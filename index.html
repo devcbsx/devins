@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Panel de Módulos NAVISAF</title>
+<style>
+  * { box-sizing: border-box !important; margin: 0; padding: 0; }
+  body, html {
+    width: 100%;
+    height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #f4f7fc;
+    color: #1e293b;
+  }
+  .hub-container {
+    padding: 20px;
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .hub-header {
+    background-color: #1b4e85;
+    color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+  .hub-header h1 { font-size: 24px; margin-bottom: 6px; }
+  .hub-header p { font-size: 13px; opacity: 0.9; }
+  
+  /* Cuadrícula de Módulos basada en tu boceto */
+  .grid-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-top: 10px;
+  }
+  .module-card {
+    background: #ffffff;
+    border: 2px solid #cbd5e1;
+    border-radius: 12px;
+    padding: 30px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 160px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+  }
+  .module-card:hover {
+    border-color: #1b4e85;
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(27, 78, 133, 0.15);
+  }
+  .module-card h2 {
+    font-size: 18px;
+    color: #1b4e85;
+    font-weight: 700;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .module-card p {
+    font-size: 12px;
+    color: #64748b;
+  }
+  .module-card.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background-color: #f8fafc;
+    border-style: dashed;
+  }
+  .module-card.disabled:hover {
+    transform: none;
+    border-color: #cbd5e1;
+    box-shadow: none;
+  }
+
+  /* Vista del Módulo Embebido */
+  #view-wrapper {
+    display: none;
+    width: 100%;
+    height: 100vh;
+    flex-direction: column;
+  }
+  .nav-bar {
+    background-color: #0f2d4e;
+    color: #ffffff;
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .btn-back {
+    background-color: #ffffff;
+    color: #1b4e85;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  .btn-back:hover { background-color: #e2e8f0; }
+  iframe {
+    width: 100%;
+    height: calc(100vh - 40px);
+    border: none;
+  }
+
+  @media (max-width: 640px) {
+    .grid-container { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Pantalla de Selección Principal -->
+<div id="hub-wrapper" class="hub-container">
+  <div class="hub-header">
+    <h1>PANEL DE MÓDULOS GPS</h1>
+    <p>Seleccione el módulo operativo al que desea ingresar.</p>
+  </div>
+
+  <div class="grid-container">
+    <!-- Tarjeta 1: CERTI GPS -->
+    <div class="module-card" onclick="openModule('certigps.html')">
+      <h2>CERTI GPS</h2>
+      <p>Generación de Anexo N°01 y solicitudes para el Área Legal.</p>
+    </div>
+
+    <!-- Tarjeta 2: VALIDACIÓN -->
+    <div class="module-card" onclick="openModule('validacion.html')">
+      <h2>VALIDACIÓN</h2>
+      <p>Edición masiva de campos de placa, estado, RUC y tipo.</p>
+    </div>
+
+    <!-- Tarjeta 3: OTRO -->
+    <div class="module-card disabled">
+      <h2>OTRO MÓDULO</h2>
+      <p>Próximamente disponible.</p>
+    </div>
+
+    <!-- Tarjeta 4: OTRO -->
+    <div class="module-card disabled">
+      <h2>OTRO MÓDULO</h2>
+      <p>Próximamente disponible.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Pantalla del Módulo Seleccionado -->
+<div id="view-wrapper">
+  <div class="nav-bar">
+    <button class="btn-back" onclick="closeModule()">← Volver al Panel Principal</button>
+    <span id="active-module-title" style="font-size: 12px; font-weight: 600;"></span>
+  </div>
+  <iframe id="module-iframe" src="about:blank"></iframe>
+</div>
+
+<script>
+  function openModule(url) {
+    document.getElementById('hub-wrapper').style.display = 'none';
+    var viewWrapper = document.getElementById('view-wrapper');
+    var iframe = document.getElementById('module-iframe');
+    
+    // Asignar timestamp para evitar caché
+    iframe.src = url + "?v=" + new Date().getTime();
+    viewWrapper.style.display = 'flex';
+  }
+
+  function closeModule() {
+    var iframe = document.getElementById('module-iframe');
+    iframe.src = 'about:blank';
+    document.getElementById('view-wrapper').style.display = 'none';
+    document.getElementById('hub-wrapper').style.display = 'flex';
+  }
+
+  // Integración requerida por MyGeotab
+  window.geotab = window.geotab || {};
+  window.geotab.addin = window.geotab.addin || {};
+  window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
+    if (typeof callback === 'function') callback();
+    return {
+      initialize: function (geotabApi, state, initializeCallback) {
+        if (typeof initializeCallback === 'function') initializeCallback();
+      },
+      focus: function (geotabApi, state) {},
+      blur: function (geotabApi, state) {}
+    };
+  };
+</script>
+</body>
+</html>
