@@ -20,7 +20,8 @@
     </div>
     <div style="display: flex; gap: 8px;">
       <button id="cgps-btn-doc" type="button" class="cgps-btn cgps-btn-white">Generar Word</button>
-      <button id="cgps-btn-view" type="button" class="cgps-btn cgps-btn-secondary">Visualizar Tabla</button>
+      <button id="cgps-btn-mail" type="button" class="cgps-btn cgps-btn-secondary">Generar Texto Legal</button>
+      <button id="cgps-btn-view" type="button" class="cgps-btn cgps-btn-outline">Visualizar Tabla</button>
     </div>
   </div>
 
@@ -52,19 +53,22 @@
     </div>
   </div>
 
-  <!-- Controles y Edición Masiva de Razón Social -->
+  <!-- Controles y Edición Masiva de Razón Social y RUC -->
   <div class="cgps-card">
     <div class="cgps-controls-row">
-      <input type="text" id="cgps-filter" class="cgps-input" placeholder="Buscar placa, VIN, grupo o razón social…" style="width: 260px;">
+      <input type="text" id="cgps-filter" class="cgps-input" placeholder="Buscar placa, VIN, RUC, grupo o razón social…" style="width: 280px;">
       <button id="cgps-sel-vis" type="button" class="cgps-btn cgps-btn-outline">Seleccionar visibles</button>
       <button id="cgps-sel-none" type="button" class="cgps-btn cgps-btn-outline">Limpiar selección</button>
     </div>
 
     <!-- Modificación Masiva por Filtro -->
     <div class="cgps-controls-row" style="margin-top: 10px; border-top: 1px solid #cbd5e1; padding-top: 10px;">
-      <label style="font-size: 12px; font-weight: 600; color: #1b4e85;">EDICIÓN MASIVA DE RAZÓN SOCIAL:</label>
-      <input type="text" id="cgps-mass-razon" class="cgps-input" placeholder="Nueva Razón Social a aplicar..." style="width: 280px;">
-      <button id="cgps-btn-apply-mass" type="button" class="cgps-btn cgps-btn-secondary">Aplicar a Seleccionados</button>
+      <label style="font-size: 12px; font-weight: 600; color: #1b4e85;">EDICIÓN MASIVA:</label>
+      <input type="text" id="cgps-mass-razon" class="cgps-input" placeholder="Nueva Razón Social..." style="width: 220px;">
+      <button id="cgps-btn-apply-mass" type="button" class="cgps-btn cgps-btn-secondary">Aplicar Razón Social</button>
+      
+      <input type="text" id="cgps-mass-ruc" class="cgps-input" placeholder="Nuevo RUC..." style="width: 140px; margin-left: 10px;">
+      <button id="cgps-btn-apply-ruc" type="button" class="cgps-btn cgps-btn-secondary">Aplicar RUC</button>
     </div>
   </div>
 
@@ -78,15 +82,25 @@
             <th>Placa</th>
             <th>VIN</th>
             <th>Activo Desde</th>
-            <th style="width: 280px;">Razón Social</th>
+            <th style="width: 220px;">Razón Social</th>
+            <th style="width: 130px;">RUC</th>
             <th>Grupos</th>
           </tr>
         </thead>
         <tbody id="cgps-listbody">
-          <tr><td colspan="6" style="text-align:center; padding: 16px; color: #64748b;">Cargando activos…</td></tr>
+          <tr><td colspan="7" style="text-align:center; padding: 16px; color: #64748b;">Cargando activos…</td></tr>
         </tbody>
       </table>
     </div>
+  </div>
+
+  <!-- Recuadro para Texto Legal -->
+  <div id="cgps-legal-box" class="cgps-card" style="display: none; background-color: #f8fafc !important;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+      <span style="font-size: 12px; font-weight: 700; color: #1b4e85;">TEXTO SOLICITUD ÁREA LEGAL</span>
+      <button id="cgps-btn-copy-legal" type="button" class="cgps-btn cgps-btn-secondary">Copiar Texto</button>
+    </div>
+    <textarea id="cgps-legal-text" class="cgps-textarea" rows="8" style="width: 100%; font-family: sans-serif;" readonly></textarea>
   </div>
 
   <div id="cgps-msg" class="cgps-msg"></div>
@@ -94,19 +108,16 @@
 </div>
 
 <script>
-// 1. VALIDACIÓN DE SESIÓN MULTI-ENTORNO (MyGeotab y Copiloto)
+// Validación de entorno MyGeotab / Copiloto
 (function checkAllowedEnvironment() {
   var isIframe = (window !== window.top);
   var ref = (document.referrer || "").toLowerCase();
-
-  // Verifica si el iframe es cargado desde MyGeotab o Copiloto
   var isGeotab = ref.indexOf("geotab.com") >= 0 || ref.indexOf("mygeotab") >= 0;
   var isCopiloto = ref.indexOf("copiloto.app") >= 0;
 
-  // Si está fuera del iframe o proviene de un dominio no autorizado, bloquea el acceso
   if (!isIframe && !isGeotab && !isCopiloto) {
-    document.body.innerHTML = "<div style='display:flex; justify-content:center; align-items:center; height:100vh; background-color:#f4f7fc;'><div style='text-align:center; padding:30px; background:#fff; border-radius:10px; border:1px solid #cbd5e1; box-shadow:0 4px 6px rgba(0,0,0,0.1);'><h3 style='color:#b91c1c; margin-bottom:10px;'>Acceso Restringido</h3><p style='color:#64748b; font-size:13px;'>Este módulo solo puede ser ejecutado dentro de las plataformas autorizadas (MyGeotab y Copiloto).</p></div></div>";
-    throw new Error("Acceso denegado: Ejecución fuera de entornos autorizados.");
+    document.body.innerHTML = "<div style='display:flex; justify-content:center; align-items:center; height:100vh; background-color:#f4f7fc;'><div style='text-align:center; padding:30px; background:#fff; border-radius:10px; border:1px solid #cbd5e1;'><h3 style='color:#b91c1c;'>Acceso Restringido</h3><p style='color:#64748b; font-size:13px;'>Este módulo solo puede ser ejecutado dentro de las plataformas autorizadas.</p></div></div>";
+    throw new Error("Acceso denegado fuera de entorno autorizado.");
   }
 })();
 
@@ -289,6 +300,7 @@ window.geotab.addin["Certificado GPS"] = function (api, state, callback) {
   }
 
   var RAZON_PROP = /raz[o\u00F3]n\s*social|empresa|cliente|company|propietario/i;
+  var RUC_PROP = /ruc|taxid|identificacion/i;
   function isSystemGroup(id) { return /^Group/.test(id || ''); }
 
   function getGroupsList(d) {
@@ -301,13 +313,13 @@ window.geotab.addin["Certificado GPS"] = function (api, state, callback) {
     return names.join(', ');
   }
 
-  function resolveRazonSocial(d) {
+  function resolveProperty(d, regex) {
     var list = d.customProperties || [];
     for (var i = 0; i < list.length; i++) {
       var p = propsById[list[i].property && list[i].property.id];
-      if (p && list[i].value && RAZON_PROP.test(p.name)) return String(list[i].value).trim();
+      if (p && list[i].value && regex.test(p.name)) return String(list[i].value).trim();
     }
-    return (d.comment || '').trim();
+    return '';
   }
 
   function toRow(d) {
@@ -317,7 +329,8 @@ window.geotab.addin["Certificado GPS"] = function (api, state, callback) {
       vin: (d.vehicleIdentificationNumber || '').trim(),
       serialNumber: (d.serialNumber || '').trim(),
       desde: fmtDate(d.activeFrom),
-      razon: resolveRazonSocial(d),
+      razon: resolveProperty(d, RAZON_PROP) || (d.comment || '').trim(),
+      ruc: resolveProperty(d, RUC_PROP),
       grupos: getGroupsList(d)
     };
   }
@@ -365,7 +378,7 @@ window.geotab.addin["Certificado GPS"] = function (api, state, callback) {
         if (!matchBulk) return;
       }
 
-      var hay = (r.placa + ' ' + r.vin + ' ' + r.serialNumber + ' ' + r.grupos + ' ' + r.razon).toLowerCase();
+      var hay = (r.placa + ' ' + r.vin + ' ' + r.serialNumber + ' ' + r.grupos + ' ' + r.razon + ' ' + r.ruc).toLowerCase();
       if (q && hay.indexOf(q) < 0) return;
 
       n++;
@@ -375,11 +388,12 @@ window.geotab.addin["Certificado GPS"] = function (api, state, callback) {
         '<td>' + htmlEsc(r.vin) + '</td>' +
         '<td>' + htmlEsc(r.desde) + '</td>' +
         '<td><input type="text" class="cgps-edit-input" data-razon-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(r.razon) + '" placeholder="Sin razón social"></td>' +
+        '<td><input type="text" class="cgps-edit-input" data-ruc-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(r.ruc) + '" placeholder="Sin RUC"></td>' +
         '<td>' + htmlEsc(r.grupos) + '</td>' +
         '</tr>';
     });
 
-    $('listbody').innerHTML = html || '<tr><td colspan="6" style="text-align:center; padding: 14px; color: #64748b;">Sin resultados coincidentes</td></tr>';
+    $('listbody').innerHTML = html || '<tr><td colspan="7" style="text-align:center; padding: 14px; color: #64748b;">Sin resultados coincidentes</td></tr>';
     
     var selCount = Object.keys(selected).filter(function (k) { return selected[k]; }).length;
     document.getElementById('kpi-total').textContent = all.length;
@@ -389,13 +403,6 @@ window.geotab.addin["Certificado GPS"] = function (api, state, callback) {
 
   function applyMassRazonSocial() {
     var massVal = $('mass-razon').value.trim();
-    var selIds = Object.keys(selected).filter(function (k) { return selected[k]; });
-
-    if (!selIds.length) {
-      setMsg('Seleccione al menos un activo para modificar su Razón Social masivamente.', true);
-      return;
-    }
-
     var count = 0;
     all.forEach(function (r) {
       if (selected[r.id]) {
@@ -403,48 +410,65 @@ window.geotab.addin["Certificado GPS"] = function (api, state, callback) {
         count++;
       }
     });
-
+    if (!count) { setMsg('Seleccione al menos un activo.', true); return; }
     renderList();
-    setMsg('Se actualizó la Razón Social a "' + (massVal || 'EN BLANCO') + '" para ' + count + ' activo(s).');
+    setMsg('Se actualizó Razón Social para ' + count + ' activo(s).');
+  }
+
+  function applyMassRuc() {
+    var massVal = $('mass-ruc').value.trim();
+    var count = 0;
+    all.forEach(function (r) {
+      if (selected[r.id]) {
+        r.ruc = massVal;
+        count++;
+      }
+    });
+    if (!count) { setMsg('Seleccione al menos un activo.', true); return; }
+    renderList();
+    setMsg('Se actualizó RUC para ' + count + ' activo(s).');
+  }
+
+  function generateLegalText() {
+    var rows = selectedRows();
+    if (!rows.length) { setMsg('Seleccione al menos un activo para generar el texto.', true); return; }
+
+    var primeraRazon = rows[0].razon || "NO ESPECIFICADO";
+    var primerRuc = rows[0].ruc || "NO ESPECIFICADO";
+
+    var text = "Buenos días estimada área Legal,\n\n" +
+      "Se solicita tu apoyo en la realización del certificado solicitado por el cliente. Considere que debe describir como beneficiaria al cliente DIVEIMPORT. Adjunto información de la(s) unidad(es):\n\n" +
+      "DATOS DE LA EMPRESA\n\n" +
+      "RAZÓN SOCIAL: " + primeraRazon + "\n" +
+      "RUC: " + primerRuc + "\n\n" +
+      "Quedo atento a sus comentarios.\n\n" +
+      "Saludos cordiales,";
+
+    $('legal-text').value = text;
+    $('legal-box').style.display = 'block';
+    setMsg('Texto generado para el área Legal.');
   }
 
   function processBulkInput() {
     var rawText = $('bulk-input').value.trim();
-    if (!rawText) {
-      setMsg('Por favor pegue una lista de unidades para filtrar.', true);
-      return;
-    }
+    if (!rawText) { setMsg('Por favor pegue una lista de unidades para filtrar.', true); return; }
 
-    activeBulkTokens = rawText.split(/[\n\r,;\t]+/).map(function (s) {
-      return s.trim().toLowerCase();
-    }).filter(function (s) { return s.length > 0; });
-
-    if (activeBulkTokens.length === 0) {
-      setMsg('No se detectaron elementos válidos en el texto pegado.', true);
-      return;
-    }
+    activeBulkTokens = rawText.split(/[\n\r,;\t]+/).map(function (s) { return s.trim().toLowerCase(); }).filter(function (s) { return s.length > 0; });
+    if (activeBulkTokens.length === 0) { setMsg('No se detectaron elementos válidos.', true); return; }
 
     selected = {};
     var matchedCount = 0;
 
     all.forEach(function (r) {
-      var p = r.placa.toLowerCase();
-      var v = r.vin.toLowerCase();
-      var s = r.serialNumber.toLowerCase();
-
+      var p = r.placa.toLowerCase(), v = r.vin.toLowerCase(), s = r.serialNumber.toLowerCase();
       var isMatch = activeBulkTokens.some(function (token) {
-        return p === token || v === token || s === token ||
-               (token.length >= 3 && (p.indexOf(token) >= 0 || v.indexOf(token) >= 0 || s.indexOf(token) >= 0));
+        return p === token || v === token || s === token || (token.length >= 3 && (p.indexOf(token) >= 0 || v.indexOf(token) >= 0 || s.indexOf(token) >= 0));
       });
-
-      if (isMatch) {
-        selected[r.id] = true;
-        matchedCount++;
-      }
+      if (isMatch) { selected[r.id] = true; matchedCount++; }
     });
 
     renderList();
-    setMsg('Filtro masivo aplicado: mostrando y seleccionando ' + matchedCount + ' de ' + activeBulkTokens.length + ' unidades ingresadas.');
+    setMsg('Filtro masivo aplicado: mostrando y seleccionando ' + matchedCount + ' coincidencia(s).');
   }
 
   function selectedRows() { return all.filter(function (r) { return selected[r.id]; }); }
@@ -452,12 +476,7 @@ window.geotab.addin["Certificado GPS"] = function (api, state, callback) {
   function preview() {
     var rows = selectedRows();
     var prevContainer = $('preview');
-    if (!rows.length) { 
-      setMsg('Seleccione al menos un activo.', true); 
-      prevContainer.style.display = 'none'; 
-      prevContainer.innerHTML = ''; 
-      return; 
-    }
+    if (!rows.length) { setMsg('Seleccione al menos un activo.', true); prevContainer.style.display = 'none'; return; }
     setMsg('');
     var html = '<h3 style="margin-top:0; font-size:14px;">Vista Previa del Certificado</h3>';
     groupByRazon(rows).forEach(function (g) {
@@ -501,8 +520,16 @@ window.geotab.addin["Certificado GPS"] = function (api, state, callback) {
   // Asignación de Eventos
   $('btn-view').addEventListener('click', preview);
   $('btn-doc').addEventListener('click', generate);
+  $('btn-mail').addEventListener('click', generateLegalText);
   $('btn-bulk').addEventListener('click', processBulkInput);
   $('btn-apply-mass').addEventListener('click', applyMassRazonSocial);
+  $('btn-apply-ruc').addEventListener('click', applyMassRuc);
+  $('btn-copy-legal').addEventListener('click', function() {
+    var textElem = $('legal-text');
+    textElem.select();
+    document.execCommand("copy");
+    setMsg('Texto copiado al portapapeles correctamente.');
+  });
   $('btn-bulk-clear').addEventListener('click', function () {
     $('bulk-input').value = '';
     activeBulkTokens = [];
@@ -512,13 +539,16 @@ window.geotab.addin["Certificado GPS"] = function (api, state, callback) {
   });
   $('filter').addEventListener('input', renderList);
 
+  // Escuchar edición individual de Razón Social y RUC
   $('listbody').addEventListener('input', function (e) {
-    var id = e.target.getAttribute('data-razon-id');
-    if (id) {
-      var newVal = e.target.value;
+    var idRazon = e.target.getAttribute('data-razon-id');
+    var idRuc = e.target.getAttribute('data-ruc-id');
+    if (idRazon || idRuc) {
+      var targetId = idRazon || idRuc;
       for (var i = 0; i < all.length; i++) {
-        if (all[i].id === id) {
-          all[i].razon = newVal;
+        if (all[i].id === targetId) {
+          if (idRazon) all[i].razon = e.target.value;
+          if (idRuc) all[i].ruc = e.target.value;
           break;
         }
       }
@@ -535,13 +565,13 @@ window.geotab.addin["Certificado GPS"] = function (api, state, callback) {
     all.forEach(function (r) {
       var p = r.placa.toLowerCase(), v = r.vin.toLowerCase(), s = r.serialNumber.toLowerCase();
       var matchBulk = activeBulkTokens.length === 0 || activeBulkTokens.some(function(token){ return p===token || v===token || s===token; });
-      if (matchBulk && (!q || (r.placa + ' ' + r.vin + ' ' + r.serialNumber + ' ' + r.grupos + ' ' + r.razon).toLowerCase().indexOf(q) >= 0)) {
+      if (matchBulk && (!q || (r.placa + ' ' + r.vin + ' ' + r.serialNumber + ' ' + r.grupos + ' ' + r.razon + ' ' + r.ruc).toLowerCase().indexOf(q) >= 0)) {
         selected[r.id] = true;
       }
     });
     renderList();
   });
-  $('sel-none').addEventListener('click', function () { selected = {}; renderList(); $('preview').innerHTML = ''; $('preview').style.display = 'none'; });
+  $('sel-none').addEventListener('click', function () { selected = {}; renderList(); $('preview').innerHTML = ''; $('preview').style.display = 'none'; $('legal-box').style.display = 'none'; });
 
   load().then(function () {
     if (typeof callback === 'function') callback();
