@@ -7,7 +7,7 @@
 <body>
 
 <div class="cgps-wrapper" id="cgps-root">
-  <!-- Banner Superior Compacto -->
+  <!-- Banner Superior Adaptable -->
   <div class="cgps-hero">
     <div>
       <div class="cgps-hero-tag">NAVISAF · CONTROL DE DOCUMENTOS</div>
@@ -24,7 +24,7 @@
     </div>
   </div>
 
-  <!-- Métricas Rápidas / KPIs Compactos -->
+  <!-- Métricas Rápidas / KPIs -->
   <div class="cgps-kpi-grid">
     <div class="cgps-card">
       <div class="cgps-kpi-title">Unidades Cargadas</div>
@@ -44,7 +44,7 @@
   <div class="cgps-card">
     <div style="font-size: 12px; font-weight: 700; margin-bottom: 6px; color: #1b4e85;">SELECCIÓN MASIVA DE ACTIVOS</div>
     <div style="display: flex; gap: 10px; align-items: flex-start; flex-wrap: wrap;">
-      <textarea id="cgps-bulk-input" class="cgps-textarea" placeholder="Pegue aquí la lista de placas, VINs o series (separados por salto de línea o coma)..." rows="3" style="flex: 1; min-width: 280px;"></textarea>
+      <textarea id="cgps-bulk-input" class="cgps-textarea" placeholder="Pegue aquí la lista de placas, VINs o series (separados por salto de línea o coma)..." rows="3" style="flex: 1; min-width: 250px;"></textarea>
       <div style="display: flex; flex-direction: column; gap: 6px;">
         <button id="cgps-btn-bulk" type="button" class="cgps-btn cgps-btn-secondary">Filtrar y Seleccionar Masivo</button>
         <button id="cgps-btn-bulk-clear" type="button" class="cgps-btn cgps-btn-outline">Limpiar Pegado</button>
@@ -52,7 +52,7 @@
     </div>
   </div>
 
-  <!-- Controles y Filtros Individuales -->
+  <!-- Controles e Inputs -->
   <div class="cgps-card">
     <div class="cgps-controls-row">
       <input type="text" id="cgps-filter" class="cgps-input" placeholder="Buscar placa, VIN o razón social…" style="width: 260px;">
@@ -79,7 +79,7 @@
     </div>
   </div>
 
-  <!-- Tabla de Resultados Compacta -->
+  <!-- Tabla de Resultados Adaptable -->
   <div class="cgps-table-container">
     <div class="cgps-table-scroll">
       <table class="cgps-table">
@@ -104,36 +104,38 @@
 </div>
 
 <script>
-// Inyección forzada de CSS con dimensiones compactas
+// Inyección forzada de CSS con layout 100% fluido y adaptable
 (function injectStyles() {
   var css = `
-    body {
+    * { box-sizing: border-box !important; }
+    html, body {
       margin: 0 !important;
       padding: 10px !important;
+      width: 100% !important;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
       background-color: #f4f7fc !important;
       color: #1e293b !important;
     }
     .cgps-wrapper { width: 100% !important; max-width: 100% !important; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
-    .cgps-hero { background-color: #1b4e85 !important; color: #ffffff !important; padding: 14px 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.06); }
+    .cgps-hero { background-color: #1b4e85 !important; color: #ffffff !important; padding: 14px 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.06); width: 100%; }
     .cgps-hero-tag { font-size: 10px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; opacity: 0.85; margin-bottom: 2px; }
     .cgps-hero h1 { margin: 0 0 4px 0; font-size: 20px; font-weight: 700; color: #ffffff !important; }
     .cgps-hero p { margin: 0 0 8px 0; font-size: 12px; opacity: 0.9; line-height: 1.3; color: #ffffff !important; }
     .cgps-badges { display: flex; align-items: center; gap: 8px; font-size: 11px; }
     .cgps-badge { background-color: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
-    .cgps-btn { padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; }
+    .cgps-btn { padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; white-space: nowrap; }
     .cgps-btn-white { background-color: #ffffff !important; color: #1b4e85 !important; }
     .cgps-btn-secondary { background-color: #4277a8 !important; color: #ffffff !important; }
     .cgps-btn-outline { background-color: #ffffff; color: #1b4e85; border: 1px solid #1b4e85; }
-    .cgps-kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-    .cgps-card { background: #ffffff !important; border-radius: 8px; padding: 10px 14px; border: 1px solid #cbd5e1; }
+    .cgps-kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; }
+    .cgps-card { background: #ffffff !important; border-radius: 8px; padding: 10px 14px; border: 1px solid #cbd5e1; width: 100%; }
     .cgps-kpi-title { font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
     .cgps-kpi-value { font-size: 20px; font-weight: 700; color: #1e293b; }
-    .cgps-controls-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .cgps-controls-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; width: 100%; }
     .cgps-input, .cgps-select, .cgps-textarea { padding: 5px 8px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px; outline: none; background-color: #ffffff; }
     .cgps-textarea { font-family: monospace; resize: vertical; }
-    .cgps-table-container { background-color: #ffffff; border-radius: 8px; border: 1px solid #cbd5e1; overflow: hidden; }
-    .cgps-table-scroll { max-height: 320px; overflow-y: auto; }
+    .cgps-table-container { background-color: #ffffff; border-radius: 8px; border: 1px solid #cbd5e1; overflow: hidden; width: 100%; }
+    .cgps-table-scroll { max-height: 380px; overflow-y: auto; width: 100%; }
     .cgps-table { width: 100%; border-collapse: collapse; font-size: 12px; }
     .cgps-table th { background-color: #f8fafc; color: #64748b; font-weight: 600; text-align: left; padding: 8px 12px; border-bottom: 1px solid #cbd5e1; position: sticky; top: 0; z-index: 2; }
     .cgps-table td { padding: 6px 12px; border-bottom: 1px solid #e2e8f0; color: #1e293b; }
@@ -143,7 +145,7 @@
   `;
   var styleElem = document.createElement('style');
   styleElem.type = 'text/css';
-  styleElem.appendChild(document.createTextNode(styleElem.ownerDocument.createTextNode(css)));
+  styleElem.appendChild(document.createTextNode(css));
   document.head.appendChild(styleElem);
 })();
 
@@ -154,7 +156,7 @@ window.geotab.addin["Certificado GPS"] = function (api, state, callback) {
   'use strict';
 
   var all = [], groupsById = {}, propsById = {}, selected = {}, rawDevices = [];
-  var activeBulkTokens = []; // Guarda las claves del filtro masivo
+  var activeBulkTokens = [];
 
   function pad(n) { return n < 10 ? '0' + n : '' + n; }
   function fmtDate(iso) {
@@ -349,7 +351,6 @@ window.geotab.addin["Certificado GPS"] = function (api, state, callback) {
   }
   function setMsg(t, err) { var m = $('msg'); m.textContent = t || ''; m.className = 'cgps-msg' + (err ? ' cgps-err' : ''); }
 
-  // Renderizado dinámico con soporte para filtrado masivo directo
   function renderList() {
     var q = $('filter').value.trim().toLowerCase(), n = 0, html = '';
     all.forEach(function (r) {
@@ -357,16 +358,14 @@ window.geotab.addin["Certificado GPS"] = function (api, state, callback) {
       var v = r.vin.toLowerCase();
       var s = r.serialNumber.toLowerCase();
 
-      // 1. Validar si existe un filtro masivo activo
       if (activeBulkTokens.length > 0) {
         var matchBulk = activeBulkTokens.some(function (token) {
           return p === token || v === token || s === token ||
                  (token.length >= 3 && (p.indexOf(token) >= 0 || v.indexOf(token) >= 0 || s.indexOf(token) >= 0));
         });
-        if (!matchBulk) return; // Si no está en la lista masiva, no se dibuja en la tabla
+        if (!matchBulk) return;
       }
 
-      // 2. Validar filtro manual secundario por texto
       var hay = (r.placa + ' ' + r.vin + ' ' + r.serialNumber + ' ' + r.razon).toLowerCase();
       if (q && hay.indexOf(q) < 0) return;
 
@@ -390,7 +389,6 @@ window.geotab.addin["Certificado GPS"] = function (api, state, callback) {
       return;
     }
 
-    // Extrae y normaliza las claves pegadas
     activeBulkTokens = rawText.split(/[\n\r,;\t]+/).map(function (s) {
       return s.trim().toLowerCase();
     }).filter(function (s) { return s.length > 0; });
@@ -400,7 +398,7 @@ window.geotab.addin["Certificado GPS"] = function (api, state, callback) {
       return;
     }
 
-    selected = {}; // Reinicia selección
+    selected = {};
     var matchedCount = 0;
 
     all.forEach(function (r) {
@@ -419,7 +417,7 @@ window.geotab.addin["Certificado GPS"] = function (api, state, callback) {
       }
     });
 
-    renderList(); // Renderiza la tabla mostrando SOLO las coincidencias
+    renderList();
     setMsg('Filtro masivo aplicado: mostrando y seleccionando ' + matchedCount + ' de ' + activeBulkTokens.length + ' unidades ingresadas.');
   }
 
@@ -475,7 +473,7 @@ window.geotab.addin["Certificado GPS"] = function (api, state, callback) {
     }).catch(function (e) { setMsg('No se pudieron cargar los activos: ' + (e && e.message ? e.message : e), true); });
   }
 
-  // Eventos
+  // Asignación de Eventos
   $('btn-view').addEventListener('click', preview);
   $('btn-doc').addEventListener('click', generate);
   $('btn-bulk').addEventListener('click', processBulkInput);
