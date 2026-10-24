@@ -374,7 +374,7 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
       vin: vin,
       serialNumber: (d.serialNumber || '').trim(),
       desde: fmtDate(d.activeFrom),
-      razon: resolveProperty(d, RAZON_PROP) || (d.comment || '').trim(),
+      razon: resolveProperty(d, RAZON_PROP), // Solucionado: solo toma propiedad de Razón Social
       ruc: resolveProperty(d, RUC_PROP),
       estadoProvincia: resolveProperty(d, ESTADO_PROP),
       anualidad: resolveProperty(d, ANUALIDAD_PROP),
@@ -630,7 +630,6 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     var nowIso = new Date().toISOString();
 
     return Promise.all([
-      // Consulta filtrada especificando 'active' y sin toVersion expirada
       callApi(api, 'Get', {
         typeName: 'Device',
         search: {
@@ -642,16 +641,13 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     ]).then(function (res) {
       var now = new Date().getTime();
 
-      // FILTRADO ESTRICTO DE ACTIVOS ARCHIVADOS E INACTIVOS
       rawDevices = (res[0] || []).filter(function (d) {
-        // Excluir dispositivos con toVersion definida (historicos / archivados)
         if (d.toVersion) {
           var toVerDate = new Date(d.toVersion).getTime();
           if (!isNaN(toVerDate) && toVerDate <= now) {
             return false;
           }
         }
-        // Excluir si el estado del dispositivo indica descontinuado o archivado
         if (d.deviceType === 'CustomDevice' && d.comment && d.comment.toLowerCase().indexOf('archivado') >= 0) {
           return false;
         }
