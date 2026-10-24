@@ -1,0 +1,17 @@
+{
+  "name": "Certificado GPS",
+  "supportEmail": "ejecutivo.cuentas13@navisaf.pe",
+  "version": "1.0.2",
+  "enableViewSecurityId": true,
+  "items": [
+    {
+      "url": "https://lllCbaslll.github.io/reportsG/index.html",
+      "path": "NaviSAF/",
+      "menuName": {
+        "es": "Certificado GPS",
+        "en": "GPS Certificate"
+      }
+    }
+  ],
+  "files": {}
+}

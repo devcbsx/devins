@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Certificado GPS</title>
+</head>
+<body>
+
+<div class="cgps-wrapper" id="cgps-root">
+  <!-- Banner Superior Compacto -->
+  <div class="cgps-hero">
+    <div>
+      <div class="cgps-hero-tag">NAVISAF · CONTROL DE DOCUMENTOS</div>
+      <h1>Certificado GPS</h1>
+      <p>Seleccione los activos de la base de datos para visualizar la estructura e imprima el Anexo N°01 formal en Word.</p>
+      <div class="cgps-badges">
+        <span>Base actual: <strong>divemotor</strong></span>
+        <span class="cgps-badge">Módulo Activo</span>
+      </div>
+    </div>
+    <div style="display: flex; gap: 8px;">
+      <button id="cgps-btn-doc" type="button" class="cgps-btn cgps-btn-white">Generar Word</button>
+      <button id="cgps-btn-view" type="button" class="cgps-btn cgps-btn-secondary">Visualizar Tabla</button>
+    </div>
+  </div>
+
+  <!-- Métricas Rápidas / KPIs Compactos -->
+  <div class="cgps-kpi-grid">
+    <div class="cgps-card">
+      <div class="cgps-kpi-title">Unidades Cargadas</div>
+      <div class="cgps-kpi-value" id="kpi-total">0</div>
+    </div>
+    <div class="cgps-card">
+      <div class="cgps-kpi-title">Seleccionados</div>
+      <div class="cgps-kpi-value" id="kpi-selected">0</div>
+    </div>
+    <div class="cgps-card">
+      <div class="cgps-kpi-title">Visibles en Filtro</div>
+      <div class="cgps-kpi-value" id="kpi-visible">0</div>
+    </div>
+  </div>
+
+  <!-- Búsqueda y Selección Masiva -->
+  <div class="cgps-card">
+    <div style="font-size: 12px; font-weight: 700; margin-bottom: 6px; color: #1b4e85;">SELECCIÓN MASIVA DE ACTIVOS</div>
+    <div style="display: flex; gap: 10px; align-items: flex-start; flex-wrap: wrap;">
+      <textarea id="cgps-bulk-input" class="cgps-textarea" placeholder="Pegue aquí la lista de placas, VINs o series (separados por salto de línea o coma)..." rows="3" style="flex: 1; min-width: 280px;"></textarea>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <button id="cgps-btn-bulk" type="button" class="cgps-btn cgps-btn-secondary">Filtrar y Seleccionar Masivo</button>
+        <button id="cgps-btn-bulk-clear" type="button" class="cgps-btn cgps-btn-outline">Limpiar Pegado</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Controles y Filtros Individuales -->
+  <div class="cgps-card">
+    <div class="cgps-controls-row">
+      <input type="text" id="cgps-filter" class="cgps-input" placeholder="Buscar placa, VIN o razón social…" style="width: 260px;">
+      <button id="cgps-sel-vis" type="button" class="cgps-btn cgps-btn-outline">Seleccionar visibles</button>
+      <button id="cgps-sel-none" type="button" class="cgps-btn cgps-btn-outline">Limpiar selección</button>
+      <label style="font-size: 12px; cursor: pointer;">
+        <input type="checkbox" id="cgps-inactive"> Incluir activos inactivos
+      </label>
+    </div>
+
+    <div class="cgps-controls-row" style="margin-top: 10px; border-top: 1px solid #cbd5e1; padding-top: 10px;">
+      <label style="font-size: 12px; font-weight: 600;">Razón social desde:
+        <select id="cgps-mode" class="cgps-select" style="margin-left: 4px;">
+          <option value="auto">Automático (propiedad personalizada → comentario → grupo)</option>
+          <option value="comment">Comentario del activo</option>
+          <option value="group">Grupo del activo</option>
+          <option value="property">Propiedad personalizada…</option>
+        </select>
+      </label>
+      <input type="text" id="cgps-propname" class="cgps-input" placeholder="Nombre propiedad" style="display:none; width: 140px;">
+      <label style="font-size: 12px; margin-left: 8px;">Si no se detecta: 
+        <input type="text" id="cgps-manual" class="cgps-input" placeholder="RAZON SOCIAL" style="width: 180px; margin-left: 4px;">
+      </label>
+    </div>
+  </div>
+
+  <!-- Tabla de Resultados Compacta -->
+  <div class="cgps-table-container">
+    <div class="cgps-table-scroll">
+      <table class="cgps-table">
+        <thead>
+          <tr>
+            <th style="width: 36px; text-align: center;"></th>
+            <th>Placa</th>
+            <th>VIN</th>
+            <th>Activo Desde</th>
+            <th>Razón Social</th>
+          </tr>
+        </thead>
+        <tbody id="cgps-listbody">
+          <tr><td colspan="5" style="text-align:center; padding: 16px; color: #64748b;">Cargando activos…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="cgps-msg" class="cgps-msg"></div>
+  <div id="cgps-preview" class="cgps-card" style="display: none;"></div>
+</div>
+
+<script>
+// Inyección forzada de CSS con dimensiones compactas y estilos para el textarea masivo
+(function injectStyles() {
+  var css = `
+    body {
+      margin: 0 !important;
+      padding: 10px !important;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+      background-color: #f4f7fc !important;
+      color: #1e293b !important;
+    }
+    .cgps-wrapper { width: 100% !important; max-width: 100% !important; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
+    .cgps-hero { background-color: #1b4e85 !important; color: #ffffff !important; padding: 14px 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.06); }
+    .cgps-hero-tag { font-size: 10px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; opacity: 0.85; margin-bottom: 2px; }
+    .cgps-hero h1 { margin: 0 0 4px 0; font-size: 20px; font-weight: 700; color: #ffffff !important; }
+    .cgps-hero p { margin: 0 0 8px 0; font-size: 12px; opacity: 0.9; line-height: 1.3; color: #ffffff !important; }
+    .cgps-badges { display: flex; align-items: center; gap: 8px; font-size: 11px; }
+    .cgps-badge { background-color: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+    .cgps-btn { padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; }
+    .cgps-btn-white { background-color: #ffffff !important; color: #1b4e85 !important; }
+    .cgps-btn-secondary { background-color: #4277a8 !important; color: #ffffff !important; }
+    .cgps-btn-outline { background-color: #ffffff; color: #1b4e85; border: 1px solid #1b4e85; }
+    .cgps-kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .cgps-card { background: #ffffff !important; border-radius: 8px; padding: 10px 14px; border: 1px solid #cbd5e1; }
+    .cgps-kpi-title { font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
+    .cgps-kpi-value { font-size: 20px; font-weight: 700; color: #1e293b; }
+    .cgps-controls-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .cgps-input, .cgps-select, .cgps-textarea { padding: 5px 8px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px; outline: none; background-color: #ffffff; }
+    .cgps-textarea { font-family: monospace; resize: vertical; }
+    .cgps-table-container { background-color: #ffffff; border-radius: 8px; border: 1px solid #cbd5e1; overflow: hidden; }
+    .cgps-table-scroll { max-height: 320px; overflow-y: auto; }
+    .cgps-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .cgps-table th { background-color: #f8fafc; color: #64748b; font-weight: 600; text-align: left; padding: 8px 12px; border-bottom: 1px solid #cbd5e1; position: sticky; top: 0; z-index: 2; }
+    .cgps-table td { padding: 6px 12px; border-bottom: 1px solid #e2e8f0; color: #1e293b; }
+    .cgps-table tbody tr:hover { background-color: #f1f5f9; }
+    .cgps-msg { min-height: 18px; font-size: 12px; font-weight: 600; color: #15803d; }
+    .cgps-msg.cgps-err { color: #b91c1c; }
+  `;
+  var styleElem = document.createElement('style');
+  styleElem.type = 'text/css';
+  styleElem.appendChild(document.createTextNode(css));
+  document.head.appendChild(styleElem);
+})();
+
+window.geotab = window.geotab || {};
+window.geotab.addin = window.geotab.addin || {};
+
+window.geotab.addin["Certificado GPS"] = function (api, state, callback) {
+  'use strict';
+
+  var all = [], groupsById = {}, propsById = {}, selected = {}, rawDevices = [];
+
+  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+  function fmtDate(iso) {
+    if (!iso) return '';
+    var d = new Date(iso);
+    if (isNaN(d.getTime()) || d.getFullYear() > 2040) return '';
+    return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear();
+  }
+  function xmlEsc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  }
+  function htmlEsc(s) { return xmlEsc(s).replace(/'/g, '&#39;'); }
+  function safeFileName(s) {
+    return String(s).replace(/[\\\/:*?"<>|\r\n\t]/g, '').replace(/\s+/g, ' ').trim();
+  }
+  function docFileName(razon) { return 'CERTIFICADO GPS - ' + safeFileName(razon || 'SIN RAZON SOCIAL') + '.docx'; }
+
+  var CRC_TABLE = (function () {
+    var t = [], c, n, k;
+    for (n = 0; n < 256; n++) {
+      c = n;
+      for (k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+      t[n] = c >>> 0;
+    }
+    return t;
+  })();
+
+  function crc32(bytes) {
+    var c = 0xFFFFFFFF;
+    for (var i = 0; i < bytes.length; i++) c = CRC_TABLE[(c ^ bytes[i]) & 0xFF] ^ (c >>> 8);
+    return (c ^ 0xFFFFFFFF) >>> 0;
+  }
+  function utf8(s) { return new TextEncoder().encode(s); }
+
+  function zipStore(files) {
+    var now = new Date();
+    var dosTime = (now.getHours() << 11) | (now.getMinutes() << 5) | (now.getSeconds() >> 1);
+    var dosDate = ((now.getFullYear() - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate();
+    var chunks = [], central = [], offset = 0;
+    function u16(v) { return [v & 255, (v >>> 8) & 255]; }
+    function u32(v) { return [v & 255, (v >>> 8) & 255, (v >>> 16) & 255, (v >>> 24) & 255]; }
+    files.forEach(function (f) {
+      var name = utf8(f.name), data = utf8(f.data), crc = crc32(data);
+      var local = [].concat(u32(0x04034b50), u16(20), u16(0x0800), u16(0), u16(dosTime), u16(dosDate),
+        u32(crc), u32(data.length), u32(data.length), u16(name.length), u16(0));
+      chunks.push(new Uint8Array(local), name, data);
+      central.push([].concat(u32(0x02014b50), u16(20), u16(20), u16(0x0800), u16(0), u16(dosTime), u16(dosDate),
+        u32(crc), u32(data.length), u32(data.length), u16(name.length), u16(0), u16(0), u16(0), u16(0),
+        u32(0), u32(offset)), Array.prototype.slice.call(name));
+      offset += local.length + name.length + data.length;
+    });
+    var cdStart = offset, cdSize = 0;
+    central.forEach(function (c) { var u = new Uint8Array(c); chunks.push(u); cdSize += u.length; });
+    chunks.push(new Uint8Array([].concat(u32(0x06054b50), u16(0), u16(0), u16(files.length), u16(files.length),
+      u32(cdSize), u32(cdStart), u16(0))));
+    var total = chunks.reduce(function (a, c) { return a + c.length; }, 0);
+    var out = new Uint8Array(total), p = 0;
+    chunks.forEach(function (c) { out.set(c, p); p += c.length; });
+    return out;
+  }
+
+  var NS = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" ' +
+           'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"';
+  var COLS = [458, 2387, 2455, 1701];
+  var HEAD_RPR = '<w:rPr><w:rFonts w:ascii="Aptos Narrow" w:eastAsia="Times New Roman" w:hAnsi="Aptos Narrow" w:cs="Times New Roman"/><w:b/><w:bCs/><w:color w:val="000000"/><w:kern w:val="0"/></w:rPr>';
+  var BODY_RPR = '<w:rPr><w:rFonts w:ascii="Aptos" w:hAnsi="Aptos" w:cs="Segoe UI"/><w:color w:val="000000"/></w:rPr>';
+
+  function cell(width, text, rpr, noWrap) {
+    return '<w:tc><w:tcPr><w:tcW w:w="' + width + '" w:type="dxa"/>' + (noWrap ? '<w:noWrap/>' : '') +
+      '<w:vAlign w:val="center"/></w:tcPr><w:p><w:pPr><w:jc w:val="center"/></w:pPr><w:r>' + rpr +
+      '<w:t xml:space="preserve">' + xmlEsc(text) + '</w:t></w:r></w:p></w:tc>';
+  }
+  function row(vals, height, rpr) {
+    var h = '<w:trPr><w:trHeight w:val="' + height + '"/><w:jc w:val="center"/></w:trPr>';
+    return '<w:tr>' + h + vals.map(function (v, i) { return cell(COLS[i], v, rpr, i > 0); }).join('') + '</w:tr>';
+  }
+  function documentXml(rows) {
+    var body = '<w:p><w:pPr><w:jc w:val="center"/></w:pPr><w:r><w:t>ANEXO N\u00B001</w:t></w:r></w:p>' +
+      '<w:tbl><w:tblPr><w:tblStyle w:val="Tablaconcuadrcula"/><w:tblW w:w="0" w:type="auto"/><w:jc w:val="center"/>' +
+      '<w:tblLook w:val="04A0" w:firstRow="1" w:lastRow="0" w:firstColumn="1" w:lastColumn="0" w:noHBand="0" w:noVBand="1"/></w:tblPr>' +
+      '<w:tblGrid>' + COLS.map(function (w) { return '<w:gridCol w:w="' + w + '"/>'; }).join('') + '</w:tblGrid>' +
+      row(['N\u00BA', 'Placa', 'VIN', 'ACTIVO DESDE'], 350, HEAD_RPR) +
+      rows.map(function (r, i) { return row([String(i + 1), r.placa, r.vin, r.desde], 428, BODY_RPR); }).join('') +
+      '</w:tbl><w:p/>' +
+      '<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1417" w:right="1701" w:bottom="1417" w:left="1701" w:header="708" w:footer="708" w:gutter="0"/><w:cols w:space="708"/><w:docGrid w:linePitch="360"/></w:sectPr>';
+    return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document ' + NS + '><w:body>' + body + '</w:body></w:document>';
+  }
+  var STYLES_XML = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles ' + NS + '>' +
+    '<w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Aptos" w:eastAsia="Aptos" w:hAnsi="Aptos" w:cs="Aptos"/><w:sz w:val="22"/><w:szCs w:val="22"/><w:lang w:val="es-PE" w:eastAsia="en-US" w:bidi="ar-SA"/></w:rPr></w:rPrDefault>' +
+    '<w:pPrDefault><w:pPr><w:spacing w:after="160" w:line="259" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults>' +
+    '<w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/><w:qFormat/></w:style>' +
+    '<w:style w:type="table" w:default="1" w:styleId="Tablanormal"><w:name w:val="Normal Table"/><w:uiPriority w:val="99"/><w:semiHidden/><w:unhideWhenUsed/><w:tblPr><w:tblInd w:w="0" w:type="dxa"/><w:tblCellMar><w:top w:w="0" w:type="dxa"/><w:left w:w="108" w:type="dxa"/><w:bottom w:w="0" w:type="dxa"/><w:right w:w="108" w:type="dxa"/></w:tblCellMar></w:tblPr></w:style>' +
+    '<w:style w:type="table" w:styleId="Tablaconcuadrcula"><w:name w:val="Table Grid"/><w:basedOn w:val="Tablanormal"/><w:uiPriority w:val="39"/><w:pPr><w:spacing w:after="0" w:line="240" w:lineRule="auto"/></w:pPr><w:tblPr><w:tblBorders>' +
+    ['top', 'left', 'bottom', 'right', 'insideH', 'insideV'].map(function (s) { return '<w:' + s + ' w:val="single" w:sz="4" w:space="0" w:color="auto"/>'; }).join('') +
+    '</w:tblBorders></w:tblPr></w:style></w:styles>';
+  var CT_XML = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
+    '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/>' +
+    '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>' +
+    '<Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>' +
+    '<Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/></Types>';
+  var RELS_XML = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+    '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>' +
+    '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/></Relationships>';
+  var DOC_RELS_XML = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+    '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>';
+  function coreXml(razon) {
+    var iso = new Date().toISOString().replace(/\.\d+Z$/, 'Z');
+    return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' +
+      '<dc:title>' + xmlEsc('CERTIFICADO GPS - ' + razon) + '</dc:title><dc:creator>MyGeotab</dc:creator>' +
+      '<dcterms:created xsi:type="dcterms:W3CDTF">' + iso + '</dcterms:created></cp:coreProperties>';
+  }
+  function buildDocx(rows, razon) {
+    return zipStore([
+      { name: '[Content_Types].xml', data: CT_XML },
+      { name: '_rels/.rels', data: RELS_XML },
+      { name: 'word/document.xml', data: documentXml(rows) },
+      { name: 'word/styles.xml', data: STYLES_XML },
+      { name: 'word/_rels/document.xml.rels', data: DOC_RELS_XML },
+      { name: 'docProps/core.xml', data: coreXml(razon || '') }
+    ]);
+  }
+
+  var RAZON_PROP = /raz[o\u00F3]n\s*social|empresa|cliente|company|propietario/i;
+  function isSystemGroup(id) { return /^Group/.test(id || ''); }
+
+  function makeResolver(groupsById, propsById, mode, propName) {
+    function fromProp(d, wanted) {
+      var list = d.customProperties || [];
+      for (var i = 0; i < list.length; i++) {
+        var p = propsById[list[i].property && list[i].property.id];
+        if (!p || !list[i].value) continue;
+        if (wanted ? p.name.toLowerCase() === wanted.toLowerCase() : RAZON_PROP.test(p.name)) return String(list[i].value).trim();
+      }
+      return '';
+    }
+    function fromGroup(d) {
+      var gs = d.groups || [];
+      for (var i = 0; i < gs.length; i++) {
+        var g = groupsById[gs[i].id];
+        if (g && g.name && !isSystemGroup(g.id)) return g.name.trim();
+      }
+      return '';
+    }
+    return function (d) {
+      if (mode === 'comment') return (d.comment || '').trim();
+      if (mode === 'group') return fromGroup(d);
+      if (mode === 'property') return fromProp(d, propName);
+      return fromProp(d, '') || (d.comment || '').trim() || fromGroup(d);
+    };
+  }
+
+  function toRow(d, resolver) {
+    return {
+      id: d.id,
+      placa: (d.name || d.licensePlate || '').trim(),
+      vin: (d.vehicleIdentificationNumber || '').trim(),
+      serialNumber: (d.serialNumber || '').trim(),
+      desde: fmtDate(d.activeFrom),
+      razon: resolver(d) || ''
+    };
+  }
+  function groupByRazon(rows) {
+    var map = {}, order = [];
+    rows.forEach(function (r) {
+      var k = r.razon || '';
+      if (!map[k]) { map[k] = []; order.push(k); }
+      map[k].push(r);
+    });
+    return order.map(function (k) { return { razon: k, rows: map[k] }; });
+  }
+
+  function callApi(apiRef, method, params) {
+    return new Promise(function (ok, fail) { apiRef.call(method, params, ok, fail); });
+  }
+  function download(name, bytes) {
+    var blob = new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+  }
+
+  var $ = function (id) { return document.getElementById('cgps-' + id); };
+
+  function resolver() { return makeResolver(groupsById, propsById, $('mode').value, $('propname').value.trim()); }
+  function rebuildRows() {
+    var r = resolver();
+    all = rawDevices.map(function (d) { return toRow(d, r); })
+      .sort(function (a, b) { return a.placa.localeCompare(b.placa, 'es', { numeric: true }); });
+  }
+  function setMsg(t, err) { var m = $('msg'); m.textContent = t || ''; m.className = 'cgps-msg' + (err ? ' cgps-err' : ''); }
+
+  function renderList() {
+    var q = $('filter').value.trim().toLowerCase(), n = 0, html = '';
+    all.forEach(function (r) {
+      var hay = (r.placa + ' ' + r.vin + ' ' + r.serialNumber + ' ' + r.razon).toLowerCase();
+      if (q && hay.indexOf(q) < 0) return;
+      n++;
+      html += '<tr><td style="text-align:center;"><input type="checkbox" data-id="' + htmlEsc(r.id) + '"' + (selected[r.id] ? ' checked' : '') + '></td><td>' +
+        htmlEsc(r.placa) + '</td><td>' + htmlEsc(r.vin) + '</td><td>' + htmlEsc(r.desde) + '</td><td>' + htmlEsc(r.razon) + '</td></tr>';
+    });
+    $('listbody').innerHTML = html || '<tr><td colspan="5" style="text-align:center; padding: 14px; color: #64748b;">Sin resultados</td></tr>';
+    
+    var selCount = Object.keys(selected).filter(function (k) { return selected[k]; }).length;
+    document.getElementById('kpi-total').textContent = all.length;
+    document.getElementById('kpi-selected').textContent = selCount;
+    document.getElementById('kpi-visible').textContent = n;
+  }
+
+  function processBulkInput() {
+    var rawText = $('bulk-input').value.trim();
+    if (!rawText) {
+      setMsg('Por favor pegue una lista de unidades para filtrar.', true);
+      return;
+    }
+
+    // Separa por comas, saltos de línea (\n, \r), tabulaciones o espacios múltiples
+    var tokens = rawText.split(/[\n\r,;\t]+/).map(function (s) {
+      return s.trim().toLowerCase();
+    }).filter(function (s) { return s.length > 0; });
+
+    if (tokens.length === 0) {
+      setMsg('No se detectaron elementos válidos en el texto pegado.', true);
+      return;
+    }
+
+    selected = {}; // Reinicia selección previa
+    var matchedCount = 0;
+
+    all.forEach(function (r) {
+      var p = r.placa.toLowerCase();
+      var v = r.vin.toLowerCase();
+      var s = r.serialNumber.toLowerCase();
+
+      var isMatch = tokens.some(function (token) {
+        return p === token || v === token || s === token ||
+               (token.length >= 3 && (p.indexOf(token) >= 0 || v.indexOf(token) >= 0 || s.indexOf(token) >= 0));
+      });
+
+      if (isMatch) {
+        selected[r.id] = true;
+        matchedCount++;
+      }
+    });
+
+    renderList();
+    setMsg('Se procesaron ' + tokens.length + ' elementos ingresados. Se encontraron y seleccionaron ' + matchedCount + ' coincidencia(s).');
+  }
+
+  function selectedRows() { return all.filter(function (r) { return selected[r.id]; }); }
+
+  function preview() {
+    var rows = selectedRows();
+    var prevContainer = $('preview');
+    if (!rows.length) { 
+      setMsg('Seleccione al menos un activo.', true); 
+      prevContainer.style.display = 'none'; 
+      prevContainer.innerHTML = ''; 
+      return; 
+    }
+    setMsg('');
+    var html = '<h3 style="margin-top:0; font-size:14px;">Vista Previa del Certificado</h3>';
+    groupByRazon(rows).forEach(function (g) {
+      html += '<h4 style="margin:8px 0 4px; font-size:13px; color: #1b4e85;">' + htmlEsc(g.razon || '(Sin razón social)') + ' <span style="font-size:11px; font-weight:normal; color:#64748b;">– ' + g.rows.length + ' activo(s)</span></h4>' +
+        '<table class="cgps-table" style="margin-bottom:8px;"><thead><tr><th>Nº</th><th>Placa</th><th>VIN</th><th>ACTIVO DESDE</th></tr></thead><tbody>';
+      g.rows.forEach(function (r, i) { html += '<tr><td>' + (i + 1) + '</td><td>' + htmlEsc(r.placa) + '</td><td>' + htmlEsc(r.vin) + '</td><td>' + htmlEsc(r.desde) + '</td></tr>'; });
+      html += '</tbody></table>';
+    });
+    prevContainer.innerHTML = html;
+    prevContainer.style.display = 'block';
+  }
+
+  function generate() {
+    var rows = selectedRows();
+    if (!rows.length) { setMsg('Seleccione al menos un activo.', true); return; }
+    var manual = $('manual').value.trim(), groups = groupByRazon(rows), i = 0;
+    setMsg('');
+    (function next() {
+      if (i >= groups.length) { setMsg('Se generaron ' + groups.length + ' documento(s) Word correctamente.'); return; }
+      var g = groups[i++], razon = g.razon || manual || 'SIN RAZON SOCIAL';
+      download(docFileName(razon), buildDocx(g.rows, razon));
+      setTimeout(next, 600);
+    })();
+  }
+
+  function load() {
+    setMsg('Cargando activos de la base de datos…');
+    var inc = $('inactive').checked;
+    var devSearch = inc ? { fromDate: '1986-01-01T00:00:00.000Z' } : {};
+    return Promise.all([
+      callApi(api, 'Get', { typeName: 'Device', search: devSearch }),
+      callApi(api, 'Get', { typeName: 'Group' }).catch(function () { return []; }),
+      callApi(api, 'Get', { typeName: 'Property' }).catch(function () { return []; })
+    ]).then(function (res) {
+      rawDevices = res[0] || []; groupsById = {}; propsById = {};
+      (res[1] || []).forEach(function (g) { groupsById[g.id] = g; });
+      (res[2] || []).forEach(function (p) { propsById[p.id] = p; });
+      rebuildRows(); renderList(); setMsg(rawDevices.length + ' activos cargados correctamente.');
+    }).catch(function (e) { setMsg('No se pudieron cargar los activos: ' + (e && e.message ? e.message : e), true); });
+  }
+
+  // Eventos
+  $('btn-view').addEventListener('click', preview);
+  $('btn-doc').addEventListener('click', generate);
+  $('btn-bulk').addEventListener('click', processBulkInput);
+  $('btn-bulk-clear').addEventListener('click', function () {
+    $('bulk-input').value = '';
+    selected = {};
+    renderList();
+    setMsg('Filtro masivo limpiado.');
+  });
+  $('filter').addEventListener('input', renderList);
+  $('inactive').addEventListener('change', load);
+  $('mode').addEventListener('change', function () { $('propname').style.display = this.value === 'property' ? '' : 'none'; rebuildRows(); renderList(); });
+  $('propname').addEventListener('change', function () { rebuildRows(); renderList(); });
+  $('listbody').addEventListener('change', function (e) { var id = e.target.getAttribute('data-id'); if (id) { selected[id] = e.target.checked; renderList(); } });
+  $('sel-vis').addEventListener('click', function () {
+    var q = $('filter').value.trim().toLowerCase();
+    all.forEach(function (r) { if (!q || (r.placa + ' ' + r.vin + ' ' + r.serialNumber + ' ' + r.razon).toLowerCase().indexOf(q) >= 0) selected[r.id] = true; });
+    renderList();
+  });
+  $('sel-none').addEventListener('click', function () { selected = {}; renderList(); $('preview').innerHTML = ''; $('preview').style.display = 'none'; });
+
+  load().then(function () {
+    if (typeof callback === 'function') callback();
+  }).catch(function () {
+    if (typeof callback === 'function') callback();
+  });
+
+  return {
+    initialize: function (geotabApi, state, initializeCallback) {
+      if (typeof initializeCallback === 'function') initializeCallback();
+    },
+    focus: function (geotabApi, state) {},
+    blur: function (geotabApi, state) {}
+  };
+};
+</script>
+</body>
+</html>
