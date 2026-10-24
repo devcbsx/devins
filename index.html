@@ -58,9 +58,6 @@
       <input type="text" id="cgps-filter" class="cgps-input" placeholder="Buscar placa, VIN, grupo o razón social…" style="width: 260px;">
       <button id="cgps-sel-vis" type="button" class="cgps-btn cgps-btn-outline">Seleccionar visibles</button>
       <button id="cgps-sel-none" type="button" class="cgps-btn cgps-btn-outline">Limpiar selección</button>
-      <label style="font-size: 12px; cursor: pointer;">
-        <input type="checkbox" id="cgps-inactive"> Incluir activos inactivos
-      </label>
     </div>
 
     <!-- Modificación Masiva por Filtro -->
@@ -71,7 +68,7 @@
     </div>
   </div>
 
-  <!-- Tabla de Resultados Adaptable -->
+  <!-- Tabla de Resultados Reordenada -->
   <div class="cgps-table-container">
     <div class="cgps-table-scroll">
       <table class="cgps-table">
@@ -81,8 +78,8 @@
             <th>Placa</th>
             <th>VIN</th>
             <th>Activo Desde</th>
-            <th>Grupos</th>
             <th style="width: 280px;">Razón Social</th>
+            <th>Grupos</th>
           </tr>
         </thead>
         <tbody id="cgps-listbody">
@@ -97,6 +94,12 @@
 </div>
 
 <script>
+// 1. VALIDACIÓN DE SESIÓN: Bloqueo de acceso si se abre fuera del iframe de MyGeotab
+if (window === window.top) {
+  document.body.innerHTML = "<div style='display:flex; justify-content:center; align-items:center; height:100vh; background-color:#f4f7fc;'><div style='text-align:center; padding:30px; background:#fff; border-radius:10px; border:1px solid #cbd5e1; box-shadow:0 4px 6px rgba(0,0,0,0.1);'><h3 style='color:#b91c1c; margin-bottom:10px;'>Acceso Restringido</h3><p style='color:#64748b; font-size:13px;'>Este módulo es un Add-In oficial y solo puede ser ejecutado dentro de la plataforma MyGeotab.</p></div></div>";
+  throw new Error("Acceso denegado: Ejecución fuera de MyGeotab.");
+}
+
 // Inyección forzada de CSS
 (function injectStyles() {
   var css = `
@@ -294,7 +297,7 @@ window.geotab.addin["Certificado GPS"] = function (api, state, callback) {
       var p = propsById[list[i].property && list[i].property.id];
       if (p && list[i].value && RAZON_PROP.test(p.name)) return String(list[i].value).trim();
     }
-    return (d.comment || '').trim() || getGroupsList(d) || '';
+    return (d.comment || '').trim(); // Si no existe, se retorna vacío sin copiar los grupos
   }
 
   function toRow(d) {
@@ -304,8 +307,8 @@ window.geotab.addin["Certificado GPS"] = function (api, state, callback) {
       vin: (d.vehicleIdentificationNumber || '').trim(),
       serialNumber: (d.serialNumber || '').trim(),
       desde: fmtDate(d.activeFrom),
-      grupos: getGroupsList(d),
-      razon: resolveRazonSocial(d) // Trae valor o se queda en blanco
+      razon: resolveRazonSocial(d), // Razón Social independiente (vacía si no hay)
+      grupos: getGroupsList(d)
     };
   }
   function groupByRazon(rows) {
@@ -337,6 +340,7 @@ window.geotab.addin["Certificado GPS"] = function (api, state, callback) {
   }
   function setMsg(t, err) { var m = $('msg'); m.textContent = t || ''; m.className = 'cgps-msg' + (err ? ' cgps-err' : ''); }
 
+  // Renderizado dinámico con orden estricto de columnas: Placa, VIN, Activo desde, Razón social, Grupos
   function renderList() {
     var q = $('filter').value.trim().toLowerCase(), n = 0, html = '';
     all.forEach(function (r) {
@@ -361,8 +365,8 @@ window.geotab.addin["Certificado GPS"] = function (api, state, callback) {
         '<td>' + htmlEsc(r.placa) + '</td>' +
         '<td>' + htmlEsc(r.vin) + '</td>' +
         '<td>' + htmlEsc(r.desde) + '</td>' +
-        '<td>' + htmlEsc(r.grupos) + '</td>' +
         '<td><input type="text" class="cgps-edit-input" data-razon-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(r.razon) + '" placeholder="Sin razón social"></td>' +
+        '<td>' + htmlEsc(r.grupos) + '</td>' +
         '</tr>';
     });
 
@@ -470,19 +474,22 @@ window.geotab.addin["Certificado GPS"] = function (api, state, callback) {
     })();
   }
 
+  // Carga únicamente de activos vigentes (excluye archivados/desactivados)
   function load() {
     setMsg('Cargando activos de la base de datos…');
-    var inc = $('inactive').checked;
-    var devSearch = inc ? { fromDate: '1986-01-01T00:00:00.000Z' } : {};
     return Promise.all([
-      callApi(api, 'Get', { typeName: 'Device', search: devSearch }),
+      callApi(api, 'Get', { typeName: 'Device' }), // Solo activos vigentes
       callApi(api, 'Get', { typeName: 'Group' }).catch(function () { return []; }),
       callApi(api, 'Get', { typeName: 'Property' }).catch(function () { return []; })
     ]).then(function (res) {
-      rawDevices = res[0] || []; groupsById = {}; propsById = {};
+      // Filtrado estricto por código para omitir archivados
+      rawDevices = (res[0] || []).filter(function (d) {
+        return !d.toVersion; 
+      });
+      groupsById = {}; propsById = {};
       (res[1] || []).forEach(function (g) { groupsById[g.id] = g; });
       (res[2] || []).forEach(function (p) { propsById[p.id] = p; });
-      rebuildRows(); renderList(); setMsg(rawDevices.length + ' activos cargados correctamente.');
+      rebuildRows(); renderList(); setMsg(rawDevices.length + ' activos vigentes cargados correctamente.');
     }).catch(function (e) { setMsg('No se pudieron cargar los activos: ' + (e && e.message ? e.message : e), true); });
   }
 
@@ -499,9 +506,8 @@ window.geotab.addin["Certificado GPS"] = function (api, state, callback) {
     setMsg('Filtro masivo limpiado.');
   });
   $('filter').addEventListener('input', renderList);
-  $('inactive').addEventListener('change', load);
 
-  // Escuchar edición individual de razón social en la tabla
+  // Escuchar edición individual de Razón Social
   $('listbody').addEventListener('input', function (e) {
     var id = e.target.getAttribute('data-razon-id');
     if (id) {
