@@ -26,7 +26,7 @@
 
       <div class="navisaf-card" id="btn-mod-valid">
         <h2>VALIDACIÓN DE VARIABLES</h2>
-        <p>Edición masiva e individual de campos de placa, estado, RUC y tipo.</p>
+        <p>Edición masiva e individual de campos de nombre, placa, estado, RUC y tipo.</p>
       </div>
 
       <div class="navisaf-card disabled">
@@ -99,7 +99,7 @@
     <div class="cgps-card" style="margin-top: 10px;">
       <div style="font-size: 12px; font-weight: 700; margin-bottom: 6px; color: #1b4e85;">SELECCIÓN MASIVA DE ACTIVOS</div>
       <div style="display: flex; gap: 10px; align-items: flex-start; flex-wrap: wrap;">
-        <textarea id="cgps-bulk-input" class="cgps-textarea" placeholder="Pegue aquí la lista de placas, VINs o series..." rows="3" style="flex: 1; min-width: 250px;"></textarea>
+        <textarea id="cgps-bulk-input" class="cgps-textarea" placeholder="Pegue aquí la lista de nombres de activos, placas, VINs o series..." rows="3" style="flex: 1; min-width: 250px;"></textarea>
         <div style="display: flex; flex-direction: column; gap: 6px;">
           <button id="cgps-btn-bulk" type="button" class="cgps-btn cgps-btn-secondary">Filtrar Masivo</button>
           <button id="cgps-btn-bulk-clear" type="button" class="cgps-btn cgps-btn-outline">Limpiar Pegado</button>
@@ -110,7 +110,7 @@
     <!-- Controles y Edición Masiva -->
     <div class="cgps-card" style="margin-top: 10px;">
       <div class="cgps-controls-row">
-        <input type="text" id="cgps-filter" class="cgps-input" placeholder="Buscar por placa, VIN, RUC, estado, tipo, grupo..." style="width: 280px;">
+        <input type="text" id="cgps-filter" class="cgps-input" placeholder="Buscar por nombre, placa, VIN, RUC, estado, tipo, grupo..." style="width: 320px;">
         <button id="cgps-sel-vis" type="button" class="cgps-btn cgps-btn-outline">Seleccionar visibles</button>
         <button id="cgps-sel-none" type="button" class="cgps-btn cgps-btn-outline">Limpiar selección</button>
       </div>
@@ -127,6 +127,8 @@
       <!-- Edición Masiva en Validación -->
       <div id="mass-controls-valid" class="cgps-controls-row" style="margin-top: 10px; border-top: 1px solid #cbd5e1; padding-top: 10px; display: none;">
         <label style="font-size: 12px; font-weight: 600; color: #1b4e85;">EDICIÓN MASIVA:</label>
+        <input type="text" id="cgps-mass-nombre" class="cgps-input" placeholder="Nombre..." style="width: 110px;">
+        <button id="cgps-btn-apply-nombre" type="button" class="cgps-btn cgps-btn-secondary">Nombre</button>
         <input type="text" id="cgps-mass-placa" class="cgps-input" placeholder="Placa..." style="width: 90px;">
         <button id="cgps-btn-apply-placa" type="button" class="cgps-btn cgps-btn-secondary">Placa</button>
         <input type="text" id="cgps-mass-estado" class="cgps-input" placeholder="Estado..." style="width: 100px;">
@@ -148,7 +150,7 @@
         <table class="cgps-table">
           <thead id="cgps-table-head"></thead>
           <tbody id="cgps-listbody">
-            <tr><td colspan="8" style="text-align:center; padding: 16px; color: #64748b;">Cargando activos…</td></tr>
+            <tr><td colspan="9" style="text-align:center; padding: 16px; color: #64748b;">Cargando activos…</td></tr>
           </tbody>
         </table>
       </div>
@@ -240,6 +242,7 @@
     .cgps-table-container { background-color: #ffffff; border-radius: 8px; border: 1px solid #cbd5e1; overflow: hidden; width: 100%; }
     .cgps-table-scroll { max-height: 440px; overflow-y: auto; width: 100%; }
     
+    /* Tabla con anchos optimizados */
     .cgps-table { width: 100%; border-collapse: collapse; font-size: 12px; table-layout: fixed; }
     .cgps-table th { background-color: #f8fafc; color: #64748b; font-weight: 600; text-align: left; padding: 8px 10px; border-bottom: 1px solid #cbd5e1; position: sticky; top: 0; z-index: 2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .cgps-table td { padding: 6px 10px; border-bottom: 1px solid #e2e8f0; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -374,7 +377,7 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
       vin: vin,
       serialNumber: (d.serialNumber || '').trim(),
       desde: fmtDate(d.activeFrom),
-      razon: resolveProperty(d, RAZON_PROP), // Solucionado: solo toma propiedad de Razón Social
+      razon: resolveProperty(d, RAZON_PROP),
       ruc: resolveProperty(d, RUC_PROP),
       estadoProvincia: resolveProperty(d, ESTADO_PROP),
       anualidad: resolveProperty(d, ANUALIDAD_PROP),
@@ -478,9 +481,20 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
   function renderHeader() {
     var head = $('cgps-table-head');
     if (activeModule === 'certi') {
-      head.innerHTML = '<tr><th style="width: 36px; text-align: center;"></th><th style="width: 120px;">Placa</th><th style="width: 180px;">VIN</th><th style="width: 110px;">Activo Desde</th><th>Razón Social</th><th style="width: 130px;">RUC</th><th style="width: 180px;">Grupos</th></tr>';
+      head.innerHTML = '<tr><th style="width: 36px; text-align: center;"></th><th style="width: 120px;">Placa</th><th style="width: 160px;">VIN</th><th style="width: 100px;">Activo Desde</th><th style="width: 220px;">Razón Social</th><th style="width: 120px;">RUC</th><th>Grupos</th></tr>';
     } else {
-      head.innerHTML = '<tr><th style="width: 36px; text-align: center;"></th><th style="width: 120px;">Placa</th><th style="width: 180px;">VIN</th><th style="width: 130px;">Estado/Prov.</th><th style="width: 120px;">RUC</th><th>Razón Social</th><th style="width: 80px;">Anualidad</th><th style="width: 120px;">Tipo Vehículo</th></tr>';
+      // Ajuste optimizado de anchos para incluir "Nombre del Activo"
+      head.innerHTML = '<tr>' +
+        '<th style="width: 36px; text-align: center;"></th>' +
+        '<th style="width: 150px;">Nombre del Activo</th>' +
+        '<th style="width: 100px;">Placa</th>' +
+        '<th style="width: 150px;">VIN</th>' +
+        '<th style="width: 110px;">Estado/Prov.</th>' +
+        '<th style="width: 100px;">RUC</th>' +
+        '<th style="width: 200px;">Razón Social</th>' +
+        '<th style="width: 80px;">Anualidad</th>' +
+        '<th style="width: 100px;">Tipo Vehículo</th>' +
+        '</tr>';
     }
   }
 
@@ -499,16 +513,16 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
         }
       }
 
-      var p = r.placa.toLowerCase(), v = r.vin.toLowerCase(), s = r.serialNumber.toLowerCase();
+      var nom = r.nombreActivo.toLowerCase(), p = r.placa.toLowerCase(), v = r.vin.toLowerCase(), s = r.serialNumber.toLowerCase();
 
       if (activeBulkTokens.length > 0) {
         var matchBulk = activeBulkTokens.some(function (token) {
-          return p === token || v === token || s === token || (token.length >= 3 && (p.indexOf(token) >= 0 || v.indexOf(token) >= 0 || s.indexOf(token) >= 0));
+          return nom === token || p === token || v === token || s === token || (token.length >= 3 && (nom.indexOf(token) >= 0 || p.indexOf(token) >= 0 || v.indexOf(token) >= 0 || s.indexOf(token) >= 0));
         });
         if (!matchBulk) return;
       }
 
-      var hay = (r.placa + ' ' + r.vin + ' ' + r.serialNumber + ' ' + r.grupos + ' ' + r.razon + ' ' + r.ruc + ' ' + r.estadoProvincia + ' ' + r.tipoVehiculo).toLowerCase();
+      var hay = (r.nombreActivo + ' ' + r.placa + ' ' + r.vin + ' ' + r.serialNumber + ' ' + r.grupos + ' ' + r.razon + ' ' + r.ruc + ' ' + r.estadoProvincia + ' ' + r.tipoVehiculo).toLowerCase();
       if (q && hay.indexOf(q) < 0) return;
 
       if (activeModule === 'certi') {
@@ -517,13 +531,14 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
           '<td>' + htmlEsc(r.placa) + '</td>' +
           '<td>' + htmlEsc(r.vin) + '</td>' +
           '<td>' + htmlEsc(r.desde) + '</td>' +
-          '<td><input type="text" class="cgps-edit-input" data-field="razon" data-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(r.razon) + '" placeholder="Sin razón social"></td>' +
+          '<td><input type="text" class="cgps-edit-input" data-field="razon" data-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(r.razon) + '" placeholder="Sin Razón Social"></td>' +
           '<td><input type="text" class="cgps-edit-input" data-field="ruc" data-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(r.ruc) + '" placeholder="Sin RUC"></td>' +
           '<td>' + htmlEsc(r.grupos) + '</td>' +
           '</tr>';
       } else {
         html += '<tr>' +
           '<td style="text-align:center;"><input type="checkbox" data-id="' + htmlEsc(r.id) + '"' + (selected[r.id] ? ' checked' : '') + '></td>' +
+          '<td><input type="text" class="cgps-edit-input" data-field="nombreActivo" data-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(r.nombreActivo) + '"></td>' +
           '<td><input type="text" class="cgps-edit-input" data-field="placa" data-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(r.placa) + '"></td>' +
           '<td>' + htmlEsc(r.vin) + '</td>' +
           '<td><input type="text" class="cgps-edit-input" data-field="estadoProvincia" data-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(r.estadoProvincia) + '" placeholder="Sin Estado"></td>' +
@@ -535,7 +550,7 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
       }
     });
 
-    $('cgps-listbody').innerHTML = html || '<tr><td colspan="8" style="text-align:center; padding: 14px; color: #64748b;">Sin resultados coincidentes</td></tr>';
+    $('cgps-listbody').innerHTML = html || '<tr><td colspan="9" style="text-align:center; padding: 14px; color: #64748b;">Sin resultados coincidentes</td></tr>';
     updateKPIs();
   }
 
@@ -583,9 +598,9 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     var matchedCount = 0;
 
     all.forEach(function (r) {
-      var p = r.placa.toLowerCase(), v = r.vin.toLowerCase(), s = r.serialNumber.toLowerCase();
+      var nom = r.nombreActivo.toLowerCase(), p = r.placa.toLowerCase(), v = r.vin.toLowerCase(), s = r.serialNumber.toLowerCase();
       var isMatch = activeBulkTokens.some(function (token) {
-        return p === token || v === token || s === token || (token.length >= 3 && (p.indexOf(token) >= 0 || v.indexOf(token) >= 0 || s.indexOf(token) >= 0));
+        return nom === token || p === token || v === token || s === token || (token.length >= 3 && (nom.indexOf(token) >= 0 || p.indexOf(token) >= 0 || v.indexOf(token) >= 0 || s.indexOf(token) >= 0));
       });
       if (isMatch) { selected[r.id] = true; matchedCount++; }
     });
@@ -709,6 +724,7 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
   $('cgps-btn-apply-mass-cert').addEventListener('click', function() { applyMassField('razon', 'cgps-mass-razon-cert', 'Razón Social'); });
   $('cgps-btn-apply-ruc-cert').addEventListener('click', function() { applyMassField('ruc', 'cgps-mass-ruc-cert', 'RUC'); });
 
+  $('cgps-btn-apply-nombre').addEventListener('click', function() { applyMassField('nombreActivo', 'cgps-mass-nombre', 'Nombre del Activo'); });
   $('cgps-btn-apply-placa').addEventListener('click', function() { applyMassField('placa', 'cgps-mass-placa', 'Placa'); });
   $('cgps-btn-apply-estado').addEventListener('click', function() { applyMassField('estadoProvincia', 'cgps-mass-estado', 'Estado/Provincia'); });
   $('cgps-btn-apply-ruc-val').addEventListener('click', function() { applyMassField('ruc', 'cgps-mass-ruc-val', 'RUC'); });
@@ -735,9 +751,9 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
   $('cgps-sel-vis').addEventListener('click', function () {
     var q = $('cgps-filter').value.trim().toLowerCase();
     all.forEach(function (r) {
-      var p = r.placa.toLowerCase(), v = r.vin.toLowerCase(), s = r.serialNumber.toLowerCase();
-      var matchBulk = activeBulkTokens.length === 0 || activeBulkTokens.some(function(token){ return p===token || v===token || s===token; });
-      if (matchBulk && (!q || (r.placa + ' ' + r.vin + ' ' + r.serialNumber + ' ' + r.grupos + ' ' + r.razon + ' ' + r.ruc + ' ' + r.estadoProvincia + ' ' + r.tipoVehiculo).toLowerCase().indexOf(q) >= 0)) { selected[r.id] = true; }
+      var nom = r.nombreActivo.toLowerCase(), p = r.placa.toLowerCase(), v = r.vin.toLowerCase(), s = r.serialNumber.toLowerCase();
+      var matchBulk = activeBulkTokens.length === 0 || activeBulkTokens.some(function(token){ return nom===token || p===token || v===token || s===token; });
+      if (matchBulk && (!q || (r.nombreActivo + ' ' + r.placa + ' ' + r.vin + ' ' + r.serialNumber + ' ' + r.grupos + ' ' + r.razon + ' ' + r.ruc + ' ' + r.estadoProvincia + ' ' + r.tipoVehiculo).toLowerCase().indexOf(q) >= 0)) { selected[r.id] = true; }
     });
     renderList();
   });
