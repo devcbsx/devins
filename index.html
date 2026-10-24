@@ -104,7 +104,7 @@
 </div>
 
 <script>
-// Inyección forzada de CSS con dimensiones compactas y estilos para el textarea masivo
+// Inyección forzada de CSS con dimensiones compactas
 (function injectStyles() {
   var css = `
     body {
@@ -143,7 +143,7 @@
   `;
   var styleElem = document.createElement('style');
   styleElem.type = 'text/css';
-  styleElem.appendChild(document.createTextNode(css));
+  styleElem.appendChild(document.createTextNode(styleElem.ownerDocument.createTextNode(css)));
   document.head.appendChild(styleElem);
 })();
 
@@ -154,6 +154,7 @@ window.geotab.addin["Certificado GPS"] = function (api, state, callback) {
   'use strict';
 
   var all = [], groupsById = {}, propsById = {}, selected = {}, rawDevices = [];
+  var activeBulkTokens = []; // Guarda las claves del filtro masivo
 
   function pad(n) { return n < 10 ? '0' + n : '' + n; }
   function fmtDate(iso) {
@@ -348,16 +349,33 @@ window.geotab.addin["Certificado GPS"] = function (api, state, callback) {
   }
   function setMsg(t, err) { var m = $('msg'); m.textContent = t || ''; m.className = 'cgps-msg' + (err ? ' cgps-err' : ''); }
 
+  // Renderizado dinámico con soporte para filtrado masivo directo
   function renderList() {
     var q = $('filter').value.trim().toLowerCase(), n = 0, html = '';
     all.forEach(function (r) {
+      var p = r.placa.toLowerCase();
+      var v = r.vin.toLowerCase();
+      var s = r.serialNumber.toLowerCase();
+
+      // 1. Validar si existe un filtro masivo activo
+      if (activeBulkTokens.length > 0) {
+        var matchBulk = activeBulkTokens.some(function (token) {
+          return p === token || v === token || s === token ||
+                 (token.length >= 3 && (p.indexOf(token) >= 0 || v.indexOf(token) >= 0 || s.indexOf(token) >= 0));
+        });
+        if (!matchBulk) return; // Si no está en la lista masiva, no se dibuja en la tabla
+      }
+
+      // 2. Validar filtro manual secundario por texto
       var hay = (r.placa + ' ' + r.vin + ' ' + r.serialNumber + ' ' + r.razon).toLowerCase();
       if (q && hay.indexOf(q) < 0) return;
+
       n++;
       html += '<tr><td style="text-align:center;"><input type="checkbox" data-id="' + htmlEsc(r.id) + '"' + (selected[r.id] ? ' checked' : '') + '></td><td>' +
         htmlEsc(r.placa) + '</td><td>' + htmlEsc(r.vin) + '</td><td>' + htmlEsc(r.desde) + '</td><td>' + htmlEsc(r.razon) + '</td></tr>';
     });
-    $('listbody').innerHTML = html || '<tr><td colspan="5" style="text-align:center; padding: 14px; color: #64748b;">Sin resultados</td></tr>';
+
+    $('listbody').innerHTML = html || '<tr><td colspan="5" style="text-align:center; padding: 14px; color: #64748b;">Sin resultados coincidentes</td></tr>';
     
     var selCount = Object.keys(selected).filter(function (k) { return selected[k]; }).length;
     document.getElementById('kpi-total').textContent = all.length;
@@ -372,17 +390,17 @@ window.geotab.addin["Certificado GPS"] = function (api, state, callback) {
       return;
     }
 
-    // Separa por comas, saltos de línea (\n, \r), tabulaciones o espacios múltiples
-    var tokens = rawText.split(/[\n\r,;\t]+/).map(function (s) {
+    // Extrae y normaliza las claves pegadas
+    activeBulkTokens = rawText.split(/[\n\r,;\t]+/).map(function (s) {
       return s.trim().toLowerCase();
     }).filter(function (s) { return s.length > 0; });
 
-    if (tokens.length === 0) {
+    if (activeBulkTokens.length === 0) {
       setMsg('No se detectaron elementos válidos en el texto pegado.', true);
       return;
     }
 
-    selected = {}; // Reinicia selección previa
+    selected = {}; // Reinicia selección
     var matchedCount = 0;
 
     all.forEach(function (r) {
@@ -390,7 +408,7 @@ window.geotab.addin["Certificado GPS"] = function (api, state, callback) {
       var v = r.vin.toLowerCase();
       var s = r.serialNumber.toLowerCase();
 
-      var isMatch = tokens.some(function (token) {
+      var isMatch = activeBulkTokens.some(function (token) {
         return p === token || v === token || s === token ||
                (token.length >= 3 && (p.indexOf(token) >= 0 || v.indexOf(token) >= 0 || s.indexOf(token) >= 0));
       });
@@ -401,8 +419,8 @@ window.geotab.addin["Certificado GPS"] = function (api, state, callback) {
       }
     });
 
-    renderList();
-    setMsg('Se procesaron ' + tokens.length + ' elementos ingresados. Se encontraron y seleccionaron ' + matchedCount + ' coincidencia(s).');
+    renderList(); // Renderiza la tabla mostrando SOLO las coincidencias
+    setMsg('Filtro masivo aplicado: mostrando y seleccionando ' + matchedCount + ' de ' + activeBulkTokens.length + ' unidades ingresadas.');
   }
 
   function selectedRows() { return all.filter(function (r) { return selected[r.id]; }); }
@@ -463,6 +481,7 @@ window.geotab.addin["Certificado GPS"] = function (api, state, callback) {
   $('btn-bulk').addEventListener('click', processBulkInput);
   $('btn-bulk-clear').addEventListener('click', function () {
     $('bulk-input').value = '';
+    activeBulkTokens = [];
     selected = {};
     renderList();
     setMsg('Filtro masivo limpiado.');
@@ -474,7 +493,13 @@ window.geotab.addin["Certificado GPS"] = function (api, state, callback) {
   $('listbody').addEventListener('change', function (e) { var id = e.target.getAttribute('data-id'); if (id) { selected[id] = e.target.checked; renderList(); } });
   $('sel-vis').addEventListener('click', function () {
     var q = $('filter').value.trim().toLowerCase();
-    all.forEach(function (r) { if (!q || (r.placa + ' ' + r.vin + ' ' + r.serialNumber + ' ' + r.razon).toLowerCase().indexOf(q) >= 0) selected[r.id] = true; });
+    all.forEach(function (r) {
+      var p = r.placa.toLowerCase(), v = r.vin.toLowerCase(), s = r.serialNumber.toLowerCase();
+      var matchBulk = activeBulkTokens.length === 0 || activeBulkTokens.some(function(token){ return p===token || v===token || s===token; });
+      if (matchBulk && (!q || (r.placa + ' ' + r.vin + ' ' + r.serialNumber + ' ' + r.razon).toLowerCase().indexOf(q) >= 0)) {
+        selected[r.id] = true;
+      }
+    });
     renderList();
   });
   $('sel-none').addEventListener('click', function () { selected = {}; renderList(); $('preview').innerHTML = ''; $('preview').style.display = 'none'; });
