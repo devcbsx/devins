@@ -94,11 +94,21 @@
 </div>
 
 <script>
-// 1. VALIDACIÓN DE SESIÓN: Bloqueo de acceso si se abre fuera del iframe de MyGeotab
-if (window === window.top) {
-  document.body.innerHTML = "<div style='display:flex; justify-content:center; align-items:center; height:100vh; background-color:#f4f7fc;'><div style='text-align:center; padding:30px; background:#fff; border-radius:10px; border:1px solid #cbd5e1; box-shadow:0 4px 6px rgba(0,0,0,0.1);'><h3 style='color:#b91c1c; margin-bottom:10px;'>Acceso Restringido</h3><p style='color:#64748b; font-size:13px;'>Este módulo es un Add-In oficial y solo puede ser ejecutado dentro de la plataforma MyGeotab.</p></div></div>";
-  throw new Error("Acceso denegado: Ejecución fuera de MyGeotab.");
-}
+// 1. VALIDACIÓN DE SESIÓN MULTI-ENTORNO (MyGeotab y Copiloto)
+(function checkAllowedEnvironment() {
+  var isIframe = (window !== window.top);
+  var ref = (document.referrer || "").toLowerCase();
+
+  // Verifica si el iframe es cargado desde MyGeotab o Copiloto
+  var isGeotab = ref.indexOf("geotab.com") >= 0 || ref.indexOf("mygeotab") >= 0;
+  var isCopiloto = ref.indexOf("copiloto.app") >= 0;
+
+  // Si está fuera del iframe o proviene de un dominio no autorizado, bloquea el acceso
+  if (!isIframe && !isGeotab && !isCopiloto) {
+    document.body.innerHTML = "<div style='display:flex; justify-content:center; align-items:center; height:100vh; background-color:#f4f7fc;'><div style='text-align:center; padding:30px; background:#fff; border-radius:10px; border:1px solid #cbd5e1; box-shadow:0 4px 6px rgba(0,0,0,0.1);'><h3 style='color:#b91c1c; margin-bottom:10px;'>Acceso Restringido</h3><p style='color:#64748b; font-size:13px;'>Este módulo solo puede ser ejecutado dentro de las plataformas autorizadas (MyGeotab y Copiloto).</p></div></div>";
+    throw new Error("Acceso denegado: Ejecución fuera de entornos autorizados.");
+  }
+})();
 
 // Inyección forzada de CSS
 (function injectStyles() {
@@ -297,7 +307,7 @@ window.geotab.addin["Certificado GPS"] = function (api, state, callback) {
       var p = propsById[list[i].property && list[i].property.id];
       if (p && list[i].value && RAZON_PROP.test(p.name)) return String(list[i].value).trim();
     }
-    return (d.comment || '').trim(); // Si no existe, se retorna vacío sin copiar los grupos
+    return (d.comment || '').trim();
   }
 
   function toRow(d) {
@@ -307,7 +317,7 @@ window.geotab.addin["Certificado GPS"] = function (api, state, callback) {
       vin: (d.vehicleIdentificationNumber || '').trim(),
       serialNumber: (d.serialNumber || '').trim(),
       desde: fmtDate(d.activeFrom),
-      razon: resolveRazonSocial(d), // Razón Social independiente (vacía si no hay)
+      razon: resolveRazonSocial(d),
       grupos: getGroupsList(d)
     };
   }
@@ -340,7 +350,6 @@ window.geotab.addin["Certificado GPS"] = function (api, state, callback) {
   }
   function setMsg(t, err) { var m = $('msg'); m.textContent = t || ''; m.className = 'cgps-msg' + (err ? ' cgps-err' : ''); }
 
-  // Renderizado dinámico con orden estricto de columnas: Placa, VIN, Activo desde, Razón social, Grupos
   function renderList() {
     var q = $('filter').value.trim().toLowerCase(), n = 0, html = '';
     all.forEach(function (r) {
@@ -474,18 +483,14 @@ window.geotab.addin["Certificado GPS"] = function (api, state, callback) {
     })();
   }
 
-  // Carga únicamente de activos vigentes (excluye archivados/desactivados)
   function load() {
     setMsg('Cargando activos de la base de datos…');
     return Promise.all([
-      callApi(api, 'Get', { typeName: 'Device' }), // Solo activos vigentes
+      callApi(api, 'Get', { typeName: 'Device' }),
       callApi(api, 'Get', { typeName: 'Group' }).catch(function () { return []; }),
       callApi(api, 'Get', { typeName: 'Property' }).catch(function () { return []; })
     ]).then(function (res) {
-      // Filtrado estricto por código para omitir archivados
-      rawDevices = (res[0] || []).filter(function (d) {
-        return !d.toVersion; 
-      });
+      rawDevices = (res[0] || []).filter(function (d) { return !d.toVersion; });
       groupsById = {}; propsById = {};
       (res[1] || []).forEach(function (g) { groupsById[g.id] = g; });
       (res[2] || []).forEach(function (p) { propsById[p.id] = p; });
@@ -507,7 +512,6 @@ window.geotab.addin["Certificado GPS"] = function (api, state, callback) {
   });
   $('filter').addEventListener('input', renderList);
 
-  // Escuchar edición individual de Razón Social
   $('listbody').addEventListener('input', function (e) {
     var id = e.target.getAttribute('data-razon-id');
     if (id) {
