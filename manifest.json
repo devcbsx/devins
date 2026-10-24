@@ -1,19 +1,11 @@
 {
   "items": [
     {
-      "url": "https://devcbsx.github.io/devins/certigps.html?v=15.0",
+      "url": "https://devcbsx.github.io/devins/index.html?v=16.0",
       "path": "ActivityLink/",
       "menuName": {
-        "en": "Certificado GPS",
-        "es": "Certificado GPS"
-      }
-    },
-    {
-      "url": "https://devcbsx.github.io/devins/validacion.html?v=15.0",
-      "path": "ActivityLink/",
-      "menuName": {
-        "en": "Validación de Variables",
-        "es": "Validación de Variables"
+        "en": "Módulos NAVISAF",
+        "es": "Módulos NAVISAF"
       }
     }
   ]
