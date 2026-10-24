@@ -52,10 +52,10 @@
     </div>
   </div>
 
-  <!-- Controles e Inputs -->
+  <!-- Controles y Edición Masiva de Razón Social -->
   <div class="cgps-card">
     <div class="cgps-controls-row">
-      <input type="text" id="cgps-filter" class="cgps-input" placeholder="Buscar placa, VIN o razón social…" style="width: 260px;">
+      <input type="text" id="cgps-filter" class="cgps-input" placeholder="Buscar placa, VIN, grupo o razón social…" style="width: 260px;">
       <button id="cgps-sel-vis" type="button" class="cgps-btn cgps-btn-outline">Seleccionar visibles</button>
       <button id="cgps-sel-none" type="button" class="cgps-btn cgps-btn-outline">Limpiar selección</button>
       <label style="font-size: 12px; cursor: pointer;">
@@ -63,19 +63,11 @@
       </label>
     </div>
 
+    <!-- Modificación Masiva por Filtro -->
     <div class="cgps-controls-row" style="margin-top: 10px; border-top: 1px solid #cbd5e1; padding-top: 10px;">
-      <label style="font-size: 12px; font-weight: 600;">Razón social desde:
-        <select id="cgps-mode" class="cgps-select" style="margin-left: 4px;">
-          <option value="auto">Automático (propiedad personalizada → comentario → grupo)</option>
-          <option value="comment">Comentario del activo</option>
-          <option value="group">Grupo del activo</option>
-          <option value="property">Propiedad personalizada…</option>
-        </select>
-      </label>
-      <input type="text" id="cgps-propname" class="cgps-input" placeholder="Nombre propiedad" style="display:none; width: 140px;">
-      <label style="font-size: 12px; margin-left: 8px;">Si no se detecta: 
-        <input type="text" id="cgps-manual" class="cgps-input" placeholder="RAZON SOCIAL" style="width: 180px; margin-left: 4px;">
-      </label>
+      <label style="font-size: 12px; font-weight: 600; color: #1b4e85;">EDICIÓN MASIVA DE RAZÓN SOCIAL:</label>
+      <input type="text" id="cgps-mass-razon" class="cgps-input" placeholder="Nueva Razón Social a aplicar..." style="width: 280px;">
+      <button id="cgps-btn-apply-mass" type="button" class="cgps-btn cgps-btn-secondary">Aplicar a Seleccionados</button>
     </div>
   </div>
 
@@ -89,11 +81,12 @@
             <th>Placa</th>
             <th>VIN</th>
             <th>Activo Desde</th>
-            <th>Razón Social</th>
+            <th>Grupos</th>
+            <th style="width: 280px;">Razón Social</th>
           </tr>
         </thead>
         <tbody id="cgps-listbody">
-          <tr><td colspan="5" style="text-align:center; padding: 16px; color: #64748b;">Cargando activos…</td></tr>
+          <tr><td colspan="6" style="text-align:center; padding: 16px; color: #64748b;">Cargando activos…</td></tr>
         </tbody>
       </table>
     </div>
@@ -104,7 +97,7 @@
 </div>
 
 <script>
-// Inyección forzada de CSS con layout 100% fluido y adaptable
+// Inyección forzada de CSS
 (function injectStyles() {
   var css = `
     * { box-sizing: border-box !important; }
@@ -140,6 +133,7 @@
     .cgps-table th { background-color: #f8fafc; color: #64748b; font-weight: 600; text-align: left; padding: 8px 12px; border-bottom: 1px solid #cbd5e1; position: sticky; top: 0; z-index: 2; }
     .cgps-table td { padding: 6px 12px; border-bottom: 1px solid #e2e8f0; color: #1e293b; }
     .cgps-table tbody tr:hover { background-color: #f1f5f9; }
+    .cgps-edit-input { width: 100%; padding: 4px 6px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px; }
     .cgps-msg { min-height: 18px; font-size: 12px; font-weight: 600; color: #15803d; }
     .cgps-msg.cgps-err { color: #b91c1c; }
   `;
@@ -284,40 +278,34 @@ window.geotab.addin["Certificado GPS"] = function (api, state, callback) {
   var RAZON_PROP = /raz[o\u00F3]n\s*social|empresa|cliente|company|propietario/i;
   function isSystemGroup(id) { return /^Group/.test(id || ''); }
 
-  function makeResolver(groupsById, propsById, mode, propName) {
-    function fromProp(d, wanted) {
-      var list = d.customProperties || [];
-      for (var i = 0; i < list.length; i++) {
-        var p = propsById[list[i].property && list[i].property.id];
-        if (!p || !list[i].value) continue;
-        if (wanted ? p.name.toLowerCase() === wanted.toLowerCase() : RAZON_PROP.test(p.name)) return String(list[i].value).trim();
-      }
-      return '';
+  function getGroupsList(d) {
+    var gs = d.groups || [];
+    var names = [];
+    for (var i = 0; i < gs.length; i++) {
+      var g = groupsById[gs[i].id];
+      if (g && g.name && !isSystemGroup(g.id)) names.push(g.name.trim());
     }
-    function fromGroup(d) {
-      var gs = d.groups || [];
-      for (var i = 0; i < gs.length; i++) {
-        var g = groupsById[gs[i].id];
-        if (g && g.name && !isSystemGroup(g.id)) return g.name.trim();
-      }
-      return '';
-    }
-    return function (d) {
-      if (mode === 'comment') return (d.comment || '').trim();
-      if (mode === 'group') return fromGroup(d);
-      if (mode === 'property') return fromProp(d, propName);
-      return fromProp(d, '') || (d.comment || '').trim() || fromGroup(d);
-    };
+    return names.join(', ');
   }
 
-  function toRow(d, resolver) {
+  function resolveRazonSocial(d) {
+    var list = d.customProperties || [];
+    for (var i = 0; i < list.length; i++) {
+      var p = propsById[list[i].property && list[i].property.id];
+      if (p && list[i].value && RAZON_PROP.test(p.name)) return String(list[i].value).trim();
+    }
+    return (d.comment || '').trim() || getGroupsList(d) || '';
+  }
+
+  function toRow(d) {
     return {
       id: d.id,
       placa: (d.name || d.licensePlate || '').trim(),
       vin: (d.vehicleIdentificationNumber || '').trim(),
       serialNumber: (d.serialNumber || '').trim(),
       desde: fmtDate(d.activeFrom),
-      razon: resolver(d) || ''
+      grupos: getGroupsList(d),
+      razon: resolveRazonSocial(d) // Trae valor o se queda en blanco
     };
   }
   function groupByRazon(rows) {
@@ -343,10 +331,8 @@ window.geotab.addin["Certificado GPS"] = function (api, state, callback) {
 
   var $ = function (id) { return document.getElementById('cgps-' + id); };
 
-  function resolver() { return makeResolver(groupsById, propsById, $('mode').value, $('propname').value.trim()); }
   function rebuildRows() {
-    var r = resolver();
-    all = rawDevices.map(function (d) { return toRow(d, r); })
+    all = rawDevices.map(function (d) { return toRow(d); })
       .sort(function (a, b) { return a.placa.localeCompare(b.placa, 'es', { numeric: true }); });
   }
   function setMsg(t, err) { var m = $('msg'); m.textContent = t || ''; m.className = 'cgps-msg' + (err ? ' cgps-err' : ''); }
@@ -366,20 +352,47 @@ window.geotab.addin["Certificado GPS"] = function (api, state, callback) {
         if (!matchBulk) return;
       }
 
-      var hay = (r.placa + ' ' + r.vin + ' ' + r.serialNumber + ' ' + r.razon).toLowerCase();
+      var hay = (r.placa + ' ' + r.vin + ' ' + r.serialNumber + ' ' + r.grupos + ' ' + r.razon).toLowerCase();
       if (q && hay.indexOf(q) < 0) return;
 
       n++;
-      html += '<tr><td style="text-align:center;"><input type="checkbox" data-id="' + htmlEsc(r.id) + '"' + (selected[r.id] ? ' checked' : '') + '></td><td>' +
-        htmlEsc(r.placa) + '</td><td>' + htmlEsc(r.vin) + '</td><td>' + htmlEsc(r.desde) + '</td><td>' + htmlEsc(r.razon) + '</td></tr>';
+      html += '<tr>' +
+        '<td style="text-align:center;"><input type="checkbox" data-id="' + htmlEsc(r.id) + '"' + (selected[r.id] ? ' checked' : '') + '></td>' +
+        '<td>' + htmlEsc(r.placa) + '</td>' +
+        '<td>' + htmlEsc(r.vin) + '</td>' +
+        '<td>' + htmlEsc(r.desde) + '</td>' +
+        '<td>' + htmlEsc(r.grupos) + '</td>' +
+        '<td><input type="text" class="cgps-edit-input" data-razon-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(r.razon) + '" placeholder="Sin razón social"></td>' +
+        '</tr>';
     });
 
-    $('listbody').innerHTML = html || '<tr><td colspan="5" style="text-align:center; padding: 14px; color: #64748b;">Sin resultados coincidentes</td></tr>';
+    $('listbody').innerHTML = html || '<tr><td colspan="6" style="text-align:center; padding: 14px; color: #64748b;">Sin resultados coincidentes</td></tr>';
     
     var selCount = Object.keys(selected).filter(function (k) { return selected[k]; }).length;
     document.getElementById('kpi-total').textContent = all.length;
     document.getElementById('kpi-selected').textContent = selCount;
     document.getElementById('kpi-visible').textContent = n;
+  }
+
+  function applyMassRazonSocial() {
+    var massVal = $('mass-razon').value.trim();
+    var selIds = Object.keys(selected).filter(function (k) { return selected[k]; });
+
+    if (!selIds.length) {
+      setMsg('Seleccione al menos un activo para modificar su Razón Social masivamente.', true);
+      return;
+    }
+
+    var count = 0;
+    all.forEach(function (r) {
+      if (selected[r.id]) {
+        r.razon = massVal;
+        count++;
+      }
+    });
+
+    renderList();
+    setMsg('Se actualizó la Razón Social a "' + (massVal || 'EN BLANCO') + '" para ' + count + ' activo(s).');
   }
 
   function processBulkInput() {
@@ -447,11 +460,11 @@ window.geotab.addin["Certificado GPS"] = function (api, state, callback) {
   function generate() {
     var rows = selectedRows();
     if (!rows.length) { setMsg('Seleccione al menos un activo.', true); return; }
-    var manual = $('manual').value.trim(), groups = groupByRazon(rows), i = 0;
+    var groups = groupByRazon(rows), i = 0;
     setMsg('');
     (function next() {
       if (i >= groups.length) { setMsg('Se generaron ' + groups.length + ' documento(s) Word correctamente.'); return; }
-      var g = groups[i++], razon = g.razon || manual || 'SIN RAZON SOCIAL';
+      var g = groups[i++], razon = g.razon || 'SIN RAZON SOCIAL';
       download(docFileName(razon), buildDocx(g.rows, razon));
       setTimeout(next, 600);
     })();
@@ -477,6 +490,7 @@ window.geotab.addin["Certificado GPS"] = function (api, state, callback) {
   $('btn-view').addEventListener('click', preview);
   $('btn-doc').addEventListener('click', generate);
   $('btn-bulk').addEventListener('click', processBulkInput);
+  $('btn-apply-mass').addEventListener('click', applyMassRazonSocial);
   $('btn-bulk-clear').addEventListener('click', function () {
     $('bulk-input').value = '';
     activeBulkTokens = [];
@@ -486,15 +500,32 @@ window.geotab.addin["Certificado GPS"] = function (api, state, callback) {
   });
   $('filter').addEventListener('input', renderList);
   $('inactive').addEventListener('change', load);
-  $('mode').addEventListener('change', function () { $('propname').style.display = this.value === 'property' ? '' : 'none'; rebuildRows(); renderList(); });
-  $('propname').addEventListener('change', function () { rebuildRows(); renderList(); });
-  $('listbody').addEventListener('change', function (e) { var id = e.target.getAttribute('data-id'); if (id) { selected[id] = e.target.checked; renderList(); } });
+
+  // Escuchar edición individual de razón social en la tabla
+  $('listbody').addEventListener('input', function (e) {
+    var id = e.target.getAttribute('data-razon-id');
+    if (id) {
+      var newVal = e.target.value;
+      for (var i = 0; i < all.length; i++) {
+        if (all[i].id === id) {
+          all[i].razon = newVal;
+          break;
+        }
+      }
+    }
+  });
+
+  $('listbody').addEventListener('change', function (e) {
+    var id = e.target.getAttribute('data-id');
+    if (id) { selected[id] = e.target.checked; renderList(); }
+  });
+
   $('sel-vis').addEventListener('click', function () {
     var q = $('filter').value.trim().toLowerCase();
     all.forEach(function (r) {
       var p = r.placa.toLowerCase(), v = r.vin.toLowerCase(), s = r.serialNumber.toLowerCase();
       var matchBulk = activeBulkTokens.length === 0 || activeBulkTokens.some(function(token){ return p===token || v===token || s===token; });
-      if (matchBulk && (!q || (r.placa + ' ' + r.vin + ' ' + r.serialNumber + ' ' + r.razon).toLowerCase().indexOf(q) >= 0)) {
+      if (matchBulk && (!q || (r.placa + ' ' + r.vin + ' ' + r.serialNumber + ' ' + r.grupos + ' ' + r.razon).toLowerCase().indexOf(q) >= 0)) {
         selected[r.id] = true;
       }
     });
