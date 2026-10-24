@@ -6,7 +6,19 @@
 </head>
 <body>
 
-<div class="cgps-wrapper" id="cgps-root">
+<!-- MODAL DE LOGIN PERMANENTE -->
+<div id="navisaf-login-overlay" style="position: fixed; top:0; left:0; width:100vw; height:100vh; background-color: rgba(15, 23, 42, 0.85); z-index: 99999; display: flex; justify-content: center; align-items: center;">
+  <div style="background: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); width: 100%; max-width: 360px; text-align: center;">
+    <div style="font-size: 11px; font-weight: 700; color: #1b4e85; letter-spacing: 0.5px; margin-bottom: 4px;">NAVISAF CONTROL</div>
+    <h2 style="margin: 0 0 15px 0; font-size: 18px; color: #1e293b;">Acceso al Módulo</h2>
+    <p style="font-size: 12px; color: #64748b; margin-bottom: 20px;">Ingrese la clave de seguridad para continuar:</p>
+    <input type="password" id="navisaf-pass-input" placeholder="Contraseña" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; text-align: center; margin-bottom: 12px; outline: none;">
+    <div id="navisaf-login-err" style="color: #dc2626; font-size: 12px; font-weight: 600; min-height: 18px; margin-bottom: 10px;"></div>
+    <button id="navisaf-btn-login" type="button" style="width: 100%; padding: 10px; background-color: #1b4e85; color: #fff; border: none; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer;">Ingresar</button>
+  </div>
+</div>
+
+<div class="cgps-wrapper" id="cgps-root" style="display: none;">
 
   <!-- VISTA 1: MENU DE TARJETAS / DASHBOARD -->
   <div id="navisaf-hub-view">
@@ -26,7 +38,7 @@
 
       <div class="navisaf-card" id="btn-mod-valid">
         <h2>VALIDACIÓN DE VARIABLES</h2>
-        <p>Edición masiva e individual de campos de nombre, placa, estado, RUC y tipo.</p>
+        <p>Edición masiva e individual de campos y validación de parámetros XML (5/5).</p>
       </div>
 
       <div class="navisaf-card disabled">
@@ -89,9 +101,17 @@
         <div class="cgps-kpi-title" id="kpi-title-3">Visibles en Filtro</div>
         <div class="cgps-kpi-value" id="kpi-val-3">0</div>
       </div>
-      <div class="cgps-card kpi-btn-card" id="kpi-card-4" style="display: none;" title="Haz clic para filtrar sin tipo de vehículo">
-        <div class="cgps-kpi-title">Sin Tipo de Vehículo</div>
-        <div class="cgps-kpi-value" id="kpi-notype" style="color: #dc2626;">0</div>
+      <div class="cgps-card kpi-btn-card" id="kpi-card-4" style="display: none;" title="Haz clic para filtrar">
+        <div class="cgps-kpi-title" id="kpi-title-4">Parámetros Completos (5/5)</div>
+        <div class="cgps-kpi-value" id="kpi-val-4" style="color: #16a34a;">0</div>
+      </div>
+      <div class="cgps-card kpi-btn-card" id="kpi-card-5" style="display: none;" title="Haz clic para filtrar activos sin parámetros">
+        <div class="cgps-kpi-title">Sin Parámetros (0/5)</div>
+        <div class="cgps-kpi-value" id="kpi-val-5" style="color: #dc2626;">0</div>
+      </div>
+      <div class="cgps-card kpi-btn-card" id="kpi-card-6" style="display: none;" title="Haz clic para filtrar activos parciales">
+        <div class="cgps-kpi-title">Parámetros Parciales (1-4)</div>
+        <div class="cgps-kpi-value" id="kpi-val-6" style="color: #d97706;">0</div>
       </div>
     </div>
 
@@ -141,6 +161,8 @@
         <button id="cgps-btn-apply-anualidad" type="button" class="cgps-btn cgps-btn-secondary">Anualidad</button>
         <input type="text" id="cgps-mass-tipo" class="cgps-input" placeholder="Tipo Vehículo..." style="width: 110px;">
         <button id="cgps-btn-apply-tipo" type="button" class="cgps-btn cgps-btn-secondary">Tipo</button>
+        
+        <button id="cgps-btn-inject-params" type="button" class="cgps-btn" style="background-color: #15803d; color: #fff; margin-left: auto;">+ Completar 5 Parámetros Faltantes</button>
       </div>
     </div>
 
@@ -150,7 +172,7 @@
         <table class="cgps-table">
           <thead id="cgps-table-head"></thead>
           <tbody id="cgps-listbody">
-            <tr><td colspan="9" style="text-align:center; padding: 16px; color: #64748b;">Cargando activos…</td></tr>
+            <tr><td colspan="10" style="text-align:center; padding: 16px; color: #64748b;">Cargando activos…</td></tr>
           </tbody>
         </table>
       </div>
@@ -242,7 +264,6 @@
     .cgps-table-container { background-color: #ffffff; border-radius: 8px; border: 1px solid #cbd5e1; overflow: hidden; width: 100%; }
     .cgps-table-scroll { max-height: 440px; overflow-y: auto; width: 100%; }
     
-    /* Tabla con anchos optimizados */
     .cgps-table { width: 100%; border-collapse: collapse; font-size: 12px; table-layout: fixed; }
     .cgps-table th { background-color: #f8fafc; color: #64748b; font-weight: 600; text-align: left; padding: 8px 10px; border-bottom: 1px solid #cbd5e1; position: sticky; top: 0; z-index: 2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .cgps-table td { padding: 6px 10px; border-bottom: 1px solid #e2e8f0; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -250,6 +271,11 @@
     .cgps-edit-input { width: 100%; padding: 4px 6px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px; }
     .cgps-msg { min-height: 18px; font-size: 12px; font-weight: 600; color: #15803d; }
     .cgps-msg.cgps-err { color: #b91c1c; }
+
+    .badge-param { padding: 3px 6px; border-radius: 4px; font-weight: 700; font-size: 11px; display: inline-block; }
+    .badge-full { background-color: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+    .badge-partial { background-color: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+    .badge-empty { background-color: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
 
     @media (max-width: 768px) {
       .navisaf-grid { grid-template-columns: 1fr !important; }
@@ -268,6 +294,34 @@ window.geotab.addin = window.geotab.addin || {};
 window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
   'use strict';
 
+  // LOGIN CONTRASEÑA
+  var PASS_CORRECTA = "3219878";
+  
+  document.getElementById('navisaf-btn-login').addEventListener('click', function() {
+    var val = document.getElementById('navisaf-pass-input').value;
+    if (val === PASS_CORRECTA) {
+      document.getElementById('navisaf-login-overlay').style.display = 'none';
+      document.getElementById('cgps-root').style.display = 'block';
+    } else {
+      document.getElementById('navisaf-login-err').textContent = "Contraseña incorrecta";
+    }
+  });
+
+  document.getElementById('navisaf-pass-input').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      document.getElementById('navisaf-btn-login').click();
+    }
+  });
+
+  // DEFINICIÓN DE LAS 5 REGLAS DE PARÁMETROS OBLIGATORIOS
+  var REQUIRED_PARAMS = [
+    { name: "Enable Gps Altitude Logging", offset: "181", bytes: "08", xml: '<Parameter Description="Enable Gps Altitude Logging" Offset="181" Bytes="08" IsEnabled="true"/>' },
+    { name: "Disable Accelerometer Record Limit", offset: "65", bytes: "02", xml: '<Parameter Description="Disable Accelerometer Record Limit" Offset="65" Bytes="02" IsEnabled="true"/>' },
+    { name: "High Res RPM allowed Error = 2 rpm", offset: "168", bytes: "02", xml: '<Parameter Description="High Res RPM allowed Error = 2 rpm" Offset="168" Bytes="02" IsEnabled="true"/>' },
+    { name: "Enable Engine Load", offset: "165", bytes: "04", xml: '<Parameter Description="Enable Engine Load" Offset="165" Bytes="04" IsEnabled="true"/>' },
+    { name: "Enable Engine Retarder Selection And Accel Pedal", offset: "166", bytes: "09", xml: '<Parameter Description="Enable Engine Retarder Selection And Accel Pedal" Offset="166" Bytes="09" IsEnabled="true"/>' }
+  ];
+
   var all = [], groupsById = {}, propsById = {}, selected = {}, rawDevices = [];
   var activeBulkTokens = [];
   var activeModule = 'hub';
@@ -282,80 +336,6 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
   }
   function xmlEsc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function htmlEsc(s) { return xmlEsc(s).replace(/'/g, '&#39;'); }
-  function safeFileName(s) { return String(s).replace(/[\\\/:*?"<>|\r\n\t]/g, '').replace(/\s+/g, ' ').trim(); }
-  function docFileName(razon) { return 'CERTIFICADO GPS - ' + safeFileName(razon || 'SIN RAZON SOCIAL') + '.docx'; }
-
-  var CRC_TABLE = (function () {
-    var t = [], c, n, k;
-    for (n = 0; n < 256; n++) { c = n; for (k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1); t[n] = c >>> 0; }
-    return t;
-  })();
-
-  function crc32(bytes) { var c = 0xFFFFFFFF; for (var i = 0; i < bytes.length; i++) c = CRC_TABLE[(c ^ bytes[i]) & 0xFF] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
-  function utf8(s) { return new TextEncoder().encode(s); }
-
-  function zipStore(files) {
-    var now = new Date();
-    var dosTime = (now.getHours() << 11) | (now.getMinutes() << 5) | (now.getSeconds() >> 1);
-    var dosDate = ((now.getFullYear() - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate();
-    var chunks = [], central = [], offset = 0;
-    function u16(v) { return [v & 255, (v >>> 8) & 255]; }
-    function u32(v) { return [v & 255, (v >>> 8) & 255, (v >>> 16) & 255, (v >>> 24) & 255]; }
-    files.forEach(function (f) {
-      var name = utf8(f.name), data = utf8(f.data), crc = crc32(data);
-      var local = [].concat(u32(0x04034b50), u16(20), u16(0x0800), u16(0), u16(dosTime), u16(dosDate), u32(crc), u32(data.length), u32(data.length), u16(name.length), u16(0));
-      chunks.push(new Uint8Array(local), name, data);
-      central.push([].concat(u32(0x02014b50), u16(20), u16(20), u16(0x0800), u16(0), u16(dosTime), u16(dosDate), u32(crc), u32(data.length), u32(data.length), u16(name.length), u16(0), u16(0), u16(0), u16(0), u32(0), u32(offset)), Array.prototype.slice.call(name));
-      offset += local.length + name.length + data.length;
-    });
-    var cdStart = offset, cdSize = 0;
-    central.forEach(function (c) { var u = new Uint8Array(c); chunks.push(u); cdSize += u.length; });
-    chunks.push(new Uint8Array([].concat(u32(0x06054b50), u16(0), u16(0), u16(files.length), u16(files.length), u32(cdSize), u32(cdStart), u16(0))));
-    var total = chunks.reduce(function (a, c) { return a + c.length; }, 0);
-    var out = new Uint8Array(total), p = 0;
-    chunks.forEach(function (c) { out.set(c, p); p += c.length; });
-    return out;
-  }
-
-  var NS = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"';
-  var COLS = [458, 2387, 2455, 1701];
-  var HEAD_RPR = '<w:rPr><w:rFonts w:ascii="Aptos Narrow" w:eastAsia="Times New Roman" w:hAnsi="Aptos Narrow" w:cs="Times New Roman"/><w:b/><w:bCs/><w:color w:val="000000"/><w:kern w:val="0"/></w:rPr>';
-  var BODY_RPR = '<w:rPr><w:rFonts w:ascii="Aptos" w:hAnsi="Aptos" w:cs="Segoe UI"/><w:color w:val="000000"/></w:rPr>';
-
-  function cell(width, text, rpr, noWrap) { return '<w:tc><w:tcPr><w:tcW w:w="' + width + '" w:type="dxa"/>' + (noWrap ? '<w:noWrap/>' : '') + '<w:vAlign w:val="center"/></w:tcPr><w:p><w:pPr><w:jc w:val="center"/></w:pPr><w:r>' + rpr + '<w:t xml:space="preserve">' + xmlEsc(text) + '</w:t></w:r></w:p></w:tc>'; }
-  function row(vals, height, rpr) { var h = '<w:trPr><w:trHeight w:val="' + height + '"/><w:jc w:val="center"/></w:trPr>'; return '<w:tr>' + h + vals.map(function (v, i) { return cell(COLS[i], v, rpr, i > 0); }).join('') + '</w:tr>'; }
-  function documentXml(rows) {
-    var body = '<w:p><w:pPr><w:jc w:val="center"/></w:pPr><w:r><w:t>ANEXO N\u00B001</w:t></w:r></w:p>' +
-      '<w:tbl><w:tblPr><w:tblStyle w:val="Tablaconcuadrcula"/><w:tblW w:w="0" w:type="auto"/><w:jc w:val="center"/>' +
-      '<w:tblLook w:val="04A0" w:firstRow="1" w:lastRow="0" w:firstColumn="1" w:lastColumn="0" w:noHBand="0" w:noVBand="1"/></w:tblPr>' +
-      '<w:tblGrid>' + COLS.map(function (w) { return '<w:gridCol w:w="' + w + '"/>'; }).join('') + '</w:tblGrid>' +
-      row(['N\u00BA', 'Placa', 'VIN', 'ACTIVO DESDE'], 350, HEAD_RPR) +
-      rows.map(function (r, i) { return row([String(i + 1), r.placa, r.vin, r.desde], 428, BODY_RPR); }).join('') +
-      '</w:tbl><w:p/>' +
-      '<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1417" w:right="1701" w:bottom="1417" w:left="1701" w:header="708" w:footer="708" w:gutter="0"/><w:cols w:space="708"/><w:docGrid w:linePitch="360"/></w:sectPr>';
-    return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document ' + NS + '><w:body>' + body + '</w:body></w:document>';
-  }
-  var STYLES_XML = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles ' + NS + '><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Aptos" w:eastAsia="Aptos" w:hAnsi="Aptos" w:cs="Aptos"/><w:sz w:val="22"/><w:szCs w:val="22"/><w:lang w:val="es-PE" w:eastAsia="en-US" w:bidi="ar-SA"/></w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:spacing w:after="160" w:line="259" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults><w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/><w:qFormat/></w:style><w:style w:type="table" w:default="1" w:styleId="Tablanormal"><w:name w:val="Normal Table"/><w:uiPriority w:val="99"/><w:semiHidden/><w:unhideWhenUsed/><w:tblPr><w:tblInd w:w="0" w:type="dxa"/><w:tblCellMar><w:top w:w="0" w:type="dxa"/><w:left w:w="108" w:type="dxa"/><w:bottom w:w="0" w:type="dxa"/><w:right w:w="108" w:type="dxa"/></w:tblCellMar></w:tblPr></w:style><w:style w:type="table" w:styleId="Tablaconcuadrcula"><w:name w:val="Table Grid"/><w:basedOn w:val="Tablanormal"/><w:uiPriority w:val="39"/><w:pPr><w:spacing w:after="0" w:line="240" w:lineRule="auto"/></w:pPr><w:tblPr><w:tblBorders>' + ['top', 'left', 'bottom', 'right', 'insideH', 'insideV'].map(function (s) { return '<w:' + s + ' w:val="single" w:sz="4" w:space="0" w:color="auto"/>'; }).join('') + '</w:tblBorders></w:tblPr></w:style></w:styles>';
-  var CT_XML = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/><Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/></Types>';
-  var RELS_XML = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/></Relationships>';
-  var DOC_RELS_XML = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>';
-  function coreXml(razon) { var iso = new Date().toISOString().replace(/\.\d+Z$/, 'Z'); return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><dc:title>' + xmlEsc('CERTIFICADO GPS - ' + razon) + '</dc:title><dc:creator>MyGeotab</dc:creator><dcterms:created xsi:type="dcterms:W3CDTF">' + iso + '</dcterms:created></cp:coreProperties>'; }
-  function buildDocx(rows, razon) { return zipStore([{ name: '[Content_Types].xml', data: CT_XML }, { name: '_rels/.rels', data: RELS_XML }, { name: 'word/document.xml', data: documentXml(rows) }, { name: 'word/styles.xml', data: STYLES_XML }, { name: 'word/_rels/document.xml.rels', data: DOC_RELS_XML }, { name: 'docProps/core.xml', data: coreXml(razon || '') }]); }
-
-  var RAZON_PROP = /raz[o\u00F3]n\s*social|empresa|cliente|company|propietario/i;
-  var RUC_PROP = /ruc|taxid|identificacion/i;
-  var ESTADO_PROP = /estado|provincia|state/i;
-  var ANUALIDAD_PROP = /anualidad|a\u00F1o|year/i;
-  var TIPO_PROP = /tipo|type|vehiculo|vehicle/i;
-
-  function isSystemGroup(id) { return /^Group/.test(id || ''); }
-
-  function getGroupsList(d) {
-    var gs = d.groups || [];
-    var names = [];
-    for (var i = 0; i < gs.length; i++) { var g = groupsById[gs[i].id]; if (g && g.name && !isSystemGroup(g.id)) names.push(g.name.trim()); }
-    return names.join(', ');
-  }
 
   function resolveProperty(d, regex) {
     var list = d.customProperties || [];
@@ -366,35 +346,60 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     return '';
   }
 
+  function evalDeviceParameters(d) {
+    var rawCustom = d.customParameters || d.parameterVersion || [];
+    var strCustom = typeof rawCustom === 'string' ? rawCustom : JSON.stringify(rawCustom);
+    
+    var count = 0;
+    var missing = [];
+
+    REQUIRED_PARAMS.forEach(function(p) {
+      var hasOffset = strCustom.indexOf('Offset="' + p.offset + '"') >= 0 || strCustom.indexOf("Offset='" + p.offset + "'") >= 0;
+      var hasBytes = strCustom.indexOf('Bytes="' + p.bytes + '"') >= 0 || strCustom.indexOf("Bytes='" + p.bytes + "'") >= 0;
+      
+      if (hasOffset && hasBytes) {
+        count++;
+      } else {
+        missing.push(p);
+      }
+    });
+
+    return { count: count, missing: missing, total: 5 };
+  }
+
   function toRow(d) {
     var name = (d.name || '').trim();
     var plate = (d.licensePlate || '').trim();
     var vin = (d.vehicleIdentificationNumber || '').trim();
+    var paramStatus = evalDeviceParameters(d);
+
     return {
       id: d.id,
+      rawDevice: d,
       nombreActivo: name,
       placa: plate || name,
       vin: vin,
       serialNumber: (d.serialNumber || '').trim(),
       desde: fmtDate(d.activeFrom),
-      razon: resolveProperty(d, RAZON_PROP),
-      ruc: resolveProperty(d, RUC_PROP),
-      estadoProvincia: resolveProperty(d, ESTADO_PROP),
-      anualidad: resolveProperty(d, ANUALIDAD_PROP),
-      tipoVehiculo: resolveProperty(d, TIPO_PROP),
-      grupos: getGroupsList(d)
+      razon: resolveProperty(d, /raz[o\u00F3]n\s*social|empresa|cliente/i),
+      ruc: resolveProperty(d, /ruc|taxid/i),
+      estadoProvincia: resolveProperty(d, /estado|provincia/i),
+      anualidad: resolveProperty(d, /anualidad|a\u00F1o/i),
+      tipoVehiculo: resolveProperty(d, /tipo|type/i),
+      grupos: getGroupsList(d),
+      paramCount: paramStatus.count,
+      paramMissing: paramStatus.missing
     };
   }
 
-  function groupByRazon(rows) {
-    var map = {}, order = [];
-    rows.forEach(function (r) { var k = r.razon || ''; if (!map[k]) { map[k] = []; order.push(k); } map[k].push(r); });
-    return order.map(function (k) { return { razon: k, rows: map[k] }; });
+  function getGroupsList(d) {
+    var gs = d.groups || [];
+    var names = [];
+    for (var i = 0; i < gs.length; i++) { var g = groupsById[gs[i].id]; if (g && g.name && !/^Group/.test(g.id)) names.push(g.name.trim()); }
+    return names.join(', ');
   }
 
   function callApi(apiRef, method, params) { return new Promise(function (ok, fail) { apiRef.call(method, params, ok, fail); }); }
-  function download(name, bytes) { var blob = new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' }); var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1500); }
-
   var $ = function (id) { return document.getElementById(id); };
 
   function rebuildRows() {
@@ -412,28 +417,35 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
       $('kpi-title-3').textContent = "VISIBLES EN FILTRO";
       $('kpi-val-3').textContent = document.querySelectorAll('#cgps-listbody tr').length;
       $('kpi-card-4').style.display = 'none';
+      $('kpi-card-5').style.display = 'none';
+      $('kpi-card-6').style.display = 'none';
       document.querySelector('.cgps-kpi-grid').style.gridTemplateColumns = 'repeat(3, 1fr)';
     } else if (activeModule === 'valid') {
-      var countMismatch = 0, countVinNoPlate = 0, countNoType = 0;
+      var countFull = 0, countEmpty = 0, countPartial = 0;
       all.forEach(function (r) {
-        if (r.nombreActivo.toLowerCase() !== r.placa.toLowerCase() && r.nombreActivo && r.placa) countMismatch++;
-        if (r.vin && (!r.placa || r.placa.toLowerCase() === r.vin.toLowerCase())) countVinNoPlate++;
-        var esSinAsignar = r.grupos.toLowerCase().indexOf('sin asignar') >= 0;
-        if (!r.tipoVehiculo && !esSinAsignar) countNoType++;
+        if (r.paramCount === 5) countFull++;
+        else if (r.paramCount === 0) countEmpty++;
+        else countPartial++;
       });
 
-      $('kpi-title-2').textContent = "NOMBRE VS PLACA DISTINTOS";
-      $('kpi-val-2').textContent = countMismatch;
-      $('kpi-title-3').textContent = "VIN REGISTRADO (SIN PLACA)";
-      $('kpi-val-3').textContent = countVinNoPlate;
-      $('kpi-notype').textContent = countNoType;
+      $('kpi-title-2').textContent = "SELECCIONADOS";
+      $('kpi-val-2').textContent = selCount;
+      $('kpi-title-3').textContent = "VISIBLES EN FILTRO";
+      $('kpi-val-3').textContent = document.querySelectorAll('#cgps-listbody tr').length;
+      
+      $('kpi-val-4').textContent = countFull;
+      $('kpi-val-5').textContent = countEmpty;
+      $('kpi-val-6').textContent = countPartial;
+
       $('kpi-card-4').style.display = 'block';
-      document.querySelector('.cgps-kpi-grid').style.gridTemplateColumns = 'repeat(4, 1fr)';
+      $('kpi-card-5').style.display = 'block';
+      $('kpi-card-6').style.display = 'block';
+      document.querySelector('.cgps-kpi-grid').style.gridTemplateColumns = 'repeat(6, 1fr)';
     }
   }
 
   function highlightKpiCard(cardId) {
-    ['kpi-card-1', 'kpi-card-2', 'kpi-card-3', 'kpi-card-4'].forEach(function(id) {
+    ['kpi-card-1', 'kpi-card-2', 'kpi-card-3', 'kpi-card-4', 'kpi-card-5', 'kpi-card-6'].forEach(function(id) {
       if ($(id)) $(id).classList.remove('kpi-active');
     });
     if (cardId && $(cardId)) {
@@ -483,15 +495,16 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     if (activeModule === 'certi') {
       head.innerHTML = '<tr><th style="width: 36px; text-align: center;"></th><th style="width: 120px;">Placa</th><th style="width: 160px;">VIN</th><th style="width: 100px;">Activo Desde</th><th style="width: 220px;">Razón Social</th><th style="width: 120px;">RUC</th><th>Grupos</th></tr>';
     } else {
-      // Ajuste optimizado de anchos para incluir "Nombre del Activo"
       head.innerHTML = '<tr>' +
         '<th style="width: 36px; text-align: center;"></th>' +
-        '<th style="width: 150px;">Nombre del Activo</th>' +
+        '<th style="width: 140px;">Nombre del Activo</th>' +
         '<th style="width: 100px;">Placa</th>' +
+        '<th style="width: 100px;">Activado Desde</th>' +
         '<th style="width: 150px;">VIN</th>' +
+        '<th style="width: 110px;">Parámetros (5)</th>' +
         '<th style="width: 110px;">Estado/Prov.</th>' +
         '<th style="width: 100px;">RUC</th>' +
-        '<th style="width: 200px;">Razón Social</th>' +
+        '<th style="width: 180px;">Razón Social</th>' +
         '<th style="width: 80px;">Anualidad</th>' +
         '<th style="width: 100px;">Tipo Vehículo</th>' +
         '</tr>';
@@ -503,14 +516,9 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
 
     all.forEach(function (r) {
       if (activeModule === 'valid') {
-        if (activeKpiFilter === 'mismatch') {
-          if (r.nombreActivo.toLowerCase() === r.placa.toLowerCase() || !r.nombreActivo || !r.placa) return;
-        } else if (activeKpiFilter === 'vinNoPlate') {
-          if (!r.vin || (r.placa && r.placa.toLowerCase() !== r.vin.toLowerCase())) return;
-        } else if (activeKpiFilter === 'noType') {
-          var esSinAsignar = r.grupos.toLowerCase().indexOf('sin asignar') >= 0;
-          if (r.tipoVehiculo || esSinAsignar) return;
-        }
+        if (activeKpiFilter === 'full' && r.paramCount !== 5) return;
+        if (activeKpiFilter === 'empty' && r.paramCount !== 0) return;
+        if (activeKpiFilter === 'partial' && (r.paramCount === 0 || r.paramCount === 5)) return;
       }
 
       var nom = r.nombreActivo.toLowerCase(), p = r.placa.toLowerCase(), v = r.vin.toLowerCase(), s = r.serialNumber.toLowerCase();
@@ -536,11 +544,16 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
           '<td>' + htmlEsc(r.grupos) + '</td>' +
           '</tr>';
       } else {
+        var badgeClass = r.paramCount === 5 ? 'badge-full' : (r.paramCount === 0 ? 'badge-empty' : 'badge-partial');
+        var badgeLabel = r.paramCount + '/5 ' + (r.paramCount === 5 ? 'OK' : (r.paramCount === 0 ? 'Sin Param' : 'Parcial'));
+
         html += '<tr>' +
           '<td style="text-align:center;"><input type="checkbox" data-id="' + htmlEsc(r.id) + '"' + (selected[r.id] ? ' checked' : '') + '></td>' +
           '<td><input type="text" class="cgps-edit-input" data-field="nombreActivo" data-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(r.nombreActivo) + '"></td>' +
           '<td><input type="text" class="cgps-edit-input" data-field="placa" data-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(r.placa) + '"></td>' +
+          '<td>' + htmlEsc(r.desde) + '</td>' +
           '<td>' + htmlEsc(r.vin) + '</td>' +
+          '<td><span class="badge-param ' + badgeClass + '">' + badgeLabel + '</span></td>' +
           '<td><input type="text" class="cgps-edit-input" data-field="estadoProvincia" data-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(r.estadoProvincia) + '" placeholder="Sin Estado"></td>' +
           '<td><input type="text" class="cgps-edit-input" data-field="ruc" data-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(r.ruc) + '" placeholder="Sin RUC"></td>' +
           '<td><input type="text" class="cgps-edit-input" data-field="razon" data-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(r.razon) + '" placeholder="Sin Razón Social"></td>' +
@@ -550,8 +563,52 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
       }
     });
 
-    $('cgps-listbody').innerHTML = html || '<tr><td colspan="9" style="text-align:center; padding: 14px; color: #64748b;">Sin resultados coincidentes</td></tr>';
+    $('cgps-listbody').innerHTML = html || '<tr><td colspan="11" style="text-align:center; padding: 14px; color: #64748b;">Sin resultados coincidentes</td></tr>';
     updateKPIs();
+  }
+
+  // ACCIÓN PARA COMPLETAR LOS PARÁMETROS FALTANTES (HASTA 5/5)
+  function injectMissingParameters() {
+    var selIds = Object.keys(selected).filter(function (k) { return selected[k]; });
+    if (!selIds.length) { setMsg('Seleccione al menos un activo.', true); return; }
+
+    var targets = all.filter(function(r) { return selected[r.id] && r.paramCount < 5; });
+    if (!targets.length) { setMsg('Los activos seleccionados ya poseen los 5 parámetros completos.'); return; }
+
+    if (!window.confirm("¿Desea autocompletar e inyectar los parámetros faltantes para " + targets.length + " activo(s)?")) return;
+
+    setMsg('Inyectando parámetros faltantes en Geotab…');
+
+    var completed = 0;
+    var promises = targets.map(function(r) {
+      var d = r.rawDevice;
+      var existingParams = d.customParameters || [];
+
+      r.paramMissing.forEach(function(missing) {
+        existingParams.push({
+          description: missing.name,
+          offset: missing.offset,
+          bytes: missing.bytes,
+          isEnabled: true
+        });
+      });
+
+      d.customParameters = existingParams;
+
+      return callApi(api, 'Set', {
+        typeName: 'Device',
+        entity: d
+      }).then(function() {
+        completed++;
+      });
+    });
+
+    Promise.all(promises).then(function() {
+      setMsg('Se completaron exitosamente los 5 parámetros en ' + completed + ' activo(s). Cargando cambios…');
+      load();
+    }).catch(function(err) {
+      setMsg('Error al guardar parámetros en Geotab: ' + (err.message || err), true);
+    });
   }
 
   function applyMassField(field, inputId, label) {
@@ -564,27 +621,6 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     all.forEach(function (r) { if (selected[r.id]) { r[field] = massVal; count++; } });
     renderList();
     setMsg('Se actualizó ' + label + ' para ' + count + ' activo(s).');
-  }
-
-  function generateLegalText() {
-    var rows = selectedRows();
-    if (!rows.length) { setMsg('Seleccione al menos un activo.', true); $('cgps-legal-box').style.display = 'none'; return; }
-
-    var primeraRazon = rows[0].razon || "";
-    var primerRuc = rows[0].ruc || "";
-
-    var text = "Asunto: CERTIFICADO GPS - " + primeraRazon + "\n\n" +
-      "Buenos días estimada área Legal,\n\n" +
-      "Se solicita tu apoyo en la realización del certificado solicitado por el cliente. Considere que debe describir como beneficiaria al cliente DIVEIMPORT. Adjunto información de la(s) unidad(es):\n\n" +
-      "DATOS DE LA EMPRESA\n\n" +
-      "RAZÓN SOCIAL: " + primeraRazon + "\n" +
-      "RUC: " + primerRuc + "\n\n" +
-      "Quedo atento a sus comentarios.\n\n" +
-      "Saludos cordiales,";
-
-    $('cgps-legal-text').value = text;
-    $('cgps-legal-box').style.display = 'block';
-    setMsg('Texto para el área Legal generado correctamente.');
   }
 
   function processBulkInput() {
@@ -607,37 +643,6 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
 
     renderList();
     setMsg('Filtro masivo aplicado: mostrando y seleccionando ' + matchedCount + ' coincidencia(s).');
-  }
-
-  function selectedRows() { return all.filter(function (r) { return selected[r.id]; }); }
-
-  function preview() {
-    var rows = selectedRows();
-    var prevContainer = $('cgps-preview');
-    if (!rows.length) { setMsg('Seleccione al menos un activo.', true); prevContainer.style.display = 'none'; return; }
-    setMsg('');
-    var html = '<h3 style="margin-top:0; font-size:14px;">Vista Previa del Certificado</h3>';
-    groupByRazon(rows).forEach(function (g) {
-      html += '<h4 style="margin:8px 0 4px; font-size:13px; color: #1b4e85;">' + htmlEsc(g.razon || '(Sin razón social)') + ' <span style="font-size:11px; font-weight:normal; color:#64748b;">– ' + g.rows.length + ' activo(s)</span></h4>' +
-        '<table class="cgps-table" style="margin-bottom:8px;"><thead><tr><th>Nº</th><th>Placa</th><th>VIN</th><th>ACTIVO DESDE</th></tr></thead><tbody>';
-      g.rows.forEach(function (r, i) { html += '<tr><td>' + (i + 1) + '</td><td>' + htmlEsc(r.placa) + '</td><td>' + htmlEsc(r.vin) + '</td><td>' + htmlEsc(r.desde) + '</td></tr>'; });
-      html += '</tbody></table>';
-    });
-    prevContainer.innerHTML = html;
-    prevContainer.style.display = 'block';
-  }
-
-  function generate() {
-    var rows = selectedRows();
-    if (!rows.length) { setMsg('Seleccione al menos un activo.', true); return; }
-    var groups = groupByRazon(rows), i = 0;
-    setMsg('');
-    (function next() {
-      if (i >= groups.length) { setMsg('Se generaron ' + groups.length + ' documento(s) Word correctamente.'); return; }
-      var g = groups[i++], razon = g.razon || 'SIN RAZON SOCIAL';
-      download(docFileName(razon), buildDocx(g.rows, razon));
-      setTimeout(next, 600);
-    })();
   }
 
   function load() {
@@ -679,51 +684,21 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     });
   }
 
-  // Eventos de Navegación del Panel Principal
+  // EVENTOS KPI
+  $('kpi-card-1').addEventListener('click', function() { activeKpiFilter = 'all'; highlightKpiCard('kpi-card-1'); renderList(); });
+  $('kpi-card-4').addEventListener('click', function() { activeKpiFilter = (activeKpiFilter === 'full') ? 'all' : 'full'; highlightKpiCard(activeKpiFilter === 'full' ? 'kpi-card-4' : 'kpi-card-1'); renderList(); });
+  $('kpi-card-5').addEventListener('click', function() { activeKpiFilter = (activeKpiFilter === 'empty') ? 'all' : 'empty'; highlightKpiCard(activeKpiFilter === 'empty' ? 'kpi-card-5' : 'kpi-card-1'); renderList(); });
+  $('kpi-card-6').addEventListener('click', function() { activeKpiFilter = (activeKpiFilter === 'partial') ? 'all' : 'partial'; highlightKpiCard(activeKpiFilter === 'partial' ? 'kpi-card-6' : 'kpi-card-1'); renderList(); });
+
+  // EVENTOS INYECCIÓN Y EDICIÓN
+  $('cgps-btn-inject-params').addEventListener('click', injectMissingParameters);
+
+  // NAVEGACIÓN
   $('btn-mod-certi').addEventListener('click', function() { switchView('certi'); });
   $('btn-mod-valid').addEventListener('click', function() { switchView('valid'); });
   $('navisaf-btn-back').addEventListener('click', function() { switchView('hub'); });
 
-  // Eventos de Filtro KPI (Botonera)
-  $('kpi-card-1').addEventListener('click', function() {
-    activeKpiFilter = 'all';
-    highlightKpiCard('kpi-card-1');
-    renderList();
-  });
-
-  $('kpi-card-2').addEventListener('click', function() {
-    if (activeModule === 'valid') {
-      activeKpiFilter = (activeKpiFilter === 'mismatch') ? 'all' : 'mismatch';
-      highlightKpiCard(activeKpiFilter === 'mismatch' ? 'kpi-card-2' : 'kpi-card-1');
-      renderList();
-    }
-  });
-
-  $('kpi-card-3').addEventListener('click', function() {
-    if (activeModule === 'valid') {
-      activeKpiFilter = (activeKpiFilter === 'vinNoPlate') ? 'all' : 'vinNoPlate';
-      highlightKpiCard(activeKpiFilter === 'vinNoPlate' ? 'kpi-card-3' : 'kpi-card-1');
-      renderList();
-    }
-  });
-
-  $('kpi-card-4').addEventListener('click', function() {
-    if (activeModule === 'valid') {
-      activeKpiFilter = (activeKpiFilter === 'noType') ? 'all' : 'noType';
-      highlightKpiCard(activeKpiFilter === 'noType' ? 'kpi-card-4' : 'kpi-card-1');
-      renderList();
-    }
-  });
-
-  // Acciones Operativas
-  $('cgps-btn-view').addEventListener('click', preview);
-  $('cgps-btn-doc').addEventListener('click', generate);
-  $('cgps-btn-mail').addEventListener('click', generateLegalText);
-  $('cgps-btn-bulk').addEventListener('click', processBulkInput);
-
-  $('cgps-btn-apply-mass-cert').addEventListener('click', function() { applyMassField('razon', 'cgps-mass-razon-cert', 'Razón Social'); });
-  $('cgps-btn-apply-ruc-cert').addEventListener('click', function() { applyMassField('ruc', 'cgps-mass-ruc-cert', 'RUC'); });
-
+  // EDICIÓN MASIVA
   $('cgps-btn-apply-nombre').addEventListener('click', function() { applyMassField('nombreActivo', 'cgps-mass-nombre', 'Nombre del Activo'); });
   $('cgps-btn-apply-placa').addEventListener('click', function() { applyMassField('placa', 'cgps-mass-placa', 'Placa'); });
   $('cgps-btn-apply-estado').addEventListener('click', function() { applyMassField('estadoProvincia', 'cgps-mass-estado', 'Estado/Provincia'); });
@@ -732,7 +707,7 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
   $('cgps-btn-apply-anualidad').addEventListener('click', function() { applyMassField('anualidad', 'cgps-mass-anualidad', 'Anualidad'); });
   $('cgps-btn-apply-tipo').addEventListener('click', function() { applyMassField('tipoVehiculo', 'cgps-mass-tipo', 'Tipo de Vehículo'); });
 
-  $('cgps-btn-copy-legal').addEventListener('click', function() { $('cgps-legal-text').select(); document.execCommand("copy"); setMsg('Texto copiado al portapapeles correctamente.'); });
+  $('cgps-btn-bulk').addEventListener('click', processBulkInput);
   $('cgps-btn-bulk-clear').addEventListener('click', function () { $('cgps-bulk-input').value = ''; activeBulkTokens = []; selected = {}; renderList(); setMsg('Filtro masivo limpiado.'); });
   $('cgps-filter').addEventListener('input', renderList);
 
@@ -757,7 +732,7 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     });
     renderList();
   });
-  $('cgps-sel-none').addEventListener('click', function () { selected = {}; renderList(); $('cgps-preview').innerHTML = ''; $('cgps-preview').style.display = 'none'; $('cgps-legal-box').style.display = 'none'; });
+  $('cgps-sel-none').addEventListener('click', function () { selected = {}; renderList(); });
 
   load().then(function () { if (typeof callback === 'function') callback(); }).catch(function () { if (typeof callback === 'function') callback(); });
 
