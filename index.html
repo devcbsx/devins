@@ -806,9 +806,9 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     setMsg('Filtro de fechas removido: Mostrando unidades según los filtros de tabla activos.');
   }
 
-  // GENERACIÓN DE EXCEL INTEGRANDO TODOS LOS FILTROS COMBINADOS + FILTRADO EXCLUSIVO DE UNIDADES CON SERIAL
+  // GENERACIÓN DE EXCEL CON NOMBRE INCLUYENDO FECHA Y HORA + SIN FILA DE FECHA DE CORTE
   function exportMasterSwitchExcel() {
-    // Filtrar estrictamente solo las unidades visibles que tengan SERIAL (# SERIE GPS) y VIN poblado
+    // Filtrar estrictamente solo las unidades visibles con SERIAL (# SERIE GPS) y VIN poblado
     var list = all.filter(function(r) {
       var isFiltered = isRowMatchingFilters(r);
       var hasSerial = !!r.serialNumber && r.serialNumber.trim().length > 0;
@@ -822,16 +822,15 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     }
 
     var now = new Date();
-    var dateStr = pad(now.getDate()) + '/' + pad(now.getMonth() + 1) + '/' + now.getFullYear();
-    var timeStr = pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds());
+    var dateStr = pad(now.getDate()) + '-' + pad(now.getMonth() + 1) + '-' + now.getFullYear();
+    var timeStr = pad(now.getHours()) + '-' + pad(now.getMinutes()) + '-' + pad(now.getSeconds());
     
-    var fileName = 'LISTA MASTER SWITCH DIVEMOTOR CAMIONES-' + pad(now.getDate()) + '-' + pad(now.getMonth() + 1) + '-' + now.getFullYear() + '.xlsx';
+    // Nombre con fecha y hora de descarga (Ejemplo: LISTA MASTER SWITCH DIVEMOTOR CAMIONES-26-10-2026_14-30-05.xlsx)
+    var fileName = 'LISTA MASTER SWITCH DIVEMOTOR CAMIONES-' + dateStr + '_' + timeStr + '.xlsx';
 
-    // Construcción exacta según la Imagen 2
+    // Fila inicial directa con Encabezados (Sin la fila "Fecha de corte")
     var sheetData = [
-      ["Fecha de corte", dateStr, timeStr], // Fila 1: Fecha de corte | DD/MM/YYYY | HH:MM:SS
-      [], // Fila 2 vacía
-      ["PLACA", "BASE DE DATOS", "VIN", "# SERIE"] // Fila 3: Encabezados principales
+      ["PLACA", "BASE DE DATOS", "VIN", "# SERIE"]
     ];
 
     list.forEach(function(r) {
@@ -856,7 +855,7 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     XLSX.utils.book_append_sheet(wb, ws, "Hoja3");
     XLSX.writeFile(wb, fileName);
 
-    setMsg('📊 Archivo Excel generado con éxito con ' + list.length + ' activo(s) con serial: ' + fileName);
+    setMsg('📊 Archivo Excel generado con éxito (' + list.length + ' activos): ' + fileName);
   }
 
   // CERTI GPS
