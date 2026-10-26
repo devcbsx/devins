@@ -2,53 +2,53 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<title>Módulos NAVISAF</title>
+<title>Test N</title>
 <!-- Librería SheetJS para exportación a Excel .xlsx -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
 
 <!-- MODAL DE LOGIN PERMANENTE -->
-<div id="navisaf-login-overlay" style="position: fixed; top:0; left:0; width:100vw; height:100vh; background-color: rgba(15, 23, 42, 0.85); z-index: 99999; display: flex; justify-content: center; align-items: center;">
+<div id="testn-login-overlay" style="position: fixed; top:0; left:0; width:100vw; height:100vh; background-color: rgba(15, 23, 42, 0.85); z-index: 99999; display: flex; justify-content: center; align-items: center;">
   <div style="background: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); width: 100%; max-width: 360px; text-align: center;">
-    <div style="font-size: 11px; font-weight: 700; color: #1b4e85; letter-spacing: 0.5px; margin-bottom: 4px;">NAVISAF CONTROL</div>
+    <div style="font-size: 11px; font-weight: 700; color: #1b4e85; letter-spacing: 0.5px; margin-bottom: 4px;">SISTEMA CONTROL</div>
     <h2 style="margin: 0 0 15px 0; font-size: 18px; color: #1e293b;">Acceso al Módulo</h2>
     <p style="font-size: 12px; color: #64748b; margin-bottom: 20px;">Ingrese la clave de seguridad para continuar:</p>
-    <input type="password" id="navisaf-pass-input" placeholder="Contraseña" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; text-align: center; margin-bottom: 12px; outline: none;">
-    <div id="navisaf-login-err" style="color: #dc2626; font-size: 12px; font-weight: 600; min-height: 18px; margin-bottom: 10px;"></div>
-    <button id="navisaf-btn-login" type="button" style="width: 100%; padding: 10px; background-color: #1b4e85; color: #fff; border: none; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer;">Ingresar</button>
+    <input type="password" id="testn-pass-input" placeholder="Contraseña" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; text-align: center; margin-bottom: 12px; outline: none;">
+    <div id="testn-login-err" style="color: #dc2626; font-size: 12px; font-weight: 600; min-height: 18px; margin-bottom: 10px;"></div>
+    <button id="testn-btn-login" type="button" style="width: 100%; padding: 10px; background-color: #1b4e85; color: #fff; border: none; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer;">Ingresar</button>
   </div>
 </div>
 
 <div class="cgps-wrapper" id="cgps-root" style="display: none;">
 
   <!-- VISTA 1: MENU DE TARJETAS / DASHBOARD -->
-  <div id="navisaf-hub-view">
+  <div id="testn-hub-view">
     <div class="cgps-hero" style="margin-bottom: 20px;">
       <div>
-        <div class="cgps-hero-tag">NAVISAF · CONTROL DE DOCUMENTOS & VALIDACIÓN</div>
+        <div class="cgps-hero-tag">TEST N · CONTROL DE DOCUMENTOS & VALIDACIÓN</div>
         <h1>PANEL DE MÓDULOS GPS</h1>
         <p>Seleccione el módulo operativo al que desea ingresar.</p>
       </div>
     </div>
 
-    <div class="navisaf-grid">
-      <div class="navisaf-card" id="btn-mod-certi">
+    <div class="testn-grid">
+      <div class="testn-card" id="btn-mod-certi">
         <h2>CERTI GPS</h2>
         <p>Generación de Anexo N°01 en Word y solicitudes para el Área Legal.</p>
       </div>
 
-      <div class="navisaf-card" id="btn-mod-valid">
+      <div class="testn-card" id="btn-mod-valid">
         <h2>VALIDACIÓN DE VARIABLES</h2>
         <p>Edición masiva e individual en Modo Seguro, visualización de grupos, fecha de instalación y parámetros XML (5/5).</p>
       </div>
 
-      <div class="navisaf-card" id="btn-mod-master">
+      <div class="testn-card" id="btn-mod-master">
         <h2>MASTER SWITCH</h2>
         <p>Filtro por fecha de instalación ("Esta Semana al Corte" / Rango Personalizado) y descarga Excel.</p>
       </div>
 
-      <div class="navisaf-card" id="btn-mod-audit">
+      <div class="testn-card" id="btn-mod-audit">
         <h2>AUDITORÍA DE GRUPOS</h2>
         <p>Valida de forma flexible si existen los grupos registrados a partir de pegado de texto masivo.</p>
       </div>
@@ -56,17 +56,17 @@
   </div>
 
   <!-- VISTA 2: CONTENEDOR DE MODULOS OPERATIVOS -->
-  <div id="navisaf-module-view" style="display: none;">
+  <div id="testn-module-view" style="display: none;">
     <div style="margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
-      <button id="navisaf-btn-back" type="button" class="cgps-btn cgps-btn-secondary">← Volver al Panel Principal</button>
-      <span id="navisaf-mod-title" style="font-size: 14px; font-weight: 700; color: #1b4e85;"></span>
+      <button id="testn-btn-back" type="button" class="cgps-btn cgps-btn-secondary">← Volver al Panel Principal</button>
+      <span id="testn-mod-title" style="font-size: 14px; font-weight: 700; color: #1b4e85;"></span>
     </div>
 
     <!-- Módulo Certificado GPS -->
     <div id="sec-certigps" style="display: none;">
       <div class="cgps-hero">
         <div>
-          <div class="cgps-hero-tag">NAVISAF · CONTROL DE DOCUMENTOS</div>
+          <div class="cgps-hero-tag">TEST N · CONTROL DE DOCUMENTOS</div>
           <h1>Certificado GPS</h1>
           <p>Seleccione los activos de la base de datos para emitir el Anexo N°01 formal en Word.</p>
         </div>
@@ -82,7 +82,7 @@
     <div id="sec-validacion" style="display: none;">
       <div class="cgps-hero">
         <div>
-          <div class="cgps-hero-tag">NAVISAF · AUDITORÍA Y MODO SEGURO</div>
+          <div class="cgps-hero-tag">TEST N · AUDITORÍA Y MODO SEGURO</div>
           <h1>Validación de Variables GPS</h1>
           <p>Modo seguro: GET → Fusionar Atributos → SET → GET Verificación.</p>
         </div>
@@ -93,7 +93,7 @@
     <div id="sec-master" style="display: none;">
       <div class="cgps-hero">
         <div>
-          <div class="cgps-hero-tag">NAVISAF · MASTER SWITCH DIVEMOTOR</div>
+          <div class="cgps-hero-tag">TEST N · MASTER SWITCH DIVEMOTOR</div>
           <h1>Master Switch Camiones</h1>
           <p>Filtre por fecha de instalación y exporte el reporte oficial en Excel.</p>
         </div>
@@ -126,7 +126,7 @@
     <div id="sec-audit" style="display: none;">
       <div class="cgps-hero">
         <div>
-          <div class="cgps-hero-tag">NAVISAF · VALIDACIÓN DE ARBOL DE GRUPOS</div>
+          <div class="cgps-hero-tag">TEST N · VALIDACIÓN DE ARBOL DE GRUPOS</div>
           <h1>Auditoría de Grupos por Texto Masivo</h1>
           <p>Pegue el texto continuo de observaciones/clientes para verificar si el grupo existe en Geotab.</p>
         </div>
@@ -315,8 +315,8 @@
     .cgps-hero h1 { margin: 0 0 4px 0; font-size: 20px; font-weight: 700; color: #ffffff !important; }
     .cgps-hero p { margin: 0; font-size: 12px; opacity: 0.9; line-height: 1.3; color: #ffffff !important; }
     
-    .navisaf-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; width: 100%; margin-top: 10px; }
-    .navisaf-card {
+    .testn-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; width: 100%; margin-top: 10px; }
+    .testn-card {
       background: #ffffff !important;
       border: 2px solid #cbd5e1 !important;
       border-radius: 12px !important;
@@ -331,9 +331,9 @@
       min-height: 150px !important;
       box-shadow: 0 2px 4px rgba(0,0,0,0.04) !important;
     }
-    .navisaf-card:hover { border-color: #1b4e85 !important; transform: translateY(-3px) !important; box-shadow: 0 8px 16px rgba(27, 78, 133, 0.12) !important; }
-    .navisaf-card h2 { font-size: 17px !important; color: #1b4e85 !important; font-weight: 700 !important; margin: 0 0 8px 0 !important; text-transform: uppercase !important; }
-    .navisaf-card p { font-size: 12px !important; color: #64748b !important; margin: 0 !important; }
+    .testn-card:hover { border-color: #1b4e85 !important; transform: translateY(-3px) !important; box-shadow: 0 8px 16px rgba(27, 78, 133, 0.12) !important; }
+    .testn-card h2 { font-size: 17px !important; color: #1b4e85 !important; font-weight: 700 !important; margin: 0 0 8px 0 !important; text-transform: uppercase !important; }
+    .testn-card p { font-size: 12px !important; color: #64748b !important; margin: 0 !important; }
     
     .cgps-btn { padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; white-space: nowrap; transition: all 0.2s; }
     .cgps-btn-white { background-color: #ffffff !important; color: #1b4e85 !important; }
@@ -371,7 +371,7 @@
     .badge-audit-warn { background-color: #fee2e2; color: #b91c1c; padding: 3px 8px; border-radius: 4px; font-weight: 700; border: 1px solid #fca5a5; display: inline-block; }
 
     @media (max-width: 768px) {
-      .navisaf-grid { grid-template-columns: 1fr !important; }
+      .testn-grid { grid-template-columns: 1fr !important; }
       .cgps-kpi-grid { grid-template-columns: repeat(2, 1fr) !important; }
     }
   `;
@@ -384,24 +384,25 @@
 window.geotab = window.geotab || {};
 window.geotab.addin = window.geotab.addin || {};
 
-window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
+// REGISTRO OFICIAL DE ADD-IN EN GEOTAB CON NOMBRE "Test N"
+window.geotab.addin["Test N"] = function (api, state, callback) {
   'use strict';
 
   var PASS_CORRECTA = "3219878";
   
-  document.getElementById('navisaf-btn-login').addEventListener('click', function() {
-    var val = document.getElementById('navisaf-pass-input').value;
+  document.getElementById('testn-btn-login').addEventListener('click', function() {
+    var val = document.getElementById('testn-pass-input').value;
     if (val === PASS_CORRECTA) {
-      document.getElementById('navisaf-login-overlay').style.display = 'none';
+      document.getElementById('testn-login-overlay').style.display = 'none';
       document.getElementById('cgps-root').style.display = 'block';
     } else {
-      document.getElementById('navisaf-login-err').textContent = "Contraseña incorrecta";
+      document.getElementById('testn-login-err').textContent = "Contraseña incorrecta";
     }
   });
 
-  document.getElementById('navisaf-pass-input').addEventListener('keypress', function(e) {
+  document.getElementById('testn-pass-input').addEventListener('keypress', function(e) {
     if (e.key === 'Enter') {
-      document.getElementById('navisaf-btn-login').click();
+      document.getElementById('testn-btn-login').click();
     }
   });
 
@@ -599,14 +600,14 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     highlightKpiCard('kpi-card-1');
 
     if (mod === 'hub') {
-      $('navisaf-hub-view').style.display = 'block';
-      $('navisaf-module-view').style.display = 'none';
+      $('testn-hub-view').style.display = 'block';
+      $('testn-module-view').style.display = 'none';
     } else {
-      $('navisaf-hub-view').style.display = 'none';
-      $('navisaf-module-view').style.display = 'block';
+      $('testn-hub-view').style.display = 'none';
+      $('testn-module-view').style.display = 'block';
 
       if (mod === 'certi') {
-        $('navisaf-mod-title').textContent = 'MÓDULO: CERTIFICADO GPS';
+        $('testn-mod-title').textContent = 'MÓDULO: CERTIFICADO GPS';
         $('sec-certigps').style.display = 'block';
         $('sec-validacion').style.display = 'none';
         $('sec-master').style.display = 'none';
@@ -620,7 +621,7 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
         renderHeader();
         renderList();
       } else if (mod === 'valid') {
-        $('navisaf-mod-title').textContent = 'MÓDULO: VALIDACIÓN DE VARIABLES';
+        $('testn-mod-title').textContent = 'MÓDULO: VALIDACIÓN DE VARIABLES';
         $('sec-certigps').style.display = 'none';
         $('sec-validacion').style.display = 'block';
         $('sec-master').style.display = 'none';
@@ -634,7 +635,7 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
         renderHeader();
         renderList();
       } else if (mod === 'master') {
-        $('navisaf-mod-title').textContent = 'MÓDULO: MASTER SWITCH DIVEMOTOR';
+        $('testn-mod-title').textContent = 'MÓDULO: MASTER SWITCH DIVEMOTOR';
         $('sec-certigps').style.display = 'none';
         $('sec-validacion').style.display = 'none';
         $('sec-master').style.display = 'block';
@@ -648,7 +649,7 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
         renderHeader();
         renderList();
       } else if (mod === 'audit') {
-        $('navisaf-mod-title').textContent = 'MÓDULO: AUDITORÍA DE ARBOL DE GRUPOS';
+        $('testn-mod-title').textContent = 'MÓDULO: AUDITORÍA DE ARBOL DE GRUPOS';
         $('sec-certigps').style.display = 'none';
         $('sec-validacion').style.display = 'none';
         $('sec-master').style.display = 'none';
@@ -785,7 +786,6 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     updateKPIs();
   }
 
-  // LIMPIEZA RIGUROSA Y NORMALIZACIÓN DE NOMBRES
   function cleanLegalName(str) {
     if (!str) return '';
     return str.toUpperCase()
@@ -796,7 +796,6 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
       .trim();
   }
 
-  // AUDITORÍA FLEXIBLE DEL ÁRBOL DE GRUPOS DE GEOTAB
   function executeGroupAudit() {
     var rawText = $('cgps-audit-input').value.trim();
     if (!rawText) { setMsg('Ingrese el texto a auditar.', true); return; }
@@ -877,7 +876,6 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     setMsg('Auditoría del árbol de grupos finalizada.');
   }
 
-  // APLICAR CAMBIOS SEGUROS A GEOTAB (API REAL: GET -> FUSIONAR -> SET -> GET VERIF)
   function applySafeDeviceUpdate(targetRows, field, newValue, labelName) {
     if (!targetRows || !targetRows.length) {
       setMsg('No hay activos seleccionados para actualizar.', true);
@@ -1201,6 +1199,25 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
   function load() {
     setMsg('Cargando activos de la base de datos…');
     var nowIso = new Date().toISOString();
+
+    // Verificación adicional de nivel Administrador
+    if (state && typeof state.getSession === 'function') {
+      var session = state.getSession();
+      if (session && session.userName) {
+        callApi(api, 'Get', { typeName: 'User', search: { name: session.userName } }).then(function(usr) {
+          if (usr && usr[0]) {
+            var secGroups = usr[0].securityGroups || [];
+            var isAdmin = secGroups.some(function(sg) {
+              return sg.id === 'GroupEverythingId' || sg.id === 'SecurityAdminId' || (sg.name && /admin/i.test(sg.name));
+            });
+            if (!isAdmin) {
+              document.body.innerHTML = "<div style='display:flex; justify-content:center; align-items:center; height:100vh; background-color:#f4f7fc;'><div style='text-align:center; padding:30px; background:#fff; border-radius:10px; border:1px solid #cbd5e1;'><h3 style='color:#b91c1c;'>Acceso Denegado</h3><p style='color:#64748b; font-size:13px;'>Este Add-In está reservado exclusivamente para usuarios con perfil Administrador.</p></div></div>";
+              return;
+            }
+          }
+        }).catch(function() {});
+      }
+    }
 
     return Promise.all([
       callApi(api, 'Get', { typeName: 'Device', search: { fromDate: nowIso } }),
