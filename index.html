@@ -225,9 +225,6 @@
         <input type="text" id="cgps-filter" class="cgps-input" placeholder="Buscar..." style="width: 260px;">
         <button id="cgps-sel-vis" type="button" class="cgps-btn cgps-btn-outline">Seleccionar visibles</button>
         <button id="cgps-sel-none" type="button" class="cgps-btn cgps-btn-outline">Limpiar selección</button>
-        
-        <!-- BOTÓN PRINCIPAL PARA GUARDAR TODOS LOS CAMBIOS DE LA TABLA -->
-        <button id="cgps-btn-save-table-changes" type="button" class="cgps-btn" style="background-color: #0284c7; color: #ffffff; font-weight: 700; margin-left: auto; border: none; padding: 7px 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">💾 Guardar Cambios Editados</button>
       </div>
 
       <!-- Edición Masiva de Grupos -->
@@ -300,15 +297,16 @@
 
 <script>
 (function checkAllowedEnvironment() {
-  var isIframe = (window !== window.top);
-  var ref = (document.referrer || "").toLowerCase();
-  var isGeotab = ref.indexOf("geotab.com") >= 0 || ref.indexOf("mygeotab") >= 0;
-  var isCopiloto = ref.indexOf("copiloto.app") >= 0;
+  try {
+    var isIframe = (window !== window.top);
+    var ref = (document.referrer || "").toLowerCase();
+    var isGeotab = ref.indexOf("geotab.com") >= 0 || ref.indexOf("mygeotab") >= 0;
+    var isCopiloto = ref.indexOf("copiloto.app") >= 0;
 
-  if (!isIframe && !isGeotab && !isCopiloto) {
-    document.body.innerHTML = "<div style='display:flex; justify-content:center; align-items:center; height:100vh; background-color:#f4f7fc;'><div style='text-align:center; padding:30px; background:#fff; border-radius:10px; border:1px solid #cbd5e1;'><h3 style='color:#b91c1c;'>Acceso Restringido</h3><p style='color:#64748b; font-size:13px;'>Este módulo solo puede ser ejecutado dentro de las plataformas autorizadas.</p></div></div>";
-    throw new Error("Acceso denegado fuera de entorno autorizado.");
-  }
+    if (!isIframe && !isGeotab && !isCopiloto) {
+      document.body.innerHTML = "<div style='display:flex; justify-content:center; align-items:center; height:100vh; background-color:#f4f7fc;'><div style='text-align:center; padding:30px; background:#fff; border-radius:10px; border:1px solid #cbd5e1;'><h3 style='color:#b91c1c;'>Acceso Restringido</h3><p style='color:#64748b; font-size:13px;'>Este módulo solo puede ser ejecutado dentro de las plataformas autorizadas.</p></div></div>";
+    }
+  } catch(e) {}
 })();
 
 (function injectStyles() {
@@ -406,21 +404,27 @@ var addInConstructor = function (api, state, callback) {
 
   var PASS_CORRECTA = "3219878";
   
-  document.getElementById('testn-btn-login').addEventListener('click', function() {
-    var val = document.getElementById('testn-pass-input').value;
-    if (val === PASS_CORRECTA) {
-      document.getElementById('testn-login-overlay').style.display = 'none';
-      document.getElementById('cgps-root').style.display = 'block';
-    } else {
-      document.getElementById('testn-login-err').textContent = "Contraseña incorrecta";
-    }
-  });
+  var loginBtn = document.getElementById('testn-btn-login');
+  if (loginBtn) {
+    loginBtn.addEventListener('click', function() {
+      var val = document.getElementById('testn-pass-input').value;
+      if (val === PASS_CORRECTA) {
+        document.getElementById('testn-login-overlay').style.display = 'none';
+        document.getElementById('cgps-root').style.display = 'block';
+      } else {
+        document.getElementById('testn-login-err').textContent = "Contraseña incorrecta";
+      }
+    });
+  }
 
-  document.getElementById('testn-pass-input').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-      document.getElementById('testn-btn-login').click();
-    }
-  });
+  var passInput = document.getElementById('testn-pass-input');
+  if (passInput) {
+    passInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        document.getElementById('testn-btn-login').click();
+      }
+    });
+  }
 
   var REQUIRED_PARAMS = [
     { name: "Enable Gps Altitude Logging", offset: "181", bytesBase64: "CA==", bytesHex: "08" },
@@ -431,7 +435,6 @@ var addInConstructor = function (api, state, callback) {
   ];
 
   var all = [], groupsById = {}, propsById = {}, selected = {}, rawDevices = [];
-  var editedRowsMap = {}; // REGISTRA EDICIONES REALIZADAS EN CELDAS DE TEXTO
   var activeBulkTokens = [];
   var activeModule = 'hub';
   var activeKpiFilter = 'all';
@@ -559,6 +562,7 @@ var addInConstructor = function (api, state, callback) {
 
   function populateGroupDropdown() {
     var selectElem = $('cgps-group-select');
+    if (!selectElem) return;
     selectElem.innerHTML = '<option value="">-- Seleccionar Grupo del Árbol --</option>';
     
     var sortedGroups = Object.keys(groupsById).map(function(k) { return groupsById[k]; })
@@ -584,7 +588,7 @@ var addInConstructor = function (api, state, callback) {
 
   function updateKPIs() {
     var selCount = Object.keys(selected).filter(function (k) { return selected[k]; }).length;
-    $('kpi-total').textContent = all.length;
+    if ($('kpi-total')) $('kpi-total').textContent = all.length;
 
     var withSn = 0, noSn = 0;
     all.forEach(function(r) {
@@ -592,16 +596,17 @@ var addInConstructor = function (api, state, callback) {
       else noSn++;
     });
 
-    $('kpi-with-sn').textContent = withSn;
-    $('kpi-no-sn').textContent = noSn;
+    if ($('kpi-with-sn')) $('kpi-with-sn').textContent = withSn;
+    if ($('kpi-no-sn')) $('kpi-no-sn').textContent = noSn;
 
     if (activeModule === 'certi' || activeModule === 'master') {
-      $('kpi-title-2').textContent = "SELECCIONADOS";
-      $('kpi-val-2').textContent = selCount;
-      $('kpi-card-4').style.display = 'none';
-      $('kpi-card-5').style.display = 'none';
-      $('kpi-card-6').style.display = 'none';
-      document.querySelector('.cgps-kpi-grid').style.gridTemplateColumns = 'repeat(4, 1fr)';
+      if ($('kpi-title-2')) $('kpi-title-2').textContent = "SELECCIONADOS";
+      if ($('kpi-val-2')) $('kpi-val-2').textContent = selCount;
+      if ($('kpi-card-4')) $('kpi-card-4').style.display = 'none';
+      if ($('kpi-card-5')) $('kpi-card-5').style.display = 'none';
+      if ($('kpi-card-6')) $('kpi-card-6').style.display = 'none';
+      var kpiGrid = document.querySelector('.cgps-kpi-grid');
+      if (kpiGrid) kpiGrid.style.gridTemplateColumns = 'repeat(4, 1fr)';
     } else if (activeModule === 'valid') {
       var countFull = 0, countEmpty = 0, countPartial = 0;
       all.forEach(function (r) {
@@ -610,17 +615,18 @@ var addInConstructor = function (api, state, callback) {
         else countPartial++;
       });
 
-      $('kpi-title-2').textContent = "SELECCIONADOS";
-      $('kpi-val-2').textContent = selCount;
+      if ($('kpi-title-2')) $('kpi-title-2').textContent = "SELECCIONADOS";
+      if ($('kpi-val-2')) $('kpi-val-2').textContent = selCount;
       
-      $('kpi-val-4').textContent = countFull;
-      $('kpi-val-5').textContent = countEmpty;
-      $('kpi-val-6').textContent = countPartial;
+      if ($('kpi-val-4')) $('kpi-val-4').textContent = countFull;
+      if ($('kpi-val-5')) $('kpi-val-5').textContent = countEmpty;
+      if ($('kpi-val-6')) $('kpi-val-6').textContent = countPartial;
 
-      $('kpi-card-4').style.display = 'block';
-      $('kpi-card-5').style.display = 'block';
-      $('kpi-card-6').style.display = 'block';
-      document.querySelector('.cgps-kpi-grid').style.gridTemplateColumns = 'repeat(7, 1fr)';
+      if ($('kpi-card-4')) $('kpi-card-4').style.display = 'block';
+      if ($('kpi-card-5')) $('kpi-card-5').style.display = 'block';
+      if ($('kpi-card-6')) $('kpi-card-6').style.display = 'block';
+      var kpiGrid = document.querySelector('.cgps-kpi-grid');
+      if (kpiGrid) kpiGrid.style.gridTemplateColumns = 'repeat(7, 1fr)';
     }
   }
 
@@ -633,86 +639,86 @@ var addInConstructor = function (api, state, callback) {
     }
   }
 
-  function setMsg(t, err) { var m = $('cgps-msg'); m.textContent = t || ''; m.className = 'cgps-msg' + (err ? ' cgps-err' : ''); }
+  function setMsg(t, err) { var m = $('cgps-msg'); if (m) { m.textContent = t || ''; m.className = 'cgps-msg' + (err ? ' cgps-err' : ''); } }
 
   function switchView(mod) {
     activeModule = mod;
     activeKpiFilter = 'all';
     activeDateRange = null;
     selected = {};
-    editedRowsMap = {};
     activeBulkTokens = [];
-    $('cgps-bulk-input').value = '';
-    $('cgps-filter').value = '';
-    $('cgps-filter-field').value = 'all';
-    $('cgps-legal-box').style.display = 'none';
+    if ($('cgps-bulk-input')) $('cgps-bulk-input').value = '';
+    if ($('cgps-filter')) $('cgps-filter').value = '';
+    if ($('cgps-filter-field')) $('cgps-filter-field').value = 'all';
+    if ($('cgps-legal-box')) $('cgps-legal-box').style.display = 'none';
     highlightKpiCard('kpi-card-1');
 
     if (mod === 'hub') {
-      $('testn-hub-view').style.display = 'block';
-      $('testn-module-view').style.display = 'none';
+      if ($('testn-hub-view')) $('testn-hub-view').style.display = 'block';
+      if ($('testn-module-view')) $('testn-module-view').style.display = 'none';
     } else {
-      $('testn-hub-view').style.display = 'none';
-      $('testn-module-view').style.display = 'block';
+      if ($('testn-hub-view')) $('testn-hub-view').style.display = 'none';
+      if ($('testn-module-view')) $('testn-module-view').style.display = 'block';
 
       if (mod === 'certi') {
-        $('testn-mod-title').textContent = 'MÓDULO: CERTIFICADO GPS';
-        $('sec-certigps').style.display = 'block';
-        $('sec-validacion').style.display = 'none';
-        $('sec-master').style.display = 'none';
-        $('sec-audit').style.display = 'none';
-        $('sec-kpi-container').style.display = 'grid';
-        $('sec-bulk-container').style.display = 'block';
-        $('sec-controls-container').style.display = 'block';
-        $('sec-table-container').style.display = 'block';
-        $('mass-controls-certi').style.display = 'flex';
-        $('mass-controls-valid').style.display = 'none';
+        if ($('testn-mod-title')) $('testn-mod-title').textContent = 'MÓDULO: CERTIFICADO GPS';
+        if ($('sec-certigps')) $('sec-certigps').style.display = 'block';
+        if ($('sec-validacion')) $('sec-validacion').style.display = 'none';
+        if ($('sec-master')) $('sec-master').style.display = 'none';
+        if ($('sec-audit')) $('sec-audit').style.display = 'none';
+        if ($('sec-kpi-container')) $('sec-kpi-container').style.display = 'grid';
+        if ($('sec-bulk-container')) $('sec-bulk-container').style.display = 'block';
+        if ($('sec-controls-container')) $('sec-controls-container').style.display = 'block';
+        if ($('sec-table-container')) $('sec-table-container').style.display = 'block';
+        if ($('mass-controls-certi')) $('mass-controls-certi').style.display = 'flex';
+        if ($('mass-controls-valid')) $('mass-controls-valid').style.display = 'none';
         renderHeader();
         renderList();
       } else if (mod === 'valid') {
-        $('testn-mod-title').textContent = 'MÓDULO: VALIDACIÓN DE VARIABLES';
-        $('sec-certigps').style.display = 'none';
-        $('sec-validacion').style.display = 'block';
-        $('sec-master').style.display = 'none';
-        $('sec-audit').style.display = 'none';
-        $('sec-kpi-container').style.display = 'grid';
-        $('sec-bulk-container').style.display = 'block';
-        $('sec-controls-container').style.display = 'block';
-        $('sec-table-container').style.display = 'block';
-        $('mass-controls-certi').style.display = 'none';
-        $('mass-controls-valid').style.display = 'flex';
+        if ($('testn-mod-title')) $('testn-mod-title').textContent = 'MÓDULO: VALIDACIÓN DE VARIABLES';
+        if ($('sec-certigps')) $('sec-certigps').style.display = 'none';
+        if ($('sec-validacion')) $('sec-validacion').style.display = 'block';
+        if ($('sec-master')) $('sec-master').style.display = 'none';
+        if ($('sec-audit')) $('sec-audit').style.display = 'none';
+        if ($('sec-kpi-container')) $('sec-kpi-container').style.display = 'grid';
+        if ($('sec-bulk-container')) $('sec-bulk-container').style.display = 'block';
+        if ($('sec-controls-container')) $('sec-controls-container').style.display = 'block';
+        if ($('sec-table-container')) $('sec-table-container').style.display = 'block';
+        if ($('mass-controls-certi')) $('mass-controls-certi').style.display = 'none';
+        if ($('mass-controls-valid')) $('mass-controls-valid').style.display = 'flex';
         renderHeader();
         renderList();
       } else if (mod === 'master') {
-        $('testn-mod-title').textContent = 'MÓDULO: MASTER SWITCH DIVEMOTOR';
-        $('sec-certigps').style.display = 'none';
-        $('sec-validacion').style.display = 'none';
-        $('sec-master').style.display = 'block';
-        $('sec-audit').style.display = 'none';
-        $('sec-kpi-container').style.display = 'grid';
-        $('sec-bulk-container').style.display = 'block';
-        $('sec-controls-container').style.display = 'block';
-        $('sec-table-container').style.display = 'block';
-        $('mass-controls-certi').style.display = 'none';
-        $('mass-controls-valid').style.display = 'none';
+        if ($('testn-mod-title')) $('testn-mod-title').textContent = 'MÓDULO: MASTER SWITCH DIVEMOTOR';
+        if ($('sec-certigps')) $('sec-certigps').style.display = 'none';
+        if ($('sec-validacion')) $('sec-validacion').style.display = 'none';
+        if ($('sec-master')) $('sec-master').style.display = 'block';
+        if ($('sec-audit')) $('sec-audit').style.display = 'none';
+        if ($('sec-kpi-container')) $('sec-kpi-container').style.display = 'grid';
+        if ($('sec-bulk-container')) $('sec-bulk-container').style.display = 'block';
+        if ($('sec-controls-container')) $('sec-controls-container').style.display = 'block';
+        if ($('sec-table-container')) $('sec-table-container').style.display = 'block';
+        if ($('mass-controls-certi')) $('mass-controls-certi').style.display = 'none';
+        if ($('mass-controls-valid')) $('mass-controls-valid').style.display = 'none';
         renderHeader();
         renderList();
       } else if (mod === 'audit') {
-        $('testn-mod-title').textContent = 'MÓDULO: AUDITORÍA DE ARBOL DE GRUPOS';
-        $('sec-certigps').style.display = 'none';
-        $('sec-validacion').style.display = 'none';
-        $('sec-master').style.display = 'none';
-        $('sec-audit').style.display = 'block';
-        $('sec-kpi-container').style.display = 'none';
-        $('sec-bulk-container').style.display = 'none';
-        $('sec-controls-container').style.display = 'none';
-        $('sec-table-container').style.display = 'none';
+        if ($('testn-mod-title')) $('testn-mod-title').textContent = 'MÓDULO: AUDITORÍA DE ARBOL DE GRUPOS';
+        if ($('sec-certigps')) $('sec-certigps').style.display = 'none';
+        if ($('sec-validacion')) $('sec-validacion').style.display = 'none';
+        if ($('sec-master')) $('sec-master').style.display = 'none';
+        if ($('sec-audit')) $('sec-audit').style.display = 'block';
+        if ($('sec-kpi-container')) $('sec-kpi-container').style.display = 'none';
+        if ($('sec-bulk-container')) $('sec-bulk-container').style.display = 'none';
+        if ($('sec-controls-container')) $('sec-controls-container').style.display = 'none';
+        if ($('sec-table-container')) $('sec-table-container').style.display = 'none';
       }
     }
   }
 
   function renderHeader() {
     var head = $('cgps-table-head');
+    if (!head) return;
     if (activeModule === 'certi') {
       head.innerHTML = '<tr><th style="width: 36px; text-align: center;"></th><th style="width: 120px;">Placa</th><th style="width: 160px;">VIN</th><th style="width: 100px;">Activo Desde</th><th style="width: 220px;">Razón Social</th><th style="width: 120px;">RUC</th><th>Grupos</th></tr>';
     } else if (activeModule === 'master') {
@@ -761,8 +767,8 @@ var addInConstructor = function (api, state, callback) {
       if (!matchBulk) return false;
     }
 
-    var fieldSel = $('cgps-filter-field').value;
-    var q = $('cgps-filter').value.trim().toLowerCase();
+    var fieldSel = $('cgps-filter-field') ? $('cgps-filter-field').value : 'all';
+    var q = $('cgps-filter') ? $('cgps-filter').value.trim().toLowerCase() : '';
     
     if (q) {
       if (fieldSel === 'all') {
@@ -829,11 +835,12 @@ var addInConstructor = function (api, state, callback) {
       }
     });
 
-    $('cgps-listbody').innerHTML = html || '<tr><td colspan="13" style="text-align:center; padding: 14px; color: #64748b;">Sin resultados coincidentes para la combinación de filtros aplicada</td></tr>';
+    if ($('cgps-listbody')) {
+      $('cgps-listbody').innerHTML = html || '<tr><td colspan="13" style="text-align:center; padding: 14px; color: #64748b;">Sin resultados coincidentes para la combinación de filtros aplicada</td></tr>';
+    }
     updateKPIs();
   }
 
-  // GESTIÓN SEGURA DE GRUPOS (ADD / REMOVE) EN GEOTAB
   function updateDeviceGroupsSafe(targets, groupObj, action) {
     if (!targets.length) { setMsg('Seleccione al menos un activo para modificar grupos.', true); return; }
 
@@ -868,86 +875,6 @@ var addInConstructor = function (api, state, callback) {
       load();
     }).catch(function(err) {
       setMsg('❌ Error al actualizar grupos en Geotab: ' + (err.message || err), true);
-    });
-  }
-
-  // GUARDADO EXPLÍCITO DE CAMBIOS EDITADOS EN TABLA (BOTÓN DE GUARDAR)
-  function saveAllTableChanges() {
-    var deviceIds = Object.keys(editedRowsMap);
-    if (!deviceIds.length) {
-      setMsg('No hay cambios pendientes por guardar en la tabla.', true);
-      return;
-    }
-
-    if (!window.confirm("💾 MODO SEGURO: ¿Desea guardar definitivamente los cambios realizados en " + deviceIds.length + " activo(s) en Geotab?")) return;
-
-    setMsg('🛡️ Guardando ' + deviceIds.length + ' activo(s) modificados en Geotab...');
-
-    var regexMap = {
-      razon: /raz[o\u00F3]n\s*social|empresa|cliente/i,
-      ruc: /ruc|taxid/i,
-      estadoProvincia: /estado|provincia/i,
-      anualidad: /anualidad|a\u00F1o/i,
-      tipoVehiculo: /tipo|type/i
-    };
-
-    var completed = 0;
-
-    var promises = deviceIds.map(function(devId) {
-      var changes = editedRowsMap[devId];
-      return callApi(api, 'Get', { typeName: 'Device', search: { id: devId } }).then(function(resGet) {
-        if (!resGet || !resGet[0]) return;
-        var liveDevice = resGet[0];
-
-        Object.keys(changes).forEach(function(field) {
-          var newVal = changes[field];
-          if (field === 'nombreActivo') {
-            liveDevice.name = newVal;
-          } else if (field === 'placa') {
-            liveDevice.licensePlate = newVal;
-          } else if (regexMap[field]) {
-            var propRegex = regexMap[field];
-            var propId = findPropertyId(propRegex);
-
-            if (propId) {
-              var customProps = liveDevice.customProperties || [];
-              var foundIdx = -1;
-
-              for (var i = 0; i < customProps.length; i++) {
-                var pInfo = propsById[customProps[i].property && customProps[i].property.id];
-                if (pInfo && propRegex.test(pInfo.name)) {
-                  foundIdx = i;
-                  break;
-                }
-              }
-
-              if (foundIdx >= 0) {
-                customProps[foundIdx].value = newVal;
-              } else {
-                customProps.push({
-                  property: { id: propId },
-                  value: newVal
-                });
-              }
-              liveDevice.customProperties = customProps;
-            }
-          }
-        });
-
-        return callApi(api, 'Set', { typeName: 'Device', entity: liveDevice }).then(function() {
-          return callApi(api, 'Get', { typeName: 'Device', search: { id: devId } }).then(function(verifGet) {
-            if (verifGet && verifGet[0]) completed++;
-          });
-        });
-      });
-    });
-
-    Promise.all(promises).then(function() {
-      editedRowsMap = {};
-      setMsg('✅ Cambios guardados correctamente en Geotab para ' + completed + ' activo(s).');
-      load();
-    }).catch(function(err) {
-      setMsg('❌ Error al guardar cambios en Geotab: ' + (err.message || err), true);
     });
   }
 
@@ -1104,8 +1031,8 @@ var addInConstructor = function (api, state, callback) {
   }
 
   function filterCustomDateRange() {
-    var fromVal = $('master-date-from').value;
-    var toVal = $('master-date-to').value;
+    var fromVal = $('master-date-from') ? $('master-date-from').value : '';
+    var toVal = $('master-date-to') ? $('master-date-to').value : '';
 
     if (!fromVal || !toVal) {
       setMsg('Por favor ingrese tanto la fecha de inicio (Desde) como la fecha de fin (Hasta).', true);
@@ -1137,8 +1064,8 @@ var addInConstructor = function (api, state, callback) {
 
   function resetDateFilters() {
     activeDateRange = null;
-    $('master-date-from').value = '';
-    $('master-date-to').value = '';
+    if ($('master-date-from')) $('master-date-from').value = '';
+    if ($('master-date-to')) $('master-date-to').value = '';
     renderList();
     setMsg('Filtro de fechas removido: Mostrando unidades según los filtros de tabla activos.');
   }
@@ -1205,8 +1132,8 @@ var addInConstructor = function (api, state, callback) {
 
     txt += "\nQuedamos a la espera de la confirmación.\nSaludos cordiales.";
 
-    $('cgps-legal-text').value = txt;
-    $('cgps-legal-box').style.display = 'block';
+    if ($('cgps-legal-text')) $('cgps-legal-text').value = txt;
+    if ($('cgps-legal-box')) $('cgps-legal-box').style.display = 'block';
     setMsg('Texto para el Área Legal generado abajo.');
   }
 
@@ -1240,16 +1167,16 @@ var addInConstructor = function (api, state, callback) {
   function applyMassField(field, inputId, label) {
     var selIds = Object.keys(selected).filter(function (k) { return selected[k]; });
     if (!selIds.length) { setMsg('Seleccione al menos un activo.', true); return; }
-    var massVal = $(inputId).value.trim();
+    var massVal = $(inputId) ? $(inputId).value.trim() : '';
 
-    if (!window.confirm("¿Está seguro de modificar masivamente [" + label + "] para " + selIds.length + " activo(s) en Geotab?")) return;
+    if (!window.confirm("¿Desea aplicar y guardar la modificación masiva [" + label + "] para " + selIds.length + " activo(s) en Geotab?")) return;
 
     var targets = all.filter(function(r) { return selected[r.id]; });
     applySafeDeviceUpdate(targets, field, massVal, label);
   }
 
   function processBulkInput() {
-    var rawText = $('cgps-bulk-input').value.trim();
+    var rawText = $('cgps-bulk-input') ? $('cgps-bulk-input').value.trim() : '';
     if (!rawText) { setMsg('Por favor pegue una lista de unidades.', true); return; }
 
     activeBulkTokens = rawText.split(/[\n\r,;\t]+/).map(function (s) { return s.trim().toLowerCase(); }).filter(function (s) { return s.length > 0; });
@@ -1309,126 +1236,186 @@ var addInConstructor = function (api, state, callback) {
   }
 
   // EVENTOS AUDITORÍA DE GRUPOS
-  $('cgps-btn-exec-audit').addEventListener('click', executeGroupAudit);
-  $('cgps-btn-clear-audit').addEventListener('click', function() {
-    $('cgps-audit-input').value = '';
-    $('cgps-audit-results-card').style.display = 'none';
+  if ($('cgps-btn-exec-audit')) $('cgps-btn-exec-audit').addEventListener('click', function() {
+    var rawText = $('cgps-audit-input') ? $('cgps-audit-input').value.trim() : '';
+    if (!rawText) { setMsg('Ingrese el texto a auditar.', true); return; }
+
+    var cleanText = rawText.replace(/^Observaciones\s*:\s*/i, '');
+    var groupList = [];
+    Object.keys(groupsById).forEach(function(gid) {
+      var g = groupsById[gid];
+      if (g && g.name && !/^Group/.test(g.id)) {
+        groupList.push({ id: g.id, name: g.name.trim(), cleanName: g.name.trim().toUpperCase() });
+      }
+    });
+
+    var clientCandidates = [];
+    var chunks = cleanText.split(/[\n\r]+/);
+    chunks.forEach(function(chunk) {
+      var subParts = chunk.split(/\s*-\s*/);
+      for (var i = 0; i < subParts.length; i++) {
+        var part = subParts[i].trim();
+        if (/^[A-Z0-9]{15,17}/i.test(part) || /^NO\s+INDICA/i.test(part)) continue;
+        var candidateName = part.replace(/\s+[A-Z0-9]{15,17}.*$/i, '').trim();
+        if (candidateName.length >= 3 && !clientCandidates.includes(candidateName)) {
+          clientCandidates.push(candidateName);
+        }
+      }
+    });
+
+    var resultsHtml = '';
+    clientCandidates.forEach(function(rawClient) {
+      var cleanClient = rawClient.toUpperCase();
+      var matchedGroup = null;
+      for (var i = 0; i < groupList.length; i++) {
+        if (groupList[i].cleanName.indexOf(cleanClient) >= 0 || cleanClient.indexOf(groupList[i].cleanName) >= 0) {
+          matchedGroup = groupList[i].name;
+          break;
+        }
+      }
+      var statusBadge = matchedGroup ? '<span class="badge-audit-ok">Grupo Existe</span>' : '<span class="badge-audit-warn">Grupo No Creado</span>';
+      resultsHtml += '<tr><td><b>' + htmlEsc(rawClient) + '</b></td><td>' + htmlEsc(matchedGroup || 'Sin Grupo Coincidente') + '</td><td>' + statusBadge + '</td></tr>';
+    });
+
+    if ($('cgps-audit-listbody')) $('cgps-audit-listbody').innerHTML = resultsHtml || '<tr><td colspan="3" style="text-align:center;">No se detectaron clientes.</td></tr>';
+    if ($('cgps-audit-results-card')) $('cgps-audit-results-card').style.display = 'block';
+    setMsg('Auditoría del árbol de grupos finalizada.');
+  });
+
+  if ($('cgps-btn-clear-audit')) $('cgps-btn-clear-audit').addEventListener('click', function() {
+    if ($('cgps-audit-input')) $('cgps-audit-input').value = '';
+    if ($('cgps-audit-results-card')) $('cgps-audit-results-card').style.display = 'none';
     setMsg('Auditoría de grupos limpiada.');
   });
 
   // EVENTOS CERTI GPS
-  $('cgps-btn-doc').addEventListener('click', generateCertiWord);
-  $('cgps-btn-mail').addEventListener('click', generateCertiLegalText);
-  $('cgps-btn-view').addEventListener('click', function() { switchView('certi'); setMsg('Visualizando tabla de activos.'); });
-  $('cgps-btn-copy-legal').addEventListener('click', function() {
+  if ($('cgps-btn-doc')) $('cgps-btn-doc').addEventListener('click', generateCertiWord);
+  if ($('cgps-btn-mail')) $('cgps-btn-mail').addEventListener('click', generateCertiLegalText);
+  if ($('cgps-btn-view')) $('cgps-btn-view').addEventListener('click', function() { switchView('certi'); setMsg('Visualizando tabla de activos.'); });
+  if ($('cgps-btn-copy-legal')) $('cgps-btn-copy-legal').addEventListener('click', function() {
     var txt = $('cgps-legal-text');
-    txt.select();
-    document.execCommand('copy');
-    setMsg('Texto legal copiado al portapapeles.');
+    if (txt) {
+      txt.select();
+      document.execCommand('copy');
+      setMsg('Texto legal copiado al portapapeles.');
+    }
   });
 
   // EVENTOS MASTER SWITCH
-  $('master-btn-week').addEventListener('click', filterThisWeekToCut);
-  $('master-btn-custom-range').addEventListener('click', filterCustomDateRange);
-  $('master-btn-reset-dates').addEventListener('click', resetDateFilters);
-  $('master-btn-excel').addEventListener('click', exportMasterSwitchExcel);
+  if ($('master-btn-week')) $('master-btn-week').addEventListener('click', filterThisWeekToCut);
+  if ($('master-btn-custom-range')) $('master-btn-custom-range').addEventListener('click', filterCustomDateRange);
+  if ($('master-btn-reset-dates')) $('master-btn-reset-dates').addEventListener('click', resetDateFilters);
+  if ($('master-btn-excel')) $('master-btn-excel').addEventListener('click', exportMasterSwitchExcel);
 
   // EVENTOS KPI
-  $('kpi-card-1').addEventListener('click', function() { activeKpiFilter = 'all'; highlightKpiCard('kpi-card-1'); renderList(); });
-  $('kpi-card-sn').addEventListener('click', function() { activeKpiFilter = (activeKpiFilter === 'withSn') ? 'all' : 'withSn'; highlightKpiCard(activeKpiFilter === 'withSn' ? 'kpi-card-sn' : 'kpi-card-1'); renderList(); });
-  $('kpi-card-nosn').addEventListener('click', function() { activeKpiFilter = (activeKpiFilter === 'noSn') ? 'all' : 'noSn'; highlightKpiCard(activeKpiFilter === 'noSn' ? 'kpi-card-nosn' : 'kpi-card-1'); renderList(); });
-  $('kpi-card-2').addEventListener('click', function() { activeKpiFilter = (activeKpiFilter === 'selected') ? 'all' : 'selected'; highlightKpiCard(activeKpiFilter === 'selected' ? 'kpi-card-2' : 'kpi-card-1'); renderList(); });
+  if ($('kpi-card-1')) $('kpi-card-1').addEventListener('click', function() { activeKpiFilter = 'all'; highlightKpiCard('kpi-card-1'); renderList(); });
+  if ($('kpi-card-sn')) $('kpi-card-sn').addEventListener('click', function() { activeKpiFilter = (activeKpiFilter === 'withSn') ? 'all' : 'withSn'; highlightKpiCard(activeKpiFilter === 'withSn' ? 'kpi-card-sn' : 'kpi-card-1'); renderList(); });
+  if ($('kpi-card-nosn')) $('kpi-card-nosn').addEventListener('click', function() { activeKpiFilter = (activeKpiFilter === 'noSn') ? 'all' : 'noSn'; highlightKpiCard(activeKpiFilter === 'noSn' ? 'kpi-card-nosn' : 'kpi-card-1'); renderList(); });
+  if ($('kpi-card-2')) $('kpi-card-2').addEventListener('click', function() { activeKpiFilter = (activeKpiFilter === 'selected') ? 'all' : 'selected'; highlightKpiCard(activeKpiFilter === 'selected' ? 'kpi-card-2' : 'kpi-card-1'); renderList(); });
 
-  $('kpi-card-4').addEventListener('click', function() { activeKpiFilter = (activeKpiFilter === 'full') ? 'all' : 'full'; highlightKpiCard(activeKpiFilter === 'full' ? 'kpi-card-4' : 'kpi-card-1'); renderList(); });
-  $('kpi-card-5').addEventListener('click', function() { activeKpiFilter = (activeKpiFilter === 'empty') ? 'all' : 'empty'; highlightKpiCard(activeKpiFilter === 'empty' ? 'kpi-card-5' : 'kpi-card-1'); renderList(); });
-  $('kpi-card-6').addEventListener('click', function() { activeKpiFilter = (activeKpiFilter === 'partial') ? 'all' : 'partial'; highlightKpiCard(activeKpiFilter === 'partial' ? 'kpi-card-6' : 'kpi-card-1'); renderList(); });
-
-  // EVENTO DE GUARDADO EXPLÍCITO DE LA TABLA
-  $('cgps-btn-save-table-changes').addEventListener('click', saveAllTableChanges);
+  if ($('kpi-card-4')) $('kpi-card-4').addEventListener('click', function() { activeKpiFilter = (activeKpiFilter === 'full') ? 'all' : 'full'; highlightKpiCard(activeKpiFilter === 'full' ? 'kpi-card-4' : 'kpi-card-1'); renderList(); });
+  if ($('kpi-card-5')) $('kpi-card-5').addEventListener('click', function() { activeKpiFilter = (activeKpiFilter === 'empty') ? 'all' : 'empty'; highlightKpiCard(activeKpiFilter === 'empty' ? 'kpi-card-5' : 'kpi-card-1'); renderList(); });
+  if ($('kpi-card-6')) $('kpi-card-6').addEventListener('click', function() { activeKpiFilter = (activeKpiFilter === 'partial') ? 'all' : 'partial'; highlightKpiCard(activeKpiFilter === 'partial' ? 'kpi-card-6' : 'kpi-card-1'); renderList(); });
 
   // EVENTOS DE GESTIÓN DE GRUPOS MASIVA
-  $('cgps-btn-add-group').addEventListener('click', function() {
-    var grpId = $('cgps-group-select').value;
+  if ($('cgps-btn-add-group')) $('cgps-btn-add-group').addEventListener('click', function() {
+    var grpId = $('cgps-group-select') ? $('cgps-group-select').value : '';
     if (!grpId) { setMsg('Seleccione un grupo del desplegable.', true); return; }
     var targets = all.filter(function(r) { return selected[r.id]; });
     updateDeviceGroupsSafe(targets, groupsById[grpId], 'add');
   });
 
-  $('cgps-btn-remove-group').addEventListener('click', function() {
-    var grpId = $('cgps-group-select').value;
+  if ($('cgps-btn-remove-group')) $('cgps-btn-remove-group').addEventListener('click', function() {
+    var grpId = $('cgps-group-select') ? $('cgps-group-select').value : '';
     if (!grpId) { setMsg('Seleccione un grupo del desplegable.', true); return; }
     var targets = all.filter(function(r) { return selected[r.id]; });
     updateDeviceGroupsSafe(targets, groupsById[grpId], 'remove');
   });
 
   // EVENTO INYECCIÓN SEGURA DE PARÁMETROS
-  $('cgps-btn-inject-params').addEventListener('click', injectMissingParametersSafe);
+  if ($('cgps-btn-inject-params')) $('cgps-btn-inject-params').addEventListener('click', injectMissingParametersSafe);
 
   // NAVEGACIÓN
-  $('btn-mod-certi').addEventListener('click', function() { switchView('certi'); });
-  $('btn-mod-valid').addEventListener('click', function() { switchView('valid'); });
-  $('btn-mod-master').addEventListener('click', function() { switchView('master'); });
-  $('btn-mod-audit').addEventListener('click', function() { switchView('audit'); });
-  $('testn-btn-back').addEventListener('click', function() { switchView('hub'); });
+  if ($('btn-mod-certi')) $('btn-mod-certi').addEventListener('click', function() { switchView('certi'); });
+  if ($('btn-mod-valid')) $('btn-mod-valid').addEventListener('click', function() { switchView('valid'); });
+  if ($('btn-mod-master')) $('btn-mod-master').addEventListener('click', function() { switchView('master'); });
+  if ($('btn-mod-audit')) $('btn-mod-audit').addEventListener('click', function() { switchView('audit'); });
+  if ($('testn-btn-back')) $('testn-btn-back').addEventListener('click', function() { switchView('hub'); });
 
   // EDICIÓN MASIVA EN CERTI
-  $('cgps-btn-apply-mass-cert').addEventListener('click', function() { applyMassField('razon', 'cgps-mass-razon-cert', 'Razón Social'); });
-  $('cgps-btn-apply-ruc-cert').addEventListener('click', function() { applyMassField('ruc', 'cgps-mass-ruc-cert', 'RUC'); });
+  if ($('cgps-btn-apply-mass-cert')) $('cgps-btn-apply-mass-cert').addEventListener('click', function() { applyMassField('razon', 'cgps-mass-razon-cert', 'Razón Social'); });
+  if ($('cgps-btn-apply-ruc-cert')) $('cgps-btn-apply-ruc-cert').addEventListener('click', function() { applyMassField('ruc', 'cgps-mass-ruc-cert', 'RUC'); });
 
-  // EDICIÓN MASIVA EN VALIDACIÓN (PERSISTENTE EN GEOTAB)
-  $('cgps-btn-apply-nombre').addEventListener('click', function() { applyMassField('nombreActivo', 'cgps-mass-nombre', 'Nombre del Activo'); });
-  $('cgps-btn-apply-placa').addEventListener('click', function() { applyMassField('placa', 'cgps-mass-placa', 'Placa'); });
-  $('cgps-btn-apply-estado').addEventListener('click', function() { applyMassField('estadoProvincia', 'cgps-mass-estado', 'Estado/Provincia'); });
-  $('cgps-btn-apply-ruc-val').addEventListener('click', function() { applyMassField('ruc', 'cgps-mass-ruc-val', 'RUC'); });
-  $('cgps-btn-apply-mass-val').addEventListener('click', function() { applyMassField('razon', 'cgps-mass-razon-val', 'Razón Social'); });
-  $('cgps-btn-apply-anualidad').addEventListener('click', function() { applyMassField('anualidad', 'cgps-mass-anualidad', 'Anualidad'); });
-  $('cgps-btn-apply-tipo').addEventListener('click', function() { applyMassField('tipoVehiculo', 'cgps-mass-tipo', 'Tipo de Vehículo'); });
+  // EDICIÓN MASIVA EN VALIDACIÓN
+  if ($('cgps-btn-apply-nombre')) $('cgps-btn-apply-nombre').addEventListener('click', function() { applyMassField('nombreActivo', 'cgps-mass-nombre', 'Nombre del Activo'); });
+  if ($('cgps-btn-apply-placa')) $('cgps-btn-apply-placa').addEventListener('click', function() { applyMassField('placa', 'cgps-mass-placa', 'Placa'); });
+  if ($('cgps-btn-apply-estado')) $('cgps-btn-apply-estado').addEventListener('click', function() { applyMassField('estadoProvincia', 'cgps-mass-estado', 'Estado/Provincia'); });
+  if ($('cgps-btn-apply-ruc-val')) $('cgps-btn-apply-ruc-val').addEventListener('click', function() { applyMassField('ruc', 'cgps-mass-ruc-val', 'RUC'); });
+  if ($('cgps-btn-apply-mass-val')) $('cgps-btn-apply-mass-val').addEventListener('click', function() { applyMassField('razon', 'cgps-mass-razon-val', 'Razón Social'); });
+  if ($('cgps-btn-apply-anualidad')) $('cgps-btn-apply-anualidad').addEventListener('click', function() { applyMassField('anualidad', 'cgps-mass-anualidad', 'Anualidad'); });
+  if ($('cgps-btn-apply-tipo')) $('cgps-btn-apply-tipo').addEventListener('click', function() { applyMassField('tipoVehiculo', 'cgps-mass-tipo', 'Tipo de Vehículo'); });
 
-  $('cgps-btn-bulk').addEventListener('click', processBulkInput);
-  $('cgps-btn-bulk-clear').addEventListener('click', function () { $('cgps-bulk-input').value = ''; activeBulkTokens = []; selected = {}; renderList(); setMsg('Filtro masivo limpiado.'); });
+  if ($('cgps-btn-bulk')) $('cgps-btn-bulk').addEventListener('click', processBulkInput);
+  if ($('cgps-btn-bulk-clear')) $('cgps-btn-bulk-clear').addEventListener('click', function () { if ($('cgps-bulk-input')) $('cgps-bulk-input').value = ''; activeBulkTokens = []; selected = {}; renderList(); setMsg('Filtro masivo limpiado.'); });
   
-  // EVENTOS DE BÚSQUEDA Y SELECTOR DE CAMPO
-  $('cgps-filter').addEventListener('input', renderList);
-  $('cgps-filter-field').addEventListener('change', renderList);
+  if ($('cgps-filter')) $('cgps-filter').addEventListener('input', renderList);
+  if ($('cgps-filter-field')) $('cgps-filter-field').addEventListener('change', renderList);
 
-  // EVENTOS DE LA TABLA (EDICIÓN EN MEMORIA + QUITADO RÁPIDO DE GRUPOS INDIVIDUALES)
-  $('cgps-listbody').addEventListener('input', function (e) {
-    var field = e.target.getAttribute('data-field');
-    var id = e.target.getAttribute('data-id');
+  // EDICIÓN INDIVIDUAL EN TABLA CON PREGUNTA DISCRETA
+  if ($('cgps-listbody')) {
+    $('cgps-listbody').addEventListener('change', function (e) {
+      var field = e.target.getAttribute('data-field');
+      var id = e.target.getAttribute('data-id');
 
-    if (field && id) {
-      if (!editedRowsMap[id]) editedRowsMap[id] = {};
-      editedRowsMap[id][field] = e.target.value.trim();
-      setMsg('⚠️ Hay cambios pendientes por guardar. Haga clic en "💾 Guardar Cambios Editados".');
-    }
-  });
+      if (e.target.type === 'checkbox' && id) {
+        selected[id] = e.target.checked;
+        renderList();
+        updateKPIs();
+        return;
+      }
 
-  $('cgps-listbody').addEventListener('click', function (e) {
-    var act = e.target.getAttribute('data-act');
-    if (act === 'del-grp') {
-      var devId = e.target.getAttribute('data-devid');
-      var grpId = e.target.getAttribute('data-grpid');
-      var targetRow = all.find(function(r) { return r.id === devId; });
-      var groupObj = groupsById[grpId];
+      if (field && id) {
+        var newVal = e.target.value.trim();
+        var targetRow = all.find(function(r) { return r.id === id; });
+        if (targetRow) {
+          var labelMap = {
+            nombreActivo: 'Nombre',
+            placa: 'Placa',
+            razon: 'Razón Social',
+            ruc: 'RUC',
+            estadoProvincia: 'Estado',
+            anualidad: 'Anualidad',
+            tipoVehiculo: 'Tipo'
+          };
+          var fieldLabel = labelMap[field] || field;
 
-      if (targetRow && groupObj) {
-        if (window.confirm('¿Deseas quitar el grupo [' + groupObj.name + '] de este activo?')) {
-          updateDeviceGroupsSafe([targetRow], groupObj, 'remove');
+          if (window.confirm('¿Desea guardar el cambio realizado en [' + fieldLabel + '] para este activo?')) {
+            applySafeDeviceUpdate([targetRow], field, newVal, fieldLabel);
+          } else {
+            e.target.value = targetRow[field] || '';
+          }
         }
       }
-    }
-  });
+    });
 
-  $('cgps-listbody').addEventListener('change', function (e) {
-    var id = e.target.getAttribute('data-id');
-    if (e.target.type === 'checkbox' && id) {
-      selected[id] = e.target.checked;
-      renderList();
-      updateKPIs();
-    }
-  });
+    $('cgps-listbody').addEventListener('click', function (e) {
+      var act = e.target.getAttribute('data-act');
+      if (act === 'del-grp') {
+        var devId = e.target.getAttribute('data-devid');
+        var grpId = e.target.getAttribute('data-grpid');
+        var targetRow = all.find(function(r) { return r.id === devId; });
+        var groupObj = groupsById[grpId];
 
-  $('cgps-sel-vis').addEventListener('click', function () {
+        if (targetRow && groupObj) {
+          if (window.confirm('¿Desea quitar el grupo [' + groupObj.name + '] de este activo?')) {
+            updateDeviceGroupsSafe([targetRow], groupObj, 'remove');
+          }
+        }
+      }
+    });
+  }
+
+  if ($('cgps-sel-vis')) $('cgps-sel-vis').addEventListener('click', function () {
     all.forEach(function (r) {
       if (isRowMatchingFilters(r)) {
         selected[r.id] = true;
@@ -1437,7 +1424,7 @@ var addInConstructor = function (api, state, callback) {
     renderList();
   });
 
-  $('cgps-sel-none').addEventListener('click', function () { 
+  if ($('cgps-sel-none')) $('cgps-sel-none').addEventListener('click', function () { 
     selected = {}; 
     renderList(); 
   });
@@ -1451,12 +1438,24 @@ var addInConstructor = function (api, state, callback) {
   };
 };
 
-// REGISTRO UNIFICADO EN GEOTAB
+// REGISTRO ROBUSTO EN GEOTAB
 window.geotab = window.geotab || {};
 window.geotab.addin = window.geotab.addin || {};
-window.geotab.addin["Test N"] = addInConstructor;
-window.geotab.addin["test_n"] = addInConstructor;
-window.geotab.addin["test_n-index"] = addInConstructor;
+
+function registerAddin(key) {
+  window.geotab.addin[key] = function(api, state, callback) {
+    try {
+      return addInConstructor(api, state, callback);
+    } catch(err) {
+      if (typeof callback === 'function') callback();
+    }
+  };
+}
+
+registerAddin("Test N");
+registerAddin("test_n");
+registerAddin("test_n-index");
+registerAddin("test_n-index?v100");
 </script>
 </body>
 </html>
