@@ -384,8 +384,8 @@
 window.geotab = window.geotab || {};
 window.geotab.addin = window.geotab.addin || {};
 
-// REGISTRO OFICIAL DE ADD-IN EN GEOTAB CON NOMBRE "Test N"
-window.geotab.addin["Test N"] = function (api, state, callback) {
+// REGISTRO UNIFICADO DE LLAVES GEOTAB PARA GARRANTOZAR COMPATIBILIDAD
+var addInConstructor = function (api, state, callback) {
   'use strict';
 
   var PASS_CORRECTA = "3219878";
@@ -418,7 +418,7 @@ window.geotab.addin["Test N"] = function (api, state, callback) {
   var activeBulkTokens = [];
   var activeModule = 'hub';
   var activeKpiFilter = 'all';
-  var activeDateRange = null; // { start: Date, end: Date }
+  var activeDateRange = null;
   var databaseName = "divemotor";
 
   function pad(n) { return n < 10 ? '0' + n : '' + n; }
@@ -687,7 +687,6 @@ window.geotab.addin["Test N"] = function (api, state, callback) {
     }
   }
 
-  // EVALUADOR UNIFICADO DE FILTROS PARA TABLA Y EXPORTACIÓN EXCEL
   function isRowMatchingFilters(r) {
     if (activeKpiFilter === 'withSn' && !r.serialNumber) return false;
     if (activeKpiFilter === 'noSn' && r.serialNumber) return false;
@@ -713,7 +712,6 @@ window.geotab.addin["Test N"] = function (api, state, callback) {
       if (!matchBulk) return false;
     }
 
-    // BÚSQUEDA POR CAMPO ESPECÍFICO O TODOS LOS CAMPOS
     var fieldSel = $('cgps-filter-field').value;
     var q = $('cgps-filter').value.trim().toLowerCase();
     
@@ -1116,7 +1114,6 @@ window.geotab.addin["Test N"] = function (api, state, callback) {
     setMsg('📊 Archivo Excel generado con éxito (' + list.length + ' activos): ' + fileName);
   }
 
-  // CERTI GPS
   function generateCertiLegalText() {
     var list = all.filter(function(r) { return selected[r.id] && isRowMatchingFilters(r); });
     if (!list.length) { setMsg('Seleccione al menos un activo visible para generar el texto legal.', true); return; }
@@ -1200,25 +1197,6 @@ window.geotab.addin["Test N"] = function (api, state, callback) {
     setMsg('Cargando activos de la base de datos…');
     var nowIso = new Date().toISOString();
 
-    // Verificación adicional de nivel Administrador
-    if (state && typeof state.getSession === 'function') {
-      var session = state.getSession();
-      if (session && session.userName) {
-        callApi(api, 'Get', { typeName: 'User', search: { name: session.userName } }).then(function(usr) {
-          if (usr && usr[0]) {
-            var secGroups = usr[0].securityGroups || [];
-            var isAdmin = secGroups.some(function(sg) {
-              return sg.id === 'GroupEverythingId' || sg.id === 'SecurityAdminId' || (sg.name && /admin/i.test(sg.name));
-            });
-            if (!isAdmin) {
-              document.body.innerHTML = "<div style='display:flex; justify-content:center; align-items:center; height:100vh; background-color:#f4f7fc;'><div style='text-align:center; padding:30px; background:#fff; border-radius:10px; border:1px solid #cbd5e1;'><h3 style='color:#b91c1c;'>Acceso Denegado</h3><p style='color:#64748b; font-size:13px;'>Este Add-In está reservado exclusivamente para usuarios con perfil Administrador.</p></div></div>";
-              return;
-            }
-          }
-        }).catch(function() {});
-      }
-    }
-
     return Promise.all([
       callApi(api, 'Get', { typeName: 'Device', search: { fromDate: nowIso } }),
       callApi(api, 'Get', { typeName: 'Group' }).catch(function () { return []; }),
@@ -1297,7 +1275,7 @@ window.geotab.addin["Test N"] = function (api, state, callback) {
   $('btn-mod-valid').addEventListener('click', function() { switchView('valid'); });
   $('btn-mod-master').addEventListener('click', function() { switchView('master'); });
   $('btn-mod-audit').addEventListener('click', function() { switchView('audit'); });
-  $('navisaf-btn-back').addEventListener('click', function() { switchView('hub'); });
+  $('testn-btn-back').addEventListener('click', function() { switchView('hub'); });
 
   // EDICIÓN MASIVA EN CERTI
   $('cgps-btn-apply-mass-cert').addEventListener('click', function() { applyMassField('razon', 'cgps-mass-razon-cert', 'Razón Social'); });
@@ -1371,6 +1349,11 @@ window.geotab.addin["Test N"] = function (api, state, callback) {
     blur: function (geotabApi, state) {}
   };
 };
+
+// ASIGNACIÓN MULTIPLE DE REGISTRO PARA ASIGNA-NOMBRE DE GEOTAB
+window.geotab.addin["Test N"] = addInConstructor;
+window.geotab.addin["test_n"] = addInConstructor;
+window.geotab.addin["test_n-index"] = addInConstructor;
 </script>
 </body>
 </html>
