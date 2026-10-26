@@ -87,24 +87,25 @@
       </div>
     </div>
 
-    <!-- KPIs Rápidos -->
+    <!-- KPIs Rápidos (Botonera de Filtro Dinámico) -->
     <div class="cgps-kpi-grid" style="margin-top: 10px;">
       <div class="cgps-card kpi-btn-card" id="kpi-card-1" title="Haz clic para mostrar todos los activos">
         <div class="cgps-kpi-title" id="kpi-title-1">Unidades Cargadas</div>
         <div class="cgps-kpi-value" id="kpi-total">0</div>
-        <div style="font-size: 10px; color: #64748b; margin-top: 3px;">
-          Con Serie: <strong id="kpi-with-sn" style="color:#1e293b;">0</strong> | Sin Serie: <strong id="kpi-no-sn" style="color:#64748b;">0</strong>
-        </div>
       </div>
-      <div class="cgps-card kpi-btn-card" id="kpi-card-2" title="Haz clic para filtrar">
+      <div class="cgps-card kpi-btn-card" id="kpi-card-sn" title="Haz clic para filtrar unidades con número de serie">
+        <div class="cgps-kpi-title">Con Serial (GPS)</div>
+        <div class="cgps-kpi-value" id="kpi-with-sn" style="color: #0369a1;">0</div>
+      </div>
+      <div class="cgps-card kpi-btn-card" id="kpi-card-nosn" title="Haz clic para filtrar unidades sin número de serie">
+        <div class="cgps-kpi-title">Sin Serial (Custom)</div>
+        <div class="cgps-kpi-value" id="kpi-no-sn" style="color: #64748b;">0</div>
+      </div>
+      <div class="cgps-card kpi-btn-card" id="kpi-card-2" title="Haz clic para filtrar seleccionados">
         <div class="cgps-kpi-title" id="kpi-title-2">Seleccionados</div>
         <div class="cgps-kpi-value" id="kpi-val-2">0</div>
       </div>
-      <div class="cgps-card kpi-btn-card" id="kpi-card-3" title="Haz clic para filtrar">
-        <div class="cgps-kpi-title" id="kpi-title-3">Visibles en Filtro</div>
-        <div class="cgps-kpi-value" id="kpi-val-3">0</div>
-      </div>
-      <div class="cgps-card kpi-btn-card" id="kpi-card-4" style="display: none;" title="Haz clic para filtrar">
+      <div class="cgps-card kpi-btn-card" id="kpi-card-4" style="display: none;" title="Haz clic para filtrar activos completos">
         <div class="cgps-kpi-title" id="kpi-title-4">Parámetros Completos (5/5)</div>
         <div class="cgps-kpi-value" id="kpi-val-4" style="color: #16a34a;">0</div>
       </div>
@@ -253,7 +254,7 @@
     .cgps-btn-secondary { background-color: #4277a8 !important; color: #ffffff !important; }
     .cgps-btn-outline { background-color: transparent; color: #1b4e85; border: 1px solid #1b4e85; }
     
-    .cgps-kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; }
+    .cgps-kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; }
     .cgps-card { background: #ffffff !important; border-radius: 8px; padding: 10px 14px; border: 1px solid #cbd5e1; width: 100%; }
     .kpi-btn-card { cursor: pointer !important; transition: all 0.2s !important; user-select: none; }
     .kpi-btn-card:hover { border-color: #1b4e85 !important; background-color: #f8fafc !important; }
@@ -276,7 +277,7 @@
     .cgps-msg { min-height: 18px; font-size: 12px; font-weight: 600; color: #15803d; }
     .cgps-msg.cgps-err { color: #b91c1c; }
 
-    .badge-param { padding: 3px 6px; border-radius: 4px; font-weight: 700; font-size: 11px; display: inline-block; }
+    .badge-param { padding: 3px 6px; border-radius: 4px; font-weight: 700; font-size: 11px; display: inline-block; cursor: pointer; }
     .badge-full { background-color: #dcfce7; color: #15803d; border: 1px solid #86efac; }
     .badge-partial { background-color: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
     .badge-empty { background-color: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
@@ -316,12 +317,13 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     }
   });
 
+  // DEFINICIÓN DE LOS 5 PARÁMETROS OBLIGATORIOS (SOPORTA BASE64 Y HEX)
   var REQUIRED_PARAMS = [
-    { name: "Enable Gps Altitude Logging", offset: "181", bytes: "08" },
-    { name: "Disable Accelerometer Record Limit", offset: "65", bytes: "02" },
-    { name: "High Res RPM allowed Error = 2 rpm", offset: "168", bytes: "02" },
-    { name: "Enable Engine Load", offset: "165", bytes: "04" },
-    { name: "Enable Engine Retarder Selection And Accel Pedal", offset: "166", bytes: "09" }
+    { name: "Enable Gps Altitude Logging", offset: "181", bytesBase64: "CA==", bytesHex: "08" },
+    { name: "Disable Accelerometer Record Limit", offset: "65", bytesBase64: "Ag==", bytesHex: "02" },
+    { name: "High Res RPM allowed Error = 2 rpm", offset: "168", bytesBase64: "Ag==", bytesHex: "02" },
+    { name: "Enable Engine Load", offset: "165", bytesBase64: "BA==", bytesHex: "04" },
+    { name: "Enable Engine Retarder Selection And Accel Pedal", offset: "166", bytesBase64: "CQ==", bytesHex: "09" }
   ];
 
   var all = [], groupsById = {}, propsById = {}, selected = {}, rawDevices = [];
@@ -336,7 +338,7 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     if (isNaN(d.getTime()) || d.getFullYear() > 2040) return '';
     return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear();
   }
-  function xmlEsc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;'> '&gt;', '"': '&quot;' }[c]; }); }
+  function xmlEsc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function htmlEsc(s) { return xmlEsc(s).replace(/'/g, '&#39;'); }
 
   function resolveProperty(d, regex) {
@@ -348,27 +350,41 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     return '';
   }
 
-  // EVALUACIÓN MEJORADA DE PARÁMETROS EN GEOTAB
+  // EVALUACIÓN ROBUSTA DE PARÁMETROS EN customParameters Y parameterVersion
   function evalDeviceParameters(d) {
-    var customArray = d.customParameters || [];
-    var strParamVer = typeof d.parameterVersion === 'string' ? d.parameterVersion : JSON.stringify(d.parameterVersion || '');
-    var strCustomArray = JSON.stringify(customArray);
+    var customList = d.customParameters || [];
+    var paramVerString = typeof d.parameterVersion === 'string' ? d.parameterVersion : JSON.stringify(d.parameterVersion || '');
+    var strCustomDump = JSON.stringify(customList);
 
     var count = 0;
     var missing = [];
 
     REQUIRED_PARAMS.forEach(function(p) {
-      var foundInArray = Array.isArray(customArray) && customArray.some(function(cp) {
-        return String(cp.offset) === p.offset && String(cp.bytes) === p.bytes;
-      });
+      var found = false;
 
-      var regOffset = new RegExp('Offset=[\'"]?' + p.offset + '[\'"]?', 'i');
-      var regBytes = new RegExp('Bytes=[\'"]?' + p.bytes + '[\'"]?', 'i');
+      // 1. Verificación en Arreglo customParameters
+      if (Array.isArray(customList)) {
+        found = customList.some(function(cp) {
+          var offMatch = String(cp.offset) === p.offset;
+          var bytesVal = String(cp.bytes || cp.bytesBase64 || cp.value || '');
+          var bytesMatch = (bytesVal === p.bytesBase64) || (bytesVal.toUpperCase().indexOf(p.bytesHex) >= 0);
+          return offMatch && bytesMatch;
+        });
+      }
 
-      var foundInString = (regOffset.test(strParamVer) && regBytes.test(strParamVer)) || 
-                          (regOffset.test(strCustomArray) && regBytes.test(strCustomArray));
+      // 2. Verificación en CADENA / XML
+      if (!found) {
+        var regOff = new RegExp('Offset=[\'"]?' + p.offset + '[\'"]?', 'i');
+        var regB64 = new RegExp('Bytes=[\'"]?' + p.bytesBase64.replace(/=/g, '\\=') + '[\'"]?', 'i');
+        var regHex = new RegExp('Bytes=[\'"]?' + p.bytesHex + '[\'"]?', 'i');
 
-      if (foundInArray || foundInString) {
+        var matchOff = regOff.test(paramVerString) || regOff.test(strCustomDump);
+        var matchBytes = regB64.test(paramVerString) || regB64.test(strCustomDump) || regHex.test(paramVerString) || regHex.test(strCustomDump);
+
+        if (matchOff && matchBytes) found = true;
+      }
+
+      if (found) {
         count++;
       } else {
         missing.push(p);
@@ -435,12 +451,10 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     if (activeModule === 'certi') {
       $('kpi-title-2').textContent = "SELECCIONADOS";
       $('kpi-val-2').textContent = selCount;
-      $('kpi-title-3').textContent = "VISIBLES EN FILTRO";
-      $('kpi-val-3').textContent = document.querySelectorAll('#cgps-listbody tr').length;
       $('kpi-card-4').style.display = 'none';
       $('kpi-card-5').style.display = 'none';
       $('kpi-card-6').style.display = 'none';
-      document.querySelector('.cgps-kpi-grid').style.gridTemplateColumns = 'repeat(3, 1fr)';
+      document.querySelector('.cgps-kpi-grid').style.gridTemplateColumns = 'repeat(4, 1fr)';
     } else if (activeModule === 'valid') {
       var countFull = 0, countEmpty = 0, countPartial = 0;
       all.forEach(function (r) {
@@ -451,8 +465,6 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
 
       $('kpi-title-2').textContent = "SELECCIONADOS";
       $('kpi-val-2').textContent = selCount;
-      $('kpi-title-3').textContent = "VISIBLES EN FILTRO";
-      $('kpi-val-3').textContent = document.querySelectorAll('#cgps-listbody tr').length;
       
       $('kpi-val-4').textContent = countFull;
       $('kpi-val-5').textContent = countEmpty;
@@ -461,12 +473,12 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
       $('kpi-card-4').style.display = 'block';
       $('kpi-card-5').style.display = 'block';
       $('kpi-card-6').style.display = 'block';
-      document.querySelector('.cgps-kpi-grid').style.gridTemplateColumns = 'repeat(6, 1fr)';
+      document.querySelector('.cgps-kpi-grid').style.gridTemplateColumns = 'repeat(7, 1fr)';
     }
   }
 
   function highlightKpiCard(cardId) {
-    ['kpi-card-1', 'kpi-card-2', 'kpi-card-3', 'kpi-card-4', 'kpi-card-5', 'kpi-card-6'].forEach(function(id) {
+    ['kpi-card-1', 'kpi-card-sn', 'kpi-card-nosn', 'kpi-card-2', 'kpi-card-4', 'kpi-card-5', 'kpi-card-6'].forEach(function(id) {
       if ($(id)) $(id).classList.remove('kpi-active');
     });
     if (cardId && $(cardId)) {
@@ -536,6 +548,9 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     var q = $('cgps-filter').value.trim().toLowerCase(), html = '';
 
     all.forEach(function (r) {
+      if (activeKpiFilter === 'withSn' && !r.serialNumber) return;
+      if (activeKpiFilter === 'noSn' && r.serialNumber) return;
+
       if (activeModule === 'valid') {
         if (activeKpiFilter === 'full' && r.paramCount !== 5) return;
         if (activeKpiFilter === 'empty' && r.paramCount !== 0) return;
@@ -577,7 +592,7 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
           '<td><input type="text" class="cgps-edit-input" data-field="placa" data-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(r.placa) + '"' + disAttr + '></td>' +
           '<td>' + htmlEsc(r.desde) + '</td>' +
           '<td>' + htmlEsc(r.vin) + '</td>' +
-          '<td><span class="badge-param ' + badgeClass + '">' + badgeLabel + '</span></td>' +
+          '<td><span class="badge-param ' + badgeClass + '" title="Posee ' + r.paramCount + ' de 5 parámetros">' + badgeLabel + '</span></td>' +
           '<td><input type="text" class="cgps-edit-input" data-field="estadoProvincia" data-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(r.estadoProvincia) + '" placeholder="Sin Estado"' + disAttr + '></td>' +
           '<td><input type="text" class="cgps-edit-input" data-field="ruc" data-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(r.ruc) + '" placeholder="Sin RUC"' + disAttr + '></td>' +
           '<td><input type="text" class="cgps-edit-input" data-field="razon" data-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(r.razon) + '" placeholder="Sin Razón Social"' + disAttr + '></td>' +
@@ -611,7 +626,7 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
         existingParams.push({
           description: missing.name,
           offset: missing.offset,
-          bytes: missing.bytes,
+          bytes: missing.bytesBase64,
           isEnabled: true
         });
       });
@@ -707,21 +722,22 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     });
   }
 
-  // EVENTOS KPI
+  // EVENTOS DE NAVEGACIÓN Y FILTRO POR KPI
   $('kpi-card-1').addEventListener('click', function() { activeKpiFilter = 'all'; highlightKpiCard('kpi-card-1'); renderList(); });
+  $('kpi-card-sn').addEventListener('click', function() { activeKpiFilter = (activeKpiFilter === 'withSn') ? 'all' : 'withSn'; highlightKpiCard(activeKpiFilter === 'withSn' ? 'kpi-card-sn' : 'kpi-card-1'); renderList(); });
+  $('kpi-card-nosn').addEventListener('click', function() { activeKpiFilter = (activeKpiFilter === 'noSn') ? 'all' : 'noSn'; highlightKpiCard(activeKpiFilter === 'noSn' ? 'kpi-card-nosn' : 'kpi-card-1'); renderList(); });
+
   $('kpi-card-4').addEventListener('click', function() { activeKpiFilter = (activeKpiFilter === 'full') ? 'all' : 'full'; highlightKpiCard(activeKpiFilter === 'full' ? 'kpi-card-4' : 'kpi-card-1'); renderList(); });
   $('kpi-card-5').addEventListener('click', function() { activeKpiFilter = (activeKpiFilter === 'empty') ? 'all' : 'empty'; highlightKpiCard(activeKpiFilter === 'empty' ? 'kpi-card-5' : 'kpi-card-1'); renderList(); });
   $('kpi-card-6').addEventListener('click', function() { activeKpiFilter = (activeKpiFilter === 'partial') ? 'all' : 'partial'; highlightKpiCard(activeKpiFilter === 'partial' ? 'kpi-card-6' : 'kpi-card-1'); renderList(); });
 
-  // EVENTOS INYECCIÓN Y EDICIÓN
+  // EVENTOS EDICIÓN E INYECCIÓN
   $('cgps-btn-inject-params').addEventListener('click', injectMissingParameters);
 
-  // NAVEGACIÓN
   $('btn-mod-certi').addEventListener('click', function() { switchView('certi'); });
   $('btn-mod-valid').addEventListener('click', function() { switchView('valid'); });
   $('navisaf-btn-back').addEventListener('click', function() { switchView('hub'); });
 
-  // EDICIÓN MASIVA
   $('cgps-btn-apply-nombre').addEventListener('click', function() { applyMassField('nombreActivo', 'cgps-mass-nombre', 'Nombre del Activo'); });
   $('cgps-btn-apply-placa').addEventListener('click', function() { applyMassField('placa', 'cgps-mass-placa', 'Placa'); });
   $('cgps-btn-apply-estado').addEventListener('click', function() { applyMassField('estadoProvincia', 'cgps-mass-estado', 'Estado/Provincia'); });
@@ -745,7 +761,6 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     }
   });
 
-  // HABILITAR / DESHABILITAR EDICIÓN SEGÚN SELECCIÓN
   $('cgps-listbody').addEventListener('change', function (e) { 
     var id = e.target.getAttribute('data-id'); 
     if (id && e.target.type === 'checkbox') { 
