@@ -98,18 +98,26 @@
           <p>Filtre por fecha de instalación y exporte el reporte oficial en Excel.</p>
         </div>
         <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
-          <button id="master-btn-week" type="button" class="cgps-btn cgps-btn-white">📅 Esta Semana al Corte</button>
-          <button id="master-btn-excel" type="button" class="cgps-btn cgps-btn-secondary">📊 Descargar Excel .xlsx</button>
+          <button id="master-btn-excel" type="button" class="cgps-btn cgps-btn-white" style="font-weight:700;">📊 Descargar Excel .xlsx</button>
         </div>
       </div>
 
-      <!-- Filtro Personalizado de Fechas para Master Switch -->
-      <div class="cgps-card" style="margin-top: 10px; background-color: #ffffff;">
-        <div style="font-size: 11px; font-weight: 700; color: #1b4e85; margin-bottom: 6px;">FILTRAR POR RANGO DE FECHAS PERSONALIZADO:</div>
-        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-          <label style="font-size: 12px; font-weight: 600;">Desde: <input type="date" id="master-date-from" class="cgps-input" style="padding: 4px 6px;"></label>
-          <label style="font-size: 12px; font-weight: 600;">Hasta: <input type="date" id="master-date-to" class="cgps-input" style="padding: 4px 6px;"></label>
-          <button id="master-btn-custom-range" type="button" class="cgps-btn cgps-btn-secondary">Aplicar Rango</button>
+      <!-- panel visible de filtros de fecha -->
+      <div class="cgps-card" style="margin-top: 10px; background-color: #ffffff !important; border: 1px solid #94a3b8 !important;">
+        <div style="font-size: 11px; font-weight: 700; color: #1b4e85; margin-bottom: 8px; text-transform: uppercase; letter-spacing:0.5px;">FILTRAR POR FECHA DE INSTALACIÓN:</div>
+        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+          <button id="master-btn-week" type="button" class="cgps-btn cgps-btn-secondary" style="height: 34px;">📅 Esta Semana al Corte</button>
+          <div style="height: 24px; width: 1px; background-color: #cbd5e1;"></div>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="font-size: 12px; font-weight: 600; color: #475569;">Desde:</span>
+            <input type="date" id="master-date-from" class="cgps-input" style="padding: 4px 8px; height: 34px; border: 1px solid #cbd5e1; border-radius: 4px;">
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="font-size: 12px; font-weight: 600; color: #475569;">Hasta:</span>
+            <input type="date" id="master-date-to" class="cgps-input" style="padding: 4px 8px; height: 34px; border: 1px solid #cbd5e1; border-radius: 4px;">
+          </div>
+          <button id="master-btn-custom-range" type="button" class="cgps-btn cgps-btn-secondary" style="height: 34px;">Aplicar Rango</button>
+          <button id="master-btn-reset-dates" type="button" class="cgps-btn cgps-btn-outline" style="height: 34px;">Mostrar Todos</button>
         </div>
       </div>
     </div>
@@ -356,6 +364,7 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
   var activeBulkTokens = [];
   var activeModule = 'hub';
   var activeKpiFilter = 'all';
+  var activeDateRange = null; // { start: Date, end: Date } para filtrado estricto
   var databaseName = "divemotor";
 
   function pad(n) { return n < 10 ? '0' + n : '' + n; }
@@ -516,6 +525,7 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
   function switchView(mod) {
     activeModule = mod;
     activeKpiFilter = 'all';
+    activeDateRange = null;
     selected = {};
     activeBulkTokens = [];
     $('cgps-bulk-input').value = '';
@@ -584,19 +594,30 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
 
   function renderList() {
     var q = $('cgps-filter').value.trim().toLowerCase(), html = '';
+    var visibleCount = 0;
 
     all.forEach(function (r) {
+      // 1. FILTRADO POR KPI DE SERIAL / SELECCIÓN
       if (activeKpiFilter === 'withSn' && !r.serialNumber) return;
       if (activeKpiFilter === 'noSn' && r.serialNumber) return;
+      if (activeKpiFilter === 'selected' && !selected[r.id]) return;
 
+      // 2. FILTRADO POR RANGO DE FECHAS (MASTER SWITCH)
+      if (activeDateRange) {
+        if (!r.activeFromRaw || r.activeFromRaw < activeDateRange.start || r.activeFromRaw > activeDateRange.end) {
+          return;
+        }
+      }
+
+      // 3. FILTRADO POR PARÁMETROS EN MÓDULO VALIDACIÓN
       if (activeModule === 'valid') {
         if (activeKpiFilter === 'full' && r.paramCount !== 5) return;
         if (activeKpiFilter === 'empty' && r.paramCount !== 0) return;
         if (activeKpiFilter === 'partial' && (r.paramCount === 0 || r.paramCount === 5)) return;
       }
 
+      // 4. FILTRADO POR PEGADO MASIVO
       var nom = r.nombreActivo.toLowerCase(), p = r.placa.toLowerCase(), v = r.vin.toLowerCase(), s = r.serialNumber.toLowerCase();
-
       if (activeBulkTokens.length > 0) {
         var matchBulk = activeBulkTokens.some(function (token) {
           return nom === token || p === token || v === token || s === token || (token.length >= 3 && (nom.indexOf(token) >= 0 || p.indexOf(token) >= 0 || v.indexOf(token) >= 0 || s.indexOf(token) >= 0));
@@ -604,9 +625,11 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
         if (!matchBulk) return;
       }
 
+      // 5. FILTRADO POR TEXTO LIBRE
       var hay = (r.nombreActivo + ' ' + r.placa + ' ' + r.vin + ' ' + r.serialNumber + ' ' + r.grupos + ' ' + r.razon + ' ' + r.ruc + ' ' + r.estadoProvincia + ' ' + r.tipoVehiculo).toLowerCase();
       if (q && hay.indexOf(q) < 0) return;
 
+      visibleCount++;
       var isSel = !!selected[r.id];
       var disAttr = isSel ? '' : ' disabled';
 
@@ -649,7 +672,7 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
       }
     });
 
-    $('cgps-listbody').innerHTML = html || '<tr><td colspan="11" style="text-align:center; padding: 14px; color: #64748b;">Sin resultados coincidentes</td></tr>';
+    $('cgps-listbody').innerHTML = html || '<tr><td colspan="11" style="text-align:center; padding: 14px; color: #64748b;">Sin resultados coincidentes para el filtro aplicado</td></tr>';
     updateKPIs();
   }
 
@@ -709,9 +732,9 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     });
   }
 
-  // ACCIÓN BOTÓN "ESTA SEMANA AL CORTE" (DESDE EL LUNES A LAS 00:00 HASTA EL MOMENTO DE PRESIONAR EL BOTÓN)
+  // ACCIÓN BOTÓN "ESTA SEMANA AL CORTE" (FILTRA LA TABLA EN PANTALLA)
   function filterThisWeekToCut() {
-    var nowCut = new Date(); // Momento exacto del corte
+    var nowCut = new Date();
     var dayOfWeek = nowCut.getDay();
     var diffToMonday = (dayOfWeek === 0 ? -6 : 1 - dayOfWeek);
 
@@ -719,9 +742,11 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     mondayStart.setDate(nowCut.getDate() + diffToMonday);
     mondayStart.setHours(0, 0, 0, 0);
 
+    activeDateRange = { start: mondayStart, end: nowCut };
+    
+    // Auto-seleccionar solo los activos dentro de este rango
     selected = {};
     var count = 0;
-
     all.forEach(function(r) {
       if (r.activeFromRaw && r.activeFromRaw >= mondayStart && r.activeFromRaw <= nowCut) {
         selected[r.id] = true;
@@ -730,10 +755,10 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     });
 
     renderList();
-    setMsg('📅 Filtro "Esta Semana al Corte" (Del ' + fmtDate(mondayStart) + ' a las 00:00 hasta Hoy ' + pad(nowCut.getHours()) + ':' + pad(nowCut.getMinutes()) + '): ' + count + ' unidad(es) seleccionada(s).');
+    setMsg('📅 Filtro aplicado: Mostrando ' + count + ' activo(s) instalados entre Lunes ' + fmtDate(mondayStart) + ' a las 00:00 y Corte (' + pad(nowCut.getHours()) + ':' + pad(nowCut.getMinutes()) + ').');
   }
 
-  // ACCIÓN DE FILTRADO POR RANGO DE FECHAS PERSONALIZADO
+  // ACCIÓN FILTRO DE FECHAS PERSONALIZADO (FILTRA LA TABLA EN PANTALLA)
   function filterCustomDateRange() {
     var fromVal = $('master-date-from').value;
     var toVal = $('master-date-to').value;
@@ -751,9 +776,11 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
       return;
     }
 
+    activeDateRange = { start: startDate, end: endDate };
+
+    // Auto-seleccionar solo los activos dentro del rango personalizado
     selected = {};
     var count = 0;
-
     all.forEach(function(r) {
       if (r.activeFromRaw && r.activeFromRaw >= startDate && r.activeFromRaw <= endDate) {
         selected[r.id] = true;
@@ -762,10 +789,18 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     });
 
     renderList();
-    setMsg('📅 Filtro Rango Personalizado (' + fmtDate(startDate) + ' al ' + fmtDate(endDate) + '): ' + count + ' unidad(es) seleccionada(s).');
+    setMsg('📅 Filtro aplicado: Mostrando ' + count + ' activo(s) instalados del ' + fmtDate(startDate) + ' al ' + fmtDate(endDate) + '.');
   }
 
-  // GENERACIÓN DEL ARCHIVO EXCEL .XLSX
+  function resetDateFilters() {
+    activeDateRange = null;
+    $('master-date-from').value = '';
+    $('master-date-to').value = '';
+    renderList();
+    setMsg('Filtro de fechas removido: Mostrando todas las unidades.');
+  }
+
+  // GENERACIÓN EXCEL .XLSX
   function exportMasterSwitchExcel() {
     var list = all.filter(function(r) { return selected[r.id]; });
 
@@ -946,12 +981,14 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
   // EVENTOS MASTER SWITCH
   $('master-btn-week').addEventListener('click', filterThisWeekToCut);
   $('master-btn-custom-range').addEventListener('click', filterCustomDateRange);
+  $('master-btn-reset-dates').addEventListener('click', resetDateFilters);
   $('master-btn-excel').addEventListener('click', exportMasterSwitchExcel);
 
   // EVENTOS KPI
   $('kpi-card-1').addEventListener('click', function() { activeKpiFilter = 'all'; highlightKpiCard('kpi-card-1'); renderList(); });
   $('kpi-card-sn').addEventListener('click', function() { activeKpiFilter = (activeKpiFilter === 'withSn') ? 'all' : 'withSn'; highlightKpiCard(activeKpiFilter === 'withSn' ? 'kpi-card-sn' : 'kpi-card-1'); renderList(); });
   $('kpi-card-nosn').addEventListener('click', function() { activeKpiFilter = (activeKpiFilter === 'noSn') ? 'all' : 'noSn'; highlightKpiCard(activeKpiFilter === 'noSn' ? 'kpi-card-nosn' : 'kpi-card-1'); renderList(); });
+  $('kpi-card-2').addEventListener('click', function() { activeKpiFilter = (activeKpiFilter === 'selected') ? 'all' : 'selected'; highlightKpiCard(activeKpiFilter === 'selected' ? 'kpi-card-2' : 'kpi-card-1'); renderList(); });
 
   $('kpi-card-4').addEventListener('click', function() { activeKpiFilter = (activeKpiFilter === 'full') ? 'all' : 'full'; highlightKpiCard(activeKpiFilter === 'full' ? 'kpi-card-4' : 'kpi-card-1'); renderList(); });
   $('kpi-card-5').addEventListener('click', function() { activeKpiFilter = (activeKpiFilter === 'empty') ? 'all' : 'empty'; highlightKpiCard(activeKpiFilter === 'empty' ? 'kpi-card-5' : 'kpi-card-1'); renderList(); });
