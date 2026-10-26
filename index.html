@@ -102,7 +102,7 @@
         </div>
       </div>
 
-      <!-- panel visible de filtros de fecha -->
+      <!-- Panel visible de filtros de fecha -->
       <div class="cgps-card" style="margin-top: 10px; background-color: #ffffff !important; border: 1px solid #94a3b8 !important;">
         <div style="font-size: 11px; font-weight: 700; color: #1b4e85; margin-bottom: 8px; text-transform: uppercase; letter-spacing:0.5px;">FILTRAR POR FECHA DE INSTALACIÓN:</div>
         <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
@@ -364,7 +364,7 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
   var activeBulkTokens = [];
   var activeModule = 'hub';
   var activeKpiFilter = 'all';
-  var activeDateRange = null; // { start: Date, end: Date } para filtrado estricto
+  var activeDateRange = null; // { start: Date, end: Date }
   var databaseName = "divemotor";
 
   function pad(n) { return n < 10 ? '0' + n : '' + n; }
@@ -592,42 +592,52 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     }
   }
 
+  // EVALUADOR UNIFICADO DE FILTROS PARA TABLA Y EXPORTACIÓN
+  function isRowMatchingFilters(r) {
+    // 1. KPI Serial / Selección
+    if (activeKpiFilter === 'withSn' && !r.serialNumber) return false;
+    if (activeKpiFilter === 'noSn' && r.serialNumber) return false;
+    if (activeKpiFilter === 'selected' && !selected[r.id]) return false;
+
+    // 2. Rango de Fechas
+    if (activeDateRange) {
+      if (!r.activeFromRaw || r.activeFromRaw < activeDateRange.start || r.activeFromRaw > activeDateRange.end) {
+        return false;
+      }
+    }
+
+    // 3. Parámetros en Validación
+    if (activeModule === 'valid') {
+      if (activeKpiFilter === 'full' && r.paramCount !== 5) return false;
+      if (activeKpiFilter === 'empty' && r.paramCount !== 0) return false;
+      if (activeKpiFilter === 'partial' && (r.paramCount === 0 || r.paramCount === 5)) return false;
+    }
+
+    // 4. Bulk Pegado Masivo
+    var nom = r.nombreActivo.toLowerCase(), p = r.placa.toLowerCase(), v = r.vin.toLowerCase(), s = r.serialNumber.toLowerCase();
+    if (activeBulkTokens.length > 0) {
+      var matchBulk = activeBulkTokens.some(function (token) {
+        return nom === token || p === token || v === token || s === token || (token.length >= 3 && (nom.indexOf(token) >= 0 || p.indexOf(token) >= 0 || v.indexOf(token) >= 0 || s.indexOf(token) >= 0));
+      });
+      if (!matchBulk) return false;
+    }
+
+    // 5. Búsqueda por Texto
+    var q = $('cgps-filter').value.trim().toLowerCase();
+    if (q) {
+      var hay = (r.nombreActivo + ' ' + r.placa + ' ' + r.vin + ' ' + r.serialNumber + ' ' + r.grupos + ' ' + r.razon + ' ' + r.ruc + ' ' + r.estadoProvincia + ' ' + r.tipoVehiculo).toLowerCase();
+      if (hay.indexOf(q) < 0) return false;
+    }
+
+    return true;
+  }
+
   function renderList() {
-    var q = $('cgps-filter').value.trim().toLowerCase(), html = '';
+    var html = '';
     var visibleCount = 0;
 
     all.forEach(function (r) {
-      // 1. FILTRADO POR KPI DE SERIAL / SELECCIÓN
-      if (activeKpiFilter === 'withSn' && !r.serialNumber) return;
-      if (activeKpiFilter === 'noSn' && r.serialNumber) return;
-      if (activeKpiFilter === 'selected' && !selected[r.id]) return;
-
-      // 2. FILTRADO POR RANGO DE FECHAS (MASTER SWITCH)
-      if (activeDateRange) {
-        if (!r.activeFromRaw || r.activeFromRaw < activeDateRange.start || r.activeFromRaw > activeDateRange.end) {
-          return;
-        }
-      }
-
-      // 3. FILTRADO POR PARÁMETROS EN MÓDULO VALIDACIÓN
-      if (activeModule === 'valid') {
-        if (activeKpiFilter === 'full' && r.paramCount !== 5) return;
-        if (activeKpiFilter === 'empty' && r.paramCount !== 0) return;
-        if (activeKpiFilter === 'partial' && (r.paramCount === 0 || r.paramCount === 5)) return;
-      }
-
-      // 4. FILTRADO POR PEGADO MASIVO
-      var nom = r.nombreActivo.toLowerCase(), p = r.placa.toLowerCase(), v = r.vin.toLowerCase(), s = r.serialNumber.toLowerCase();
-      if (activeBulkTokens.length > 0) {
-        var matchBulk = activeBulkTokens.some(function (token) {
-          return nom === token || p === token || v === token || s === token || (token.length >= 3 && (nom.indexOf(token) >= 0 || p.indexOf(token) >= 0 || v.indexOf(token) >= 0 || s.indexOf(token) >= 0));
-        });
-        if (!matchBulk) return;
-      }
-
-      // 5. FILTRADO POR TEXTO LIBRE
-      var hay = (r.nombreActivo + ' ' + r.placa + ' ' + r.vin + ' ' + r.serialNumber + ' ' + r.grupos + ' ' + r.razon + ' ' + r.ruc + ' ' + r.estadoProvincia + ' ' + r.tipoVehiculo).toLowerCase();
-      if (q && hay.indexOf(q) < 0) return;
+      if (!isRowMatchingFilters(r)) return;
 
       visibleCount++;
       var isSel = !!selected[r.id];
@@ -672,7 +682,7 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
       }
     });
 
-    $('cgps-listbody').innerHTML = html || '<tr><td colspan="11" style="text-align:center; padding: 14px; color: #64748b;">Sin resultados coincidentes para el filtro aplicado</td></tr>';
+    $('cgps-listbody').innerHTML = html || '<tr><td colspan="11" style="text-align:center; padding: 14px; color: #64748b;">Sin resultados coincidentes para la combinación de filtros aplicada</td></tr>';
     updateKPIs();
   }
 
@@ -732,7 +742,6 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     });
   }
 
-  // ACCIÓN BOTÓN "ESTA SEMANA AL CORTE" (FILTRA LA TABLA EN PANTALLA)
   function filterThisWeekToCut() {
     var nowCut = new Date();
     var dayOfWeek = nowCut.getDay();
@@ -744,21 +753,20 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
 
     activeDateRange = { start: mondayStart, end: nowCut };
     
-    // Auto-seleccionar solo los activos dentro de este rango
+    // Auto-seleccionar solo las unidades que coincidan con la combinación total
     selected = {};
     var count = 0;
     all.forEach(function(r) {
-      if (r.activeFromRaw && r.activeFromRaw >= mondayStart && r.activeFromRaw <= nowCut) {
+      if (isRowMatchingFilters(r)) {
         selected[r.id] = true;
         count++;
       }
     });
 
     renderList();
-    setMsg('📅 Filtro aplicado: Mostrando ' + count + ' activo(s) instalados entre Lunes ' + fmtDate(mondayStart) + ' a las 00:00 y Corte (' + pad(nowCut.getHours()) + ':' + pad(nowCut.getMinutes()) + ').');
+    setMsg('📅 Filtro aplicado: Mostrando ' + count + ' activo(s) de esta semana al corte.');
   }
 
-  // ACCIÓN FILTRO DE FECHAS PERSONALIZADO (FILTRA LA TABLA EN PANTALLA)
   function filterCustomDateRange() {
     var fromVal = $('master-date-from').value;
     var toVal = $('master-date-to').value;
@@ -778,18 +786,18 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
 
     activeDateRange = { start: startDate, end: endDate };
 
-    // Auto-seleccionar solo los activos dentro del rango personalizado
+    // Auto-seleccionar solo las unidades que coincidan con la combinación total
     selected = {};
     var count = 0;
     all.forEach(function(r) {
-      if (r.activeFromRaw && r.activeFromRaw >= startDate && r.activeFromRaw <= endDate) {
+      if (isRowMatchingFilters(r)) {
         selected[r.id] = true;
         count++;
       }
     });
 
     renderList();
-    setMsg('📅 Filtro aplicado: Mostrando ' + count + ' activo(s) instalados del ' + fmtDate(startDate) + ' al ' + fmtDate(endDate) + '.');
+    setMsg('📅 Filtro aplicado: Mostrando ' + count + ' activo(s) en el rango ' + fmtDate(startDate) + ' - ' + fmtDate(endDate) + '.');
   }
 
   function resetDateFilters() {
@@ -797,15 +805,18 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     $('master-date-from').value = '';
     $('master-date-to').value = '';
     renderList();
-    setMsg('Filtro de fechas removido: Mostrando todas las unidades.');
+    setMsg('Filtro de fechas removido: Mostrando unidades según los filtros de tabla activos.');
   }
 
-  // GENERACIÓN EXCEL .XLSX
+  // GENERACIÓN DE EXCEL INTEGRANDO TODOS LOS FILTROS COMBINADOS (DASHBOARD + FECHA + BÚSQUEDA)
   function exportMasterSwitchExcel() {
-    var list = all.filter(function(r) { return selected[r.id]; });
+    // Extraer unidades visibles actualmente bajo la combinación total de filtros
+    var list = all.filter(function(r) {
+      return isRowMatchingFilters(r);
+    });
 
     if (list.length === 0) {
-      setMsg('Seleccione al menos un activo para generar el Excel de Master Switch.', true);
+      setMsg('No hay ningún activo que coincida con la combinación de filtros aplicada para exportar a Excel.', true);
       return;
     }
 
@@ -844,13 +855,13 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     XLSX.utils.book_append_sheet(wb, ws, "Hoja3");
     XLSX.writeFile(wb, fileName);
 
-    setMsg('📊 Archivo Excel generado con éxito: ' + fileName);
+    setMsg('📊 Archivo Excel generado con éxito con ' + list.length + ' activo(s) filtrado(s): ' + fileName);
   }
 
   // CERTI GPS
   function generateCertiLegalText() {
-    var list = all.filter(function(r) { return selected[r.id]; });
-    if (!list.length) { setMsg('Seleccione al menos un activo para generar el texto legal.', true); return; }
+    var list = all.filter(function(r) { return selected[r.id] && isRowMatchingFilters(r); });
+    if (!list.length) { setMsg('Seleccione al menos un activo visible para generar el texto legal.', true); return; }
 
     var txt = "SOLICITUD DE CERTIFICADO GPS - ÁREA LEGAL\n";
     txt += "========================================\n\n";
@@ -868,8 +879,8 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
   }
 
   function generateCertiWord() {
-    var list = all.filter(function(r) { return selected[r.id]; });
-    if (!list.length) { setMsg('Seleccione al menos un activo para generar el documento Word.', true); return; }
+    var list = all.filter(function(r) { return selected[r.id] && isRowMatchingFilters(r); });
+    if (!list.length) { setMsg('Seleccione al menos un activo visible para generar el documento Word.', true); return; }
 
     var htmlDoc = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>" +
       "<head><meta charset='utf-8'><title>Anexo 01</title><style>body{font-family:Arial,sans-serif;font-size:11pt;} table{border-collapse:collapse;width:100%;} th,td{border:1px solid #000;padding:6px;font-size:10pt;}</style></head><body>" +
@@ -984,7 +995,7 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
   $('master-btn-reset-dates').addEventListener('click', resetDateFilters);
   $('master-btn-excel').addEventListener('click', exportMasterSwitchExcel);
 
-  // EVENTOS KPI
+  // EVENTOS KPI (COMBINAN CON FECHA Y DEMÁS FILTROS)
   $('kpi-card-1').addEventListener('click', function() { activeKpiFilter = 'all'; highlightKpiCard('kpi-card-1'); renderList(); });
   $('kpi-card-sn').addEventListener('click', function() { activeKpiFilter = (activeKpiFilter === 'withSn') ? 'all' : 'withSn'; highlightKpiCard(activeKpiFilter === 'withSn' ? 'kpi-card-sn' : 'kpi-card-1'); renderList(); });
   $('kpi-card-nosn').addEventListener('click', function() { activeKpiFilter = (activeKpiFilter === 'noSn') ? 'all' : 'noSn'; highlightKpiCard(activeKpiFilter === 'noSn' ? 'kpi-card-nosn' : 'kpi-card-1'); renderList(); });
@@ -1037,11 +1048,10 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
   });
 
   $('cgps-sel-vis').addEventListener('click', function () {
-    var q = $('cgps-filter').value.trim().toLowerCase();
     all.forEach(function (r) {
-      var nom = r.nombreActivo.toLowerCase(), p = r.placa.toLowerCase(), v = r.vin.toLowerCase(), s = r.serialNumber.toLowerCase();
-      var matchBulk = activeBulkTokens.length === 0 || activeBulkTokens.some(function(token){ return nom===token || p===token || v===token || s===token; });
-      if (matchBulk && (!q || (r.nombreActivo + ' ' + r.placa + ' ' + r.vin + ' ' + r.serialNumber + ' ' + r.grupos + ' ' + r.razon + ' ' + r.ruc + ' ' + r.estadoProvincia + ' ' + r.tipoVehiculo).toLowerCase().indexOf(q) >= 0)) { selected[r.id] = true; }
+      if (isRowMatchingFilters(r)) {
+        selected[r.id] = true;
+      }
     });
     renderList();
   });
