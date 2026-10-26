@@ -384,7 +384,6 @@
 window.geotab = window.geotab || {};
 window.geotab.addin = window.geotab.addin || {};
 
-// REGISTRO UNIFICADO DE LLAVES GEOTAB PARA GARRANTOZAR COMPATIBILIDAD
 var addInConstructor = function (api, state, callback) {
   'use strict';
 
@@ -1195,10 +1194,10 @@ var addInConstructor = function (api, state, callback) {
 
   function load() {
     setMsg('Cargando activos de la base de datos…');
-    var nowIso = new Date().toISOString();
 
+    // CONSULTA DIRECTA DE DISPOSITIVOS SIN FILTRO DE FECHA SÍNCRONA
     return Promise.all([
-      callApi(api, 'Get', { typeName: 'Device', search: { fromDate: nowIso } }),
+      callApi(api, 'Get', { typeName: 'Device' }),
       callApi(api, 'Get', { typeName: 'Group' }).catch(function () { return []; }),
       callApi(api, 'Get', { typeName: 'Property' }).catch(function () { return []; }),
       callApi(api, 'GetSystemStatus').catch(function() { return null; })
@@ -1350,7 +1349,9 @@ var addInConstructor = function (api, state, callback) {
   };
 };
 
-// ASIGNACIÓN MULTIPLE DE REGISTRO PARA ASIGNA-NOMBRE DE GEOTAB
+// REGISTRO UNIFICADO EN GEOTAB
+window.geotab = window.geotab || {};
+window.geotab.addin = window.geotab.addin || {};
 window.geotab.addin["Test N"] = addInConstructor;
 window.geotab.addin["test_n"] = addInConstructor;
 window.geotab.addin["test_n-index"] = addInConstructor;
