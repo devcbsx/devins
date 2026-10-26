@@ -592,7 +592,7 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     }
   }
 
-  // EVALUADOR UNIFICADO DE FILTROS PARA TABLA Y EXPORTACIÓN
+  // EVALUADOR UNIFICADO DE FILTROS PARA TABLA Y EXPORTACIÓN EXCEL
   function isRowMatchingFilters(r) {
     // 1. KPI Serial / Selección
     if (activeKpiFilter === 'withSn' && !r.serialNumber) return false;
@@ -753,7 +753,6 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
 
     activeDateRange = { start: mondayStart, end: nowCut };
     
-    // Auto-seleccionar solo las unidades que coincidan con la combinación total
     selected = {};
     var count = 0;
     all.forEach(function(r) {
@@ -786,7 +785,6 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
 
     activeDateRange = { start: startDate, end: endDate };
 
-    // Auto-seleccionar solo las unidades que coincidan con la combinación total
     selected = {};
     var count = 0;
     all.forEach(function(r) {
@@ -808,32 +806,36 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     setMsg('Filtro de fechas removido: Mostrando unidades según los filtros de tabla activos.');
   }
 
-  // GENERACIÓN DE EXCEL INTEGRANDO TODOS LOS FILTROS COMBINADOS (DASHBOARD + FECHA + BÚSQUEDA)
+  // GENERACIÓN DE EXCEL INTEGRANDO TODOS LOS FILTROS COMBINADOS + FILTRADO EXCLUSIVO DE UNIDADES CON SERIAL
   function exportMasterSwitchExcel() {
-    // Extraer unidades visibles actualmente bajo la combinación total de filtros
+    // Filtrar estrictamente solo las unidades visibles que tengan SERIAL (# SERIE GPS) y VIN poblado
     var list = all.filter(function(r) {
-      return isRowMatchingFilters(r);
+      var isFiltered = isRowMatchingFilters(r);
+      var hasSerial = !!r.serialNumber && r.serialNumber.trim().length > 0;
+      var hasVin = !!r.vin && r.vin.trim().length > 0;
+      return isFiltered && hasSerial && hasVin;
     });
 
     if (list.length === 0) {
-      setMsg('No hay ningún activo que coincida con la combinación de filtros aplicada para exportar a Excel.', true);
+      setMsg('No hay unidades con # SERIE que coincidan con la combinación de filtros para exportar.', true);
       return;
     }
 
     var now = new Date();
-    var dateStr = pad(now.getDate()) + '-' + pad(now.getMonth() + 1) + '-' + now.getFullYear();
-    var fileName = 'LISTA MASTER SWITCH DIVEMOTOR CAMIONES-' + dateStr + '.xlsx';
+    var dateStr = pad(now.getDate()) + '/' + pad(now.getMonth() + 1) + '/' + now.getFullYear();
+    var timeStr = pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds());
+    
+    var fileName = 'LISTA MASTER SWITCH DIVEMOTOR CAMIONES-' + pad(now.getDate()) + '-' + pad(now.getMonth() + 1) + '-' + now.getFullYear() + '.xlsx';
 
+    // Construcción exacta según la Imagen 2
     var sheetData = [
-      [],
-      ["", "Fecha de corte", { t: 'n', v: 0, f: 'NOW()' }],
-      [],
-      ["", "PLACA", "BASE DE DATOS", "VIN", "# SERIE"]
+      ["Fecha de corte", dateStr, timeStr], // Fila 1: Fecha de corte | DD/MM/YYYY | HH:MM:SS
+      [], // Fila 2 vacía
+      ["PLACA", "BASE DE DATOS", "VIN", "# SERIE"] // Fila 3: Encabezados principales
     ];
 
     list.forEach(function(r) {
       sheetData.push([
-        "",
         r.placa || r.nombreActivo,
         databaseName,
         r.vin,
@@ -845,17 +847,16 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     var ws = XLSX.utils.aoa_to_sheet(sheetData);
 
     ws['!cols'] = [
-      { wch: 4 },
-      { wch: 22 },
-      { wch: 18 },
-      { wch: 22 },
-      { wch: 18 }
+      { wch: 24 }, // Col A PLACA
+      { wch: 18 }, // Col B BASE DE DATOS
+      { wch: 24 }, // Col C VIN
+      { wch: 20 }  // Col D # SERIE
     ];
 
     XLSX.utils.book_append_sheet(wb, ws, "Hoja3");
     XLSX.writeFile(wb, fileName);
 
-    setMsg('📊 Archivo Excel generado con éxito con ' + list.length + ' activo(s) filtrado(s): ' + fileName);
+    setMsg('📊 Archivo Excel generado con éxito con ' + list.length + ' activo(s) con serial: ' + fileName);
   }
 
   // CERTI GPS
@@ -995,7 +996,7 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
   $('master-btn-reset-dates').addEventListener('click', resetDateFilters);
   $('master-btn-excel').addEventListener('click', exportMasterSwitchExcel);
 
-  // EVENTOS KPI (COMBINAN CON FECHA Y DEMÁS FILTROS)
+  // EVENTOS KPI
   $('kpi-card-1').addEventListener('click', function() { activeKpiFilter = 'all'; highlightKpiCard('kpi-card-1'); renderList(); });
   $('kpi-card-sn').addEventListener('click', function() { activeKpiFilter = (activeKpiFilter === 'withSn') ? 'all' : 'withSn'; highlightKpiCard(activeKpiFilter === 'withSn' ? 'kpi-card-sn' : 'kpi-card-1'); renderList(); });
   $('kpi-card-nosn').addEventListener('click', function() { activeKpiFilter = (activeKpiFilter === 'noSn') ? 'all' : 'noSn'; highlightKpiCard(activeKpiFilter === 'noSn' ? 'kpi-card-nosn' : 'kpi-card-1'); renderList(); });
