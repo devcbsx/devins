@@ -40,7 +40,7 @@
 
       <div class="testn-card" id="btn-mod-valid">
         <h2>VALIDACIÓN DE VARIABLES</h2>
-        <p>Edición masiva e individual en Modo Seguro, visualización de grupos, fecha de instalación y parámetros XML (5/5).</p>
+        <p>Edición masiva e individual en Modo Seguro, gestión de grupos y parámetros XML (5/5).</p>
       </div>
 
       <div class="testn-card" id="btn-mod-master">
@@ -84,7 +84,7 @@
         <div>
           <div class="cgps-hero-tag">TEST N · AUDITORÍA Y MODO SEGURO</div>
           <h1>Validación de Variables GPS</h1>
-          <p>Modo seguro: GET → Fusionar Atributos → SET → GET Verificación.</p>
+          <p>Modo seguro: GET → Fusionar Atributos / Grupos → SET → GET Verificación.</p>
         </div>
       </div>
     </div>
@@ -225,6 +225,19 @@
         <input type="text" id="cgps-filter" class="cgps-input" placeholder="Buscar..." style="width: 260px;">
         <button id="cgps-sel-vis" type="button" class="cgps-btn cgps-btn-outline">Seleccionar visibles</button>
         <button id="cgps-sel-none" type="button" class="cgps-btn cgps-btn-outline">Limpiar selección</button>
+        
+        <!-- BOTÓN PRINCIPAL PARA GUARDAR TODOS LOS CAMBIOS DE LA TABLA -->
+        <button id="cgps-btn-save-table-changes" type="button" class="cgps-btn" style="background-color: #0284c7; color: #ffffff; font-weight: 700; margin-left: auto; border: none; padding: 7px 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">💾 Guardar Cambios Editados</button>
+      </div>
+
+      <!-- Edición Masiva de Grupos -->
+      <div id="mass-controls-groups" class="cgps-controls-row" style="margin-top: 10px; border-top: 1px solid #cbd5e1; padding-top: 10px; background-color: #f8fafc; padding: 10px; border-radius: 6px;">
+        <label style="font-size: 12px; font-weight: 700; color: #1b4e85; display: flex; align-items: center; gap: 4px;">📂 AÑADIR/QUITAR GRUPO GEOTAB:</label>
+        <select id="cgps-group-select" class="cgps-input" style="width: 280px; font-weight: 600;">
+          <option value="">-- Seleccionar Grupo del Árbol --</option>
+        </select>
+        <button id="cgps-btn-add-group" type="button" class="cgps-btn" style="background-color: #16a34a; color: #fff;">➕ Agregar Grupo a Seleccionados</button>
+        <button id="cgps-btn-remove-group" type="button" class="cgps-btn" style="background-color: #dc2626; color: #fff;">➖ Quitar Grupo de Seleccionados</button>
       </div>
 
       <!-- Edición Masiva en Certi GPS -->
@@ -362,6 +375,10 @@
     .cgps-msg { min-height: 18px; font-size: 12px; font-weight: 600; color: #15803d; }
     .cgps-msg.cgps-err { color: #b91c1c; }
 
+    .group-tag { display: inline-flex; align-items: center; gap: 4px; background-color: #e2e8f0; color: #334155; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 600; margin: 2px; }
+    .group-tag-del { cursor: pointer; color: #ef4444; font-weight: bold; font-size: 12px; margin-left: 2px; }
+    .group-tag-del:hover { color: #b91c1c; }
+
     .badge-param { padding: 3px 6px; border-radius: 4px; font-weight: 700; font-size: 11px; display: inline-block; }
     .badge-full { background-color: #dcfce7; color: #15803d; border: 1px solid #86efac; }
     .badge-partial { background-color: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
@@ -414,6 +431,7 @@ var addInConstructor = function (api, state, callback) {
   ];
 
   var all = [], groupsById = {}, propsById = {}, selected = {}, rawDevices = [];
+  var editedRowsMap = {}; // REGISTRA EDICIONES REALIZADAS EN CELDAS DE TEXTO
   var activeBulkTokens = [];
   var activeModule = 'hub';
   var activeKpiFilter = 'all';
@@ -512,7 +530,8 @@ var addInConstructor = function (api, state, callback) {
       estadoProvincia: resolveProperty(d, /estado|provincia/i),
       anualidad: resolveProperty(d, /anualidad|a\u00F1o/i),
       tipoVehiculo: resolveProperty(d, /tipo|type/i),
-      grupos: getGroupsList(d),
+      deviceGroups: d.groups || [],
+      gruposNames: getGroupsList(d),
       paramCount: paramStatus.count,
       paramMissing: paramStatus.missing
     };
@@ -525,11 +544,41 @@ var addInConstructor = function (api, state, callback) {
     return names.join(', ');
   }
 
+  function renderGroupBadges(r) {
+    var gs = r.deviceGroups || [];
+    if (!gs.length) return '<span style="color:#94a3b8; font-size:11px;">Sin Grupo</span>';
+    var html = '';
+    gs.forEach(function(gObj) {
+      var g = groupsById[gObj.id];
+      if (g && g.name && !/^Group/.test(g.id)) {
+        html += '<span class="group-tag">' + htmlEsc(g.name.trim()) + '<span class="group-tag-del" data-act="del-grp" data-devid="' + htmlEsc(r.id) + '" data-grpid="' + htmlEsc(g.id) + '" title="Quitar grupo">×</span></span>';
+      }
+    });
+    return html || '<span style="color:#94a3b8; font-size:11px;">Sin Grupo Custom</span>';
+  }
+
+  function populateGroupDropdown() {
+    var selectElem = $('cgps-group-select');
+    selectElem.innerHTML = '<option value="">-- Seleccionar Grupo del Árbol --</option>';
+    
+    var sortedGroups = Object.keys(groupsById).map(function(k) { return groupsById[k]; })
+      .filter(function(g) { return g && g.name && !/^Group/.test(g.id); })
+      .sort(function(a, b) { return a.name.localeCompare(b.name, 'es'); });
+
+    sortedGroups.forEach(function(g) {
+      var opt = document.createElement('option');
+      opt.value = g.id;
+      opt.textContent = g.name;
+      selectElem.appendChild(opt);
+    });
+  }
+
   function callApi(apiRef, method, params) { return new Promise(function (ok, fail) { apiRef.call(method, params, ok, fail); }); }
   var $ = function (id) { return document.getElementById(id); };
 
   function rebuildRows() {
     all = rawDevices.map(function (d) { return toRow(d); }).sort(function (a, b) { return a.placa.localeCompare(b.placa, 'es', { numeric: true }); });
+    populateGroupDropdown();
     updateKPIs();
   }
 
@@ -591,6 +640,7 @@ var addInConstructor = function (api, state, callback) {
     activeKpiFilter = 'all';
     activeDateRange = null;
     selected = {};
+    editedRowsMap = {};
     activeBulkTokens = [];
     $('cgps-bulk-input').value = '';
     $('cgps-filter').value = '';
@@ -676,7 +726,7 @@ var addInConstructor = function (api, state, callback) {
         '<th style="width: 110px;">Fecha Instalación</th>' +
         '<th style="width: 150px;">VIN</th>' +
         '<th style="width: 110px;">Parámetros (5)</th>' +
-        '<th style="width: 140px;">Grupos</th>' +
+        '<th style="width: 180px;">Grupos</th>' +
         '<th style="width: 110px;">Estado/Prov.</th>' +
         '<th style="width: 100px;">RUC</th>' +
         '<th style="width: 180px;">Razón Social</th>' +
@@ -716,7 +766,7 @@ var addInConstructor = function (api, state, callback) {
     
     if (q) {
       if (fieldSel === 'all') {
-        var hay = (r.nombreActivo + ' ' + r.placa + ' ' + r.vin + ' ' + r.serialNumber + ' ' + r.grupos + ' ' + r.razon + ' ' + r.ruc + ' ' + r.estadoProvincia + ' ' + r.anualidad + ' ' + r.tipoVehiculo).toLowerCase();
+        var hay = (r.nombreActivo + ' ' + r.placa + ' ' + r.vin + ' ' + r.serialNumber + ' ' + r.gruposNames + ' ' + r.razon + ' ' + r.ruc + ' ' + r.estadoProvincia + ' ' + r.anualidad + ' ' + r.tipoVehiculo).toLowerCase();
         if (hay.indexOf(q) < 0) return false;
       } else {
         var valTarget = String(r[fieldSel] || '').toLowerCase();
@@ -746,7 +796,7 @@ var addInConstructor = function (api, state, callback) {
           '<td>' + htmlEsc(r.desde) + '</td>' +
           '<td><input type="text" class="cgps-edit-input" data-field="razon" data-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(r.razon) + '" placeholder="Sin Razón Social"' + disAttr + '></td>' +
           '<td><input type="text" class="cgps-edit-input" data-field="ruc" data-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(r.ruc) + '" placeholder="Sin RUC"' + disAttr + '></td>' +
-          '<td>' + htmlEsc(r.grupos) + '</td>' +
+          '<td>' + renderGroupBadges(r) + '</td>' +
           '</tr>';
       } else if (activeModule === 'master') {
         html += '<tr>' +
@@ -769,7 +819,7 @@ var addInConstructor = function (api, state, callback) {
           '<td>' + htmlEsc(r.desde) + '</td>' +
           '<td>' + htmlEsc(r.vin) + '</td>' +
           '<td><span class="badge-param ' + badgeClass + '" title="Posee ' + r.paramCount + ' de 5 parámetros">' + badgeLabel + '</span></td>' +
-          '<td>' + htmlEsc(r.grupos || 'Sin Grupo') + '</td>' +
+          '<td>' + renderGroupBadges(r) + '</td>' +
           '<td><input type="text" class="cgps-edit-input" data-field="estadoProvincia" data-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(r.estadoProvincia) + '" placeholder="Sin Estado"' + disAttr + '></td>' +
           '<td><input type="text" class="cgps-edit-input" data-field="ruc" data-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(r.ruc) + '" placeholder="Sin RUC"' + disAttr + '></td>' +
           '<td><input type="text" class="cgps-edit-input" data-field="razon" data-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(r.razon) + '" placeholder="Sin Razón Social"' + disAttr + '></td>' +
@@ -783,94 +833,122 @@ var addInConstructor = function (api, state, callback) {
     updateKPIs();
   }
 
-  function cleanLegalName(str) {
-    if (!str) return '';
-    return str.toUpperCase()
-      .replace(/^OBSERVACIONES\s*:\s*/i, '')
-      .replace(/\b(S\.?A\.?C\.?|S\.?A\.?|E\.?I\.?R\.?L\.?|S\.?R\.?L\.?|SOCIEDAD\s+ANONIMA\s+CERRADA|SOCIEDAD\s+ANONIMA|CERRADA)\b/g, '')
-      .replace(/[^A-Z0-9\s]/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
+  // GESTIÓN SEGURA DE GRUPOS (ADD / REMOVE) EN GEOTAB
+  function updateDeviceGroupsSafe(targets, groupObj, action) {
+    if (!targets.length) { setMsg('Seleccione al menos un activo para modificar grupos.', true); return; }
+
+    var actionText = (action === 'add') ? 'añadir' : 'quitar';
+    setMsg('🛡️ Guardando grupo [' + groupObj.name + '] (' + actionText + ') en ' + targets.length + ' activo(s)...');
+
+    var completed = 0;
+    var promises = targets.map(function(r) {
+      return callApi(api, 'Get', { typeName: 'Device', search: { id: r.id } }).then(function(resGet) {
+        var liveDevice = (resGet && resGet[0]) ? resGet[0] : r.rawDevice;
+        var currentGroups = liveDevice.groups || [];
+
+        if (action === 'add') {
+          var exists = currentGroups.some(function(g) { return g.id === groupObj.id; });
+          if (!exists) currentGroups.push({ id: groupObj.id });
+        } else if (action === 'remove') {
+          currentGroups = currentGroups.filter(function(g) { return g.id !== groupObj.id; });
+        }
+
+        liveDevice.groups = currentGroups;
+
+        return callApi(api, 'Set', { typeName: 'Device', entity: liveDevice }).then(function() {
+          return callApi(api, 'Get', { typeName: 'Device', search: { id: r.id } }).then(function(verifGet) {
+            if (verifGet && verifGet[0]) completed++;
+          });
+        });
+      });
+    });
+
+    return Promise.all(promises).then(function() {
+      setMsg('✅ Guardado Exitoso en Geotab: Grupo [' + groupObj.name + '] actualizado en ' + completed + ' activo(s).');
+      load();
+    }).catch(function(err) {
+      setMsg('❌ Error al actualizar grupos en Geotab: ' + (err.message || err), true);
+    });
   }
 
-  function executeGroupAudit() {
-    var rawText = $('cgps-audit-input').value.trim();
-    if (!rawText) { setMsg('Ingrese el texto a auditar.', true); return; }
+  // GUARDADO EXPLÍCITO DE CAMBIOS EDITADOS EN TABLA (BOTÓN DE GUARDAR)
+  function saveAllTableChanges() {
+    var deviceIds = Object.keys(editedRowsMap);
+    if (!deviceIds.length) {
+      setMsg('No hay cambios pendientes por guardar en la tabla.', true);
+      return;
+    }
 
-    var cleanText = rawText.replace(/^Observaciones\s*:\s*/i, '');
+    if (!window.confirm("💾 MODO SEGURO: ¿Desea guardar definitivamente los cambios realizados en " + deviceIds.length + " activo(s) en Geotab?")) return;
 
-    var groupList = [];
-    Object.keys(groupsById).forEach(function(gid) {
-      var g = groupsById[gid];
-      if (g && g.name && !/^Group/.test(g.id)) {
-        groupList.push({ id: g.id, name: g.name.trim(), cleanName: cleanLegalName(g.name) });
-      }
-    });
+    setMsg('🛡️ Guardando ' + deviceIds.length + ' activo(s) modificados en Geotab...');
 
-    var clientCandidates = [];
-    var chunks = cleanText.split(/[\n\r]+/);
-    
-    chunks.forEach(function(chunk) {
-      var subParts = chunk.split(/\s*-\s*/);
-      for (var i = 0; i < subParts.length; i++) {
-        var part = subParts[i].trim();
+    var regexMap = {
+      razon: /raz[o\u00F3]n\s*social|empresa|cliente/i,
+      ruc: /ruc|taxid/i,
+      estadoProvincia: /estado|provincia/i,
+      anualidad: /anualidad|a\u00F1o/i,
+      tipoVehiculo: /tipo|type/i
+    };
 
-        if (/^[A-Z0-9]{15,17}/i.test(part) || /^NO\s+INDICA/i.test(part)) {
-          continue;
-        }
+    var completed = 0;
 
-        var candidateName = part.replace(/\s+[A-Z0-9]{15,17}.*$/i, '').trim();
-        if (candidateName.length >= 3 && !clientCandidates.includes(candidateName)) {
-          clientCandidates.push(candidateName);
-        }
-      }
-    });
+    var promises = deviceIds.map(function(devId) {
+      var changes = editedRowsMap[devId];
+      return callApi(api, 'Get', { typeName: 'Device', search: { id: devId } }).then(function(resGet) {
+        if (!resGet || !resGet[0]) return;
+        var liveDevice = resGet[0];
 
-    var resultsHtml = '';
-    var uniqueClients = [];
+        Object.keys(changes).forEach(function(field) {
+          var newVal = changes[field];
+          if (field === 'nombreActivo') {
+            liveDevice.name = newVal;
+          } else if (field === 'placa') {
+            liveDevice.licensePlate = newVal;
+          } else if (regexMap[field]) {
+            var propRegex = regexMap[field];
+            var propId = findPropertyId(propRegex);
 
-    clientCandidates.forEach(function(rawClient) {
-      var cleanClient = cleanLegalName(rawClient);
-      if (!cleanClient || uniqueClients.includes(cleanClient)) return;
-      uniqueClients.push(cleanClient);
+            if (propId) {
+              var customProps = liveDevice.customProperties || [];
+              var foundIdx = -1;
 
-      var clientTokens = cleanClient.split(' ').filter(function(t) { return t.length >= 3; });
-      var matchedGroup = null;
+              for (var i = 0; i < customProps.length; i++) {
+                var pInfo = propsById[customProps[i].property && customProps[i].property.id];
+                if (pInfo && propRegex.test(pInfo.name)) {
+                  foundIdx = i;
+                  break;
+                }
+              }
 
-      for (var i = 0; i < groupList.length; i++) {
-        var g = groupList[i];
-        if (!g.cleanName) continue;
-
-        if (g.cleanName === cleanClient || g.cleanName.indexOf(cleanClient) >= 0 || cleanClient.indexOf(g.cleanName) >= 0) {
-          matchedGroup = g.name;
-          break;
-        }
-
-        var matches = 0;
-        clientTokens.forEach(function(tok) {
-          if (g.cleanName.indexOf(tok) >= 0) matches++;
+              if (foundIdx >= 0) {
+                customProps[foundIdx].value = newVal;
+              } else {
+                customProps.push({
+                  property: { id: propId },
+                  value: newVal
+                });
+              }
+              liveDevice.customProperties = customProps;
+            }
+          }
         });
 
-        if (matches >= 2 || (clientTokens.length === 1 && matches === 1)) {
-          matchedGroup = g.name;
-          break;
-        }
-      }
-
-      var statusBadge = matchedGroup 
-        ? '<span class="badge-audit-ok">Grupo Existe</span>' 
-        : '<span class="badge-audit-warn">Grupo No Creado</span>';
-
-      resultsHtml += '<tr>' +
-        '<td><b>' + htmlEsc(rawClient) + '</b></td>' +
-        '<td>' + htmlEsc(matchedGroup || 'Sin Grupo Coincidente en el Árbol') + '</td>' +
-        '<td>' + statusBadge + '</td>' +
-        '</tr>';
+        return callApi(api, 'Set', { typeName: 'Device', entity: liveDevice }).then(function() {
+          return callApi(api, 'Get', { typeName: 'Device', search: { id: devId } }).then(function(verifGet) {
+            if (verifGet && verifGet[0]) completed++;
+          });
+        });
+      });
     });
 
-    $('cgps-audit-listbody').innerHTML = resultsHtml || '<tr><td colspan="3" style="text-align:center;">No se detectaron clientes válidos en el texto.</td></tr>';
-    $('cgps-audit-results-card').style.display = 'block';
-    setMsg('Auditoría del árbol de grupos finalizada.');
+    Promise.all(promises).then(function() {
+      editedRowsMap = {};
+      setMsg('✅ Cambios guardados correctamente en Geotab para ' + completed + ' activo(s).');
+      load();
+    }).catch(function(err) {
+      setMsg('❌ Error al guardar cambios en Geotab: ' + (err.message || err), true);
+    });
   }
 
   function applySafeDeviceUpdate(targetRows, field, newValue, labelName) {
@@ -1195,7 +1273,6 @@ var addInConstructor = function (api, state, callback) {
   function load() {
     setMsg('Cargando activos de la base de datos…');
 
-    // CONSULTA DIRECTA DE DISPOSITIVOS SIN FILTRO DE FECHA SÍNCRONA
     return Promise.all([
       callApi(api, 'Get', { typeName: 'Device' }),
       callApi(api, 'Get', { typeName: 'Group' }).catch(function () { return []; }),
@@ -1266,6 +1343,24 @@ var addInConstructor = function (api, state, callback) {
   $('kpi-card-5').addEventListener('click', function() { activeKpiFilter = (activeKpiFilter === 'empty') ? 'all' : 'empty'; highlightKpiCard(activeKpiFilter === 'empty' ? 'kpi-card-5' : 'kpi-card-1'); renderList(); });
   $('kpi-card-6').addEventListener('click', function() { activeKpiFilter = (activeKpiFilter === 'partial') ? 'all' : 'partial'; highlightKpiCard(activeKpiFilter === 'partial' ? 'kpi-card-6' : 'kpi-card-1'); renderList(); });
 
+  // EVENTO DE GUARDADO EXPLÍCITO DE LA TABLA
+  $('cgps-btn-save-table-changes').addEventListener('click', saveAllTableChanges);
+
+  // EVENTOS DE GESTIÓN DE GRUPOS MASIVA
+  $('cgps-btn-add-group').addEventListener('click', function() {
+    var grpId = $('cgps-group-select').value;
+    if (!grpId) { setMsg('Seleccione un grupo del desplegable.', true); return; }
+    var targets = all.filter(function(r) { return selected[r.id]; });
+    updateDeviceGroupsSafe(targets, groupsById[grpId], 'add');
+  });
+
+  $('cgps-btn-remove-group').addEventListener('click', function() {
+    var grpId = $('cgps-group-select').value;
+    if (!grpId) { setMsg('Seleccione un grupo del desplegable.', true); return; }
+    var targets = all.filter(function(r) { return selected[r.id]; });
+    updateDeviceGroupsSafe(targets, groupsById[grpId], 'remove');
+  });
+
   // EVENTO INYECCIÓN SEGURA DE PARÁMETROS
   $('cgps-btn-inject-params').addEventListener('click', injectMissingParametersSafe);
 
@@ -1296,33 +1391,40 @@ var addInConstructor = function (api, state, callback) {
   $('cgps-filter').addEventListener('input', renderList);
   $('cgps-filter-field').addEventListener('change', renderList);
 
-  // EDICIÓN INDIVIDUAL EN TABLA (MODO SEGURO AUTOMÁTICO AL CAMBIAR CAMPO)
-  $('cgps-listbody').addEventListener('change', function (e) {
+  // EVENTOS DE LA TABLA (EDICIÓN EN MEMORIA + QUITADO RÁPIDO DE GRUPOS INDIVIDUALES)
+  $('cgps-listbody').addEventListener('input', function (e) {
     var field = e.target.getAttribute('data-field');
     var id = e.target.getAttribute('data-id');
 
+    if (field && id) {
+      if (!editedRowsMap[id]) editedRowsMap[id] = {};
+      editedRowsMap[id][field] = e.target.value.trim();
+      setMsg('⚠️ Hay cambios pendientes por guardar. Haga clic en "💾 Guardar Cambios Editados".');
+    }
+  });
+
+  $('cgps-listbody').addEventListener('click', function (e) {
+    var act = e.target.getAttribute('data-act');
+    if (act === 'del-grp') {
+      var devId = e.target.getAttribute('data-devid');
+      var grpId = e.target.getAttribute('data-grpid');
+      var targetRow = all.find(function(r) { return r.id === devId; });
+      var groupObj = groupsById[grpId];
+
+      if (targetRow && groupObj) {
+        if (window.confirm('¿Deseas quitar el grupo [' + groupObj.name + '] de este activo?')) {
+          updateDeviceGroupsSafe([targetRow], groupObj, 'remove');
+        }
+      }
+    }
+  });
+
+  $('cgps-listbody').addEventListener('change', function (e) {
+    var id = e.target.getAttribute('data-id');
     if (e.target.type === 'checkbox' && id) {
       selected[id] = e.target.checked;
       renderList();
       updateKPIs();
-      return;
-    }
-
-    if (field && id) {
-      var newVal = e.target.value.trim();
-      var targetRow = all.find(function(r) { return r.id === id; });
-      if (targetRow) {
-        var labelMap = {
-          nombreActivo: 'Nombre',
-          placa: 'Placa',
-          razon: 'Razón Social',
-          ruc: 'RUC',
-          estadoProvincia: 'Estado',
-          anualidad: 'Anualidad',
-          tipoVehiculo: 'Tipo'
-        };
-        applySafeDeviceUpdate([targetRow], field, newVal, labelMap[field] || field);
-      }
     }
   });
 
