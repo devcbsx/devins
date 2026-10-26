@@ -87,11 +87,14 @@
       </div>
     </div>
 
-    <!-- KPIs Rápidos (Botonera de filtro dinámico) -->
+    <!-- KPIs Rápidos -->
     <div class="cgps-kpi-grid" style="margin-top: 10px;">
       <div class="cgps-card kpi-btn-card" id="kpi-card-1" title="Haz clic para mostrar todos los activos">
         <div class="cgps-kpi-title" id="kpi-title-1">Unidades Cargadas</div>
         <div class="cgps-kpi-value" id="kpi-total">0</div>
+        <div style="font-size: 10px; color: #64748b; margin-top: 3px;">
+          Con Serie: <strong id="kpi-with-sn" style="color:#1e293b;">0</strong> | Sin Serie: <strong id="kpi-no-sn" style="color:#64748b;">0</strong>
+        </div>
       </div>
       <div class="cgps-card kpi-btn-card" id="kpi-card-2" title="Haz clic para filtrar">
         <div class="cgps-kpi-title" id="kpi-title-2">Seleccionados</div>
@@ -172,7 +175,7 @@
         <table class="cgps-table">
           <thead id="cgps-table-head"></thead>
           <tbody id="cgps-listbody">
-            <tr><td colspan="10" style="text-align:center; padding: 16px; color: #64748b;">Cargando activos…</td></tr>
+            <tr><td colspan="11" style="text-align:center; padding: 16px; color: #64748b;">Cargando activos…</td></tr>
           </tbody>
         </table>
       </div>
@@ -260,6 +263,7 @@
     .cgps-kpi-value { font-size: 20px; font-weight: 700; color: #1e293b; }
     .cgps-controls-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; width: 100%; }
     .cgps-input, .cgps-textarea { padding: 5px 8px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px; outline: none; background-color: #ffffff; }
+    .cgps-input:disabled { background-color: #f1f5f9 !important; color: #94a3b8 !important; cursor: not-allowed !important; border-color: #e2e8f0 !important; }
     .cgps-textarea { font-family: monospace; resize: vertical; }
     .cgps-table-container { background-color: #ffffff; border-radius: 8px; border: 1px solid #cbd5e1; overflow: hidden; width: 100%; }
     .cgps-table-scroll { max-height: 440px; overflow-y: auto; width: 100%; }
@@ -294,8 +298,7 @@ window.geotab.addin = window.geotab.addin || {};
 window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
   'use strict';
 
-  // LOGIN CONTRASEÑA
-  var PASS_CORRECTA = "321987";
+  var PASS_CORRECTA = "3219878";
   
   document.getElementById('navisaf-btn-login').addEventListener('click', function() {
     var val = document.getElementById('navisaf-pass-input').value;
@@ -313,13 +316,12 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     }
   });
 
-  // DEFINICIÓN DE LAS 5 REGLAS DE PARÁMETROS OBLIGATORIOS
   var REQUIRED_PARAMS = [
-    { name: "Enable Gps Altitude Logging", offset: "181", bytes: "08", xml: '<Parameter Description="Enable Gps Altitude Logging" Offset="181" Bytes="08" IsEnabled="true"/>' },
-    { name: "Disable Accelerometer Record Limit", offset: "65", bytes: "02", xml: '<Parameter Description="Disable Accelerometer Record Limit" Offset="65" Bytes="02" IsEnabled="true"/>' },
-    { name: "High Res RPM allowed Error = 2 rpm", offset: "168", bytes: "02", xml: '<Parameter Description="High Res RPM allowed Error = 2 rpm" Offset="168" Bytes="02" IsEnabled="true"/>' },
-    { name: "Enable Engine Load", offset: "165", bytes: "04", xml: '<Parameter Description="Enable Engine Load" Offset="165" Bytes="04" IsEnabled="true"/>' },
-    { name: "Enable Engine Retarder Selection And Accel Pedal", offset: "166", bytes: "09", xml: '<Parameter Description="Enable Engine Retarder Selection And Accel Pedal" Offset="166" Bytes="09" IsEnabled="true"/>' }
+    { name: "Enable Gps Altitude Logging", offset: "181", bytes: "08" },
+    { name: "Disable Accelerometer Record Limit", offset: "65", bytes: "02" },
+    { name: "High Res RPM allowed Error = 2 rpm", offset: "168", bytes: "02" },
+    { name: "Enable Engine Load", offset: "165", bytes: "04" },
+    { name: "Enable Engine Retarder Selection And Accel Pedal", offset: "166", bytes: "09" }
   ];
 
   var all = [], groupsById = {}, propsById = {}, selected = {}, rawDevices = [];
@@ -334,7 +336,7 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     if (isNaN(d.getTime()) || d.getFullYear() > 2040) return '';
     return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear();
   }
-  function xmlEsc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function xmlEsc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;'> '&gt;', '"': '&quot;' }[c]; }); }
   function htmlEsc(s) { return xmlEsc(s).replace(/'/g, '&#39;'); }
 
   function resolveProperty(d, regex) {
@@ -346,18 +348,27 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     return '';
   }
 
+  // EVALUACIÓN MEJORADA DE PARÁMETROS EN GEOTAB
   function evalDeviceParameters(d) {
-    var rawCustom = d.customParameters || d.parameterVersion || [];
-    var strCustom = typeof rawCustom === 'string' ? rawCustom : JSON.stringify(rawCustom);
-    
+    var customArray = d.customParameters || [];
+    var strParamVer = typeof d.parameterVersion === 'string' ? d.parameterVersion : JSON.stringify(d.parameterVersion || '');
+    var strCustomArray = JSON.stringify(customArray);
+
     var count = 0;
     var missing = [];
 
     REQUIRED_PARAMS.forEach(function(p) {
-      var hasOffset = strCustom.indexOf('Offset="' + p.offset + '"') >= 0 || strCustom.indexOf("Offset='" + p.offset + "'") >= 0;
-      var hasBytes = strCustom.indexOf('Bytes="' + p.bytes + '"') >= 0 || strCustom.indexOf("Bytes='" + p.bytes + "'") >= 0;
-      
-      if (hasOffset && hasBytes) {
+      var foundInArray = Array.isArray(customArray) && customArray.some(function(cp) {
+        return String(cp.offset) === p.offset && String(cp.bytes) === p.bytes;
+      });
+
+      var regOffset = new RegExp('Offset=[\'"]?' + p.offset + '[\'"]?', 'i');
+      var regBytes = new RegExp('Bytes=[\'"]?' + p.bytes + '[\'"]?', 'i');
+
+      var foundInString = (regOffset.test(strParamVer) && regBytes.test(strParamVer)) || 
+                          (regOffset.test(strCustomArray) && regBytes.test(strCustomArray));
+
+      if (foundInArray || foundInString) {
         count++;
       } else {
         missing.push(p);
@@ -371,6 +382,7 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     var name = (d.name || '').trim();
     var plate = (d.licensePlate || '').trim();
     var vin = (d.vehicleIdentificationNumber || '').trim();
+    var serial = (d.serialNumber || '').trim();
     var paramStatus = evalDeviceParameters(d);
 
     return {
@@ -379,7 +391,7 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
       nombreActivo: name,
       placa: plate || name,
       vin: vin,
-      serialNumber: (d.serialNumber || '').trim(),
+      serialNumber: serial,
       desde: fmtDate(d.activeFrom),
       razon: resolveProperty(d, /raz[o\u00F3]n\s*social|empresa|cliente/i),
       ruc: resolveProperty(d, /ruc|taxid/i),
@@ -410,6 +422,15 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
   function updateKPIs() {
     var selCount = Object.keys(selected).filter(function (k) { return selected[k]; }).length;
     $('kpi-total').textContent = all.length;
+
+    var withSn = 0, noSn = 0;
+    all.forEach(function(r) {
+      if (r.serialNumber) withSn++;
+      else noSn++;
+    });
+
+    $('kpi-with-sn').textContent = withSn;
+    $('kpi-no-sn').textContent = noSn;
 
     if (activeModule === 'certi') {
       $('kpi-title-2').textContent = "SELECCIONADOS";
@@ -533,14 +554,17 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
       var hay = (r.nombreActivo + ' ' + r.placa + ' ' + r.vin + ' ' + r.serialNumber + ' ' + r.grupos + ' ' + r.razon + ' ' + r.ruc + ' ' + r.estadoProvincia + ' ' + r.tipoVehiculo).toLowerCase();
       if (q && hay.indexOf(q) < 0) return;
 
+      var isSel = !!selected[r.id];
+      var disAttr = isSel ? '' : ' disabled';
+
       if (activeModule === 'certi') {
         html += '<tr>' +
-          '<td style="text-align:center;"><input type="checkbox" data-id="' + htmlEsc(r.id) + '"' + (selected[r.id] ? ' checked' : '') + '></td>' +
+          '<td style="text-align:center;"><input type="checkbox" data-id="' + htmlEsc(r.id) + '"' + (isSel ? ' checked' : '') + '></td>' +
           '<td>' + htmlEsc(r.placa) + '</td>' +
           '<td>' + htmlEsc(r.vin) + '</td>' +
           '<td>' + htmlEsc(r.desde) + '</td>' +
-          '<td><input type="text" class="cgps-edit-input" data-field="razon" data-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(r.razon) + '" placeholder="Sin Razón Social"></td>' +
-          '<td><input type="text" class="cgps-edit-input" data-field="ruc" data-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(r.ruc) + '" placeholder="Sin RUC"></td>' +
+          '<td><input type="text" class="cgps-edit-input" data-field="razon" data-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(r.razon) + '" placeholder="Sin Razón Social"' + disAttr + '></td>' +
+          '<td><input type="text" class="cgps-edit-input" data-field="ruc" data-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(r.ruc) + '" placeholder="Sin RUC"' + disAttr + '></td>' +
           '<td>' + htmlEsc(r.grupos) + '</td>' +
           '</tr>';
       } else {
@@ -548,17 +572,17 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
         var badgeLabel = r.paramCount + '/5 ' + (r.paramCount === 5 ? 'OK' : (r.paramCount === 0 ? 'Sin Param' : 'Parcial'));
 
         html += '<tr>' +
-          '<td style="text-align:center;"><input type="checkbox" data-id="' + htmlEsc(r.id) + '"' + (selected[r.id] ? ' checked' : '') + '></td>' +
-          '<td><input type="text" class="cgps-edit-input" data-field="nombreActivo" data-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(r.nombreActivo) + '"></td>' +
-          '<td><input type="text" class="cgps-edit-input" data-field="placa" data-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(r.placa) + '"></td>' +
+          '<td style="text-align:center;"><input type="checkbox" data-id="' + htmlEsc(r.id) + '"' + (isSel ? ' checked' : '') + '></td>' +
+          '<td><input type="text" class="cgps-edit-input" data-field="nombreActivo" data-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(r.nombreActivo) + '"' + disAttr + '></td>' +
+          '<td><input type="text" class="cgps-edit-input" data-field="placa" data-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(r.placa) + '"' + disAttr + '></td>' +
           '<td>' + htmlEsc(r.desde) + '</td>' +
           '<td>' + htmlEsc(r.vin) + '</td>' +
           '<td><span class="badge-param ' + badgeClass + '">' + badgeLabel + '</span></td>' +
-          '<td><input type="text" class="cgps-edit-input" data-field="estadoProvincia" data-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(r.estadoProvincia) + '" placeholder="Sin Estado"></td>' +
-          '<td><input type="text" class="cgps-edit-input" data-field="ruc" data-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(r.ruc) + '" placeholder="Sin RUC"></td>' +
-          '<td><input type="text" class="cgps-edit-input" data-field="razon" data-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(r.razon) + '" placeholder="Sin Razón Social"></td>' +
-          '<td><input type="text" class="cgps-edit-input" data-field="anualidad" data-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(r.anualidad) + '" placeholder="Año"></td>' +
-          '<td><input type="text" class="cgps-edit-input" data-field="tipoVehiculo" data-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(r.tipoVehiculo) + '" placeholder="Sin Tipo"></td>' +
+          '<td><input type="text" class="cgps-edit-input" data-field="estadoProvincia" data-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(r.estadoProvincia) + '" placeholder="Sin Estado"' + disAttr + '></td>' +
+          '<td><input type="text" class="cgps-edit-input" data-field="ruc" data-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(r.ruc) + '" placeholder="Sin RUC"' + disAttr + '></td>' +
+          '<td><input type="text" class="cgps-edit-input" data-field="razon" data-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(r.razon) + '" placeholder="Sin Razón Social"' + disAttr + '></td>' +
+          '<td><input type="text" class="cgps-edit-input" data-field="anualidad" data-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(r.anualidad) + '" placeholder="Año"' + disAttr + '></td>' +
+          '<td><input type="text" class="cgps-edit-input" data-field="tipoVehiculo" data-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(r.tipoVehiculo) + '" placeholder="Sin Tipo"' + disAttr + '></td>' +
           '</tr>';
       }
     });
@@ -567,7 +591,6 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     updateKPIs();
   }
 
-  // ACCIÓN PARA COMPLETAR LOS PARÁMETROS FALTANTES (HASTA 5/5)
   function injectMissingParameters() {
     var selIds = Object.keys(selected).filter(function (k) { return selected[k]; });
     if (!selIds.length) { setMsg('Seleccione al menos un activo.', true); return; }
@@ -722,7 +745,16 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     }
   });
 
-  $('cgps-listbody').addEventListener('change', function (e) { var id = e.target.getAttribute('data-id'); if (id) { selected[id] = e.target.checked; updateKPIs(); } });
+  // HABILITAR / DESHABILITAR EDICIÓN SEGÚN SELECCIÓN
+  $('cgps-listbody').addEventListener('change', function (e) { 
+    var id = e.target.getAttribute('data-id'); 
+    if (id && e.target.type === 'checkbox') { 
+      selected[id] = e.target.checked; 
+      renderList();
+      updateKPIs(); 
+    } 
+  });
+
   $('cgps-sel-vis').addEventListener('click', function () {
     var q = $('cgps-filter').value.trim().toLowerCase();
     all.forEach(function (r) {
@@ -732,7 +764,11 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     });
     renderList();
   });
-  $('cgps-sel-none').addEventListener('click', function () { selected = {}; renderList(); });
+
+  $('cgps-sel-none').addEventListener('click', function () { 
+    selected = {}; 
+    renderList(); 
+  });
 
   load().then(function () { if (typeof callback === 'function') callback(); }).catch(function () { if (typeof callback === 'function') callback(); });
 
