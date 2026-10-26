@@ -40,7 +40,7 @@
 
       <div class="navisaf-card" id="btn-mod-valid">
         <h2>VALIDACIÓN DE VARIABLES</h2>
-        <p>Edición masiva/modo seguro, visualización de grupos, fecha de instalación y parámetros XML (5/5).</p>
+        <p>Edición masiva e individual en Modo Seguro, visualización de grupos, fecha de instalación y parámetros XML (5/5).</p>
       </div>
 
       <div class="navisaf-card" id="btn-mod-master">
@@ -84,7 +84,7 @@
         <div>
           <div class="cgps-hero-tag">NAVISAF · AUDITORÍA Y MODO SEGURO</div>
           <h1>Validación de Variables GPS</h1>
-          <p>Modo seguro: GET → Fusionar por Offset → SET mínimo → GET verificación.</p>
+          <p>Modo seguro: GET → Fusionar Atributos → SET → GET Verificación.</p>
         </div>
       </div>
     </div>
@@ -126,19 +126,16 @@
     <div id="sec-audit" style="display: none;">
       <div class="cgps-hero">
         <div>
-          <div class="cgps-hero-tag">NAVISAF · VALIDACIÓN DE NOMENCLATURA Y GRUPOS</div>
+          <div class="cgps-hero-tag">NAVISAF · VALIDACIÓN DE ARBOL DE GRUPOS</div>
           <h1>Auditoría de Grupos por Texto Masivo</h1>
-          <p>Pegue el texto con Razones Sociales y VINs/Placas para comprobar si el grupo existe en Geotab.</p>
+          <p>Pegue el texto continuo de observaciones/clientes para verificar si el grupo existe en Geotab.</p>
         </div>
       </div>
 
       <div class="cgps-card" style="margin-top: 10px;">
         <div style="font-size: 12px; font-weight: 700; margin-bottom: 6px; color: #1b4e85;">PEGADO DE LISTA PARA AUDITORÍA DE GRUPOS</div>
         <div style="display: flex; gap: 10px; align-items: flex-start; flex-wrap: wrap;">
-          <textarea id="cgps-audit-input" class="cgps-textarea" placeholder="Ejemplo:
-PESCO PERU S.A.C. - W1FKHLAD8V0909278
-WARAYANA CORPORACION LOGISTICA S.A. C. - 9BM951511VB476953
-TRANSPORTES JIRENA S.A.C. - W1F9HPAD4V0903502" rows="6" style="flex: 1; min-width: 300px;"></textarea>
+          <textarea id="cgps-audit-input" class="cgps-textarea" placeholder="Pegue aquí las observaciones o clientes en bloque..." rows="6" style="flex: 1; min-width: 300px;"></textarea>
           <div style="display: flex; flex-direction: column; gap: 8px;">
             <button id="cgps-btn-exec-audit" type="button" class="cgps-btn cgps-btn-secondary" style="height: 38px;">🔍 Auditar Grupos</button>
             <button id="cgps-btn-clear-audit" type="button" class="cgps-btn cgps-btn-outline">Limpiar Texto</button>
@@ -153,12 +150,9 @@ TRANSPORTES JIRENA S.A.C. - W1F9HPAD4V0903502" rows="6" style="flex: 1; min-widt
           <table class="cgps-table">
             <thead>
               <tr>
-                <th style="width: 200px;">Razón Social Detectada</th>
-                <th style="width: 180px;">VIN / Placa Detectado</th>
-                <th style="width: 120px;">Placa en Geotab</th>
-                <th style="width: 220px;">Grupo Asignado Actual</th>
-                <th style="width: 200px;">Grupo Sugerido / Coincidencia</th>
-                <th style="width: 160px;">Estado Auditoría</th>
+                <th style="width: 50%;">Razón Social Detectada</th>
+                <th style="width: 30%;">Grupo Coincidente en Geotab</th>
+                <th style="width: 20%;">Estado Auditoría</th>
               </tr>
             </thead>
             <tbody id="cgps-audit-listbody"></tbody>
@@ -167,7 +161,7 @@ TRANSPORTES JIRENA S.A.C. - W1F9HPAD4V0903502" rows="6" style="flex: 1; min-widt
       </div>
     </div>
 
-    <!-- KPIs Rápidos (Certi, Validación y Master Switch) -->
+    <!-- KPIs Rápidos -->
     <div id="sec-kpi-container" class="cgps-kpi-grid" style="margin-top: 10px;">
       <div class="cgps-card kpi-btn-card" id="kpi-card-1" title="Mostrar todos los activos">
         <div class="cgps-kpi-title" id="kpi-title-1">Unidades Cargadas</div>
@@ -199,7 +193,7 @@ TRANSPORTES JIRENA S.A.C. - W1F9HPAD4V0903502" rows="6" style="flex: 1; min-widt
       </div>
     </div>
 
-    <!-- Búsqueda y Selección Masiva (Solo Módulos Estándar) -->
+    <!-- Búsqueda y Selección Masiva -->
     <div id="sec-bulk-container" class="cgps-card" style="margin-top: 10px;">
       <div style="font-size: 12px; font-weight: 700; margin-bottom: 6px; color: #1b4e85;">SELECCIÓN MASIVA DE ACTIVOS</div>
       <div style="display: flex; gap: 10px; align-items: flex-start; flex-wrap: wrap;">
@@ -228,9 +222,9 @@ TRANSPORTES JIRENA S.A.C. - W1F9HPAD4V0903502" rows="6" style="flex: 1; min-widt
         <button id="cgps-btn-apply-ruc-cert" type="button" class="cgps-btn cgps-btn-secondary">Aplicar RUC</button>
       </div>
 
-      <!-- Edición Masiva en Validación (Modo Seguro) -->
+      <!-- Edición Masiva en Validación -->
       <div id="mass-controls-valid" class="cgps-controls-row" style="margin-top: 10px; border-top: 1px solid #cbd5e1; padding-top: 10px; display: none;">
-        <label style="font-size: 12px; font-weight: 600; color: #1b4e85;">EDICIÓN MASIVA:</label>
+        <label style="font-size: 12px; font-weight: 600; color: #1b4e85;">EDICIÓN MASIVA (MODO SEGURO GEOTAB):</label>
         <input type="text" id="cgps-mass-nombre" class="cgps-input" placeholder="Nombre..." style="width: 110px;">
         <button id="cgps-btn-apply-nombre" type="button" class="cgps-btn cgps-btn-secondary">Nombre</button>
         <input type="text" id="cgps-mass-placa" class="cgps-input" placeholder="Placa..." style="width: 90px;">
@@ -326,9 +320,7 @@ TRANSPORTES JIRENA S.A.C. - W1F9HPAD4V0903502" rows="6" style="flex: 1; min-widt
     .navisaf-card:hover { border-color: #1b4e85 !important; transform: translateY(-3px) !important; box-shadow: 0 8px 16px rgba(27, 78, 133, 0.12) !important; }
     .navisaf-card h2 { font-size: 17px !important; color: #1b4e85 !important; font-weight: 700 !important; margin: 0 0 8px 0 !important; text-transform: uppercase !important; }
     .navisaf-card p { font-size: 12px !important; color: #64748b !important; margin: 0 !important; }
-    .navisaf-card.disabled { opacity: 0.55 !important; cursor: not-allowed !important; background-color: #f8fafc !important; border-style: dashed !important; }
-    .navisaf-card.disabled:hover { transform: none !important; border-color: #cbd5e1 !important; box-shadow: none !important; }
-
+    
     .cgps-btn { padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; white-space: nowrap; transition: all 0.2s; }
     .cgps-btn-white { background-color: #ffffff !important; color: #1b4e85 !important; }
     .cgps-btn-secondary { background-color: #4277a8 !important; color: #ffffff !important; }
@@ -344,7 +336,6 @@ TRANSPORTES JIRENA S.A.C. - W1F9HPAD4V0903502" rows="6" style="flex: 1; min-widt
     .cgps-kpi-value { font-size: 20px; font-weight: 700; color: #1e293b; }
     .cgps-controls-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; width: 100%; }
     .cgps-input, .cgps-textarea { padding: 5px 8px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px; outline: none; background-color: #ffffff; }
-    .cgps-input:disabled { background-color: #f1f5f9 !important; color: #94a3b8 !important; cursor: not-allowed !important; border-color: #e2e8f0 !important; }
     .cgps-textarea { font-family: monospace; resize: vertical; }
     .cgps-table-container { background-color: #ffffff; border-radius: 8px; border: 1px solid #cbd5e1; overflow: hidden; width: 100%; }
     .cgps-table-scroll { max-height: 440px; overflow-y: auto; width: 100%; }
@@ -362,9 +353,8 @@ TRANSPORTES JIRENA S.A.C. - W1F9HPAD4V0903502" rows="6" style="flex: 1; min-widt
     .badge-partial { background-color: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
     .badge-empty { background-color: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
 
-    .badge-audit-ok { background-color: #dcfce7; color: #15803d; padding: 3px 8px; border-radius: 4px; font-weight: 700; border: 1px solid #86efac; }
-    .badge-audit-warn { background-color: #fef3c7; color: #b45309; padding: 3px 8px; border-radius: 4px; font-weight: 700; border: 1px solid #fde68a; }
-    .badge-audit-err { background-color: #fee2e2; color: #b91c1c; padding: 3px 8px; border-radius: 4px; font-weight: 700; border: 1px solid #fca5a5; }
+    .badge-audit-ok { background-color: #dcfce7; color: #15803d; padding: 3px 8px; border-radius: 4px; font-weight: 700; border: 1px solid #86efac; display: inline-block; }
+    .badge-audit-warn { background-color: #fee2e2; color: #b91c1c; padding: 3px 8px; border-radius: 4px; font-weight: 700; border: 1px solid #fca5a5; display: inline-block; }
 
     @media (max-width: 768px) {
       .navisaf-grid { grid-template-columns: 1fr !important; }
@@ -433,6 +423,17 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
       if (p && list[i].value && regex.test(p.name)) return String(list[i].value).trim();
     }
     return '';
+  }
+
+  function findPropertyId(regex) {
+    var keys = Object.keys(propsById);
+    for (var i = 0; i < keys.length; i++) {
+      var p = propsById[keys[i]];
+      if (p && p.name && regex.test(p.name)) {
+        return p.id;
+      }
+    }
+    return null;
   }
 
   function evalDeviceParameters(d) {
@@ -632,7 +633,7 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
         renderHeader();
         renderList();
       } else if (mod === 'audit') {
-        $('navisaf-mod-title').textContent = 'MÓDULO: AUDITORÍA DE GRUPOS';
+        $('navisaf-mod-title').textContent = 'MÓDULO: AUDITORÍA DE ARBOL DE GRUPOS';
         $('sec-certigps').style.display = 'none';
         $('sec-validacion').style.display = 'none';
         $('sec-master').style.display = 'none';
@@ -672,26 +673,22 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
 
   // EVALUADOR UNIFICADO DE FILTROS PARA TABLA Y EXPORTACIÓN EXCEL
   function isRowMatchingFilters(r) {
-    // 1. KPI Serial / Selección
     if (activeKpiFilter === 'withSn' && !r.serialNumber) return false;
     if (activeKpiFilter === 'noSn' && r.serialNumber) return false;
     if (activeKpiFilter === 'selected' && !selected[r.id]) return false;
 
-    // 2. Rango de Fechas
     if (activeDateRange) {
       if (!r.activeFromRaw || r.activeFromRaw < activeDateRange.start || r.activeFromRaw > activeDateRange.end) {
         return false;
       }
     }
 
-    // 3. Parámetros en Validación
     if (activeModule === 'valid') {
       if (activeKpiFilter === 'full' && r.paramCount !== 5) return false;
       if (activeKpiFilter === 'empty' && r.paramCount !== 0) return false;
       if (activeKpiFilter === 'partial' && (r.paramCount === 0 || r.paramCount === 5)) return false;
     }
 
-    // 4. Bulk Pegado Masivo
     var nom = r.nombreActivo.toLowerCase(), p = r.placa.toLowerCase(), v = r.vin.toLowerCase(), s = r.serialNumber.toLowerCase();
     if (activeBulkTokens.length > 0) {
       var matchBulk = activeBulkTokens.some(function (token) {
@@ -700,7 +697,6 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
       if (!matchBulk) return false;
     }
 
-    // 5. Búsqueda por Texto
     var q = $('cgps-filter').value.trim().toLowerCase();
     if (q) {
       var hay = (r.nombreActivo + ' ' + r.placa + ' ' + r.vin + ' ' + r.serialNumber + ' ' + r.grupos + ' ' + r.razon + ' ' + r.ruc + ' ' + r.estadoProvincia + ' ' + r.tipoVehiculo).toLowerCase();
@@ -766,24 +762,24 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     updateKPIs();
   }
 
-  // ALGORITMO FLEXIBLE Y RIGUROSO PARA AUDITORÍA DE GRUPOS
+  // LIMPIEZA RIGUROSA Y NORMALIZACIÓN DE NOMBRES
   function cleanLegalName(str) {
     if (!str) return '';
     return str.toUpperCase()
+      .replace(/^OBSERVACIONES\s*:\s*/i, '')
       .replace(/\b(S\.?A\.?C\.?|S\.?A\.?|E\.?I\.?R\.?L\.?|S\.?R\.?L\.?|SOCIEDAD\s+ANONIMA\s+CERRADA|SOCIEDAD\s+ANONIMA|CERRADA)\b/g, '')
       .replace(/[^A-Z0-9\s]/g, ' ')
       .replace(/\s+/g, ' ')
       .trim();
   }
 
+  // AUDITORÍA FLEXIBLE DEL ÁRBOL DE GRUPOS DE GEOTAB
   function executeGroupAudit() {
     var rawText = $('cgps-audit-input').value.trim();
-    if (!rawText) { setMsg('Ingrese el texto con Razones Sociales y VINs/Placas a auditar.', true); return; }
+    if (!rawText) { setMsg('Ingrese el texto a auditar.', true); return; }
 
-    var lines = rawText.split(/\r?\n/).map(function(l) { return l.trim(); }).filter(function(l) { return l.length > 0; });
-    var resultsHtml = '';
+    var cleanText = rawText.replace(/^Observaciones\s*:\s*/i, '');
 
-    // Extraer todos los grupos de la BD
     var groupList = [];
     Object.keys(groupsById).forEach(function(gid) {
       var g = groupsById[gid];
@@ -792,76 +788,143 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
       }
     });
 
-    lines.forEach(function(line) {
-      // Ignorar líneas de comentarios no informativos
-      if (/^NO\s+INDICA/i.test(line)) return;
+    var clientCandidates = [];
+    var chunks = cleanText.split(/[\n\r]+/);
+    
+    chunks.forEach(function(chunk) {
+      var subParts = chunk.split(/\s*-\s*/);
+      for (var i = 0; i < subParts.length; i++) {
+        var part = subParts[i].trim();
 
-      var parts = line.split(/\s*-\s*/);
-      var rawRazon = parts.length > 1 ? parts[0].trim() : '';
-      var rawIdentifier = parts.length > 1 ? parts[1].trim() : parts[0].trim();
-
-      // Buscar el activo en Geotab por VIN, Placa o Nombre
-      var cleanId = rawIdentifier.toLowerCase().replace(/[^a-z0-9]/g, '');
-      var foundAsset = all.find(function(a) {
-        var aVin = a.vin.toLowerCase().replace(/[^a-z0-9]/g, '');
-        var aPlate = a.placa.toLowerCase().replace(/[^a-z0-9]/g, '');
-        var aName = a.nombreActivo.toLowerCase().replace(/[^a-z0-9]/g, '');
-        return (cleanId.length >= 5) && (aVin.indexOf(cleanId) >= 0 || cleanId.indexOf(aVin) >= 0 || aPlate === cleanId || aName === cleanId);
-      });
-
-      var currentGroup = foundAsset ? (foundAsset.grupos || 'Sin Grupo Asignado') : 'N/A (Activo no encontrado)';
-      var geotabPlate = foundAsset ? foundAsset.placa : 'No encontrado';
-
-      // Coincidencia flexible de grupos
-      var targetToMatch = cleanLegalName(rawRazon || rawIdentifier);
-      var targetTokens = targetToMatch.split(' ').filter(function(t) { return t.length >= 3; });
-
-      var matchedGroup = null;
-      var bestScore = 0;
-
-      groupList.forEach(function(g) {
-        if (!targetToMatch || !g.cleanName) return;
-        
-        if (g.cleanName === targetToMatch || g.cleanName.indexOf(targetToMatch) >= 0 || targetToMatch.indexOf(g.cleanName) >= 0) {
-          matchedGroup = g.name;
-          bestScore = 100;
-          return;
+        if (/^[A-Z0-9]{15,17}/i.test(part) || /^NO\s+INDICA/i.test(part)) {
+          continue;
         }
 
-        // Conteo de tokens/palabras clave similares
+        var candidateName = part.replace(/\s+[A-Z0-9]{15,17}.*$/i, '').trim();
+        if (candidateName.length >= 3 && !clientCandidates.includes(candidateName)) {
+          clientCandidates.push(candidateName);
+        }
+      }
+    });
+
+    var resultsHtml = '';
+    var uniqueClients = [];
+
+    clientCandidates.forEach(function(rawClient) {
+      var cleanClient = cleanLegalName(rawClient);
+      if (!cleanClient || uniqueClients.includes(cleanClient)) return;
+      uniqueClients.push(cleanClient);
+
+      var clientTokens = cleanClient.split(' ').filter(function(t) { return t.length >= 3; });
+      var matchedGroup = null;
+
+      for (var i = 0; i < groupList.length; i++) {
+        var g = groupList[i];
+        if (!g.cleanName) continue;
+
+        if (g.cleanName === cleanClient || g.cleanName.indexOf(cleanClient) >= 0 || cleanClient.indexOf(g.cleanName) >= 0) {
+          matchedGroup = g.name;
+          break;
+        }
+
         var matches = 0;
-        targetTokens.forEach(function(tok) {
+        clientTokens.forEach(function(tok) {
           if (g.cleanName.indexOf(tok) >= 0) matches++;
         });
 
-        if (matches > 0 && matches > bestScore) {
-          bestScore = matches;
+        if (matches >= 2 || (clientTokens.length === 1 && matches === 1)) {
           matchedGroup = g.name;
+          break;
         }
-      });
-
-      var statusBadge = '';
-      if (!foundAsset) {
-        statusBadge = '<span class="badge-audit-err">Activo No Existe</span>';
-      } else if (matchedGroup) {
-        statusBadge = '<span class="badge-audit-ok">Grupo Existe</span>';
-      } else {
-        statusBadge = '<span class="badge-audit-warn">Grupo No Creado</span>';
       }
 
+      var statusBadge = matchedGroup 
+        ? '<span class="badge-audit-ok">Grupo Existe</span>' 
+        : '<span class="badge-audit-warn">Grupo No Creado</span>';
+
       resultsHtml += '<tr>' +
-        '<td>' + htmlEsc(rawRazon || 'S/N') + '</td>' +
-        '<td>' + htmlEsc(rawIdentifier) + '</td>' +
-        '<td>' + htmlEsc(geotabPlate) + '</td>' +
-        '<td>' + htmlEsc(currentGroup) + '</td>' +
-        '<td>' + htmlEsc(matchedGroup || 'Sin Grupo Coincidente') + '</td>' +
+        '<td><b>' + htmlEsc(rawClient) + '</b></td>' +
+        '<td>' + htmlEsc(matchedGroup || 'Sin Grupo Coincidente en el Árbol') + '</td>' +
         '<td>' + statusBadge + '</td>' +
         '</tr>';
     });
 
-    $('cgps-audit-listbody').innerHTML = resultsHtml || '<tr><td colspan="6" style="text-align:center;">No se obtuvieron registros procesables.</td></tr>';
+    $('cgps-audit-listbody').innerHTML = resultsHtml || '<tr><td colspan="3" style="text-align:center;">No se detectaron clientes válidos en el texto.</td></tr>';
     $('cgps-audit-results-card').style.display = 'block';
-    setMsg('Auditoría de grupos finalizada.');
+    setMsg('Auditoría del árbol de grupos finalizada.');
+  }
+
+  // APLICAR CAMBIOS SEGUROS A GEOTAB (API REAL: GET -> FUSIONAR -> SET -> GET VERIF)
+  function applySafeDeviceUpdate(targetRows, field, newValue, labelName) {
+    if (!targetRows || !targetRows.length) {
+      setMsg('No hay activos seleccionados para actualizar.', true);
+      return Promise.resolve();
+    }
+
+    setMsg('🛡️ Modo Seguro Geotab: Guardando ' + labelName + ' en ' + targetRows.length + ' activo(s)...');
+
+    var regexMap = {
+      razon: /raz[o\u00F3]n\s*social|empresa|cliente/i,
+      ruc: /ruc|taxid/i,
+      estadoProvincia: /estado|provincia/i,
+      anualidad: /anualidad|a\u00F1o/i,
+      tipoVehiculo: /tipo|type/i
+    };
+
+    var completed = 0;
+
+    var promises = targetRows.map(function(r) {
+      return callApi(api, 'Get', { typeName: 'Device', search: { id: r.id } }).then(function(resGet) {
+        var liveDevice = (resGet && resGet[0]) ? resGet[0] : r.rawDevice;
+
+        if (field === 'nombreActivo') {
+          liveDevice.name = newValue;
+        } else if (field === 'placa') {
+          liveDevice.licensePlate = newValue;
+        } else if (regexMap[field]) {
+          var propRegex = regexMap[field];
+          var propId = findPropertyId(propRegex);
+
+          if (propId) {
+            var customProps = liveDevice.customProperties || [];
+            var foundIdx = -1;
+
+            for (var i = 0; i < customProps.length; i++) {
+              var pInfo = propsById[customProps[i].property && customProps[i].property.id];
+              if (pInfo && propRegex.test(pInfo.name)) {
+                foundIdx = i;
+                break;
+              }
+            }
+
+            if (foundIdx >= 0) {
+              customProps[foundIdx].value = newValue;
+            } else {
+              customProps.push({
+                property: { id: propId },
+                value: newValue
+              });
+            }
+            liveDevice.customProperties = customProps;
+          }
+        }
+
+        return callApi(api, 'Set', { typeName: 'Device', entity: liveDevice }).then(function() {
+          return callApi(api, 'Get', { typeName: 'Device', search: { id: r.id } }).then(function(verifGet) {
+            if (verifGet && verifGet[0]) {
+              completed++;
+            }
+          });
+        });
+      });
+    });
+
+    return Promise.all(promises).then(function() {
+      setMsg('✅ Guardado Exitoso en Geotab: Se actualizó [' + labelName + '] en ' + completed + ' activo(s).');
+      load();
+    }).catch(function(err) {
+      setMsg('❌ Error al actualizar en Geotab: ' + (err.message || err), true);
+    });
   }
 
   function injectMissingParametersSafe() {
@@ -984,7 +1047,6 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     setMsg('Filtro de fechas removido: Mostrando unidades según los filtros de tabla activos.');
   }
 
-  // GENERACIÓN DE EXCEL CON NOMBRE INCLUYENDO FECHA Y HORA + SIN FILA DE FECHA DE CORTE
   function exportMasterSwitchExcel() {
     var list = all.filter(function(r) {
       var isFiltered = isRowMatchingFilters(r);
@@ -1084,12 +1146,11 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     var selIds = Object.keys(selected).filter(function (k) { return selected[k]; });
     if (!selIds.length) { setMsg('Seleccione al menos un activo.', true); return; }
     var massVal = $(inputId).value.trim();
-    if (!window.confirm("¿Está seguro de modificar masivamente [" + label + "] para " + selIds.length + " activo(s)?")) return;
 
-    var count = 0;
-    all.forEach(function (r) { if (selected[r.id]) { r[field] = massVal; count++; } });
-    renderList();
-    setMsg('Se actualizó ' + label + ' para ' + count + ' activo(s).');
+    if (!window.confirm("¿Está seguro de modificar masivamente [" + label + "] para " + selIds.length + " activo(s) en Geotab?")) return;
+
+    var targets = all.filter(function(r) { return selected[r.id]; });
+    applySafeDeviceUpdate(targets, field, massVal, label);
   }
 
   function processBulkInput() {
@@ -1188,7 +1249,7 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
   $('kpi-card-5').addEventListener('click', function() { activeKpiFilter = (activeKpiFilter === 'empty') ? 'all' : 'empty'; highlightKpiCard(activeKpiFilter === 'empty' ? 'kpi-card-5' : 'kpi-card-1'); renderList(); });
   $('kpi-card-6').addEventListener('click', function() { activeKpiFilter = (activeKpiFilter === 'partial') ? 'all' : 'partial'; highlightKpiCard(activeKpiFilter === 'partial' ? 'kpi-card-6' : 'kpi-card-1'); renderList(); });
 
-  // EVENTO INYECCIÓN SEGURA
+  // EVENTO INYECCIÓN SEGURA DE PARÁMETROS
   $('cgps-btn-inject-params').addEventListener('click', injectMissingParametersSafe);
 
   // NAVEGACIÓN
@@ -1198,7 +1259,11 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
   $('btn-mod-audit').addEventListener('click', function() { switchView('audit'); });
   $('navisaf-btn-back').addEventListener('click', function() { switchView('hub'); });
 
-  // EDICIÓN MASIVA
+  // EDICIÓN MASIVA EN CERTI
+  $('cgps-btn-apply-mass-cert').addEventListener('click', function() { applyMassField('razon', 'cgps-mass-razon-cert', 'Razón Social'); });
+  $('cgps-btn-apply-ruc-cert').addEventListener('click', function() { applyMassField('ruc', 'cgps-mass-ruc-cert', 'RUC'); });
+
+  // EDICIÓN MASIVA EN VALIDACIÓN (PERSISTENTE EN GEOTAB)
   $('cgps-btn-apply-nombre').addEventListener('click', function() { applyMassField('nombreActivo', 'cgps-mass-nombre', 'Nombre del Activo'); });
   $('cgps-btn-apply-placa').addEventListener('click', function() { applyMassField('placa', 'cgps-mass-placa', 'Placa'); });
   $('cgps-btn-apply-estado').addEventListener('click', function() { applyMassField('estadoProvincia', 'cgps-mass-estado', 'Estado/Provincia'); });
@@ -1211,24 +1276,34 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
   $('cgps-btn-bulk-clear').addEventListener('click', function () { $('cgps-bulk-input').value = ''; activeBulkTokens = []; selected = {}; renderList(); setMsg('Filtro masivo limpiado.'); });
   $('cgps-filter').addEventListener('input', renderList);
 
-  $('cgps-listbody').addEventListener('input', function (e) {
+  // EDICIÓN INDIVIDUAL EN TABLA (MOGO SEGURO AUTOMÁTICO AL CAMBIAR CAMPO)
+  $('cgps-listbody').addEventListener('change', function (e) {
     var field = e.target.getAttribute('data-field');
     var id = e.target.getAttribute('data-id');
-    if (field && id) {
-      for (var i = 0; i < all.length; i++) {
-        if (all[i].id === id) { all[i][field] = e.target.value; break; }
-      }
-      updateKPIs();
-    }
-  });
 
-  $('cgps-listbody').addEventListener('change', function (e) { 
-    var id = e.target.getAttribute('data-id'); 
-    if (id && e.target.type === 'checkbox') { 
-      selected[id] = e.target.checked; 
+    if (e.target.type === 'checkbox' && id) {
+      selected[id] = e.target.checked;
       renderList();
-      updateKPIs(); 
-    } 
+      updateKPIs();
+      return;
+    }
+
+    if (field && id) {
+      var newVal = e.target.value.trim();
+      var targetRow = all.find(function(r) { return r.id === id; });
+      if (targetRow) {
+        var labelMap = {
+          nombreActivo: 'Nombre',
+          placa: 'Placa',
+          razon: 'Razón Social',
+          ruc: 'RUC',
+          estadoProvincia: 'Estado',
+          anualidad: 'Anualidad',
+          tipoVehiculo: 'Tipo'
+        };
+        applySafeDeviceUpdate([targetRow], field, newVal, labelMap[field] || field);
+      }
+    }
   });
 
   $('cgps-sel-vis').addEventListener('click', function () {
