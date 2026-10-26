@@ -208,7 +208,21 @@
     <!-- Controles y Edición Masiva -->
     <div id="sec-controls-container" class="cgps-card" style="margin-top: 10px;">
       <div class="cgps-controls-row">
-        <input type="text" id="cgps-filter" class="cgps-input" placeholder="Buscar por nombre, placa, VIN, RUC, estado, tipo, grupo..." style="width: 320px;">
+        <!-- SELECTOR DE CAMPO A FILTRAR + INPUT DE BÚSQUEDA -->
+        <select id="cgps-filter-field" class="cgps-input" style="width: 170px; font-weight: 600; color: #1b4e85; background-color: #f8fafc;">
+          <option value="all">[ Todos los campos ]</option>
+          <option value="nombreActivo">Nombre del Activo</option>
+          <option value="placa">Placa</option>
+          <option value="vin">VIN</option>
+          <option value="serialNumber"># Serie GPS</option>
+          <option value="razon">Razón Social</option>
+          <option value="ruc">RUC</option>
+          <option value="estadoProvincia">Estado / Provincia</option>
+          <option value="anualidad">Anualidad</option>
+          <option value="tipoVehiculo">Tipo Vehículo</option>
+          <option value="grupos">Grupos</option>
+        </select>
+        <input type="text" id="cgps-filter" class="cgps-input" placeholder="Buscar..." style="width: 260px;">
         <button id="cgps-sel-vis" type="button" class="cgps-btn cgps-btn-outline">Seleccionar visibles</button>
         <button id="cgps-sel-none" type="button" class="cgps-btn cgps-btn-outline">Limpiar selección</button>
       </div>
@@ -580,6 +594,7 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     activeBulkTokens = [];
     $('cgps-bulk-input').value = '';
     $('cgps-filter').value = '';
+    $('cgps-filter-field').value = 'all';
     $('cgps-legal-box').style.display = 'none';
     highlightKpiCard('kpi-card-1');
 
@@ -697,10 +712,18 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
       if (!matchBulk) return false;
     }
 
+    // BÚSQUEDA POR CAMPO ESPECÍFICO O TODOS LOS CAMPOS
+    var fieldSel = $('cgps-filter-field').value;
     var q = $('cgps-filter').value.trim().toLowerCase();
+    
     if (q) {
-      var hay = (r.nombreActivo + ' ' + r.placa + ' ' + r.vin + ' ' + r.serialNumber + ' ' + r.grupos + ' ' + r.razon + ' ' + r.ruc + ' ' + r.estadoProvincia + ' ' + r.tipoVehiculo).toLowerCase();
-      if (hay.indexOf(q) < 0) return false;
+      if (fieldSel === 'all') {
+        var hay = (r.nombreActivo + ' ' + r.placa + ' ' + r.vin + ' ' + r.serialNumber + ' ' + r.grupos + ' ' + r.razon + ' ' + r.ruc + ' ' + r.estadoProvincia + ' ' + r.anualidad + ' ' + r.tipoVehiculo).toLowerCase();
+        if (hay.indexOf(q) < 0) return false;
+      } else {
+        var valTarget = String(r[fieldSel] || '').toLowerCase();
+        if (valTarget.indexOf(q) < 0) return false;
+      }
     }
 
     return true;
@@ -1274,9 +1297,12 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
 
   $('cgps-btn-bulk').addEventListener('click', processBulkInput);
   $('cgps-btn-bulk-clear').addEventListener('click', function () { $('cgps-bulk-input').value = ''; activeBulkTokens = []; selected = {}; renderList(); setMsg('Filtro masivo limpiado.'); });
+  
+  // EVENTOS DE BÚSQUEDA Y SELECTOR DE CAMPO
   $('cgps-filter').addEventListener('input', renderList);
+  $('cgps-filter-field').addEventListener('change', renderList);
 
-  // EDICIÓN INDIVIDUAL EN TABLA (MOGO SEGURO AUTOMÁTICO AL CAMBIAR CAMPO)
+  // EDICIÓN INDIVIDUAL EN TABLA (MODO SEGURO AUTOMÁTICO AL CAMBIAR CAMPO)
   $('cgps-listbody').addEventListener('change', function (e) {
     var field = e.target.getAttribute('data-field');
     var id = e.target.getAttribute('data-id');
