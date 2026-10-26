@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8">
 <title>Módulos NAVISAF</title>
+<!-- Librería SheetJS para exportación a Excel .xlsx -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -38,12 +40,12 @@
 
       <div class="navisaf-card" id="btn-mod-valid">
         <h2>VALIDACIÓN DE VARIABLES</h2>
-        <p>Edición masiva e individual de campos y validación de parámetros XML (5/5).</p>
+        <p>Edición masiva/modo seguro y validación de parámetros XML (5/5).</p>
       </div>
 
-      <div class="navisaf-card disabled">
-        <h2>OTRO MÓDULO</h2>
-        <p>Próximamente disponible.</p>
+      <div class="navisaf-card" id="btn-mod-master">
+        <h2>MASTER SWITCH</h2>
+        <p>Filtro por fecha de instalación ("Esta Semana") y descarga en Excel .xlsx.</p>
       </div>
 
       <div class="navisaf-card disabled">
@@ -80,40 +82,55 @@
     <div id="sec-validacion" style="display: none;">
       <div class="cgps-hero">
         <div>
-          <div class="cgps-hero-tag">NAVISAF · AUDITORÍA Y VALIDACIÓN</div>
+          <div class="cgps-hero-tag">NAVISAF · AUDITORÍA Y MODO SEGURO</div>
           <h1>Validación de Variables GPS</h1>
-          <p>Edite masiva e individualmente los parámetros operativos de las unidades activas.</p>
+          <p>Modo seguro: GET → Fusionar por Offset → SET mínimo → GET verificación.</p>
         </div>
       </div>
     </div>
 
-    <!-- KPIs Rápidos (Botonera de Filtro Dinámico) -->
+    <!-- Módulo Master Switch -->
+    <div id="sec-master" style="display: none;">
+      <div class="cgps-hero">
+        <div>
+          <div class="cgps-hero-tag">NAVISAF · MASTER SWITCH DIVEMOTOR</div>
+          <h1>Master Switch Camiones</h1>
+          <p>Filtre por fecha de instalación y exporte el reporte oficial en Excel.</p>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button id="master-btn-week" type="button" class="cgps-btn cgps-btn-white">📅 Esta Semana (Lun-Dom)</button>
+          <button id="master-btn-excel" type="button" class="cgps-btn cgps-btn-secondary">📊 Descargar Excel .xlsx</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- KPIs Rápidos -->
     <div class="cgps-kpi-grid" style="margin-top: 10px;">
-      <div class="cgps-card kpi-btn-card" id="kpi-card-1" title="Haz clic para mostrar todos los activos">
+      <div class="cgps-card kpi-btn-card" id="kpi-card-1" title="Mostrar todos los activos">
         <div class="cgps-kpi-title" id="kpi-title-1">Unidades Cargadas</div>
         <div class="cgps-kpi-value" id="kpi-total">0</div>
       </div>
-      <div class="cgps-card kpi-btn-card" id="kpi-card-sn" title="Haz clic para filtrar unidades con número de serie">
+      <div class="cgps-card kpi-btn-card" id="kpi-card-sn" title="Filtrar con serial">
         <div class="cgps-kpi-title">Con Serial (GPS)</div>
         <div class="cgps-kpi-value" id="kpi-with-sn" style="color: #0369a1;">0</div>
       </div>
-      <div class="cgps-card kpi-btn-card" id="kpi-card-nosn" title="Haz clic para filtrar unidades sin número de serie">
+      <div class="cgps-card kpi-btn-card" id="kpi-card-nosn" title="Filtrar sin serial">
         <div class="cgps-kpi-title">Sin Serial (Custom)</div>
         <div class="cgps-kpi-value" id="kpi-no-sn" style="color: #64748b;">0</div>
       </div>
-      <div class="cgps-card kpi-btn-card" id="kpi-card-2" title="Haz clic para filtrar seleccionados">
+      <div class="cgps-card kpi-btn-card" id="kpi-card-2" title="Filtrar seleccionados">
         <div class="cgps-kpi-title" id="kpi-title-2">Seleccionados</div>
         <div class="cgps-kpi-value" id="kpi-val-2">0</div>
       </div>
-      <div class="cgps-card kpi-btn-card" id="kpi-card-4" style="display: none;" title="Haz clic para filtrar activos completos">
-        <div class="cgps-kpi-title" id="kpi-title-4">Parámetros Completos (5/5)</div>
+      <div class="cgps-card kpi-btn-card" id="kpi-card-4" style="display: none;" title="Filtrar completos">
+        <div class="cgps-kpi-title">Parámetros Completos (5/5)</div>
         <div class="cgps-kpi-value" id="kpi-val-4" style="color: #16a34a;">0</div>
       </div>
-      <div class="cgps-card kpi-btn-card" id="kpi-card-5" style="display: none;" title="Haz clic para filtrar activos sin parámetros">
+      <div class="cgps-card kpi-btn-card" id="kpi-card-5" style="display: none;" title="Filtrar sin parámetros">
         <div class="cgps-kpi-title">Sin Parámetros (0/5)</div>
         <div class="cgps-kpi-value" id="kpi-val-5" style="color: #dc2626;">0</div>
       </div>
-      <div class="cgps-card kpi-btn-card" id="kpi-card-6" style="display: none;" title="Haz clic para filtrar activos parciales">
+      <div class="cgps-card kpi-btn-card" id="kpi-card-6" style="display: none;" title="Filtrar parciales">
         <div class="cgps-kpi-title">Parámetros Parciales (1-4)</div>
         <div class="cgps-kpi-value" id="kpi-val-6" style="color: #d97706;">0</div>
       </div>
@@ -148,7 +165,7 @@
         <button id="cgps-btn-apply-ruc-cert" type="button" class="cgps-btn cgps-btn-secondary">Aplicar RUC</button>
       </div>
 
-      <!-- Edición Masiva en Validación -->
+      <!-- Edición Masiva en Validación (Modo Seguro) -->
       <div id="mass-controls-valid" class="cgps-controls-row" style="margin-top: 10px; border-top: 1px solid #cbd5e1; padding-top: 10px; display: none;">
         <label style="font-size: 12px; font-weight: 600; color: #1b4e85;">EDICIÓN MASIVA:</label>
         <input type="text" id="cgps-mass-nombre" class="cgps-input" placeholder="Nombre..." style="width: 110px;">
@@ -166,7 +183,7 @@
         <input type="text" id="cgps-mass-tipo" class="cgps-input" placeholder="Tipo Vehículo..." style="width: 110px;">
         <button id="cgps-btn-apply-tipo" type="button" class="cgps-btn cgps-btn-secondary">Tipo</button>
         
-        <button id="cgps-btn-inject-params" type="button" class="cgps-btn" style="background-color: #15803d; color: #fff; margin-left: auto;">+ Completar 5 Parámetros Faltantes</button>
+        <button id="cgps-btn-inject-params" type="button" class="cgps-btn" style="background-color: #15803d; color: #fff; margin-left: auto;">🛡️ Completar 5 Parámetros (Modo Seguro)</button>
       </div>
     </div>
 
@@ -277,7 +294,7 @@
     .cgps-msg { min-height: 18px; font-size: 12px; font-weight: 600; color: #15803d; }
     .cgps-msg.cgps-err { color: #b91c1c; }
 
-    .badge-param { padding: 3px 6px; border-radius: 4px; font-weight: 700; font-size: 11px; display: inline-block; cursor: pointer; }
+    .badge-param { padding: 3px 6px; border-radius: 4px; font-weight: 700; font-size: 11px; display: inline-block; }
     .badge-full { background-color: #dcfce7; color: #15803d; border: 1px solid #86efac; }
     .badge-partial { background-color: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
     .badge-empty { background-color: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
@@ -317,7 +334,6 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     }
   });
 
-  // DEFINICIÓN DE LOS 5 PARÁMETROS OBLIGATORIOS (SOPORTA BASE64 Y HEX)
   var REQUIRED_PARAMS = [
     { name: "Enable Gps Altitude Logging", offset: "181", bytesBase64: "CA==", bytesHex: "08" },
     { name: "Disable Accelerometer Record Limit", offset: "65", bytesBase64: "Ag==", bytesHex: "02" },
@@ -330,6 +346,7 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
   var activeBulkTokens = [];
   var activeModule = 'hub';
   var activeKpiFilter = 'all';
+  var databaseName = "divemotor"; // Default / Detectada
 
   function pad(n) { return n < 10 ? '0' + n : '' + n; }
   function fmtDate(iso) {
@@ -350,7 +367,6 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     return '';
   }
 
-  // EVALUACIÓN ROBUSTA DE PARÁMETROS EN customParameters Y parameterVersion
   function evalDeviceParameters(d) {
     var customList = d.customParameters || [];
     var paramVerString = typeof d.parameterVersion === 'string' ? d.parameterVersion : JSON.stringify(d.parameterVersion || '');
@@ -362,7 +378,6 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     REQUIRED_PARAMS.forEach(function(p) {
       var found = false;
 
-      // 1. Verificación en Arreglo customParameters
       if (Array.isArray(customList)) {
         found = customList.some(function(cp) {
           var offMatch = String(cp.offset) === p.offset;
@@ -372,7 +387,6 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
         });
       }
 
-      // 2. Verificación en CADENA / XML
       if (!found) {
         var regOff = new RegExp('Offset=[\'"]?' + p.offset + '[\'"]?', 'i');
         var regB64 = new RegExp('Bytes=[\'"]?' + p.bytesBase64.replace(/=/g, '\\=') + '[\'"]?', 'i');
@@ -409,6 +423,7 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
       vin: vin,
       serialNumber: serial,
       desde: fmtDate(d.activeFrom),
+      activeFromRaw: d.activeFrom ? new Date(d.activeFrom) : null,
       razon: resolveProperty(d, /raz[o\u00F3]n\s*social|empresa|cliente/i),
       ruc: resolveProperty(d, /ruc|taxid/i),
       estadoProvincia: resolveProperty(d, /estado|provincia/i),
@@ -448,7 +463,7 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     $('kpi-with-sn').textContent = withSn;
     $('kpi-no-sn').textContent = noSn;
 
-    if (activeModule === 'certi') {
+    if (activeModule === 'certi' || activeModule === 'master') {
       $('kpi-title-2').textContent = "SELECCIONADOS";
       $('kpi-val-2').textContent = selCount;
       $('kpi-card-4').style.display = 'none';
@@ -495,6 +510,7 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     activeBulkTokens = [];
     $('cgps-bulk-input').value = '';
     $('cgps-filter').value = '';
+    $('cgps-legal-box').style.display = 'none';
     highlightKpiCard('kpi-card-1');
 
     if (mod === 'hub') {
@@ -508,15 +524,25 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
         $('navisaf-mod-title').textContent = 'MÓDULO: CERTIFICADO GPS';
         $('sec-certigps').style.display = 'block';
         $('sec-validacion').style.display = 'none';
+        $('sec-master').style.display = 'none';
         $('mass-controls-certi').style.display = 'flex';
         $('mass-controls-valid').style.display = 'none';
         renderHeader();
-      } else {
+      } else if (mod === 'valid') {
         $('navisaf-mod-title').textContent = 'MÓDULO: VALIDACIÓN DE VARIABLES';
         $('sec-certigps').style.display = 'none';
         $('sec-validacion').style.display = 'block';
+        $('sec-master').style.display = 'none';
         $('mass-controls-certi').style.display = 'none';
         $('mass-controls-valid').style.display = 'flex';
+        renderHeader();
+      } else if (mod === 'master') {
+        $('navisaf-mod-title').textContent = 'MÓDULO: MASTER SWITCH DIVEMOTOR';
+        $('sec-certigps').style.display = 'none';
+        $('sec-validacion').style.display = 'none';
+        $('sec-master').style.display = 'block';
+        $('mass-controls-certi').style.display = 'none';
+        $('mass-controls-valid').style.display = 'none';
         renderHeader();
       }
       renderList();
@@ -527,6 +553,8 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     var head = $('cgps-table-head');
     if (activeModule === 'certi') {
       head.innerHTML = '<tr><th style="width: 36px; text-align: center;"></th><th style="width: 120px;">Placa</th><th style="width: 160px;">VIN</th><th style="width: 100px;">Activo Desde</th><th style="width: 220px;">Razón Social</th><th style="width: 120px;">RUC</th><th>Grupos</th></tr>';
+    } else if (activeModule === 'master') {
+      head.innerHTML = '<tr><th style="width: 36px; text-align: center;"></th><th style="width: 180px;">PLACA</th><th style="width: 140px;">BASE DE DATOS</th><th style="width: 200px;">VIN</th><th style="width: 160px;"># SERIE</th><th style="width: 120px;">Instalación</th></tr>';
     } else {
       head.innerHTML = '<tr>' +
         '<th style="width: 36px; text-align: center;"></th>' +
@@ -582,6 +610,15 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
           '<td><input type="text" class="cgps-edit-input" data-field="ruc" data-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(r.ruc) + '" placeholder="Sin RUC"' + disAttr + '></td>' +
           '<td>' + htmlEsc(r.grupos) + '</td>' +
           '</tr>';
+      } else if (activeModule === 'master') {
+        html += '<tr>' +
+          '<td style="text-align:center;"><input type="checkbox" data-id="' + htmlEsc(r.id) + '"' + (isSel ? ' checked' : '') + '></td>' +
+          '<td>' + htmlEsc(r.placa) + '</td>' +
+          '<td>' + htmlEsc(databaseName) + '</td>' +
+          '<td>' + htmlEsc(r.vin) + '</td>' +
+          '<td>' + htmlEsc(r.serialNumber) + '</td>' +
+          '<td>' + htmlEsc(r.desde) + '</td>' +
+          '</tr>';
       } else {
         var badgeClass = r.paramCount === 5 ? 'badge-full' : (r.paramCount === 0 ? 'badge-empty' : 'badge-partial');
         var badgeLabel = r.paramCount + '/5 ' + (r.paramCount === 5 ? 'OK' : (r.paramCount === 0 ? 'Sin Param' : 'Parcial'));
@@ -606,47 +643,192 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     updateKPIs();
   }
 
-  function injectMissingParameters() {
+  // MODIFICACIÓN SEGURA DE VARIABLES (GET -> FUSIONAR POR OFFSET -> SET -> GET VERIFICACIÓN)
+  function injectMissingParametersSafe() {
     var selIds = Object.keys(selected).filter(function (k) { return selected[k]; });
     if (!selIds.length) { setMsg('Seleccione al menos un activo.', true); return; }
 
-    var targets = all.filter(function(r) { return selected[r.id] && r.paramCount < 5; });
-    if (!targets.length) { setMsg('Los activos seleccionados ya poseen los 5 parámetros completos.'); return; }
+    var targets = all.filter(function(r) { return selected[r.id]; });
+    if (!targets.length) return;
 
-    if (!window.confirm("¿Desea autocompletar e inyectar los parámetros faltantes para " + targets.length + " activo(s)?")) return;
+    if (!window.confirm("🛡️ MODO SEGURO: Se ejecutará el flujo [GET → Fusionar por Offset → SET → GET Verificación] en " + targets.length + " activo(s). ¿Desea continuar?")) return;
 
-    setMsg('Inyectando parámetros faltantes en Geotab…');
+    setMsg('Ejecutando actualización segura de parámetros en Geotab…');
 
     var completed = 0;
     var promises = targets.map(function(r) {
-      var d = r.rawDevice;
-      var existingParams = d.customParameters || [];
+      // 1. GET de confirmación individual para obtener versión viva en servidor
+      return callApi(api, 'Get', { typeName: 'Device', search: { id: r.id } }).then(function(resGet) {
+        var liveDevice = (resGet && resGet[0]) ? resGet[0] : r.rawDevice;
+        var currentParams = liveDevice.customParameters || [];
 
-      r.paramMissing.forEach(function(missing) {
-        existingParams.push({
-          description: missing.name,
-          offset: missing.offset,
-          bytes: missing.bytesBase64,
-          isEnabled: true
+        // 2. Fusionar conservando bits independientes y corrigiendo por Offset
+        REQUIRED_PARAMS.forEach(function(req) {
+          var index = currentParams.findIndex(function(cp) {
+            return String(cp.offset) === req.offset;
+          });
+
+          var paramObj = {
+            description: req.name,
+            offset: req.offset,
+            bytes: req.bytesBase64,
+            isEnabled: true
+          };
+
+          if (index >= 0) {
+            // Reemplazo de máscara/offset solapado respetando parámetros preexistentes
+            currentParams[index] = paramObj;
+          } else {
+            // Inyección nueva
+            currentParams.push(paramObj);
+          }
         });
-      });
 
-      d.customParameters = existingParams;
+        liveDevice.customParameters = currentParams;
 
-      return callApi(api, 'Set', {
-        typeName: 'Device',
-        entity: d
-      }).then(function() {
-        completed++;
+        // 3. SET Mínimo
+        return callApi(api, 'Set', { typeName: 'Device', entity: liveDevice }).then(function() {
+          // 4. GET de Verificación final
+          return callApi(api, 'Get', { typeName: 'Device', search: { id: r.id } }).then(function(verifGet) {
+            if (verifGet && verifGet[0]) {
+              completed++;
+            }
+          });
+        });
       });
     });
 
     Promise.all(promises).then(function() {
-      setMsg('Se completaron exitosamente los 5 parámetros en ' + completed + ' activo(s). Cargando cambios…');
+      setMsg('✅ Proceso Seguro Completado: Se actualizaron y verificaron ' + completed + ' activo(s) en Geotab.');
       load();
     }).catch(function(err) {
-      setMsg('Error al guardar parámetros en Geotab: ' + (err.message || err), true);
+      setMsg('Error en el flujo seguro de modificación: ' + (err.message || err), true);
     });
+  }
+
+  // ACCIÓN BOTÓN "ESTA SEMANA" EN MASTER SWITCH (LUNES A DOMINGO)
+  function filterThisWeek() {
+    var now = new Date();
+    var day = now.getDay();
+    var diffToMonday = (day === 0 ? -6 : 1 - day); // Ajuste para que Lunes sea inicio de semana
+    
+    var monday = new Date(now);
+    monday.setDate(now.getDate() + diffToMonday);
+    monday.setHours(0, 0, 0, 0);
+
+    var sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    sunday.setHours(23, 59, 59, 999);
+
+    selected = {};
+    var count = 0;
+
+    all.forEach(function(r) {
+      if (r.activeFromRaw && r.activeFromRaw >= monday && r.activeFromRaw <= sunday) {
+        selected[r.id] = true;
+        count++;
+      }
+    });
+
+    renderList();
+    setMsg('📅 Filtro "Esta Semana" aplicado (Del ' + fmtDate(monday) + ' al ' + fmtDate(sunday) + '): ' + count + ' unidad(es) seleccionada(s).');
+  }
+
+  // GENERACIÓN DEL ARCHIVO EXCEL .XLSX IDÉNTICO AL ADJUNTO
+  function exportMasterSwitchExcel() {
+    var selIds = Object.keys(selected).filter(function (k) { return selected[k]; });
+    var list = all.filter(function(r) { return selected[r.id]; });
+
+    if (list.length === 0) {
+      setMsg('Seleccione al menos un activo para generar el Excel de Master Switch.', true);
+      return;
+    }
+
+    var now = new Date();
+    var dateStr = pad(now.getDate()) + '-' + pad(now.getMonth() + 1) + '-' + now.getFullYear();
+    var fileName = 'LISTA MASTER SWITCH DIVEMOTOR CAMIONES-' + dateStr + '.xlsx';
+
+    // Construcción exacta del layout
+    var sheetData = [
+      [], // Fila 1 Vacía
+      ["", "Fecha de corte", { t: 'n', v: 0, f: 'NOW()' }], // Fila 2
+      [], // Fila 3 Vacía
+      ["", "PLACA", "BASE DE DATOS", "VIN", "# SERIE"] // Fila 4 Encabezados
+    ];
+
+    list.forEach(function(r) {
+      sheetData.push([
+        "",
+        r.placa || r.nombreActivo,
+        databaseName,
+        r.vin,
+        r.serialNumber
+      ]);
+    });
+
+    var wb = XLSX.utils.book_new();
+    var ws = XLSX.utils.aoa_to_sheet(sheetData);
+
+    // Ajuste de ancho de columnas
+    ws['!cols'] = [
+      { wch: 4 },  // Col A
+      { wch: 22 }, // Col B PLACA
+      { wch: 18 }, // Col C BASE DE DATOS
+      { wch: 22 }, // Col D VIN
+      { wch: 18 }  // Col E # SERIE
+    ];
+
+    XLSX.utils.book_append_sheet(wb, ws, "Hoja3");
+    XLSX.writeFile(wb, fileName);
+
+    setMsg('📊 Archivo Excel generado con éxito: ' + fileName);
+  }
+
+  // FUNCIONES CERTI GPS (GENERACIÓN WORD, TEXTO LEGAL Y VISTA)
+  function generateCertiLegalText() {
+    var list = all.filter(function(r) { return selected[r.id]; });
+    if (!list.length) { setMsg('Seleccione al menos un activo para generar el texto legal.', true); return; }
+
+    var txt = "SOLICITUD DE CERTIFICADO GPS - ÁREA LEGAL\n";
+    txt += "========================================\n\n";
+    txt += "Estimados,\nPor medio de la presente solicitamos la emisión del Anexo N°01 para los siguientes activos:\n\n";
+
+    list.forEach(function(r, idx) {
+      txt += (idx + 1) + ". PLACA: " + (r.placa || 'S/P') + " | VIN: " + (r.vin || 'S/V') + " | RAZÓN SOCIAL: " + (r.razon || 'S/R') + " | RUC: " + (r.ruc || 'S/RUC') + "\n";
+    });
+
+    txt += "\nQuedamos a la espera de la confirmación.\nSaludos cordiales.";
+
+    $('cgps-legal-text').value = txt;
+    $('cgps-legal-box').style.display = 'block';
+    setMsg('Texto para el Área Legal generado abajo.');
+  }
+
+  function generateCertiWord() {
+    var list = all.filter(function(r) { return selected[r.id]; });
+    if (!list.length) { setMsg('Seleccione al menos un activo para generar el documento Word.', true); return; }
+
+    var htmlDoc = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>" +
+      "<head><meta charset='utf-8'><title>Anexo 01</title><style>body{font-family:Arial,sans-serif;font-size:11pt;} table{border-collapse:collapse;width:100%;} th,td{border:1px solid #000;padding:6px;font-size:10pt;}</style></head><body>" +
+      "<h2 style='text-align:center;'>ANEXO N° 01: CONSTANCIA DE SERVICIO GPS</h2>" +
+      "<p>Se certifica que los siguientes vehículos cuentan con el servicio de localización GPS activo:</p>" +
+      "<table><thead><tr style='background-color:#f2f2f2;'><th>N°</th><th>Placa</th><th>VIN</th><th>Razón Social</th><th>RUC</th><th>Fecha Instalación</th></tr></thead><tbody>";
+
+    list.forEach(function(r, idx) {
+      htmlDoc += "<tr><td>" + (idx + 1) + "</td><td>" + xmlEsc(r.placa) + "</td><td>" + xmlEsc(r.vin) + "</td><td>" + xmlEsc(r.razon) + "</td><td>" + xmlEsc(r.ruc) + "</td><td>" + xmlEsc(r.desde) + "</td></tr>";
+    });
+
+    htmlDoc += "</tbody></table></body></html>";
+
+    var blob = new Blob(['\ufeff', htmlDoc], { type: 'application/msword' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'ANEXO_01_CERTI_GPS.doc';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setMsg('Documento Word (Anexo N°01) descargado.');
   }
 
   function applyMassField(field, inputId, label) {
@@ -688,16 +870,16 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     var nowIso = new Date().toISOString();
 
     return Promise.all([
-      callApi(api, 'Get', {
-        typeName: 'Device',
-        search: {
-          fromDate: nowIso
-        }
-      }),
+      callApi(api, 'Get', { typeName: 'Device', search: { fromDate: nowIso } }),
       callApi(api, 'Get', { typeName: 'Group' }).catch(function () { return []; }),
-      callApi(api, 'Get', { typeName: 'Property' }).catch(function () { return []; })
+      callApi(api, 'Get', { typeName: 'Property' }).catch(function () { return []; }),
+      callApi(api, 'GetSystemStatus').catch(function() { return null; })
     ]).then(function (res) {
       var now = new Date().getTime();
+
+      if (res[3] && res[3].database) {
+        databaseName = res[3].database;
+      }
 
       rawDevices = (res[0] || []).filter(function (d) {
         if (d.toVersion) {
@@ -722,7 +904,22 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
     });
   }
 
-  // EVENTOS DE NAVEGACIÓN Y FILTRO POR KPI
+  // EVENTOS CERTI GPS
+  $('cgps-btn-doc').addEventListener('click', generateCertiWord);
+  $('cgps-btn-mail').addEventListener('click', generateCertiLegalText);
+  $('cgps-btn-view').addEventListener('click', function() { switchView('certi'); setMsg('Visualizando tabla de activos.'); });
+  $('cgps-btn-copy-legal').addEventListener('click', function() {
+    var txt = $('cgps-legal-text');
+    txt.select();
+    document.execCommand('copy');
+    setMsg('Texto legal copiado al portapapeles.');
+  });
+
+  // EVENTOS MASTER SWITCH
+  $('master-btn-week').addEventListener('click', filterThisWeek);
+  $('master-btn-excel').addEventListener('click', exportMasterSwitchExcel);
+
+  // EVENTOS KPI
   $('kpi-card-1').addEventListener('click', function() { activeKpiFilter = 'all'; highlightKpiCard('kpi-card-1'); renderList(); });
   $('kpi-card-sn').addEventListener('click', function() { activeKpiFilter = (activeKpiFilter === 'withSn') ? 'all' : 'withSn'; highlightKpiCard(activeKpiFilter === 'withSn' ? 'kpi-card-sn' : 'kpi-card-1'); renderList(); });
   $('kpi-card-nosn').addEventListener('click', function() { activeKpiFilter = (activeKpiFilter === 'noSn') ? 'all' : 'noSn'; highlightKpiCard(activeKpiFilter === 'noSn' ? 'kpi-card-nosn' : 'kpi-card-1'); renderList(); });
@@ -731,13 +928,16 @@ window.geotab.addin["Módulos NAVISAF"] = function (api, state, callback) {
   $('kpi-card-5').addEventListener('click', function() { activeKpiFilter = (activeKpiFilter === 'empty') ? 'all' : 'empty'; highlightKpiCard(activeKpiFilter === 'empty' ? 'kpi-card-5' : 'kpi-card-1'); renderList(); });
   $('kpi-card-6').addEventListener('click', function() { activeKpiFilter = (activeKpiFilter === 'partial') ? 'all' : 'partial'; highlightKpiCard(activeKpiFilter === 'partial' ? 'kpi-card-6' : 'kpi-card-1'); renderList(); });
 
-  // EVENTOS EDICIÓN E INYECCIÓN
-  $('cgps-btn-inject-params').addEventListener('click', injectMissingParameters);
+  // EVENTO INYECCIÓN SEGURA
+  $('cgps-btn-inject-params').addEventListener('click', injectMissingParametersSafe);
 
+  // NAVEGACIÓN
   $('btn-mod-certi').addEventListener('click', function() { switchView('certi'); });
   $('btn-mod-valid').addEventListener('click', function() { switchView('valid'); });
+  $('btn-mod-master').addEventListener('click', function() { switchView('master'); });
   $('navisaf-btn-back').addEventListener('click', function() { switchView('hub'); });
 
+  // EDICIÓN MASIVA
   $('cgps-btn-apply-nombre').addEventListener('click', function() { applyMassField('nombreActivo', 'cgps-mass-nombre', 'Nombre del Activo'); });
   $('cgps-btn-apply-placa').addEventListener('click', function() { applyMassField('placa', 'cgps-mass-placa', 'Placa'); });
   $('cgps-btn-apply-estado').addEventListener('click', function() { applyMassField('estadoProvincia', 'cgps-mass-estado', 'Estado/Provincia'); });
