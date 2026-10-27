@@ -210,6 +210,15 @@
       </div>
     </div>
 
+    <!-- Recuadro para Texto Legal (Ubicado inmediatamente debajo de Selección Masiva) -->
+    <div id="cgps-legal-box" class="cgps-card" style="display: none; margin-top: 10px; background-color: #f8fafc !important;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span style="font-size: 12px; font-weight: 700; color: #1b4e85;">TEXTO SOLICITUD ÁREA LEGAL</span>
+        <button id="cgps-btn-copy-legal" type="button" class="cgps-btn cgps-btn-secondary">Copiar Texto</button>
+      </div>
+      <textarea id="cgps-legal-text" class="cgps-textarea" rows="13" style="width: 100%; font-family: sans-serif;" readonly></textarea>
+    </div>
+
     <!-- Controles y Edición Masiva -->
     <div id="sec-controls-container" class="cgps-card" style="margin-top: 10px;">
       <div class="cgps-controls-row">
@@ -273,15 +282,6 @@
           </tbody>
         </table>
       </div>
-    </div>
-
-    <!-- Recuadro para Texto Legal -->
-    <div id="cgps-legal-box" class="cgps-card" style="display: none; margin-top: 10px; background-color: #f8fafc !important;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-        <span style="font-size: 12px; font-weight: 700; color: #1b4e85;">TEXTO SOLICITUD ÁREA LEGAL</span>
-        <button id="cgps-btn-copy-legal" type="button" class="cgps-btn cgps-btn-secondary">Copiar Texto</button>
-      </div>
-      <textarea id="cgps-legal-text" class="cgps-textarea" rows="13" style="width: 100%; font-family: sans-serif;" readonly></textarea>
     </div>
 
     <div id="cgps-msg" class="cgps-msg" style="margin-top: 10px;"></div>
@@ -804,6 +804,13 @@ var addInConstructor = function (api, state, callback) {
     var rawText = $('cgps-audit-input').value.trim();
     if (!rawText) { setMsg('Ingrese el texto a auditar.', true); return; }
 
+    // Palabras genéricas/comunes a ignorar completamente en la búsqueda de tokens para evitar falsos positivos masivos (ej. PERU, S.A.C., etc.)
+    var IGNORED_GENERIC_WORDS = [
+      'PERU', 'CORPORACION', 'LOGISTICA', 'TRANSPORTES', 'ASOCIADOS', 'SOCIEDAD', 
+      'EMPRESA', 'SERVICIOS', 'GRUPO', 'RENTAL', 'IMPORTACIONES', 'INGENIEROS', 
+      'COMERCIAL', 'INVERSIONES', 'GENERALES', 'INDUSTRIA', 'INDUSTRIAS', 'CONTRATISTAS'
+    ];
+
     var groupList = [];
     Object.keys(groupsById).forEach(function(gid) {
       var g = groupsById[gid];
@@ -826,7 +833,6 @@ var addInConstructor = function (api, state, callback) {
       for (var i = 0; i < subParts.length; i++) {
         var part = subParts[i].trim();
 
-        // Remueve VIN al inicio o al final
         part = part.replace(/^[A-Z0-9]{17}\s*/i, '').replace(/\s*[A-Z0-9]{17}$/i, '').trim();
 
         if (/^NO\s+INDICA/i.test(part) || /^ACT\.\s*INMEDIATA/i.test(part) || /^PENDIENTE/i.test(part) || part.length < 3) {
@@ -847,12 +853,14 @@ var addInConstructor = function (api, state, callback) {
       if (!cleanClient || cleanClient.length < 3 || uniqueClients.includes(cleanClient)) return;
       uniqueClients.push(cleanClient);
 
+      // Extrae tokens distintivos (excluyendo palabras genéricas como PERU, LOGISTICA, S.A.C.)
       var clientTokens = cleanClient.split(' ').filter(function(t) { 
-        return t.length >= 4 && !['CORPORACION', 'LOGISTICA', 'TRANSPORTES', 'ASOCIADOS', 'SOCIEDAD', 'EMPRESA', 'SERVICIOS', 'GRUPO'].includes(t);
+        return t.length >= 3 && !IGNORED_GENERIC_WORDS.includes(t);
       });
 
+      // Si por algún motivo se eliminaron todas las palabras, se rescata la primera palabra original
       if (clientTokens.length === 0) {
-        clientTokens = cleanClient.split(' ').filter(function(t) { return t.length >= 4; });
+        clientTokens = cleanClient.split(' ').filter(function(t) { return t.length >= 3; });
       }
 
       var matchedGroups = [];
@@ -863,17 +871,12 @@ var addInConstructor = function (api, state, callback) {
 
         var isMatch = false;
 
-        // 1. Coincidencia directa o substring mutuo
-        if (g.cleanName === cleanClient || g.cleanName.indexOf(cleanClient) >= 0 || cleanClient.indexOf(g.cleanName) >= 0) {
-          isMatch = true;
-        } else {
-          // 2. Coincidencia por palabra distintiva raíz
-          for (var k = 0; k < clientTokens.length; k++) {
-            var token = clientTokens[k];
-            if (g.cleanName.indexOf(token) >= 0) {
-              isMatch = true;
-              break;
-            }
+        // Se verifica si alguno de los tokens principales distintivos (ej. "PESCO", "WARAYANA", "VIZMED") está dentro del nombre del grupo
+        for (var k = 0; k < clientTokens.length; k++) {
+          var token = clientTokens[k];
+          if (g.cleanName.indexOf(token) >= 0) {
+            isMatch = true;
+            break;
           }
         }
 
@@ -1162,7 +1165,7 @@ var addInConstructor = function (api, state, callback) {
 
     $('cgps-legal-text').value = txt;
     $('cgps-legal-box').style.display = 'block';
-    setMsg('Texto para el Área Legal generado abajo.');
+    setMsg('Texto para el Área Legal generado abajo de la sección Selección Masiva.');
   }
 
   function generateCertiWord() {
