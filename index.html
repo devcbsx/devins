@@ -61,7 +61,6 @@
     <div style="margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
       <button id="testn-btn-back" type="button" class="cgps-btn cgps-btn-secondary">← Volver al Panel Principal</button>
       <div style="display: flex; align-items: center; gap: 10px;">
-        <button id="cgps-btn-save-changes" type="button" class="cgps-btn" style="background-color: #16a34a; color: #ffffff; font-weight: 700; display: none;">💾 Guardar Cambios Manuales</button>
         <button id="testn-btn-refresh-mod" type="button" class="cgps-btn cgps-btn-outline" style="font-weight: 700;">🔄 Sincronizar Datos</button>
         <span id="testn-mod-title" style="font-size: 14px; font-weight: 700; color: #1b4e85;"></span>
       </div>
@@ -351,8 +350,6 @@
     .cgps-table th { background-color: #f8fafc; color: #64748b; font-weight: 600; text-align: left; padding: 8px 10px; border-bottom: 1px solid #cbd5e1; position: sticky; top: 0; z-index: 2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .cgps-table td { padding: 6px 10px; border-bottom: 1px solid #e2e8f0; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .cgps-table tbody tr:hover { background-color: #f1f5f9; }
-    .cgps-edit-input { width: 100%; padding: 4px 6px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px; }
-    .cgps-edit-input.is-dirty { border: 2px solid #eab308 !important; background-color: #fefce8 !important; }
     .cgps-msg { min-height: 18px; font-size: 12px; font-weight: 600; color: #15803d; }
     .cgps-msg.cgps-err { color: #b91c1c; }
 
@@ -408,7 +405,6 @@ var addInConstructor = function (api, state, callback) {
   ];
 
   var all = [], groupsById = {}, propsById = {}, selected = {}, rawDevices = [];
-  var pendingManualChanges = {};
   var activeBulkTokens = [];
   var activeModule = 'hub';
   var activeKpiFilter = 'all';
@@ -528,16 +524,6 @@ var addInConstructor = function (api, state, callback) {
     updateKPIs();
   }
 
-  function checkPendingChangesUI() {
-    var changeKeys = Object.keys(pendingManualChanges);
-    if (changeKeys.length > 0) {
-      $('cgps-btn-save-changes').style.display = 'inline-block';
-      $('cgps-btn-save-changes').textContent = '💾 Guardar Cambios Manuales (' + changeKeys.length + ')';
-    } else {
-      $('cgps-btn-save-changes').style.display = 'none';
-    }
-  }
-
   function updateKPIs() {
     var selCount = Object.keys(selected).filter(function (k) { return selected[k]; }).length;
     $('kpi-total').textContent = all.length;
@@ -617,8 +603,6 @@ var addInConstructor = function (api, state, callback) {
     activeKpiFilter = 'all';
     activeDateRange = null;
     selected = {};
-    pendingManualChanges = {};
-    checkPendingChangesUI();
     activeBulkTokens = [];
     $('cgps-bulk-input').value = '';
     $('cgps-filter').value = '';
@@ -757,24 +741,11 @@ var addInConstructor = function (api, state, callback) {
 
   function renderList() {
     var html = '';
-    var visibleCount = 0;
 
     all.forEach(function (r) {
       if (!isRowMatchingFilters(r)) return;
 
-      visibleCount++;
       var isSel = !!selected[r.id];
-      var disAttr = isSel ? '' : ' disabled';
-
-      var pChanges = pendingManualChanges[r.id] || {};
-
-      var curRazon = pChanges.razon !== undefined ? pChanges.razon : r.razon;
-      var curRuc = pChanges.ruc !== undefined ? pChanges.ruc : r.ruc;
-      var curNombre = pChanges.nombreActivo !== undefined ? pChanges.nombreActivo : r.nombreActivo;
-      var curPlaca = pChanges.placa !== undefined ? pChanges.placa : r.placa;
-      var curEstado = pChanges.estadoProvincia !== undefined ? pChanges.estadoProvincia : r.estadoProvincia;
-      var curAnualidad = pChanges.anualidad !== undefined ? pChanges.anualidad : r.anualidad;
-      var curTipo = pChanges.tipoVehiculo !== undefined ? pChanges.tipoVehiculo : r.tipoVehiculo;
 
       if (activeModule === 'certi') {
         html += '<tr>' +
@@ -782,8 +753,8 @@ var addInConstructor = function (api, state, callback) {
           '<td>' + htmlEsc(r.placa) + '</td>' +
           '<td>' + htmlEsc(r.vin) + '</td>' +
           '<td>' + htmlEsc(r.desde) + '</td>' +
-          '<td><input type="text" class="cgps-edit-input ' + (pChanges.razon !== undefined ? 'is-dirty' : '') + '" data-field="razon" data-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(curRazon) + '" placeholder="Sin Razón Social"' + disAttr + '></td>' +
-          '<td><input type="text" class="cgps-edit-input ' + (pChanges.ruc !== undefined ? 'is-dirty' : '') + '" data-field="ruc" data-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(curRuc) + '" placeholder="Sin RUC"' + disAttr + '></td>' +
+          '<td>' + htmlEsc(r.razon || 'Sin Razón Social') + '</td>' +
+          '<td>' + htmlEsc(r.ruc || 'Sin RUC') + '</td>' +
           '<td>' + htmlEsc(r.grupos) + '</td>' +
           '</tr>';
       } else if (activeModule === 'master') {
@@ -801,18 +772,18 @@ var addInConstructor = function (api, state, callback) {
 
         html += '<tr>' +
           '<td style="text-align:center;"><input type="checkbox" data-id="' + htmlEsc(r.id) + '"' + (isSel ? ' checked' : '') + '></td>' +
-          '<td><input type="text" class="cgps-edit-input ' + (pChanges.nombreActivo !== undefined ? 'is-dirty' : '') + '" data-field="nombreActivo" data-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(curNombre) + '"' + disAttr + '></td>' +
-          '<td><input type="text" class="cgps-edit-input ' + (pChanges.placa !== undefined ? 'is-dirty' : '') + '" data-field="placa" data-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(curPlaca) + '"' + disAttr + '></td>' +
+          '<td>' + htmlEsc(r.nombreActivo) + '</td>' +
+          '<td>' + htmlEsc(r.placa) + '</td>' +
           '<td>' + htmlEsc(r.desde) + '</td>' +
           '<td>' + htmlEsc(r.desde) + '</td>' +
           '<td>' + htmlEsc(r.vin) + '</td>' +
           '<td><span class="badge-param ' + badgeClass + '" title="Posee ' + r.paramCount + ' de 5 parámetros">' + badgeLabel + '</span></td>' +
           '<td>' + htmlEsc(r.grupos || 'Sin Grupo') + '</td>' +
-          '<td><input type="text" class="cgps-edit-input ' + (pChanges.estadoProvincia !== undefined ? 'is-dirty' : '') + '" data-field="estadoProvincia" data-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(curEstado) + '" placeholder="Sin Estado"' + disAttr + '></td>' +
-          '<td><input type="text" class="cgps-edit-input ' + (pChanges.ruc !== undefined ? 'is-dirty' : '') + '" data-field="ruc" data-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(curRuc) + '" placeholder="Sin RUC"' + disAttr + '></td>' +
-          '<td><input type="text" class="cgps-edit-input ' + (pChanges.razon !== undefined ? 'is-dirty' : '') + '" data-field="razon" data-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(curRazon) + '" placeholder="Sin Razón Social"' + disAttr + '></td>' +
-          '<td><input type="text" class="cgps-edit-input ' + (pChanges.anualidad !== undefined ? 'is-dirty' : '') + '" data-field="anualidad" data-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(curAnualidad) + '" placeholder="Año"' + disAttr + '></td>' +
-          '<td><input type="text" class="cgps-edit-input ' + (pChanges.tipoVehiculo !== undefined ? 'is-dirty' : '') + '" data-field="tipoVehiculo" data-id="' + htmlEsc(r.id) + '" value="' + htmlEsc(curTipo) + '" placeholder="Sin Tipo"' + disAttr + '></td>' +
+          '<td>' + htmlEsc(r.estadoProvincia || 'Sin Estado') + '</td>' +
+          '<td>' + htmlEsc(r.ruc || 'Sin RUC') + '</td>' +
+          '<td>' + htmlEsc(r.razon || 'Sin Razón Social') + '</td>' +
+          '<td>' + htmlEsc(r.anualidad || '-') + '</td>' +
+          '<td>' + htmlEsc(r.tipoVehiculo || 'Sin Tipo') + '</td>' +
           '</tr>';
       }
     });
@@ -1006,29 +977,10 @@ var addInConstructor = function (api, state, callback) {
 
     return Promise.all(promises).then(function() {
       setMsg('✅ Guardado Exitoso en Geotab: Se actualizaron ' + completed + ' activo(s).');
-      pendingManualChanges = {};
-      checkPendingChangesUI();
       load();
     }).catch(function(err) {
       setMsg('❌ Error al actualizar en Geotab: ' + (err.message || err), true);
     });
-  }
-
-  function savePendingManualChanges() {
-    var deviceIds = Object.keys(pendingManualChanges);
-    if (!deviceIds.length) return;
-
-    var payloads = deviceIds.map(function(id) {
-      var rowObj = all.find(function(r) { return r.id === id; });
-      return {
-        row: rowObj,
-        fields: pendingManualChanges[id]
-      };
-    }).filter(function(p) { return p.row !== undefined; });
-
-    if (!window.confirm("💾 ¿Desea confirmar y guardar las modificaciones realizadas en " + payloads.length + " activo(s) en Geotab?")) return;
-
-    applyBatchDeviceUpdates(payloads);
   }
 
   function applyUnifiedMassEdition() {
@@ -1343,9 +1295,6 @@ var addInConstructor = function (api, state, callback) {
   // MANEJO DEL SELECTOR Y CAMBIO DE PLACEHOLDER DINÁMICO
   $('cgps-mass-field-select').addEventListener('change', updateMassInputPlaceholder);
 
-  // BOTÓN GUARDAR CAMBIOS MANUALES DE TABLA
-  $('cgps-btn-save-changes').addEventListener('click', savePendingManualChanges);
-
   // BOTONES DE RECARGA/SINCRONIZACIÓN
   $('testn-btn-refresh-hub').addEventListener('click', function() { load(); });
   $('testn-btn-refresh-mod').addEventListener('click', function() { load(); });
@@ -1402,22 +1351,7 @@ var addInConstructor = function (api, state, callback) {
   $('cgps-filter').addEventListener('input', renderList);
   $('cgps-filter-field').addEventListener('change', renderList);
 
-  // MANEJO DE EDICIÓN Y REGISTRO TEMPORAL EN TABLA
-  $('cgps-listbody').addEventListener('input', function (e) {
-    var field = e.target.getAttribute('data-field');
-    var id = e.target.getAttribute('data-id');
-
-    if (field && id) {
-      var newVal = e.target.value.trim();
-      if (!pendingManualChanges[id]) {
-        pendingManualChanges[id] = {};
-      }
-      pendingManualChanges[id][field] = newVal;
-      e.target.classList.add('is-dirty');
-      checkPendingChangesUI();
-    }
-  });
-
+  // MANEJO DE SELECCIÓN EN TABLA
   $('cgps-listbody').addEventListener('change', function (e) {
     var id = e.target.getAttribute('data-id');
 
