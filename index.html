@@ -166,57 +166,86 @@
       </div>
     </div>
 
-    <!-- KPIs Rápidos -->
+    <!-- KPIs Rápidos / DASHBOARD COMPACTO Y COMPLETO -->
     <div id="sec-kpi-container" class="cgps-kpi-grid" style="margin-top: 10px;">
       <div class="cgps-card kpi-btn-card" id="kpi-card-1" title="Mostrar todos los activos">
-        <div class="cgps-kpi-title" id="kpi-title-1">Unidades Cargadas</div>
+        <div class="cgps-kpi-title" id="kpi-title-1">UNIDADES CARGADAS</div>
         <div class="cgps-kpi-value" id="kpi-total">0</div>
       </div>
-      <div class="cgps-card kpi-btn-card" id="kpi-card-sn" title="Filtrar con serial">
-        <div class="cgps-kpi-title">Con Serial (GPS)</div>
-        <div class="cgps-kpi-value" id="kpi-with-sn" style="color: #0369a1;">0</div>
+      <div class="cgps-card kpi-btn-card" id="kpi-card-sn" title="Filtrar solo con serial">
+        <div class="cgps-kpi-title">SOLO SERIAL</div>
+        <div class="cgps-kpi-value" id="kpi-only-sn" style="color: #0369a1;">0</div>
+      </div>
+      <div class="cgps-card kpi-btn-card" id="kpi-card-sn-vin" title="Filtrar con serial y VIN">
+        <div class="cgps-kpi-title">SERIAL + VIN</div>
+        <div class="cgps-kpi-value" id="kpi-sn-vin" style="color: #0284c7;">0</div>
+      </div>
+      <div class="cgps-card kpi-btn-card" id="kpi-card-vin" title="Filtrar solo con VIN">
+        <div class="cgps-kpi-title">SOLO VIN</div>
+        <div class="cgps-kpi-value" id="kpi-only-vin" style="color: #4f46e5;">0</div>
+      </div>
+      <div class="cgps-card kpi-btn-card" id="kpi-card-novin" title="Filtrar sin VIN">
+        <div class="cgps-kpi-title">SIN VIN</div>
+        <div class="cgps-kpi-value" id="kpi-no-vin" style="color: #d97706;">0</div>
       </div>
       <div class="cgps-card kpi-btn-card" id="kpi-card-nosn" title="Filtrar sin serial">
-        <div class="cgps-kpi-title">Sin Serial (Custom)</div>
+        <div class="cgps-kpi-title">SIN SERIAL</div>
         <div class="cgps-kpi-value" id="kpi-no-sn" style="color: #64748b;">0</div>
       </div>
       <div class="cgps-card kpi-btn-card" id="kpi-card-2" title="Filtrar seleccionados">
-        <div class="cgps-kpi-title" id="kpi-title-2">Seleccionados</div>
+        <div class="cgps-kpi-title" id="kpi-title-2">SELECCIONADOS</div>
         <div class="cgps-kpi-value" id="kpi-val-2">0</div>
       </div>
+
+      <!-- KPIs específicos de Parámetros (Solo Módulo Validación) -->
       <div class="cgps-card kpi-btn-card" id="kpi-card-4" style="display: none;" title="Filtrar completos">
-        <div class="cgps-kpi-title">Parámetros Completos (5/5)</div>
+        <div class="cgps-kpi-title">PARÁMETROS 5/5</div>
         <div class="cgps-kpi-value" id="kpi-val-4" style="color: #16a34a;">0</div>
       </div>
       <div class="cgps-card kpi-btn-card" id="kpi-card-5" style="display: none;" title="Filtrar sin parámetros">
-        <div class="cgps-kpi-title">Sin Parámetros (0/5)</div>
+        <div class="cgps-kpi-title">PARÁMETROS 0/5</div>
         <div class="cgps-kpi-value" id="kpi-val-5" style="color: #dc2626;">0</div>
       </div>
       <div class="cgps-card kpi-btn-card" id="kpi-card-6" style="display: none;" title="Filtrar parciales">
-        <div class="cgps-kpi-title">Parámetros Parciales (1-4)</div>
-        <div class="cgps-kpi-value" id="kpi-val-6" style="color: #d97706;">0</div>
+        <div class="cgps-kpi-title">PARÁMETROS 1-4</div>
+        <div class="cgps-kpi-value" id="kpi-val-6" style="color: #b45309;">0</div>
       </div>
     </div>
 
-    <!-- Búsqueda y Selección Masiva -->
+    <!-- RECUADRO INTEGRADO EN EL MÓDULO CERTI GPS: SELECCIÓN MASIVA + TEXTO ÁREA LEGAL -->
+    <div id="sec-certi-combined-box" class="certi-two-cols-grid" style="margin-top: 10px; display: none;">
+      <!-- Columna 1: Selección Masiva -->
+      <div class="cgps-card" style="margin: 0;">
+        <div style="font-size: 12px; font-weight: 700; margin-bottom: 6px; color: #1b4e85;">SELECCIÓN MASIVA DE ACTIVOS</div>
+        <div style="display: flex; gap: 8px; align-items: flex-start;">
+          <textarea id="cgps-bulk-input" class="cgps-textarea" placeholder="Pegue aquí la lista de nombres de activos, placas, VINs o series..." rows="5" style="flex: 1; min-width: 150px;"></textarea>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <button id="cgps-btn-bulk" type="button" class="cgps-btn cgps-btn-secondary">Filtrar Masivo</button>
+            <button id="cgps-btn-bulk-clear" type="button" class="cgps-btn cgps-btn-outline">Limpiar Pegado</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Columna 2: Texto Solicitud Área Legal (Siempre Activo y Visible en Certi GPS) -->
+      <div class="cgps-card" style="margin: 0; background-color: #ffffff !important;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <span style="font-size: 12px; font-weight: 700; color: #1b4e85;">TEXTO SOLICITUD ÁREA LEGAL</span>
+          <button id="cgps-btn-copy-legal" type="button" class="cgps-btn cgps-btn-secondary" style="padding: 4px 10px; font-size: 11px;">Copiar Texto</button>
+        </div>
+        <textarea id="cgps-legal-text" class="cgps-textarea" rows="5" style="width: 100%; font-family: sans-serif; font-size: 11px; background-color: #f8fafc;" placeholder="Haga clic en 'Generar Texto Legal' para estructurar la solicitud..."></textarea>
+      </div>
+    </div>
+
+    <!-- Búsqueda / Selección Masiva Estándar (Para Módulos distintos de Certi GPS) -->
     <div id="sec-bulk-container" class="cgps-card" style="margin-top: 10px;">
       <div style="font-size: 12px; font-weight: 700; margin-bottom: 6px; color: #1b4e85;">SELECCIÓN MASIVA DE ACTIVOS</div>
       <div style="display: flex; gap: 10px; align-items: flex-start; flex-wrap: wrap;">
-        <textarea id="cgps-bulk-input" class="cgps-textarea" placeholder="Pegue aquí la lista de nombres de activos, placas, VINs o series..." rows="3" style="flex: 1; min-width: 250px;"></textarea>
+        <textarea id="cgps-bulk-input-std" class="cgps-textarea" placeholder="Pegue aquí la lista de nombres de activos, placas, VINs o series..." rows="3" style="flex: 1; min-width: 250px;"></textarea>
         <div style="display: flex; flex-direction: column; gap: 6px;">
-          <button id="cgps-btn-bulk" type="button" class="cgps-btn cgps-btn-secondary">Filtrar Masivo</button>
-          <button id="cgps-btn-bulk-clear" type="button" class="cgps-btn cgps-btn-outline">Limpiar Pegado</button>
+          <button id="cgps-btn-bulk-std" type="button" class="cgps-btn cgps-btn-secondary">Filtrar Masivo</button>
+          <button id="cgps-btn-bulk-clear-std" type="button" class="cgps-btn cgps-btn-outline">Limpiar Pegado</button>
         </div>
       </div>
-    </div>
-
-    <!-- Recuadro para Texto Legal -->
-    <div id="cgps-legal-box" class="cgps-card" style="display: none; margin-top: 10px; background-color: #f8fafc !important;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-        <span style="font-size: 12px; font-weight: 700; color: #1b4e85;">TEXTO SOLICITUD ÁREA LEGAL</span>
-        <button id="cgps-btn-copy-legal" type="button" class="cgps-btn cgps-btn-secondary">Copiar Texto</button>
-      </div>
-      <textarea id="cgps-legal-text" class="cgps-textarea" rows="13" style="width: 100%; font-family: sans-serif;" readonly></textarea>
     </div>
 
     <!-- Controles y Edición Masiva Unificada con Desplegable -->
@@ -332,14 +361,18 @@
     .cgps-btn-secondary { background-color: #4277a8 !important; color: #ffffff !important; }
     .cgps-btn-outline { background-color: transparent; color: #1b4e85; border: 1px solid #1b4e85; }
     
-    .cgps-kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; }
-    .cgps-card { background: #ffffff !important; border-radius: 8px; padding: 10px 14px; border: 1px solid #cbd5e1; width: 100%; }
-    .kpi-btn-card { cursor: pointer !important; transition: all 0.2s !important; user-select: none; }
+    /* DASHBOARD MÁS JUNTO Y COMPACTO */
+    .cgps-kpi-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; width: 100%; }
+    .cgps-card { background: #ffffff !important; border-radius: 8px; padding: 8px 10px; border: 1px solid #cbd5e1; width: 100%; }
+    .kpi-btn-card { cursor: pointer !important; transition: all 0.2s !important; user-select: none; padding: 8px; text-align: center; }
     .kpi-btn-card:hover { border-color: #1b4e85 !important; background-color: #f8fafc !important; }
     .kpi-btn-card.kpi-active { border: 2px solid #1b4e85 !important; background-color: #eff6ff !important; box-shadow: 0 2px 6px rgba(27,78,133,0.15) !important; }
     
-    .cgps-kpi-title { font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 2px; }
-    .cgps-kpi-value { font-size: 20px; font-weight: 700; color: #1e293b; }
+    .cgps-kpi-title { font-size: 9px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cgps-kpi-value { font-size: 18px; font-weight: 700; color: #1e293b; line-height: 1.1; }
+    
+    .certi-two-cols-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
+
     .cgps-controls-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; width: 100%; }
     .cgps-input, .cgps-textarea { padding: 5px 8px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px; outline: none; background-color: #ffffff; }
     .cgps-textarea { font-family: monospace; resize: vertical; }
@@ -361,7 +394,11 @@
     .badge-audit-ok { background-color: #dcfce7; color: #15803d; padding: 3px 8px; border-radius: 4px; font-weight: 700; border: 1px solid #86efac; display: inline-block; }
     .badge-audit-warn { background-color: #fee2e2; color: #b91c1c; padding: 3px 8px; border-radius: 4px; font-weight: 700; border: 1px solid #fca5a5; display: inline-block; }
 
-    @media (max-width: 768px) {
+    @media (max-width: 992px) {
+      .cgps-kpi-grid { grid-template-columns: repeat(4, 1fr) !important; }
+      .certi-two-cols-grid { grid-template-columns: 1fr !important; }
+    }
+    @media (max-width: 576px) {
       .testn-grid { grid-template-columns: 1fr !important; }
       .cgps-kpi-grid { grid-template-columns: repeat(2, 1fr) !important; }
     }
@@ -528,14 +565,24 @@ var addInConstructor = function (api, state, callback) {
     var selCount = Object.keys(selected).filter(function (k) { return selected[k]; }).length;
     $('kpi-total').textContent = all.length;
 
-    var withSn = 0, noSn = 0;
+    var countOnlySn = 0, countSnVin = 0, countOnlyVin = 0, countNoVin = 0, countNoSn = 0;
+    
     all.forEach(function(r) {
-      if (r.serialNumber) withSn++;
-      else noSn++;
+      var hasSn = !!r.serialNumber && r.serialNumber.trim().length > 0;
+      var hasVin = !!r.vin && r.vin.trim().length > 0;
+
+      if (hasSn && !hasVin) countOnlySn++;
+      if (hasSn && hasVin) countSnVin++;
+      if (!hasSn && hasVin) countOnlyVin++;
+      if (!hasVin) countNoVin++;
+      if (!hasSn) countNoSn++;
     });
 
-    $('kpi-with-sn').textContent = withSn;
-    $('kpi-no-sn').textContent = noSn;
+    $('kpi-only-sn').textContent = countOnlySn;
+    $('kpi-sn-vin').textContent = countSnVin;
+    $('kpi-only-vin').textContent = countOnlyVin;
+    $('kpi-no-vin').textContent = countNoVin;
+    $('kpi-no-sn').textContent = countNoSn;
 
     if (activeModule === 'certi' || activeModule === 'master') {
       $('kpi-title-2').textContent = "SELECCIONADOS";
@@ -543,7 +590,7 @@ var addInConstructor = function (api, state, callback) {
       $('kpi-card-4').style.display = 'none';
       $('kpi-card-5').style.display = 'none';
       $('kpi-card-6').style.display = 'none';
-      document.querySelector('.cgps-kpi-grid').style.gridTemplateColumns = 'repeat(4, 1fr)';
+      document.querySelector('.cgps-kpi-grid').style.gridTemplateColumns = 'repeat(7, 1fr)';
     } else if (activeModule === 'valid') {
       var countFull = 0, countEmpty = 0, countPartial = 0;
       all.forEach(function (r) {
@@ -562,12 +609,12 @@ var addInConstructor = function (api, state, callback) {
       $('kpi-card-4').style.display = 'block';
       $('kpi-card-5').style.display = 'block';
       $('kpi-card-6').style.display = 'block';
-      document.querySelector('.cgps-kpi-grid').style.gridTemplateColumns = 'repeat(7, 1fr)';
+      document.querySelector('.cgps-kpi-grid').style.gridTemplateColumns = 'repeat(10, 1fr)';
     }
   }
 
   function highlightKpiCard(cardId) {
-    ['kpi-card-1', 'kpi-card-sn', 'kpi-card-nosn', 'kpi-card-2', 'kpi-card-4', 'kpi-card-5', 'kpi-card-6'].forEach(function(id) {
+    ['kpi-card-1', 'kpi-card-sn', 'kpi-card-sn-vin', 'kpi-card-vin', 'kpi-card-novin', 'kpi-card-nosn', 'kpi-card-2', 'kpi-card-4', 'kpi-card-5', 'kpi-card-6'].forEach(function(id) {
       if ($(id)) $(id).classList.remove('kpi-active');
     });
     if (cardId && $(cardId)) {
@@ -605,10 +652,10 @@ var addInConstructor = function (api, state, callback) {
     selected = {};
     activeBulkTokens = [];
     $('cgps-bulk-input').value = '';
+    $('cgps-bulk-input-std').value = '';
     $('cgps-filter').value = '';
     $('cgps-filter-field').value = 'all';
     $('cgps-mass-value-input').value = '';
-    $('cgps-legal-box').style.display = 'none';
     highlightKpiCard('kpi-card-1');
 
     if (mod === 'hub') {
@@ -625,7 +672,8 @@ var addInConstructor = function (api, state, callback) {
         $('sec-master').style.display = 'none';
         $('sec-audit').style.display = 'none';
         $('sec-kpi-container').style.display = 'grid';
-        $('sec-bulk-container').style.display = 'block';
+        $('sec-certi-combined-box').style.display = 'grid';
+        $('sec-bulk-container').style.display = 'none';
         $('sec-controls-container').style.display = 'block';
         $('sec-table-container').style.display = 'block';
         $('mass-controls-row').style.display = 'flex';
@@ -639,6 +687,7 @@ var addInConstructor = function (api, state, callback) {
         $('sec-master').style.display = 'none';
         $('sec-audit').style.display = 'none';
         $('sec-kpi-container').style.display = 'grid';
+        $('sec-certi-combined-box').style.display = 'none';
         $('sec-bulk-container').style.display = 'block';
         $('sec-controls-container').style.display = 'block';
         $('sec-table-container').style.display = 'block';
@@ -653,6 +702,7 @@ var addInConstructor = function (api, state, callback) {
         $('sec-master').style.display = 'block';
         $('sec-audit').style.display = 'none';
         $('sec-kpi-container').style.display = 'grid';
+        $('sec-certi-combined-box').style.display = 'none';
         $('sec-bulk-container').style.display = 'block';
         $('sec-controls-container').style.display = 'block';
         $('sec-table-container').style.display = 'block';
@@ -666,6 +716,7 @@ var addInConstructor = function (api, state, callback) {
         $('sec-master').style.display = 'none';
         $('sec-audit').style.display = 'block';
         $('sec-kpi-container').style.display = 'none';
+        $('sec-certi-combined-box').style.display = 'none';
         $('sec-bulk-container').style.display = 'none';
         $('sec-controls-container').style.display = 'none';
         $('sec-table-container').style.display = 'none';
@@ -699,8 +750,15 @@ var addInConstructor = function (api, state, callback) {
   }
 
   function isRowMatchingFilters(r) {
-    if (activeKpiFilter === 'withSn' && !r.serialNumber) return false;
-    if (activeKpiFilter === 'noSn' && r.serialNumber) return false;
+    var hasSn = !!r.serialNumber && r.serialNumber.trim().length > 0;
+    var hasVin = !!r.vin && r.vin.trim().length > 0;
+
+    if (activeKpiFilter === 'onlySn' && (!hasSn || hasVin)) return false;
+    if (activeKpiFilter === 'snVin' && (!hasSn || !hasVin)) return false;
+    if (activeKpiFilter === 'onlyVin' && (hasSn || !hasVin)) return false;
+    if (activeKpiFilter === 'noVin' && hasVin) return false;
+    if (activeKpiFilter === 'noSn' && hasSn) return false;
+
     if (activeKpiFilter === 'selected' && !selected[r.id]) return false;
 
     if (activeDateRange) {
@@ -1195,8 +1253,7 @@ var addInConstructor = function (api, state, callback) {
     txt += "\nQuedo atento a sus comentarios.";
 
     $('cgps-legal-text').value = txt;
-    $('cgps-legal-box').style.display = 'block';
-    setMsg('Texto para el Área Legal generado abajo de la sección Selección Masiva.');
+    setMsg('Texto para el Área Legal generado correctamente.');
   }
 
   function generateCertiWord() {
@@ -1226,8 +1283,8 @@ var addInConstructor = function (api, state, callback) {
     setMsg('Documento Word (Anexo N°01) descargado.');
   }
 
-  function processBulkInput() {
-    var rawText = $('cgps-bulk-input').value.trim();
+  function processBulkInputGeneral(inputElemId) {
+    var rawText = $(inputElemId).value.trim();
     if (!rawText) { setMsg('Por favor pegue una lista de unidades.', true); return; }
 
     activeBulkTokens = rawText.split(/[\n\r,;\t]+/).map(function (s) { return s.trim().toLowerCase(); }).filter(function (s) { return s.length > 0; });
@@ -1324,9 +1381,12 @@ var addInConstructor = function (api, state, callback) {
   $('master-btn-reset-dates').addEventListener('click', resetDateFilters);
   $('master-btn-excel').addEventListener('click', exportMasterSwitchExcel);
 
-  // EVENTOS KPI
+  // EVENTOS KPI DASHBOARD INTERACTIVOS
   $('kpi-card-1').addEventListener('click', function() { activeKpiFilter = 'all'; highlightKpiCard('kpi-card-1'); renderList(); });
-  $('kpi-card-sn').addEventListener('click', function() { activeKpiFilter = (activeKpiFilter === 'withSn') ? 'all' : 'withSn'; highlightKpiCard(activeKpiFilter === 'withSn' ? 'kpi-card-sn' : 'kpi-card-1'); renderList(); });
+  $('kpi-card-sn').addEventListener('click', function() { activeKpiFilter = (activeKpiFilter === 'onlySn') ? 'all' : 'onlySn'; highlightKpiCard(activeKpiFilter === 'onlySn' ? 'kpi-card-sn' : 'kpi-card-1'); renderList(); });
+  $('kpi-card-sn-vin').addEventListener('click', function() { activeKpiFilter = (activeKpiFilter === 'snVin') ? 'all' : 'snVin'; highlightKpiCard(activeKpiFilter === 'snVin' ? 'kpi-card-sn-vin' : 'kpi-card-1'); renderList(); });
+  $('kpi-card-vin').addEventListener('click', function() { activeKpiFilter = (activeKpiFilter === 'onlyVin') ? 'all' : 'onlyVin'; highlightKpiCard(activeKpiFilter === 'onlyVin' ? 'kpi-card-vin' : 'kpi-card-1'); renderList(); });
+  $('kpi-card-novin').addEventListener('click', function() { activeKpiFilter = (activeKpiFilter === 'noVin') ? 'all' : 'noVin'; highlightKpiCard(activeKpiFilter === 'noVin' ? 'kpi-card-novin' : 'kpi-card-1'); renderList(); });
   $('kpi-card-nosn').addEventListener('click', function() { activeKpiFilter = (activeKpiFilter === 'noSn') ? 'all' : 'noSn'; highlightKpiCard(activeKpiFilter === 'noSn' ? 'kpi-card-nosn' : 'kpi-card-1'); renderList(); });
   $('kpi-card-2').addEventListener('click', function() { activeKpiFilter = (activeKpiFilter === 'selected') ? 'all' : 'selected'; highlightKpiCard(activeKpiFilter === 'selected' ? 'kpi-card-2' : 'kpi-card-1'); renderList(); });
 
@@ -1344,9 +1404,14 @@ var addInConstructor = function (api, state, callback) {
   $('btn-mod-audit').addEventListener('click', function() { switchView('audit'); });
   $('testn-btn-back').addEventListener('click', function() { switchView('hub'); });
 
-  $('cgps-btn-bulk').addEventListener('click', processBulkInput);
+  // PEGA MÁSIVO CERTI GPS
+  $('cgps-btn-bulk').addEventListener('click', function() { processBulkInputGeneral('cgps-bulk-input'); });
   $('cgps-btn-bulk-clear').addEventListener('click', function () { $('cgps-bulk-input').value = ''; activeBulkTokens = []; selected = {}; renderList(); setMsg('Filtro masivo limpiado.'); });
-  
+
+  // PEGA MÁSIVO OTROS MÓDULOS
+  $('cgps-btn-bulk-std').addEventListener('click', function() { processBulkInputGeneral('cgps-bulk-input-std'); });
+  $('cgps-btn-bulk-clear-std').addEventListener('click', function () { $('cgps-bulk-input-std').value = ''; activeBulkTokens = []; selected = {}; renderList(); setMsg('Filtro masivo limpiado.'); });
+
   // EVENTOS DE BÚSQUEDA Y SELECTOR DE CAMPO
   $('cgps-filter').addEventListener('input', renderList);
   $('cgps-filter-field').addEventListener('change', renderList);
