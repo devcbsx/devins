@@ -30,6 +30,7 @@
         <h1>PANEL DE MÓDULOS GPS</h1>
         <p>Seleccione el módulo operativo al que desea ingresar.</p>
       </div>
+      <button id="testn-btn-refresh-hub" type="button" class="cgps-btn cgps-btn-white" style="font-weight:700;">🔄 Recargar Datos Geotab</button>
     </div>
 
     <div class="testn-grid">
@@ -59,7 +60,10 @@
   <div id="testn-module-view" style="display: none;">
     <div style="margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
       <button id="testn-btn-back" type="button" class="cgps-btn cgps-btn-secondary">← Volver al Panel Principal</button>
-      <span id="testn-mod-title" style="font-size: 14px; font-weight: 700; color: #1b4e85;"></span>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <button id="testn-btn-refresh-mod" type="button" class="cgps-btn cgps-btn-outline" style="font-weight: 700;">🔄 Sincronizar Datos</button>
+        <span id="testn-mod-title" style="font-size: 14px; font-weight: 700; color: #1b4e85;"></span>
+      </div>
     </div>
 
     <!-- Módulo Certificado GPS -->
@@ -425,7 +429,7 @@ var addInConstructor = function (api, state, callback) {
     if (!iso) return '';
     var d = new Date(iso);
     if (isNaN(d.getTime()) || d.getFullYear() > 2040) return '';
-    return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + pad(d.getFullYear());
+    return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear();
   }
   function xmlEsc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function htmlEsc(s) { return xmlEsc(s).replace(/'/g, '&#39;'); }
@@ -787,6 +791,7 @@ var addInConstructor = function (api, state, callback) {
     if (!str) return '';
     return str.toUpperCase()
       .replace(/^OBSERVACIONES\s*:\s*/i, '')
+      .replace(/\b[A-Z0-9]{17}\b/gi, '') // Elimina VINs puros
       .replace(/\b(S\.?\s*A\.?\s*C\.?|S\.?\s*A\.?|E\.?\s*I\.?\s*R\.?\s*L\.?|S\.?\s*R\.?\s*L\.?|SOCIEDAD\s+ANONIMA\s+CERRADA|SOCIEDAD\s+ANONIMA|CERRADA)\b/g, '')
       .replace(/[^A-Z0-9\s]/g, ' ')
       .replace(/\s+/g, ' ')
@@ -801,7 +806,10 @@ var addInConstructor = function (api, state, callback) {
     Object.keys(groupsById).forEach(function(gid) {
       var g = groupsById[gid];
       if (g && g.name && !/^Group/.test(g.id)) {
-        groupList.push({ id: g.id, name: g.name.trim(), cleanName: cleanLegalName(g.name) });
+        var cName = cleanLegalName(g.name);
+        if (cName.length >= 3) { // Ignora grupos de menos de 3 caracteres como "C"
+          groupList.push({ id: g.id, name: g.name.trim(), cleanName: cName });
+        }
       }
     });
 
@@ -816,16 +824,16 @@ var addInConstructor = function (api, state, callback) {
       for (var i = 0; i < subParts.length; i++) {
         var part = subParts[i].trim();
 
-        // Descartar VINs (17 caracteres alfanuméricos) y observaciones operativas
-        if (/^[A-Z0-9]{17}$/i.test(part) || /^NO\s+INDICA/i.test(part) || /^PENDIENTE/i.test(part)) {
+        // 1. Elimina VIN al inicio o pegado (17 caracteres)
+        part = part.replace(/^[A-Z0-9]{17}\s*/i, '').replace(/\s*[A-Z0-9]{17}$/i, '').trim();
+
+        // 2. Filtro de frases excluidas u observaciones operativas
+        if (/^NO\s+INDICA/i.test(part) || /^ACT\.\s*INMEDIATA/i.test(part) || /^PENDIENTE/i.test(part) || part.length < 3) {
           continue;
         }
 
-        // Remover VIN pegado al final si existiera
-        var candidateName = part.replace(/\s+[A-Z0-9]{17}\b/i, '').trim();
-        
-        if (candidateName.length >= 3 && !clientCandidates.includes(candidateName)) {
-          clientCandidates.push(candidateName);
+        if (!clientCandidates.includes(part)) {
+          clientCandidates.push(part);
         }
       }
     });
@@ -835,16 +843,20 @@ var addInConstructor = function (api, state, callback) {
 
     clientCandidates.forEach(function(rawClient) {
       var cleanClient = cleanLegalName(rawClient);
-      if (!cleanClient || uniqueClients.includes(cleanClient)) return;
+      if (!cleanClient || cleanClient.length < 3 || uniqueClients.includes(cleanClient)) return;
       uniqueClients.push(cleanClient);
 
+      // Solo tokens de 3 letras o más para evitar falsos positivos con "C", "SA", etc.
       var clientTokens = cleanClient.split(' ').filter(function(t) { return t.length >= 3; });
+      if (clientTokens.length === 0) return;
+
       var matchedGroup = null;
 
       for (var i = 0; i < groupList.length; i++) {
         var g = groupList[i];
-        if (!g.cleanName) continue;
+        if (!g.cleanName || g.cleanName.length < 3) continue;
 
+        // Coincidencia exacta o contenida
         if (g.cleanName === cleanClient || g.cleanName.indexOf(cleanClient) >= 0 || cleanClient.indexOf(g.cleanName) >= 0) {
           matchedGroup = g.name;
           break;
@@ -1229,11 +1241,21 @@ var addInConstructor = function (api, state, callback) {
       (res[1] || []).forEach(function (g) { groupsById[g.id] = g; });
       (res[2] || []).forEach(function (p) { propsById[p.id] = p; });
       rebuildRows();
+      
+      // Si el módulo de auditoría de grupos está abierto, re-ejecutar auditoría
+      if (activeModule === 'audit' && $('cgps-audit-input').value.trim()) {
+        executeGroupAudit();
+      }
+
       setMsg(rawDevices.length + ' activos vigentes cargados correctamente.');
     }).catch(function (e) {
       setMsg('No se pudieron cargar los activos: ' + (e && e.message ? e.message : e), true);
     });
   }
+
+  // BOTONES DE RECARGA/SINCRONIZACIÓN
+  $('testn-btn-refresh-hub').addEventListener('click', function() { load(); });
+  $('testn-btn-refresh-mod').addEventListener('click', function() { load(); });
 
   // EVENTOS AUDITORÍA DE GRUPOS
   $('cgps-btn-exec-audit').addEventListener('click', executeGroupAudit);
