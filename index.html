@@ -220,7 +220,7 @@
       <textarea id="cgps-legal-text" class="cgps-textarea" rows="13" style="width: 100%; font-family: sans-serif;" readonly></textarea>
     </div>
 
-    <!-- Controles y Edición Masiva -->
+    <!-- Controles y Edición Masiva Unificada con Desplegable -->
     <div id="sec-controls-container" class="cgps-card" style="margin-top: 10px;">
       <div class="cgps-controls-row">
         <!-- SELECTOR DE CAMPO A FILTRAR + INPUT DE BÚSQUEDA -->
@@ -242,34 +242,22 @@
         <button id="cgps-sel-none" type="button" class="cgps-btn cgps-btn-outline">Limpiar selección</button>
       </div>
 
-      <!-- Edición Masiva en Certi GPS -->
-      <div id="mass-controls-certi" class="cgps-controls-row" style="margin-top: 10px; border-top: 1px solid #cbd5e1; padding-top: 10px;">
-        <label style="font-size: 12px; font-weight: 600; color: #1b4e85;">EDICIÓN MASIVA (SOLO ACTIVOS SELECCIONADOS WITH CHECK):</label>
-        <input type="text" id="cgps-mass-razon-cert" class="cgps-input" placeholder="Nueva Razón Social..." style="width: 220px;">
-        <button id="cgps-btn-apply-mass-cert" type="button" class="cgps-btn cgps-btn-secondary">Aplicar Razón Social</button>
-        <input type="text" id="cgps-mass-ruc-cert" class="cgps-input" placeholder="Nuevo RUC..." style="width: 140px; margin-left: 10px;">
-        <button id="cgps-btn-apply-ruc-cert" type="button" class="cgps-btn cgps-btn-secondary">Aplicar RUC</button>
-      </div>
-
-      <!-- Edición Masiva en Validación -->
-      <div id="mass-controls-valid" class="cgps-controls-row" style="margin-top: 10px; border-top: 1px solid #cbd5e1; padding-top: 10px; display: none;">
-        <label style="font-size: 12px; font-weight: 600; color: #1b4e85;">EDICIÓN MASIVA (SOLO ACTIVOS SELECCIONADOS):</label>
-        <input type="text" id="cgps-mass-nombre" class="cgps-input" placeholder="Nombre..." style="width: 110px;">
-        <button id="cgps-btn-apply-nombre" type="button" class="cgps-btn cgps-btn-secondary">Nombre</button>
-        <input type="text" id="cgps-mass-placa" class="cgps-input" placeholder="Placa..." style="width: 90px;">
-        <button id="cgps-btn-apply-placa" type="button" class="cgps-btn cgps-btn-secondary">Placa</button>
-        <input type="text" id="cgps-mass-estado" class="cgps-input" placeholder="Estado..." style="width: 100px;">
-        <button id="cgps-btn-apply-estado" type="button" class="cgps-btn cgps-btn-secondary">Estado</button>
-        <input type="text" id="cgps-mass-ruc-val" class="cgps-input" placeholder="RUC..." style="width: 100px;">
-        <button id="cgps-btn-apply-ruc-val" type="button" class="cgps-btn cgps-btn-secondary">RUC</button>
-        <input type="text" id="cgps-mass-razon-val" class="cgps-input" placeholder="Razón Social..." style="width: 130px;">
-        <button id="cgps-btn-apply-mass-val" type="button" class="cgps-btn cgps-btn-secondary">Razón Social</button>
-        <input type="text" id="cgps-mass-anualidad" class="cgps-input" placeholder="Anualidad..." style="width: 90px;">
-        <button id="cgps-btn-apply-anualidad" type="button" class="cgps-btn cgps-btn-secondary">Anualidad</button>
-        <input type="text" id="cgps-mass-tipo" class="cgps-input" placeholder="Tipo Vehículo..." style="width: 110px;">
-        <button id="cgps-btn-apply-tipo" type="button" class="cgps-btn cgps-btn-secondary">Tipo</button>
+      <!-- SECCIÓN DE EDICIÓN MASIVA UNIFICADA (Lista Desplegable + Input + Botón 'Guardar seleccionados') -->
+      <div id="mass-controls-row" class="cgps-controls-row" style="margin-top: 10px; border-top: 1px solid #cbd5e1; padding-top: 10px;">
+        <label style="font-size: 12px; font-weight: 700; color: #1b4e85; margin-right: 4px;">EDICIÓN MASIVA:</label>
+        <select id="cgps-mass-field-select" class="cgps-input" style="width: 180px; font-weight: 600; color: #0f172a; background-color: #ffffff;">
+          <option value="razon">Razón Social</option>
+          <option value="ruc">RUC</option>
+          <option value="nombreActivo" class="opt-valid-only">Nombre del Activo</option>
+          <option value="placa" class="opt-valid-only">Placa</option>
+          <option value="estadoProvincia" class="opt-valid-only">Estado / Provincia</option>
+          <option value="anualidad" class="opt-valid-only">Anualidad</option>
+          <option value="tipoVehiculo" class="opt-valid-only">Tipo Vehículo</option>
+        </select>
+        <input type="text" id="cgps-mass-value-input" class="cgps-input" placeholder="Ingrese el nuevo valor..." style="width: 240px;">
+        <button id="cgps-btn-apply-mass-unified" type="button" class="cgps-btn" style="background-color: #0284c7; color: #ffffff; font-weight: 700;">Guardar seleccionados</button>
         
-        <button id="cgps-btn-inject-params" type="button" class="cgps-btn" style="background-color: #15803d; color: #fff; margin-left: auto;">🛡️ Completar 5 Parámetros (Modo Seguro)</button>
+        <button id="cgps-btn-inject-params" type="button" class="cgps-btn" style="background-color: #15803d; color: #fff; margin-left: auto; display: none;">🛡️ Completar 5 Parámetros (Modo Seguro)</button>
       </div>
     </div>
 
@@ -421,7 +409,7 @@ var addInConstructor = function (api, state, callback) {
   ];
 
   var all = [], groupsById = {}, propsById = {}, selected = {}, rawDevices = [];
-  var pendingManualChanges = {}; // Guarda cambios individuales temporales sin guardar
+  var pendingManualChanges = {};
   var activeBulkTokens = [];
   var activeModule = 'hub';
   var activeKpiFilter = 'all';
@@ -604,6 +592,27 @@ var addInConstructor = function (api, state, callback) {
 
   function setMsg(t, err) { var m = $('cgps-msg'); m.textContent = t || ''; m.className = 'cgps-msg' + (err ? ' cgps-err' : ''); }
 
+  function updateMassSelectVisibility() {
+    var validOpts = document.querySelectorAll('.opt-valid-only');
+    if (activeModule === 'valid') {
+      validOpts.forEach(function(opt) { opt.style.display = 'block'; });
+      $('cgps-btn-inject-params').style.display = 'inline-block';
+    } else {
+      validOpts.forEach(function(opt) { opt.style.display = 'none'; });
+      $('cgps-btn-inject-params').style.display = 'none';
+      if (['nombreActivo', 'placa', 'estadoProvincia', 'anualidad', 'tipoVehiculo'].includes($('cgps-mass-field-select').value)) {
+        $('cgps-mass-field-select').value = 'razon';
+      }
+    }
+    updateMassInputPlaceholder();
+  }
+
+  function updateMassInputPlaceholder() {
+    var selectedOpt = $('cgps-mass-field-select').options[$('cgps-mass-field-select').selectedIndex];
+    var labelText = selectedOpt ? selectedOpt.text : 'valor';
+    $('cgps-mass-value-input').placeholder = labelText + '...';
+  }
+
   function switchView(mod) {
     activeModule = mod;
     activeKpiFilter = 'all';
@@ -615,6 +624,7 @@ var addInConstructor = function (api, state, callback) {
     $('cgps-bulk-input').value = '';
     $('cgps-filter').value = '';
     $('cgps-filter-field').value = 'all';
+    $('cgps-mass-value-input').value = '';
     $('cgps-legal-box').style.display = 'none';
     highlightKpiCard('kpi-card-1');
 
@@ -635,8 +645,8 @@ var addInConstructor = function (api, state, callback) {
         $('sec-bulk-container').style.display = 'block';
         $('sec-controls-container').style.display = 'block';
         $('sec-table-container').style.display = 'block';
-        $('mass-controls-certi').style.display = 'flex';
-        $('mass-controls-valid').style.display = 'none';
+        $('mass-controls-row').style.display = 'flex';
+        updateMassSelectVisibility();
         renderHeader();
         renderList();
       } else if (mod === 'valid') {
@@ -649,8 +659,8 @@ var addInConstructor = function (api, state, callback) {
         $('sec-bulk-container').style.display = 'block';
         $('sec-controls-container').style.display = 'block';
         $('sec-table-container').style.display = 'block';
-        $('mass-controls-certi').style.display = 'none';
-        $('mass-controls-valid').style.display = 'flex';
+        $('mass-controls-row').style.display = 'flex';
+        updateMassSelectVisibility();
         renderHeader();
         renderList();
       } else if (mod === 'master') {
@@ -663,8 +673,7 @@ var addInConstructor = function (api, state, callback) {
         $('sec-bulk-container').style.display = 'block';
         $('sec-controls-container').style.display = 'block';
         $('sec-table-container').style.display = 'block';
-        $('mass-controls-certi').style.display = 'none';
-        $('mass-controls-valid').style.display = 'none';
+        $('mass-controls-row').style.display = 'none';
         renderHeader();
         renderList();
       } else if (mod === 'audit') {
@@ -1023,6 +1032,30 @@ var addInConstructor = function (api, state, callback) {
     applyBatchDeviceUpdates(payloads);
   }
 
+  function applyUnifiedMassEdition() {
+    var selIds = Object.keys(selected).filter(function (k) { return selected[k]; });
+    if (!selIds.length) { 
+      setMsg('Por favor seleccione al menos un activo usando los checkboxes para aplicar la edición masiva.', true); 
+      return; 
+    }
+
+    var selectedField = $('cgps-mass-field-select').value;
+    var selectedOptText = $('cgps-mass-field-select').options[$('cgps-mass-field-select').selectedIndex].text;
+    var massValue = $('cgps-mass-value-input').value.trim();
+
+    if (!window.confirm("¿Está seguro de modificar masivamente el campo [" + selectedOptText + "] con el valor '" + massValue + "' para los " + selIds.length + " activo(s) SELECCIONADOS?")) return;
+
+    var targets = all.filter(function(r) { return selected[r.id]; });
+
+    var payloads = targets.map(function(r) {
+      var f = {};
+      f[selectedField] = massValue;
+      return { row: r, fields: f };
+    });
+
+    applyBatchDeviceUpdates(payloads);
+  }
+
   function injectMissingParametersSafe() {
     var selIds = Object.keys(selected).filter(function (k) { return selected[k]; });
     if (!selIds.length) { setMsg('Seleccione al menos un activo usando los checkboxes.', true); return; }
@@ -1242,29 +1275,6 @@ var addInConstructor = function (api, state, callback) {
     setMsg('Documento Word (Anexo N°01) descargado.');
   }
 
-  function applyMassField(field, inputId, label) {
-    // FILTRAR ESTRICTAMENTE LOS ACTIVOS QUE TIENEN CHECKBOX MARCADO
-    var selIds = Object.keys(selected).filter(function (k) { return selected[k]; });
-    if (!selIds.length) { 
-      setMsg('Por favor seleccione al menos un activo usando el checkbox para aplicar la edición masiva.', true); 
-      return; 
-    }
-    
-    var massVal = $(inputId).value.trim();
-
-    if (!window.confirm("¿Está seguro de modificar masivamente [" + label + "] con el valor '" + massVal + "' para los " + selIds.length + " activo(s) SELECCIONADOS?")) return;
-
-    var targets = all.filter(function(r) { return selected[r.id]; });
-    
-    var payloads = targets.map(function(r) {
-      var f = {};
-      f[field] = massVal;
-      return { row: r, fields: f };
-    });
-
-    applyBatchDeviceUpdates(payloads);
-  }
-
   function processBulkInput() {
     var rawText = $('cgps-bulk-input').value.trim();
     if (!rawText) { setMsg('Por favor pegue una lista de unidades.', true); return; }
@@ -1293,13 +1303,12 @@ var addInConstructor = function (api, state, callback) {
     return Promise.all([
       callApi(api, 'Get', { typeName: 'Device' }),
       callApi(api, 'Get', { typeName: 'Group' }).catch(function () { return []; }),
-      callApi(api, 'Get', { typeName: 'Property' }).catch(function () { return []; }),
       callApi(api, 'GetSystemStatus').catch(function() { return null; })
     ]).then(function (res) {
       var now = new Date().getTime();
 
-      if (res[3] && res[3].database) {
-        databaseName = res[3].database;
+      if (res[2] && res[2].database) {
+        databaseName = res[2].database;
       }
 
       rawDevices = (res[0] || []).filter(function (d) {
@@ -1317,7 +1326,6 @@ var addInConstructor = function (api, state, callback) {
 
       groupsById = {}; propsById = {};
       (res[1] || []).forEach(function (g) { groupsById[g.id] = g; });
-      (res[2] || []).forEach(function (p) { propsById[p.id] = p; });
       rebuildRows();
       
       if (activeModule === 'audit' && $('cgps-audit-input').value.trim()) {
@@ -1329,6 +1337,12 @@ var addInConstructor = function (api, state, callback) {
       setMsg('No se pudieron cargar los activos: ' + (e && e.message ? e.message : e), true);
     });
   }
+
+  // EVENTO APLICAR EDICIÓN MASIVA UNIFICADA
+  $('cgps-btn-apply-mass-unified').addEventListener('click', applyUnifiedMassEdition);
+
+  // MANEJO DEL SELECTOR Y CAMBIO DE PLACEHOLDER DINÁMICO
+  $('cgps-mass-field-select').addEventListener('change', updateMassInputPlaceholder);
 
   // BOTÓN GUARDAR CAMBIOS MANUALES DE TABLA
   $('cgps-btn-save-changes').addEventListener('click', savePendingManualChanges);
@@ -1382,19 +1396,6 @@ var addInConstructor = function (api, state, callback) {
   $('btn-mod-audit').addEventListener('click', function() { switchView('audit'); });
   $('testn-btn-back').addEventListener('click', function() { switchView('hub'); });
 
-  // EDICIÓN MASIVA EN CERTI
-  $('cgps-btn-apply-mass-cert').addEventListener('click', function() { applyMassField('razon', 'cgps-mass-razon-cert', 'Razón Social'); });
-  $('cgps-btn-apply-ruc-cert').addEventListener('click', function() { applyMassField('ruc', 'cgps-mass-ruc-cert', 'RUC'); });
-
-  // EDICIÓN MASIVA EN VALIDACIÓN (PERSISTENTE EN GEOTAB)
-  $('cgps-btn-apply-nombre').addEventListener('click', function() { applyMassField('nombreActivo', 'cgps-mass-nombre', 'Nombre del Activo'); });
-  $('cgps-btn-apply-placa').addEventListener('click', function() { applyMassField('placa', 'cgps-mass-placa', 'Placa'); });
-  $('cgps-btn-apply-estado').addEventListener('click', function() { applyMassField('estadoProvincia', 'cgps-mass-estado', 'Estado/Provincia'); });
-  $('cgps-btn-apply-ruc-val').addEventListener('click', function() { applyMassField('ruc', 'cgps-mass-ruc-val', 'RUC'); });
-  $('cgps-btn-apply-mass-val').addEventListener('click', function() { applyMassField('razon', 'cgps-mass-razon-val', 'Razón Social'); });
-  $('cgps-btn-apply-anualidad').addEventListener('click', function() { applyMassField('anualidad', 'cgps-mass-anualidad', 'Anualidad'); });
-  $('cgps-btn-apply-tipo').addEventListener('click', function() { applyMassField('tipoVehiculo', 'cgps-mass-tipo', 'Tipo de Vehículo'); });
-
   $('cgps-btn-bulk').addEventListener('click', processBulkInput);
   $('cgps-btn-bulk-clear').addEventListener('click', function () { $('cgps-bulk-input').value = ''; activeBulkTokens = []; selected = {}; renderList(); setMsg('Filtro masivo limpiado.'); });
   
@@ -1402,7 +1403,7 @@ var addInConstructor = function (api, state, callback) {
   $('cgps-filter').addEventListener('input', renderList);
   $('cgps-filter-field').addEventListener('change', renderList);
 
-  // MANEJO DE EDICIÓN Y REGISTRO TEMPORAL EN TABLA (SIN AUTO-SAVE)
+  // MANEJO DE EDICIÓN Y REGISTRO TEMPORAL EN TABLA
   $('cgps-listbody').addEventListener('input', function (e) {
     var field = e.target.getAttribute('data-field');
     var id = e.target.getAttribute('data-id');
