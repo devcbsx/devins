@@ -425,7 +425,7 @@ var addInConstructor = function (api, state, callback) {
     if (!iso) return '';
     var d = new Date(iso);
     if (isNaN(d.getTime()) || d.getFullYear() > 2040) return '';
-    return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear();
+    return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + pad(d.getFullYear());
   }
   function xmlEsc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function htmlEsc(s) { return xmlEsc(s).replace(/'/g, '&#39;'); }
@@ -787,7 +787,7 @@ var addInConstructor = function (api, state, callback) {
     if (!str) return '';
     return str.toUpperCase()
       .replace(/^OBSERVACIONES\s*:\s*/i, '')
-      .replace(/\b(S\.?A\.?C\.?|S\.?A\.?|E\.?I\.?R\.?L\.?|S\.?R\.?L\.?|SOCIEDAD\s+ANONIMA\s+CERRADA|SOCIEDAD\s+ANONIMA|CERRADA)\b/g, '')
+      .replace(/\b(S\.?\s*A\.?\s*C\.?|S\.?\s*A\.?|E\.?\s*I\.?\s*R\.?\s*L\.?|S\.?\s*R\.?\s*L\.?|SOCIEDAD\s+ANONIMA\s+CERRADA|SOCIEDAD\s+ANONIMA|CERRADA)\b/g, '')
       .replace(/[^A-Z0-9\s]/g, ' ')
       .replace(/\s+/g, ' ')
       .trim();
@@ -796,8 +796,6 @@ var addInConstructor = function (api, state, callback) {
   function executeGroupAudit() {
     var rawText = $('cgps-audit-input').value.trim();
     if (!rawText) { setMsg('Ingrese el texto a auditar.', true); return; }
-
-    var cleanText = rawText.replace(/^Observaciones\s*:\s*/i, '');
 
     var groupList = [];
     Object.keys(groupsById).forEach(function(gid) {
@@ -808,18 +806,24 @@ var addInConstructor = function (api, state, callback) {
     });
 
     var clientCandidates = [];
-    var chunks = cleanText.split(/[\n\r]+/);
+    var lines = rawText.split(/[\n\r]+/);
     
-    chunks.forEach(function(chunk) {
-      var subParts = chunk.split(/\s*-\s*/);
+    lines.forEach(function(line) {
+      var lineClean = line.replace(/^OBSERVACIONES\s*:\s*/i, '').trim();
+      if (!lineClean) return;
+
+      var subParts = lineClean.split(/\s*-\s*/);
       for (var i = 0; i < subParts.length; i++) {
         var part = subParts[i].trim();
 
-        if (/^[A-Z0-9]{15,17}/i.test(part) || /^NO\s+INDICA/i.test(part)) {
+        // Descartar VINs (17 caracteres alfanuméricos) y observaciones operativas
+        if (/^[A-Z0-9]{17}$/i.test(part) || /^NO\s+INDICA/i.test(part) || /^PENDIENTE/i.test(part)) {
           continue;
         }
 
-        var candidateName = part.replace(/\s+[A-Z0-9]{15,17}.*$/i, '').trim();
+        // Remover VIN pegado al final si existiera
+        var candidateName = part.replace(/\s+[A-Z0-9]{17}\b/i, '').trim();
+        
         if (candidateName.length >= 3 && !clientCandidates.includes(candidateName)) {
           clientCandidates.push(candidateName);
         }
