@@ -429,7 +429,7 @@ var addInConstructor = function (api, state, callback) {
     if (!iso) return '';
     var d = new Date(iso);
     if (isNaN(d.getTime()) || d.getFullYear() > 2040) return '';
-    return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear();
+    return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + pad(d.getFullYear());
   }
   function xmlEsc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function htmlEsc(s) { return xmlEsc(s).replace(/'/g, '&#39;'); }
@@ -791,9 +791,9 @@ var addInConstructor = function (api, state, callback) {
     if (!str) return '';
     return str.toUpperCase()
       .replace(/^OBSERVACIONES\s*:\s*/i, '')
-      .replace(/\b[A-Z0-9]{17}\b/gi, '') // Elimina VINs de 17 caracteres
+      .replace(/\b[A-Z0-9]{17}\b/gi, '') 
       .replace(/\b(S\.?\s*A\.?\s*C\.?|S\.?\s*A\.?|E\.?\s*I\.?\s*R\.?\s*L\.?|S\.?\s*R\.?\s*L\.?|SOCIEDAD\s+ANONIMA\s+CERRADA|SOCIEDAD\s+ANONIMA|CERRADA)\b/g, '')
-      .replace(/_/g, ' ') // Reemplaza guiones bajos de grupos por espacios para normalizar "ATEGO_2430_WARAYANA" -> "ATEGO 2430 WARAYANA"
+      .replace(/_/g, ' ') 
       .replace(/[^A-Z0-9\s]/g, ' ')
       .replace(/\s+/g, ' ')
       .trim();
@@ -825,10 +825,9 @@ var addInConstructor = function (api, state, callback) {
       for (var i = 0; i < subParts.length; i++) {
         var part = subParts[i].trim();
 
-        // Elimina VINs al inicio/final o pegados (17 caracteres)
+        // Remueve VIN al inicio o al final
         part = part.replace(/^[A-Z0-9]{17}\s*/i, '').replace(/\s*[A-Z0-9]{17}$/i, '').trim();
 
-        // Filtro de frases excluidas u observaciones operativas
         if (/^NO\s+INDICA/i.test(part) || /^ACT\.\s*INMEDIATA/i.test(part) || /^PENDIENTE/i.test(part) || part.length < 3) {
           continue;
         }
@@ -847,8 +846,15 @@ var addInConstructor = function (api, state, callback) {
       if (!cleanClient || cleanClient.length < 3 || uniqueClients.includes(cleanClient)) return;
       uniqueClients.push(cleanClient);
 
-      var clientTokens = cleanClient.split(' ').filter(function(t) { return t.length >= 3; });
-      if (clientTokens.length === 0) return;
+      // Palabras significativas (tokens) con longitud >= 4 para búsqueda flexible (ej: WARAYANA, VIZMED, PESCO)
+      var clientTokens = cleanClient.split(' ').filter(function(t) { 
+        return t.length >= 4 && !['CORPORACION', 'LOGISTICA', 'TRANSPORTES', 'ASOCIADOS', 'SOCIEDAD', 'EMPRESA', 'SERVICIOS', 'GRUPO'].includes(t);
+      });
+
+      // Si se filtraron todas las genéricas, rescatamos tokens estándar >= 4
+      if (clientTokens.length === 0) {
+        clientTokens = cleanClient.split(' ').filter(function(t) { return t.length >= 4; });
+      }
 
       var matchedGroup = null;
 
@@ -856,26 +862,22 @@ var addInConstructor = function (api, state, callback) {
         var g = groupList[i];
         if (!g.cleanName || g.cleanName.length < 3) continue;
 
-        // 1. Coincidencia directa o contenida (ej. "WARAYANA" en "ATEGO 2430 WARAYANA")
+        // 1. Coincidencia directa o substring mutuo
         if (g.cleanName === cleanClient || g.cleanName.indexOf(cleanClient) >= 0 || cleanClient.indexOf(g.cleanName) >= 0) {
           matchedGroup = g.name;
           break;
         }
 
-        // 2. Coincidencia por tokens significativos (≥ 4 letras)
-        var significantTokens = clientTokens.filter(function(t) { return t.length >= 4; });
-        var matchCount = 0;
-
-        significantTokens.forEach(function(tok) {
-          if (g.cleanName.indexOf(tok) >= 0) {
-            matchCount++;
+        // 2. Coincidencia por palabra distintiva raíz (ej. "WARAYANA" en "ATEGO 2430 WARAYANA")
+        for (var k = 0; k < clientTokens.length; k++) {
+          var token = clientTokens[k];
+          if (g.cleanName.indexOf(token) >= 0) {
+            matchedGroup = g.name;
+            break;
           }
-        });
-
-        if (matchCount >= 1 && (significantTokens.length === 1 || matchCount >= 2)) {
-          matchedGroup = g.name;
-          break;
         }
+
+        if (matchedGroup) break;
       }
 
       var statusBadge = matchedGroup 
