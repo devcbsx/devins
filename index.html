@@ -154,9 +154,10 @@
           <table class="cgps-table">
             <thead>
               <tr>
-                <th style="width: 50%;">Razón Social Detectada</th>
-                <th style="width: 30%;">Grupo Coincidente en Geotab</th>
-                <th style="width: 20%;">Estado Auditoría</th>
+                <th style="width: 35%;">Razón Social Detectada</th>
+                <th style="width: 40%;">Grupo(s) Coincidente(s) en Geotab</th>
+                <th style="width: 13%; text-align: center;"># Coincidencias</th>
+                <th style="width: 12%;">Estado Auditoría</th>
               </tr>
             </thead>
             <tbody id="cgps-audit-listbody"></tbody>
@@ -280,7 +281,7 @@
         <span style="font-size: 12px; font-weight: 700; color: #1b4e85;">TEXTO SOLICITUD ÁREA LEGAL</span>
         <button id="cgps-btn-copy-legal" type="button" class="cgps-btn cgps-btn-secondary">Copiar Texto</button>
       </div>
-      <textarea id="cgps-legal-text" class="cgps-textarea" rows="11" style="width: 100%; font-family: sans-serif;" readonly></textarea>
+      <textarea id="cgps-legal-text" class="cgps-textarea" rows="13" style="width: 100%; font-family: sans-serif;" readonly></textarea>
     </div>
 
     <div id="cgps-msg" class="cgps-msg" style="margin-top: 10px;"></div>
@@ -846,52 +847,56 @@ var addInConstructor = function (api, state, callback) {
       if (!cleanClient || cleanClient.length < 3 || uniqueClients.includes(cleanClient)) return;
       uniqueClients.push(cleanClient);
 
-      // Palabras significativas (tokens) con longitud >= 4 para búsqueda flexible (ej: WARAYANA, VIZMED, PESCO)
       var clientTokens = cleanClient.split(' ').filter(function(t) { 
         return t.length >= 4 && !['CORPORACION', 'LOGISTICA', 'TRANSPORTES', 'ASOCIADOS', 'SOCIEDAD', 'EMPRESA', 'SERVICIOS', 'GRUPO'].includes(t);
       });
 
-      // Si se filtraron todas las genéricas, rescatamos tokens estándar >= 4
       if (clientTokens.length === 0) {
         clientTokens = cleanClient.split(' ').filter(function(t) { return t.length >= 4; });
       }
 
-      var matchedGroup = null;
+      var matchedGroups = [];
 
       for (var i = 0; i < groupList.length; i++) {
         var g = groupList[i];
         if (!g.cleanName || g.cleanName.length < 3) continue;
 
+        var isMatch = false;
+
         // 1. Coincidencia directa o substring mutuo
         if (g.cleanName === cleanClient || g.cleanName.indexOf(cleanClient) >= 0 || cleanClient.indexOf(g.cleanName) >= 0) {
-          matchedGroup = g.name;
-          break;
-        }
-
-        // 2. Coincidencia por palabra distintiva raíz (ej. "WARAYANA" en "ATEGO 2430 WARAYANA")
-        for (var k = 0; k < clientTokens.length; k++) {
-          var token = clientTokens[k];
-          if (g.cleanName.indexOf(token) >= 0) {
-            matchedGroup = g.name;
-            break;
+          isMatch = true;
+        } else {
+          // 2. Coincidencia por palabra distintiva raíz
+          for (var k = 0; k < clientTokens.length; k++) {
+            var token = clientTokens[k];
+            if (g.cleanName.indexOf(token) >= 0) {
+              isMatch = true;
+              break;
+            }
           }
         }
 
-        if (matchedGroup) break;
+        if (isMatch && !matchedGroups.includes(g.name)) {
+          matchedGroups.push(g.name);
+        }
       }
 
-      var statusBadge = matchedGroup 
+      var matchCount = matchedGroups.length;
+      var groupTextDisplay = matchCount > 0 ? matchedGroups.join(', ') : 'Sin Grupo Coincidente en el Árbol';
+      var statusBadge = matchCount > 0 
         ? '<span class="badge-audit-ok">Grupo Existe</span>' 
         : '<span class="badge-audit-warn">Grupo No Creado</span>';
 
       resultsHtml += '<tr>' +
         '<td><b>' + htmlEsc(rawClient) + '</b></td>' +
-        '<td>' + htmlEsc(matchedGroup || 'Sin Grupo Coincidente en el Árbol') + '</td>' +
+        '<td style="white-space: normal; word-break: break-word;">' + htmlEsc(groupTextDisplay) + '</td>' +
+        '<td style="text-align: center; font-weight: 700;">' + matchCount + '</td>' +
         '<td>' + statusBadge + '</td>' +
         '</tr>';
     });
 
-    $('cgps-audit-listbody').innerHTML = resultsHtml || '<tr><td colspan="3" style="text-align:center;">No se detectaron clientes válidos en el texto.</td></tr>';
+    $('cgps-audit-listbody').innerHTML = resultsHtml || '<tr><td colspan="4" style="text-align:center;">No se detectaron clientes válidos en el texto.</td></tr>';
     $('cgps-audit-results-card').style.display = 'block';
     setMsg('Auditoría del árbol de grupos finalizada.');
   }
@@ -1140,15 +1145,20 @@ var addInConstructor = function (api, state, callback) {
     var list = all.filter(function(r) { return selected[r.id] && isRowMatchingFilters(r); });
     if (!list.length) { setMsg('Seleccione al menos un activo visible para generar el texto legal.', true); return; }
 
-    var txt = "SOLICITUD DE CERTIFICADO GPS - ÁREA LEGAL\n";
-    txt += "========================================\n\n";
-    txt += "Estimados,\nPor medio de la presente solicitamos la emisión del Anexo N°01 para los siguientes activos:\n\n";
+    var primaryRazon = list[0].razon || 'NOMBRE DE LA EMPRESA';
+    var primaryRuc = list[0].ruc || 'XXXXXXXXX';
+
+    var txt = "Buen día estimada Área Legal,\n\n";
+    txt += "Se solicita tu apoyo en la realización del certificado solicitado por el cliente. Considere que debe describir como beneficiaria al cliente DIVEIMPORT. Adjunto información de la(s) unidad(es):\n\n";
+    txt += "DATOS DE LA EMPRESA\n\n";
+    txt += "NOMBRE:    " + primaryRazon + "\n";
+    txt += "RUC:       " + primaryRuc + "\n\n";
 
     list.forEach(function(r, idx) {
-      txt += (idx + 1) + ". PLACA: " + (r.placa || 'S/P') + " | VIN: " + (r.vin || 'S/V') + " | RAZÓN SOCIAL: " + (r.razon || 'S/R') + " | RUC: " + (r.ruc || 'S/RUC') + "\n";
+      txt += (idx + 1) + ". PLACA: " + (r.placa || 'S/P') + " | VIN: " + (r.vin || 'S/V') + "\n";
     });
 
-    txt += "\nQuedamos a la espera de la confirmación.\nSaludos cordiales.";
+    txt += "\nQuedo atento a sus comentarios.";
 
     $('cgps-legal-text').value = txt;
     $('cgps-legal-box').style.display = 'block';
