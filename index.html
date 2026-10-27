@@ -791,8 +791,9 @@ var addInConstructor = function (api, state, callback) {
     if (!str) return '';
     return str.toUpperCase()
       .replace(/^OBSERVACIONES\s*:\s*/i, '')
-      .replace(/\b[A-Z0-9]{17}\b/gi, '') // Elimina VINs puros
+      .replace(/\b[A-Z0-9]{17}\b/gi, '') // Elimina VINs de 17 caracteres
       .replace(/\b(S\.?\s*A\.?\s*C\.?|S\.?\s*A\.?|E\.?\s*I\.?\s*R\.?\s*L\.?|S\.?\s*R\.?\s*L\.?|SOCIEDAD\s+ANONIMA\s+CERRADA|SOCIEDAD\s+ANONIMA|CERRADA)\b/g, '')
+      .replace(/_/g, ' ') // Reemplaza guiones bajos de grupos por espacios para normalizar "ATEGO_2430_WARAYANA" -> "ATEGO 2430 WARAYANA"
       .replace(/[^A-Z0-9\s]/g, ' ')
       .replace(/\s+/g, ' ')
       .trim();
@@ -807,7 +808,7 @@ var addInConstructor = function (api, state, callback) {
       var g = groupsById[gid];
       if (g && g.name && !/^Group/.test(g.id)) {
         var cName = cleanLegalName(g.name);
-        if (cName.length >= 3) { // Ignora grupos de menos de 3 caracteres como "C"
+        if (cName.length >= 3) {
           groupList.push({ id: g.id, name: g.name.trim(), cleanName: cName });
         }
       }
@@ -824,10 +825,10 @@ var addInConstructor = function (api, state, callback) {
       for (var i = 0; i < subParts.length; i++) {
         var part = subParts[i].trim();
 
-        // 1. Elimina VIN al inicio o pegado (17 caracteres)
+        // Elimina VINs al inicio/final o pegados (17 caracteres)
         part = part.replace(/^[A-Z0-9]{17}\s*/i, '').replace(/\s*[A-Z0-9]{17}$/i, '').trim();
 
-        // 2. Filtro de frases excluidas u observaciones operativas
+        // Filtro de frases excluidas u observaciones operativas
         if (/^NO\s+INDICA/i.test(part) || /^ACT\.\s*INMEDIATA/i.test(part) || /^PENDIENTE/i.test(part) || part.length < 3) {
           continue;
         }
@@ -846,7 +847,6 @@ var addInConstructor = function (api, state, callback) {
       if (!cleanClient || cleanClient.length < 3 || uniqueClients.includes(cleanClient)) return;
       uniqueClients.push(cleanClient);
 
-      // Solo tokens de 3 letras o más para evitar falsos positivos con "C", "SA", etc.
       var clientTokens = cleanClient.split(' ').filter(function(t) { return t.length >= 3; });
       if (clientTokens.length === 0) return;
 
@@ -856,18 +856,23 @@ var addInConstructor = function (api, state, callback) {
         var g = groupList[i];
         if (!g.cleanName || g.cleanName.length < 3) continue;
 
-        // Coincidencia exacta o contenida
+        // 1. Coincidencia directa o contenida (ej. "WARAYANA" en "ATEGO 2430 WARAYANA")
         if (g.cleanName === cleanClient || g.cleanName.indexOf(cleanClient) >= 0 || cleanClient.indexOf(g.cleanName) >= 0) {
           matchedGroup = g.name;
           break;
         }
 
-        var matches = 0;
-        clientTokens.forEach(function(tok) {
-          if (g.cleanName.indexOf(tok) >= 0) matches++;
+        // 2. Coincidencia por tokens significativos (≥ 4 letras)
+        var significantTokens = clientTokens.filter(function(t) { return t.length >= 4; });
+        var matchCount = 0;
+
+        significantTokens.forEach(function(tok) {
+          if (g.cleanName.indexOf(tok) >= 0) {
+            matchCount++;
+          }
         });
 
-        if (matches >= 2 || (clientTokens.length === 1 && matches === 1)) {
+        if (matchCount >= 1 && (significantTokens.length === 1 || matchCount >= 2)) {
           matchedGroup = g.name;
           break;
         }
@@ -1211,7 +1216,6 @@ var addInConstructor = function (api, state, callback) {
   function load() {
     setMsg('Cargando activos de la base de datos…');
 
-    // CONSULTA DIRECTA DE DISPOSITIVOS SIN FILTRO DE FECHA SÍNCRONA
     return Promise.all([
       callApi(api, 'Get', { typeName: 'Device' }),
       callApi(api, 'Get', { typeName: 'Group' }).catch(function () { return []; }),
@@ -1242,7 +1246,6 @@ var addInConstructor = function (api, state, callback) {
       (res[2] || []).forEach(function (p) { propsById[p.id] = p; });
       rebuildRows();
       
-      // Si el módulo de auditoría de grupos está abierto, re-ejecutar auditoría
       if (activeModule === 'audit' && $('cgps-audit-input').value.trim()) {
         executeGroupAudit();
       }
@@ -1322,7 +1325,7 @@ var addInConstructor = function (api, state, callback) {
   $('cgps-filter').addEventListener('input', renderList);
   $('cgps-filter-field').addEventListener('change', renderList);
 
-  // EDICIÓN INDIVIDUAL EN TABLA (MODO SEGURO AUTOMÁTICO AL CAMBIAR CAMPO)
+  // EDICIÓN INDIVIDUAL EN TABLA
   $('cgps-listbody').addEventListener('change', function (e) {
     var field = e.target.getAttribute('data-field');
     var id = e.target.getAttribute('data-id');
