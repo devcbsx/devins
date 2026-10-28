@@ -92,7 +92,6 @@
         <h2>REPORTES POR CLIENTE</h2>
       </div>
 
-      <!-- NUEVO MÓDULO -->
       <div class="testn-card" id="btn-mod-activations">
         <h2>ACTIVACIONES DE UNIDADES</h2>
       </div>
@@ -262,7 +261,7 @@
       </div>
     </div>
 
-    <!-- NUEVO MÓDULO: ACTIVACIONES DE UNIDADES (EN BLANCO) -->
+    <!-- MÓDULO: ACTIVACIONES DE UNIDADES (EN BLANCO) -->
     <div id="sec-activations" style="display: none;">
       <div class="cgps-hero">
         <div>
@@ -277,12 +276,8 @@
 
     <!-- KPIs Rápidos / DASHBOARD -->
     <div id="sec-kpi-container" class="cgps-kpi-grid" style="margin-top: 10px;">
-      <div class="cgps-card kpi-btn-card" id="kpi-card-1" title="Mostrar todos los activos">
-        <div class="cgps-kpi-title" id="kpi-title-1">UNIDADES CARGADAS</div>
-        <div class="cgps-kpi-value" id="kpi-total">0</div>
-      </div>
       <div class="cgps-card kpi-btn-card" id="kpi-card-sn-vin" title="Filtrar con serial y VIN">
-        <div class="cgps-kpi-title">SERIAL + VIN</div>
+        <div class="cgps-kpi-title">UNIDADES CON SERIAL + VIN</div>
         <div class="cgps-kpi-value" id="kpi-sn-vin" style="color: #0284c7;">0</div>
       </div>
       <div class="cgps-card kpi-btn-card" id="kpi-card-novin" title="Filtrar sin VIN">
@@ -468,7 +463,7 @@
     .cgps-btn-secondary { background-color: #4277a8 !important; color: #ffffff !important; }
     .cgps-btn-outline { background-color: transparent; color: #1b4e85; border: 1px solid #1b4e85; }
     
-    .cgps-kpi-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; width: 100%; }
+    .cgps-kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; width: 100%; }
     .cgps-card { background: #ffffff !important; border-radius: 8px; padding: 8px 10px; border: 1px solid #cbd5e1; width: 100%; }
     .kpi-btn-card { cursor: pointer !important; transition: all 0.2s !important; user-select: none; padding: 8px; text-align: center; }
     .kpi-btn-card:hover { border-color: #1b4e85 !important; background-color: #f8fafc !important; }
@@ -729,7 +724,6 @@ var addInConstructor = function (api, state, callback) {
   function updateKPIs() {
     var rowsToCount = getActiveRowsForModule();
     var selCount = Object.keys(selected).filter(function (k) { return selected[k]; }).length;
-    $('kpi-total').textContent = rowsToCount.length;
 
     var countSnVin = 0, countNoVin = 0, countNoSn = 0;
     
@@ -758,7 +752,7 @@ var addInConstructor = function (api, state, callback) {
       $('kpi-card-sintipo').style.display = 'none';
       $('kpi-card-otros').style.display = 'none';
 
-      document.querySelector('.cgps-kpi-grid').style.gridTemplateColumns = 'repeat(5, 1fr)';
+      document.querySelector('.cgps-kpi-grid').style.gridTemplateColumns = 'repeat(4, 1fr)';
     } else if (activeModule === 'valid') {
       var countFull = 0, countEmpty = 0, countPartial = 0;
       var cRemol = 0, cVolq = 0, cSinTipo = 0, cOtros = 0;
@@ -801,17 +795,17 @@ var addInConstructor = function (api, state, callback) {
       $('kpi-card-sintipo').style.display = 'block';
       $('kpi-card-otros').style.display = 'block';
 
-      document.querySelector('.cgps-kpi-grid').style.gridTemplateColumns = 'repeat(6, 1fr)';
+      document.querySelector('.cgps-kpi-grid').style.gridTemplateColumns = 'repeat(5, 1fr)';
     }
   }
 
   function highlightKpiCards() {
-    ['kpi-card-1', 'kpi-card-sn-vin', 'kpi-card-novin', 'kpi-card-nosn', 'kpi-card-2', 'kpi-card-4', 'kpi-card-5', 'kpi-card-6', 'kpi-card-remol', 'kpi-card-volq', 'kpi-card-sintipo', 'kpi-card-otros'].forEach(function(id) {
+    ['kpi-card-sn-vin', 'kpi-card-novin', 'kpi-card-nosn', 'kpi-card-2', 'kpi-card-4', 'kpi-card-5', 'kpi-card-6', 'kpi-card-remol', 'kpi-card-volq', 'kpi-card-sintipo', 'kpi-card-otros'].forEach(function(id) {
       if ($(id)) $(id).classList.remove('kpi-active');
     });
 
     if (activeUnitFilter === 'all' && activeParamFilter === 'all' && activeTypeFilter === 'all') {
-      if ($('kpi-card-1')) $('kpi-card-1').classList.add('kpi-active');
+      if ($('kpi-card-sn-vin')) $('kpi-card-sn-vin').classList.add('kpi-active');
     } else {
       if (activeUnitFilter === 'snVin' && $('kpi-card-sn-vin')) $('kpi-card-sn-vin').classList.add('kpi-active');
       if (activeUnitFilter === 'noVin' && $('kpi-card-novin')) $('kpi-card-novin').classList.add('kpi-active');
@@ -1081,6 +1075,48 @@ var addInConstructor = function (api, state, callback) {
     btnGeotab.href = refUrl + '#customReportSchedule,id:' + s.id;
 
     $('report-preview-modal').style.display = 'flex';
+  }
+
+  function generateLegalText() {
+    var selList = all.filter(function(r) { return selected[r.id]; });
+    if (selList.length === 0) {
+      setMsg("Seleccione al menos un activo para generar el texto legal.", true);
+      return;
+    }
+
+    var txt = "SOLICITUD DE CERTIFICADO GPS\n";
+    txt += "========================================\n\n";
+    selList.forEach(function(r, idx) {
+      txt += (idx + 1) + ". PLACA: " + (r.placa || 'S/P') + "\n";
+      txt += "   VIN: " + (r.vin || 'S/V') + "\n";
+      txt += "   RAZÓN SOCIAL: " + (r.razon || 'S/R') + "\n";
+      txt += "   RUC: " + (r.ruc || 'S/RUC') + "\n";
+      txt += "   FECHA ACTIVACIÓN: " + (r.desde || 'S/F') + "\n\n";
+    });
+
+    $('cgps-legal-text').value = txt;
+    $('sec-certi-combined-box').style.display = 'grid';
+    setMsg("Texto legal generado para " + selList.length + " vehículo(s).");
+  }
+
+  function downloadWordDoc() {
+    var txt = $('cgps-legal-text').value;
+    if (!txt) {
+      generateLegalText();
+      txt = $('cgps-legal-text').value;
+    }
+    if (!txt) return;
+
+    var blob = new Blob(['\ufeff' + txt], { type: 'application/msword' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'Certificado_GPS_' + fmtDate(new Date().toISOString()).replace(/\//g, '-') + '.doc';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    setMsg("Documento Word generado con éxito.");
   }
 
   function switchView(mod) {
@@ -1568,10 +1604,15 @@ var addInConstructor = function (api, state, callback) {
   });
 
   // EVENTOS CERTI GPS
-  $('cgps-btn-view').addEventListener('click', function() { switchView('certi'); setMsg('Visualizando tabla de activos.'); });
+  $('cgps-btn-view').addEventListener('click', function() {
+    switchView('certi');
+    $('sec-controls-container').scrollIntoView({ behavior: 'smooth' });
+    setMsg('Visualizando tabla de activos.');
+  });
+  $('cgps-btn-mail').addEventListener('click', generateLegalText);
+  $('cgps-btn-doc').addEventListener('click', downloadWordDoc);
 
   // EVENTOS KPI DASHBOARD INTERACTIVOS
-  $('kpi-card-1').addEventListener('click', function() { activeUnitFilter = 'all'; activeParamFilter = 'all'; activeTypeFilter = 'all'; renderList(); });
   $('kpi-card-sn-vin').addEventListener('click', function() { activeUnitFilter = (activeUnitFilter === 'snVin') ? 'all' : 'snVin'; renderList(); });
   $('kpi-card-novin').addEventListener('click', function() { activeUnitFilter = (activeUnitFilter === 'noVin') ? 'all' : 'noVin'; renderList(); });
   $('kpi-card-nosn').addEventListener('click', function() { activeUnitFilter = (activeUnitFilter === 'noSn') ? 'all' : 'noSn'; renderList(); });
