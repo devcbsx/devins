@@ -474,30 +474,16 @@ var addInConstructor = function (api, state, callback) {
   }
 
   function evalDeviceParameters(d) {
-    var customList = d.customParameters || [];
-    var count = 0;
-    var missing = [];
-
-    REQUIRED_PARAMS.forEach(function(p) {
-      var found = false;
-
-      if (Array.isArray(customList)) {
-        found = customList.some(function(cp) {
-          var offMatch = Number(cp.offset) === Number(p.offset);
-          var bytesVal = String(cp.bytes || cp.bytesBase64 || cp.value || '');
-          var bytesMatch = (bytesVal === p.bytes);
-          return offMatch && bytesMatch;
-        });
-      }
-
-      if (found) {
-        count++;
-      } else {
-        missing.push(p);
-      }
+    var customList = Array.isArray(d.customParameters) ? d.customParameters : [];
+    var byOffset = {};
+    customList.forEach(function (cp) {
+      if (cp && cp.isEnabled !== false) byOffset[Number(cp.offset)] = String(cp.bytes || cp.bytesBase64 || cp.value || '');
     });
-
-    return { count: count, missing: missing, total: 5 };
+    var count = 0, missing = [];
+    REQUIRED_PARAMS.forEach(function (p) {
+      if (byOffset[p.offset] === p.bytes) count++; else missing.push(p);
+    });
+    return { count: count, missing: missing, total: REQUIRED_PARAMS.length };
   }
 
   function toRow(d) {
@@ -516,7 +502,7 @@ var addInConstructor = function (api, state, callback) {
     
     var estadoProv = (d.licenseState || '').trim() || getCustomValue(cpMap, /ESTADO|PROVINCIA/i);
 
-    return {
+    var row = {
       id: d.id,
       rawDevice: d,
       nombreActivo: name,
@@ -534,6 +520,9 @@ var addInConstructor = function (api, state, callback) {
       paramCount: paramStatus.count,
       paramMissing: paramStatus.missing
     };
+    row._nom = name.toLowerCase(); row._p = row.placa.toLowerCase(); row._v = vin.toLowerCase(); row._s = serial.toLowerCase();
+    row._hay = [name, row.placa, vin, serial, row.grupos, razonSocial, rucVal, estadoProv, anualidadVal, tipoVehiculoVal].join(' ').toLowerCase();
+    return row;
   }
 
   function getGroupsList(d) {
@@ -545,8 +534,20 @@ var addInConstructor = function (api, state, callback) {
 
   function callApi(apiRef, method, params) { return new Promise(function (ok, fail) { apiRef.call(method, params, ok, fail); }); }
   var $ = function (id) { return document.getElementById(id); };
+  function callMulti(apiRef, calls) { return new Promise(function (ok, fail) { apiRef.multiCall(calls, ok, fail); }); }
+  function chunkArr(arr, size) { var out = []; for (var i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size)); return out; }
+  function seq(items, fn) { return items.reduce(function (p, it) { return p.then(function () { return fn(it); }); }, Promise.resolve()); }
+
+  var propDefs = {};
+  var DEVICE_FIELDS = ['id', 'name', 'licensePlate', 'licenseState', 'vehicleIdentificationNumber', 'serialNumber', 'activeFrom', 'activeTo', 'deviceType', 'groups', 'customProperties', 'customParameters'];
 
   function rebuildRows() {
+    propDefs = {};
+    rawDevices.forEach(function (d) {
+      (d.customProperties || []).forEach(function (it) {
+        if (it && it.property && it.property.name && it.property.id) propDefs[String(it.property.name).trim()] = it.property;
+      });
+    });
     all = rawDevices.map(function (d) { return toRow(d); }).sort(function (a, b) { return a.placa.localeCompare(b.placa, 'es', { numeric: true }); });
     updateKPIs();
   }
@@ -767,7 +768,7 @@ var addInConstructor = function (api, state, callback) {
       }
     }
 
-    var nom = r.nombreActivo.toLowerCase(), p = r.placa.toLowerCase(), v = r.vin.toLowerCase(), s = r.serialNumber.toLowerCase();
+    var nom = r._nom, p = r._p, v = r._v, s = r._s;
     if (activeBulkTokens.length > 0) {
       var matchBulk = activeBulkTokens.some(function (token) {
         return nom === token || p === token || v === token || s === token || (token.length >= 3 && (nom.indexOf(token) >= 0 || p.indexOf(token) >= 0 || v.indexOf(token) >= 0 || s.indexOf(token) >= 0));
@@ -780,8 +781,7 @@ var addInConstructor = function (api, state, callback) {
     
     if (q) {
       if (fieldSel === 'all') {
-        var hay = (r.nombreActivo + ' ' + r.placa + ' ' + r.vin + ' ' + r.serialNumber + ' ' + r.grupos + ' ' + r.razon + ' ' + r.ruc + ' ' + r.estadoProvincia + ' ' + r.anualidad + ' ' + r.tipoVehiculo).toLowerCase();
-        if (hay.indexOf(q) < 0) return false;
+        if (r._hay.indexOf(q) < 0) return false;
       } else {
         var valTarget = String(r[fieldSel] || '').toLowerCase();
         if (valTarget.indexOf(q) < 0) return false;
@@ -957,6 +957,158 @@ var addInConstructor = function (api, state, callback) {
     setMsg('Auditoría del árbol de grupos finalizada.');
   }
 
+  // ===== ESCRITURA SEGURA: GET en lote → fusionar → SET en lote (entidad completa) → GET verificación =====
+  var PROP_CFG = {
+    razon: { name: 'RAZÓN SOCIAL', rx: [/RAZ[O\u00D3]N\s*SOCIAL/i, /EMPRESA|CLIENTE/i] },
+    ruc: { name: 'RUC', rx: [/^RUC$/i, /TAXID/i] },
+    anualidad: { name: 'ANUALIDAD', rx: [/ANUALIDAD/i] },
+    tipoVehiculo: { name: 'TIPO DE VEHICULO', rx: [/TIPO\s*DE\s*VEHICULO|TIPO\s*VEHICULO/i] }
+  };
+
+  function findCustomProp(device, field) {
+    var cfg = PROP_CFG[field], list = device.customProperties || [];
+    if (!cfg) return null;
+    for (var k = 0; k < cfg.rx.length; k++) {
+      for (var i = 0; i < list.length; i++) {
+        var nm = list[i] && list[i].property && list[i].property.name;
+        if (nm && cfg.rx[k].test(String(nm).trim())) return list[i];
+      }
+    }
+    return null;
+  }
+
+  function findPropDef(cfg) {
+    var keys = Object.keys(propDefs);
+    for (var k = 0; k < cfg.rx.length; k++) {
+      for (var i = 0; i < keys.length; i++) { if (cfg.rx[k].test(keys[i])) return propDefs[keys[i]]; }
+    }
+    return null;
+  }
+
+  function readField(d, field) {
+    if (field === 'nombreActivo') return (d.name || '').trim();
+    if (field === 'placa') return (d.licensePlate || '').trim();
+    if (field === 'estadoProvincia') return (d.licenseState || '').trim();
+    var it = findCustomProp(d, field);
+    return it && it.value != null ? String(it.value).trim() : '';
+  }
+
+  function applyField(d, field, value) {
+    var v = String(value == null ? '' : value).trim();
+    if (readField(d, field) === v) return false;
+    if (field === 'nombreActivo') { d.name = v; return true; }
+    if (field === 'placa') { d.licensePlate = v; return true; }
+    if (field === 'estadoProvincia') { d.licenseState = v; return true; }
+    var cfg = PROP_CFG[field];
+    if (!cfg) return false;
+    var it = findCustomProp(d, field);
+    if (it) { it.value = v; return true; }
+    var def = findPropDef(cfg);
+    d.customProperties = d.customProperties || [];
+    d.customProperties.push({ property: def && def.id ? { id: def.id } : { name: cfg.name }, value: v });
+    return true;
+  }
+
+  // Conserva los parámetros existentes; agrega los faltantes y corrige los que tienen distinto valor o están deshabilitados.
+  function mergeRequiredParams(device) {
+    var list = Array.isArray(device.customParameters) ? device.customParameters.slice() : [];
+    var changed = false;
+    REQUIRED_PARAMS.forEach(function (p) {
+      var idx = -1;
+      for (var i = 0; i < list.length; i++) { if (Number(list[i].offset) === p.offset) { idx = i; break; } }
+      var wanted = { description: p.description, offset: p.offset, bytes: p.bytes, isEnabled: true };
+      if (idx < 0) { list.push(wanted); changed = true; }
+      else if (String(list[idx].bytes) !== p.bytes || list[idx].isEnabled === false) { list[idx] = wanted; changed = true; }
+    });
+    if (changed) device.customParameters = list;
+    return changed;
+  }
+
+  function fetchLiveDevices(ids) {
+    var byId = {};
+    return seq(chunkArr(ids, 50), function (part) {
+      var calls = part.map(function (id) { return ['Get', { typeName: 'Device', search: { id: id } }]; });
+      return callMulti(api, calls).then(function (res) {
+        res.forEach(function (list) { var d = Array.isArray(list) ? list[0] : list; if (d && d.id) byId[d.id] = d; });
+      }).catch(function () {
+        return seq(part, function (id) {
+          return callApi(api, 'Get', { typeName: 'Device', search: { id: id } }).then(function (list) {
+            if (list && list[0]) byId[id] = list[0];
+          }).catch(function () {});
+        });
+      });
+    }).then(function () { return byId; });
+  }
+
+  function saveDevices(devices) {
+    var result = { saved: [], failed: [] };
+    return seq(chunkArr(devices, 25), function (part) {
+      var calls = part.map(function (d) { return ['Set', { typeName: 'Device', entity: d }]; });
+      return callMulti(api, calls).then(function () {
+        part.forEach(function (d) { result.saved.push(d.id); });
+      }).catch(function () {
+        return seq(part, function (d) {
+          return callApi(api, 'Set', { typeName: 'Device', entity: d })
+            .then(function () { result.saved.push(d.id); })
+            .catch(function (e) { result.failed.push({ id: d.id, name: d.name, err: (e && e.message) ? e.message : String(e) }); });
+        });
+      });
+    }).then(function () { return result; });
+  }
+
+  function applyFreshDevices(freshList) {
+    var pos = {};
+    rawDevices.forEach(function (d, i) { pos[d.id] = i; });
+    freshList.forEach(function (d) { if (pos[d.id] != null) rawDevices[pos[d.id]] = d; });
+    rebuildRows();
+    renderList();
+  }
+
+  function runSafeUpdate(targets, mutate, verify) {
+    var ids = targets.map(function (r) { return r.id; });
+    var rowById = {};
+    targets.forEach(function (r) { rowById[r.id] = r; });
+    var st = { unchanged: 0, verified: 0, failed: [], unverified: [] };
+
+    return fetchLiveDevices(ids).then(function (live) {
+      var toSave = [];
+      ids.forEach(function (id) {
+        var d = live[id];
+        if (!d) { st.failed.push({ id: id, name: rowById[id].nombreActivo, err: 'No se pudo leer el dispositivo' }); return; }
+        if (mutate(d, rowById[id])) toSave.push(d); else st.unchanged++;
+      });
+      return toSave.length ? saveDevices(toSave) : { saved: [], failed: [] };
+    }).then(function (res) {
+      res.failed.forEach(function (f) { st.failed.push(f); });
+      if (!res.saved.length) return st;
+      return fetchLiveDevices(res.saved).then(function (fresh) {
+        var freshList = [];
+        res.saved.forEach(function (id) {
+          var d = fresh[id];
+          if (d) freshList.push(d);
+          if (d && verify(d)) st.verified++;
+          else st.unverified.push({ id: id, name: rowById[id].nombreActivo, err: 'el cambio no se reflejó en Geotab tras el SET' });
+        });
+        if (freshList.length) applyFreshDevices(freshList);
+        return st;
+      });
+    });
+  }
+
+  function reportUpdate(st, label, okMsg) {
+    var bad = st.failed.length + st.unverified.length;
+    var msg = label + ': ' + st.verified + ' verificado(s)' + (st.unchanged ? ', ' + st.unchanged + ' sin cambios' : '');
+    if (bad) {
+      var names = st.failed.concat(st.unverified).slice(0, 5).map(function (x) { return x.name + ' (' + x.err + ')'; }).join('; ');
+      msg += ' · ❌ ' + bad + ' con problemas: ' + names;
+      setMsg(msg, true);
+      alert('⚠️ ' + msg);
+    } else {
+      setMsg('✅ ' + msg);
+      alert('✅ ' + (okMsg || msg));
+    }
+  }
+
   function applyBatchDeviceUpdates(updatePayloads) {
     if (!updatePayloads || !updatePayloads.length) {
       setMsg('No hay cambios para guardar.', true);
@@ -965,83 +1117,20 @@ var addInConstructor = function (api, state, callback) {
 
     setMsg('🛡️ Modo Seguro Geotab: Guardando modificaciones en ' + updatePayloads.length + ' activo(s)...');
 
-    var completed = 0;
+    var targets = [], fieldsById = {};
+    updatePayloads.forEach(function (it) { targets.push(it.row); fieldsById[it.row.id] = it.fields; });
 
-    var promises = updatePayloads.map(function(item) {
-      var r = item.row;
-      var fieldsToUpdate = item.fields;
-
-      return callApi(api, 'Get', { typeName: 'Device', search: { id: r.id } }).then(function(resGet) {
-        var liveDevice = (resGet && resGet[0]) ? resGet[0] : r.rawDevice;
-
-        Object.keys(fieldsToUpdate).forEach(function(field) {
-          var newValue = fieldsToUpdate[field];
-
-          if (field === 'nombreActivo') {
-            liveDevice.name = newValue;
-          } else if (field === 'placa') {
-            liveDevice.licensePlate = newValue;
-          } else if (field === 'estadoProvincia') {
-            liveDevice.licenseState = newValue;
-          } else {
-            var targetPropNameMap = {
-              razon: 'RAZÓN SOCIAL',
-              ruc: 'RUC',
-              anualidad: 'ANUALIDAD',
-              tipoVehiculo: 'TIPO DE VEHICULO'
-            };
-
-            var propName = targetPropNameMap[field];
-            if (propName) {
-              var customProps = liveDevice.customProperties || [];
-              var foundIdx = -1;
-
-              for (var i = 0; i < customProps.length; i++) {
-                if (customProps[i].property && customProps[i].property.name && customProps[i].property.name.toUpperCase() === propName.toUpperCase()) {
-                  foundIdx = i;
-                  break;
-                }
-              }
-
-              if (foundIdx >= 0) {
-                customProps[foundIdx].value = newValue;
-              } else {
-                customProps.push({
-                  property: { name: propName },
-                  value: newValue
-                });
-              }
-              liveDevice.customProperties = customProps;
-            }
-          }
-        });
-
-        var devicePayload = {
-          id: liveDevice.id,
-          name: liveDevice.name,
-          licensePlate: liveDevice.licensePlate,
-          licenseState: liveDevice.licenseState,
-          customProperties: liveDevice.customProperties || [],
-          customParameters: liveDevice.customParameters || []
-        };
-
-        return callApi(api, 'Set', { typeName: 'Device', entity: devicePayload }).then(function() {
-          return callApi(api, 'Get', { typeName: 'Device', search: { id: r.id } }).then(function(verifGet) {
-            if (verifGet && verifGet[0]) {
-              completed++;
-            }
-          });
-        });
-      });
-    });
-
-    return Promise.all(promises).then(function() {
-      alert("✅ Actualización realizada con éxito en " + completed + " activo(s).");
-      return load().then(function() {
-        setMsg('✅ Actualización realizada con éxito.');
-      });
-    }).catch(function(err) {
-      setMsg('❌ Error al actualizar en Geotab: ' + (err.message || err), true);
+    return runSafeUpdate(targets, function (d) {
+      var f = fieldsById[d.id], changed = false;
+      Object.keys(f).forEach(function (k) { if (applyField(d, k, f[k])) changed = true; });
+      return changed;
+    }, function (d) {
+      var f = fieldsById[d.id];
+      return Object.keys(f).every(function (k) { return readField(d, k) === String(f[k]).trim(); });
+    }).then(function (st) {
+      reportUpdate(st, 'Actualización');
+    }).catch(function (err) {
+      setMsg('❌ Error al actualizar en Geotab: ' + (err && err.message ? err.message : err), true);
     });
   }
 
@@ -1069,64 +1158,28 @@ var addInConstructor = function (api, state, callback) {
     applyBatchDeviceUpdates(payloads);
   }
 
-  // INYECCIÓN DE LOS 5 PARÁMETROS XML
+  // INYECCIÓN DE LOS 5 PARÁMETROS PERSONALIZADOS (customParameters)
   function injectMissingParametersSafe() {
     var selIds = Object.keys(selected).filter(function (k) { return selected[k]; });
     if (!selIds.length) { setMsg('Seleccione al menos un activo usando los checkboxes.', true); return; }
 
-    var targets = all.filter(function(r) { return selected[r.id]; });
-    if (!targets.length) return;
+    var selectedRows = all.filter(function(r) { return selected[r.id]; });
+    var targets = selectedRows.filter(function(r) { return r.paramCount < REQUIRED_PARAMS.length; });
 
-    if (!window.confirm("🛡️ MODO SEGURO: Se inyectará la estructura de los 5 parámetros en el campo XML para " + targets.length + " activo(s) seleccionados. ¿Desea continuar?")) return;
+    if (!targets.length) { setMsg('Los ' + selectedRows.length + ' activo(s) seleccionados ya tienen los 5 parámetros (5/5).'); return; }
 
-    setMsg('Ejecutando inyección segura de parámetros XML en Geotab…');
+    if (!window.confirm("🛡️ MODO SEGURO: Se agregarán/corregirán los 5 parámetros personalizados en " + targets.length + " activo(s) (se conservan los parámetros existentes). ¿Desea continuar?")) return;
 
-    var xmlString = "<Parameter Description='Enable Gps Altitude Logging' Offset='181' Bytes='08' IsEnabled='true'/>\n" +
-                    "<Parameter Description='Disable Accelerometer Record Limit' Offset='65' Bytes='02' IsEnabled='true'/>\n" +
-                    "<Parameter Description='High Res RPM allowed Error = 2 rpm' Offset='168' Bytes='02' IsEnabled='true'/>\n" +
-                    "<Parameter Description='Enable Engine Load' Offset='165' Bytes='04' IsEnabled='true'/>\n" +
-                    "<Parameter Description='Enable Engine Retarder Selection And Accel Pedal' Offset='166' Bytes='09' IsEnabled='true'/>";
+    setMsg('Ejecutando inyección segura de parámetros personalizados en Geotab…');
 
-    var completed = 0;
-    var promises = targets.map(function(r) {
-      return callApi(api, 'Get', { typeName: 'Device', search: { id: r.id } }).then(function(resGet) {
-        var liveDevice = (resGet && resGet[0]) ? resGet[0] : r.rawDevice;
-
-        var customParamsList = [
-          { description: "Enable Gps Altitude Logging", offset: 181, bytes: "CA==", isEnabled: true },
-          { description: "Disable Accelerometer Record Limit", offset: 65, bytes: "Ag==", isEnabled: true },
-          { description: "High Res RPM allowed Error = 2 rpm", offset: 168, bytes: "Ag==", isEnabled: true },
-          { description: "Enable Engine Load", offset: 165, bytes: "BA==", isEnabled: true },
-          { description: "Enable Engine Retarder Selection And Accel Pedal", offset: 166, bytes: "CQ==", isEnabled: true }
-        ];
-
-        var devicePayload = {
-          id: liveDevice.id,
-          name: liveDevice.name,
-          licensePlate: liveDevice.licensePlate,
-          licenseState: liveDevice.licenseState,
-          parameterVersion: xmlString,
-          customProperties: liveDevice.customProperties || [],
-          customParameters: customParamsList
-        };
-
-        return callApi(api, 'Set', { typeName: 'Device', entity: devicePayload }).then(function() {
-          return callApi(api, 'Get', { typeName: 'Device', search: { id: r.id } }).then(function(verifGet) {
-            if (verifGet && verifGet[0]) {
-              completed++;
-            }
-          });
-        });
-      });
-    });
-
-    Promise.all(promises).then(function() {
-      alert("✅ Inyección realizada con éxito. Se inyectaron los 5 parámetros en " + completed + " activo(s).");
-      return load().then(function() {
-        setMsg('✅ Actualización realizada con éxito.');
-      });
-    }).catch(function(err) {
-      setMsg('Error en el flujo de inyección: ' + (err.message || err), true);
+    runSafeUpdate(targets, function (d) {
+      return mergeRequiredParams(d);
+    }, function (d) {
+      return evalDeviceParameters(d).count === REQUIRED_PARAMS.length;
+    }).then(function (st) {
+      reportUpdate(st, 'Inyección de parámetros', "Inyección realizada con éxito. Se inyectaron los 5 parámetros en " + st.verified + " activo(s).");
+    }).catch(function (err) {
+      setMsg('Error en el flujo de inyección: ' + (err && err.message ? err.message : err), true);
     });
   }
 
@@ -1303,7 +1356,7 @@ var addInConstructor = function (api, state, callback) {
     var matchedCount = 0;
 
     all.forEach(function (r) {
-      var nom = r.nombreActivo.toLowerCase(), p = r.placa.toLowerCase(), v = r.vin.toLowerCase(), s = r.serialNumber.toLowerCase();
+      var nom = r._nom, p = r._p, v = r._v, s = r._s;
       var isMatch = activeBulkTokens.some(function (token) {
         return nom === token || p === token || v === token || s === token || (token.length >= 3 && (nom.indexOf(token) >= 0 || p.indexOf(token) >= 0 || v.indexOf(token) >= 0 || s.indexOf(token) >= 0));
       });
@@ -1318,51 +1371,46 @@ var addInConstructor = function (api, state, callback) {
     setMsg('Sincronizando activos de la base de datos de Geotab…');
 
     var nowIso = new Date().toISOString();
+    var devSearch = { fromDate: nowIso, toDate: nowIso };
 
-    return Promise.all([
-      callApi(api, 'Get', { 
-        typeName: 'Device', 
-        search: { 
-          fromDate: nowIso, 
-          toDate: nowIso 
-        },
-        resultsLimit: 5000
-      }),
-      callApi(api, 'Get', { typeName: 'Group' }).catch(function () { return []; }),
-      callApi(api, 'GetSystemStatus').catch(function() { return null; })
-    ]).then(function (res) {
+    var sessionP = new Promise(function (ok) {
+      try { api.getSession(function (s) { ok(s); }); } catch (e) { ok(null); }
+    });
+
+    // Una sola petición (multiCall) con campos acotados; si falla, vuelve a consultas simples.
+    var dataP = callMulti(api, [
+      ['Get', { typeName: 'Device', search: devSearch, resultsLimit: 5000, propertySelector: { fields: DEVICE_FIELDS, isIncluded: true } }],
+      ['Get', { typeName: 'Group', propertySelector: { fields: ['id', 'name'], isIncluded: true } }]
+    ]).catch(function () {
+      return Promise.all([
+        callApi(api, 'Get', { typeName: 'Device', search: devSearch, resultsLimit: 5000 }),
+        callApi(api, 'Get', { typeName: 'Group' }).catch(function () { return []; })
+      ]);
+    });
+
+    return Promise.all([dataP, sessionP]).then(function (res) {
       var nowMs = new Date().getTime();
+      var devices = (res[0] && res[0][0]) || [];
+      var groups = (res[0] && res[0][1]) || [];
 
-      if (res[2] && res[2].database) {
-        databaseName = res[2].database;
+      if (res[1] && res[1].database) {
+        databaseName = res[1].database;
       }
 
-      rawDevices = (res[0] || []).filter(function (d) {
+      rawDevices = devices.filter(function (d) {
+        if (d.deviceType === 'CustomDevice') return false;
         if (d.activeTo) {
-          var activeToStr = String(d.activeTo);
           var activeToMs = new Date(d.activeTo).getTime();
-
-          if (!isNaN(activeToMs) && activeToMs <= nowMs) {
-            return false;
-          }
-
-          if (activeToStr.indexOf('2050-01-01') < 0 && !isNaN(activeToMs) && activeToMs <= nowMs) {
-            return false;
-          }
+          if (!isNaN(activeToMs) && activeToMs <= nowMs) return false;
         }
-
-        if (d.deviceType === 'CustomDevice') {
-          return false;
-        }
-
         return true;
       });
 
       groupsById = {};
-      (res[1] || []).forEach(function (g) { groupsById[g.id] = g; });
+      groups.forEach(function (g) { groupsById[g.id] = g; });
       rebuildRows();
       renderList();
-      
+
       if (activeModule === 'audit' && $('cgps-audit-input').value.trim()) {
         executeGroupAudit();
       }
@@ -1438,7 +1486,8 @@ var addInConstructor = function (api, state, callback) {
   $('cgps-btn-bulk-clear-std').addEventListener('click', function () { $('cgps-bulk-input-std').value = ''; activeBulkTokens = []; selected = {}; renderList(); setMsg('Filtro masivo limpiado.'); });
 
   // EVENTOS DE BÚSQUEDA Y SELECTOR DE CAMPO
-  $('cgps-filter').addEventListener('input', renderList);
+  var filterTimer = null;
+  $('cgps-filter').addEventListener('input', function () { clearTimeout(filterTimer); filterTimer = setTimeout(renderList, 200); });
   $('cgps-filter-field').addEventListener('change', renderList);
 
   // MANEJO DE SELECCIÓN EN TABLA
@@ -1469,7 +1518,7 @@ var addInConstructor = function (api, state, callback) {
   load().then(function () { if (typeof callback === 'function') callback(); }).catch(function () { if (typeof callback === 'function') callback(); });
 
   return {
-    initialize: function (geotabApi, state, initializeCallback) { if (typeof initializeCallback === 'function') initializeCallback(); },
+    initialize: function (geotabApi, state, initializeCallback) { if (geotabApi) api = geotabApi; if (typeof initializeCallback === 'function') initializeCallback(); },
     focus: function (geotabApi, state) {},
     blur: function (geotabApi, state) {}
   };
