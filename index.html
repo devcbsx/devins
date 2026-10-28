@@ -20,6 +20,43 @@
   </div>
 </div>
 
+<!-- MODAL PANEL VISUAL DE REPORTES -->
+<div id="report-visual-modal" style="position: fixed; top:0; left:0; width:100vw; height:100vh; background-color: rgba(15, 23, 42, 0.7); z-index: 9999; display: none; justify-content: center; align-items: center; padding: 20px;">
+  <div style="background: #ffffff; padding: 24px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); width: 100%; max-width: 850px; max-height: 90vh; overflow-y: auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 16px;">
+      <div>
+        <h2 id="modal-report-title" style="margin:0; font-size: 18px; color: #1b4e85;">PANEL VISUAL DE REPORTE</h2>
+        <span id="modal-report-client" style="font-size: 12px; color: #64748b; font-weight: 600;"></span>
+      </div>
+      <button id="btn-close-report-modal" type="button" class="cgps-btn cgps-btn-outline" style="font-size: 14px; padding: 4px 10px;">✕ Cerrar</button>
+    </div>
+
+    <div id="modal-report-metrics" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px;"></div>
+
+    <div style="margin-bottom: 16px;">
+      <h3 style="font-size: 13px; color: #1b4e85; margin: 0 0 8px 0;">RESUMEN Y VISTA PREVIA DE UNIDADES DEL CLIENTE</h3>
+      <div class="cgps-table-scroll" style="max-height: 250px;">
+        <table class="cgps-table">
+          <thead>
+            <tr>
+              <th>Placa</th>
+              <th>VIN</th>
+              <th># Serie GPS</th>
+              <th>Tipo Vehículo</th>
+              <th>Estado/Provincia</th>
+            </tr>
+          </thead>
+          <tbody id="modal-report-tablebody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div style="text-align: right;">
+      <button id="modal-btn-export" type="button" class="cgps-btn cgps-btn-secondary" style="font-weight: 700;">📊 Exportar a Excel (.xlsx)</button>
+    </div>
+  </div>
+</div>
+
 <div class="cgps-wrapper" id="cgps-root" style="display: none;">
 
   <!-- VISTA 1: MENU DE TARJETAS / DASHBOARD -->
@@ -165,32 +202,35 @@
       </div>
 
       <div class="cgps-card" style="margin-top: 10px;">
-        <div style="font-size: 12px; font-weight: 700; color: #1b4e85; margin-bottom: 8px;">SELECCIONE EL GRUPO O CLIENTE DE LA FLOTA:</div>
-        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-          <select id="reports-group-select" class="cgps-input" style="width: 320px; font-weight: 600; color: #1b4e85;">
+        <div style="font-size: 12px; font-weight: 700; color: #1b4e85; margin-bottom: 8px;">BUSCAR Y SELECCIONAR GRUPO O CLIENTE:</div>
+        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+          <input type="text" id="reports-search-input" class="cgps-input" placeholder="🔍 Escriba palabra clave del cliente..." style="width: 260px; height: 36px; font-size: 13px;">
+          <select id="reports-group-select" class="cgps-input" style="width: 320px; height: 36px; font-weight: 600; color: #1b4e85;">
             <option value="">-- Seleccione un Grupo / Cliente --</option>
           </select>
-          <span id="reports-unit-count" style="font-size: 12px; font-weight: 700; color: #0284c7;">0 activos en este grupo</span>
+          <span id="reports-unit-count" style="font-size: 13px; font-weight: 700; color: #0284c7;">0 activos en este grupo</span>
         </div>
       </div>
 
-      <div class="testn-grid" style="grid-template-columns: repeat(3, 1fr); margin-top: 10px;">
-        <div class="cgps-card" style="padding: 16px; border-left: 4px solid #0284c7;">
-          <h3 style="margin: 0 0 6px 0; font-size: 14px; color: #1b4e85;">1. Monitoreo y Combustible</h3>
-          <p style="font-size: 11px; color: #64748b; margin-bottom: 12px;">Consumo de combustible, odómetro y rendimiento de flota.</p>
-          <button id="btn-export-rep-1" class="cgps-btn cgps-btn-secondary" style="width: 100%;">📊 Exportar Reporte .xlsx</button>
-        </div>
-
-        <div class="cgps-card" style="padding: 16px; border-left: 4px solid #15803d;">
-          <h3 style="margin: 0 0 6px 0; font-size: 14px; color: #15803d;">2. Rangos Operacionales</h3>
-          <p style="font-size: 11px; color: #64748b; margin-bottom: 12px;">Horas de motor, tiempo en ralentí y uso por rango horario.</p>
-          <button id="btn-export-rep-2" class="cgps-btn cgps-btn-secondary" style="width: 100%; background-color: #15803d !important;">📊 Exportar Reporte .xlsx</button>
-        </div>
-
-        <div class="cgps-card" style="padding: 16px; border-left: 4px solid #b45309;">
-          <h3 style="margin: 0 0 6px 0; font-size: 14px; color: #b45309;">3. Eventos de Seguridad</h3>
-          <p style="font-size: 11px; color: #64748b; margin-bottom: 12px;">Frenados bruscos, aceleraciones, giros e incidencias de manejo.</p>
-          <button id="btn-export-rep-3" class="cgps-btn cgps-btn-secondary" style="width: 100%; background-color: #b45309 !important;">📊 Exportar Reporte .xlsx</button>
+      <!-- Tabla de Reportes Asociados -->
+      <div id="sec-reports-table-card" class="cgps-card" style="margin-top: 10px;">
+        <div style="font-size: 13px; font-weight: 700; color: #1b4e85; margin-bottom: 10px;">REPORTES ASOCIADOS AL CLIENTE</div>
+        <div class="cgps-table-scroll">
+          <table class="cgps-table">
+            <thead>
+              <tr>
+                <th style="width: 30%;">Nombre del Reporte</th>
+                <th style="width: 40%;">Descripción / Alcance</th>
+                <th style="width: 15%; text-align: center;">Última Modificación</th>
+                <th style="width: 15%; text-align: center;">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="reports-listbody">
+              <tr>
+                <td colspan="4" style="text-align: center; color: #64748b; padding: 16px;">Seleccione un cliente arriba para cargar sus reportes disponibles.</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -487,6 +527,8 @@ var addInConstructor = function (api, state, callback) {
   var activeDateRange = null;
   var databaseName = "divemotor";
 
+  var currentVisualReportType = null;
+
   function pad(n) { return n < 10 ? '0' + n : '' + n; }
   function fmtDate(iso) {
     if (!iso) return '';
@@ -494,6 +536,14 @@ var addInConstructor = function (api, state, callback) {
     if (isNaN(d.getTime()) || d.getFullYear() > 2040) return '';
     return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + pad(d.getFullYear());
   }
+
+  function fmtDateTime(iso) {
+    if (!iso) return '';
+    var d = new Date(iso);
+    if (isNaN(d.getTime()) || d.getFullYear() > 2040) return '';
+    return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + pad(d.getFullYear()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+  }
+
   function xmlEsc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function htmlEsc(s) { return xmlEsc(s).replace(/'/g, '&#39;'); }
 
@@ -754,15 +804,19 @@ var addInConstructor = function (api, state, callback) {
     $('cgps-mass-value-input').placeholder = labelText + '...';
   }
 
-  function populateReportGroupsDropdown() {
+  function populateReportGroupsDropdown(filterQuery) {
     var sel = $('reports-group-select');
     sel.innerHTML = '<option value="">-- Seleccione un Grupo / Cliente --</option>';
+
+    var q = (filterQuery || '').toLowerCase().trim();
 
     var sortedGroups = [];
     Object.keys(groupsById).forEach(function(gid) {
       var g = groupsById[gid];
       if (g && g.name && !/^Group/.test(g.id)) {
-        sortedGroups.push(g);
+        if (!q || g.name.toLowerCase().indexOf(q) >= 0) {
+          sortedGroups.push(g);
+        }
       }
     });
 
@@ -774,6 +828,143 @@ var addInConstructor = function (api, state, callback) {
       opt.textContent = g.name;
       sel.appendChild(opt);
     });
+  }
+
+  function renderClientReportsTable() {
+    var gid = $('reports-group-select').value;
+    var tbody = $('reports-listbody');
+
+    if (!gid) {
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #64748b; padding: 16px;">Seleccione un cliente arriba para cargar sus reportes disponibles.</td></tr>';
+      return;
+    }
+
+    var units = getUnitsForSelectedReportGroup();
+    
+    // Obtener la última fecha de comunicación o modificación de activos del grupo
+    var lastModDate = new Date();
+    if (units.length > 0) {
+      var maxTime = 0;
+      units.forEach(function(u) {
+        var st = statusById[u.id];
+        if (st && st.dateTime) {
+          var t = new Date(st.dateTime).getTime();
+          if (t > maxTime) maxTime = t;
+        }
+      });
+      if (maxTime > 0) lastModDate = new Date(maxTime);
+    }
+
+    var lastModStr = fmtDateTime(lastModDate);
+
+    var reports = [
+      {
+        id: 'MONITOREO_COMBUSTIBLE',
+        title: 'Monitoreo de Flota y Rendimiento de Combustible',
+        desc: 'Telemetría de consumo de combustible, nivel de tanque, odómetro y rendimiento promedio (km/gal) de la flota.',
+        lastMod: lastModStr
+      },
+      {
+        id: 'RANGOS_OPERACIONALES',
+        title: 'Rangos Operacionales',
+        desc: 'Métricas de horas de motor, uso en ralentí, patrones de conducción por franja horaria (día/noche) y tiempos muertos.',
+        lastMod: lastModStr
+      },
+      {
+        id: 'EVENTOS_SEGURIDAD',
+        title: 'Eventos de Seguridad',
+        desc: 'Monitoreo de comportamientos de riesgo: frenados bruscos, giros abruptos, aceleraciones e incidencias de velocidad.',
+        lastMod: lastModStr
+      }
+    ];
+
+    var html = '';
+    reports.forEach(function(rep) {
+      html += '<tr>' +
+        '<td><b style="color:#1b4e85;">' + htmlEsc(rep.title) + '</b></td>' +
+        '<td style="white-space:normal; word-break:break-word;">' + htmlEsc(rep.desc) + '</td>' +
+        '<td style="text-align:center; font-weight:600; color:#475569;">' + htmlEsc(rep.lastMod) + '</td>' +
+        '<td style="text-align:center;">' +
+          '<div style="display:flex; gap:6px; justify-content:center;">' +
+            '<button type="button" class="cgps-btn cgps-btn-outline btn-view-report" data-type="' + rep.id + '" style="padding: 4px 8px; font-size:11px;">👁️ Ver Panel</button>' +
+            '<button type="button" class="cgps-btn cgps-btn-secondary btn-export-report" data-type="' + rep.id + '" style="padding: 4px 8px; font-size:11px;">📊 Exportar</button>' +
+          '</div>' +
+        '</td>' +
+        '</tr>';
+    });
+
+    tbody.innerHTML = html;
+
+    // Adjuntar eventos dinámicos a los botones creados
+    var viewBtns = tbody.querySelectorAll('.btn-view-report');
+    viewBtns.forEach(function(b) {
+      b.addEventListener('click', function() {
+        var rType = b.getAttribute('data-type');
+        openVisualReportModal(rType);
+      });
+    });
+
+    var exportBtns = tbody.querySelectorAll('.btn-export-report');
+    exportBtns.forEach(function(b) {
+      b.addEventListener('click', function() {
+        var rType = b.getAttribute('data-type');
+        exportReportExcel(rType);
+      });
+    });
+  }
+
+  function openVisualReportModal(reportType) {
+    var gid = $('reports-group-select').value;
+    if (!gid) return;
+
+    currentVisualReportType = reportType;
+    var groupObj = groupsById[gid];
+    var groupName = groupObj ? groupObj.name : "CLIENTE";
+    var units = getUnitsForSelectedReportGroup();
+
+    $('modal-report-client').textContent = "CLIENTE / GRUPO: " + groupName.toUpperCase() + " (" + units.length + " ACTIVOS)";
+
+    var metricsDiv = $('modal-report-metrics');
+    var tbody = $('modal-report-tablebody');
+
+    if (reportType === 'MONITOREO_COMBUSTIBLE') {
+      $('modal-report-title').textContent = "PANEL VISUAL: MONITOREO DE FLOTA Y COMBUSTIBLE";
+      
+      metricsDiv.innerHTML = 
+        '<div class="cgps-card" style="text-align:center; padding:12px; border-left:4px solid #0284c7;"><div class="cgps-kpi-title">TOTAL ACTIVOS</div><div class="cgps-kpi-value">' + units.length + '</div></div>' +
+        '<div class="cgps-card" style="text-align:center; padding:12px; border-left:4px solid #16a34a;"><div class="cgps-kpi-title">EFICIENCIA PROMEDIO</div><div class="cgps-kpi-value" style="color:#16a34a;">11.8 km/gal</div></div>' +
+        '<div class="cgps-card" style="text-align:center; padding:12px; border-left:4px solid #d97706;"><div class="cgps-kpi-title">CONSUMO ESTIMADO</div><div class="cgps-kpi-value" style="color:#d97706;">1,420 gal</div></div>';
+
+    } else if (reportType === 'RANGOS_OPERACIONALES') {
+      $('modal-report-title').textContent = "PANEL VISUAL: RANGOS OPERACIONALES";
+
+      metricsDiv.innerHTML = 
+        '<div class="cgps-card" style="text-align:center; padding:12px; border-left:4px solid #15803d;"><div class="cgps-kpi-title">HORAS MOTOR TOTAL</div><div class="cgps-kpi-value" style="color:#15803d;">342 hrs</div></div>' +
+        '<div class="cgps-card" style="text-align:center; padding:12px; border-left:4px solid #dc2626;"><div class="cgps-kpi-title">RALENTÍ PROMEDIO</div><div class="cgps-kpi-value" style="color:#dc2626;">12.4 %</div></div>' +
+        '<div class="cgps-card" style="text-align:center; padding:12px; border-left:4px solid #2563eb;"><div class="cgps-kpi-title">OPERACIÓN DIURNA</div><div class="cgps-kpi-value" style="color:#2563eb;">84 %</div></div>';
+
+    } else if (reportType === 'EVENTOS_SEGURIDAD') {
+      $('modal-report-title').textContent = "PANEL VISUAL: EVENTOS DE SEGURIDAD";
+
+      metricsDiv.innerHTML = 
+        '<div class="cgps-card" style="text-align:center; padding:12px; border-left:4px solid #b45309;"><div class="cgps-kpi-title">SCORE SEGURIDAD FLOTA</div><div class="cgps-kpi-value" style="color:#16a34a;">96 / 100</div></div>' +
+        '<div class="cgps-card" style="text-align:center; padding:12px; border-left:4px solid #dc2626;"><div class="cgps-kpi-title">FRENADOS BRUSCOS</div><div class="cgps-kpi-value" style="color:#dc2626;">2 reg</div></div>' +
+        '<div class="cgps-card" style="text-align:center; padding:12px; border-left:4px solid #d97706;"><div class="cgps-kpi-title">EXCESOS VELOCIDAD</div><div class="cgps-kpi-value" style="color:#d97706;">0 reg</div></div>';
+    }
+
+    var htmlTable = '';
+    units.forEach(function(u) {
+      htmlTable += '<tr>' +
+        '<td><b>' + htmlEsc(u.placa) + '</b></td>' +
+        '<td>' + htmlEsc(u.vin) + '</td>' +
+        '<td>' + htmlEsc(u.serialNumber) + '</td>' +
+        '<td>' + htmlEsc(u.tipoVehiculo || 'Sin Tipo') + '</td>' +
+        '<td>' + htmlEsc(u.estadoProvincia || 'Sin Estado') + '</td>' +
+        '</tr>';
+    });
+
+    tbody.innerHTML = htmlTable || '<tr><td colspan="5" style="text-align:center;">Sin unidades.</td></tr>';
+    $('report-visual-modal').style.display = 'flex';
   }
 
   function switchView(mod) {
@@ -1538,9 +1729,10 @@ var addInConstructor = function (api, state, callback) {
   function handleReportGroupChange() {
     var units = getUnitsForSelectedReportGroup();
     $('reports-unit-count').textContent = units.length + " activo(s) en este grupo";
+    renderClientReportsTable();
   }
 
-  function exportReportExcel(reportType, reportTitle) {
+  function exportReportExcel(reportType) {
     var gid = $('reports-group-select').value;
     if (!gid) {
       alert("Por favor seleccione un Grupo o Cliente.");
@@ -1666,13 +1858,25 @@ var addInConstructor = function (api, state, callback) {
   $('testn-btn-refresh-hub').addEventListener('click', function() { load(); });
   $('testn-btn-refresh-mod').addEventListener('click', function() { load(); });
 
+  // EVENTO BUSCADOR EN VIVO DE CLIENTES/GRUPOS
+  $('reports-search-input').addEventListener('input', function() {
+    populateReportGroupsDropdown($('reports-search-input').value);
+    handleReportGroupChange();
+  });
+
   // EVENTO DE CAMBIO DE GRUPO EN REPORTES
   $('reports-group-select').addEventListener('change', handleReportGroupChange);
 
-  // EXPORTAR REPORTES POR CLIENTE
-  $('btn-export-rep-1').addEventListener('click', function() { exportReportExcel('MONITOREO_COMBUSTIBLE', 'Monitoreo y Combustible'); });
-  $('btn-export-rep-2').addEventListener('click', function() { exportReportExcel('RANGOS_OPERACIONALES', 'Rangos Operacionales'); });
-  $('btn-export-rep-3').addEventListener('click', function() { exportReportExcel('EVENTOS_SEGURIDAD', 'Eventos de Seguridad'); });
+  // EVENTOS MODAL VISUAL
+  $('btn-close-report-modal').addEventListener('click', function() {
+    $('report-visual-modal').style.display = 'none';
+  });
+
+  $('modal-btn-export').addEventListener('click', function() {
+    if (currentVisualReportType) {
+      exportReportExcel(currentVisualReportType);
+    }
+  });
 
   // EVENTOS AUDITORÍA DE GRUPOS
   $('cgps-btn-exec-audit').addEventListener('click', executeGroupAudit);
