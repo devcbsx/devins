@@ -187,7 +187,7 @@
           <span id="reports-unit-count" style="font-size: 13px; font-weight: 700; color: #0284c7;">0 activos en este grupo</span>
         </div>
 
-        <!-- BARRA DE CARGA VISUAL DENTRO DEL CONTENEDOR DE BÚSQUEDA -->
+        <!-- BARRA DE CARGA VISUAL -->
         <div id="reports-loading-bar-box" style="display: none; margin-top: 12px;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
             <span id="reports-loading-text" style="font-size: 11px; font-weight: 700; color: #0284c7;">Consultando base de datos y programaciones...</span>
@@ -471,7 +471,6 @@
     .badge-audit-ok { background-color: #dcfce7; color: #15803d; padding: 3px 8px; border-radius: 4px; font-weight: 700; border: 1px solid #86efac; display: inline-block; }
     .badge-audit-warn { background-color: #fee2e2; color: #b91c1c; padding: 3px 8px; border-radius: 4px; font-weight: 700; border: 1px solid #fca5a5; display: inline-block; }
 
-    /* ESTILO SPINNER ANIMADO DE CARGA */
     .cgps-spinner {
       display: inline-block;
       width: 14px;
@@ -491,11 +490,9 @@
   document.head.appendChild(styleElem);
 })();
 
-window.geotab = window.geotab || {};
-window.geotab.addin = window.geotab.addin || {};
-
-var addInConstructor = function (api, state, callback) {
+var addInConstructor = function (geotabApi, state, callback) {
   'use strict';
+  var api = geotabApi;
 
   var PASS_CORRECTA = "3219878";
   
@@ -694,9 +691,27 @@ var addInConstructor = function (api, state, callback) {
     return row;
   }
 
-  function callApi(apiRef, method, params) { return new Promise(function (ok, fail) { apiRef.call(method, params, ok, fail); }); }
+  function callApi(apiRef, method, params) { 
+    return new Promise(function (ok, fail) { 
+      if (!apiRef) {
+        fail(new Error("La referencia API de Geotab no está disponible."));
+        return;
+      }
+      apiRef.call(method, params, ok, fail); 
+    }); 
+  }
+
   var $ = function (id) { return document.getElementById(id); };
-  function callMulti(apiRef, calls) { return new Promise(function (ok, fail) { apiRef.multiCall(calls, ok, fail); }); }
+
+  function callMulti(apiRef, calls) { 
+    return new Promise(function (ok, fail) { 
+      if (!apiRef) {
+        fail(new Error("La referencia API de Geotab no está disponible."));
+        return;
+      }
+      apiRef.multiCall(calls, ok, fail); 
+    }); 
+  }
 
   function rebuildRows() {
     all = rawDevices
@@ -810,18 +825,18 @@ var addInConstructor = function (api, state, callback) {
     }
   }
 
-  function setMsg(t, err) { var m = $('cgps-msg'); m.textContent = t || ''; m.className = 'cgps-msg' + (err ? ' cgps-err' : ''); }
+  function setMsg(t, err) { var m = $('cgps-msg'); if (m) { m.textContent = t || ''; m.className = 'cgps-msg' + (err ? ' cgps-err' : ''); } }
 
   function showLoading(msg, progressPercent) {
-    $('reports-loading-bar-box').style.display = 'block';
-    $('reports-loading-text').textContent = msg || 'Cargando datos...';
-    $('reports-loading-progress').style.width = (progressPercent || 20) + '%';
+    if ($('reports-loading-bar-box')) $('reports-loading-bar-box').style.display = 'block';
+    if ($('reports-loading-text')) $('reports-loading-text').textContent = msg || 'Cargando datos...';
+    if ($('reports-loading-progress')) $('reports-loading-progress').style.width = (progressPercent || 20) + '%';
   }
 
   function hideLoading() {
-    $('reports-loading-progress').style.width = '100%';
+    if ($('reports-loading-progress')) $('reports-loading-progress').style.width = '100%';
     setTimeout(function() {
-      $('reports-loading-bar-box').style.display = 'none';
+      if ($('reports-loading-bar-box')) $('reports-loading-bar-box').style.display = 'none';
     }, 300);
   }
 
@@ -848,6 +863,7 @@ var addInConstructor = function (api, state, callback) {
 
   function populateReportGroupsDropdown(filterQuery) {
     var sel = $('reports-group-select');
+    if (!sel) return;
     sel.innerHTML = '<option value="">-- Seleccione un Grupo / Cliente --</option>';
 
     var q = (filterQuery || '').toLowerCase().trim();
@@ -1047,6 +1063,7 @@ var addInConstructor = function (api, state, callback) {
   function updateValidationCard(cardId, statusId, label, isOk) {
     var card = $(cardId);
     var st = $(statusId);
+    if (!card || !st) return;
     if (isOk) {
       card.style.borderLeftColor = '#16a34a';
       card.style.backgroundColor = '#f0fdf4';
@@ -1204,14 +1221,14 @@ var addInConstructor = function (api, state, callback) {
     activeDateRange = null;
     selected = {};
     activeBulkTokens = [];
-    $('cgps-bulk-input').value = '';
-    $('cgps-bulk-input-std').value = '';
-    $('cgps-filter').value = '';
-    $('cgps-filter-field').value = 'all';
-    $('cgps-mass-value-input').value = '';
+    if($('cgps-bulk-input')) $('cgps-bulk-input').value = '';
+    if($('cgps-bulk-input-std')) $('cgps-bulk-input-std').value = '';
+    if($('cgps-filter')) $('cgps-filter').value = '';
+    if($('cgps-filter-field')) $('cgps-filter-field').value = 'all';
+    if($('cgps-mass-value-input')) $('cgps-mass-value-input').value = '';
     
-    $('hdr-actions-certi').style.display = 'none';
-    $('hdr-actions-master').style.display = 'none';
+    if($('hdr-actions-certi')) $('hdr-actions-certi').style.display = 'none';
+    if($('hdr-actions-master')) $('hdr-actions-master').style.display = 'none';
 
     highlightKpiCards();
 
@@ -1307,6 +1324,7 @@ var addInConstructor = function (api, state, callback) {
 
   function renderHeader() {
     var head = $('cgps-table-head');
+    if (!head) return;
     if (activeModule === 'certi') {
       head.innerHTML = '<tr><th style="width: 36px; text-align: center;"></th><th style="width: 120px;">Placa</th><th style="width: 160px;">VIN</th><th style="width: 100px;">Activo Desde</th><th style="width: 220px;">Razón Social</th><th style="width: 120px;">RUC</th><th>Grupos</th></tr>';
     } else if (activeModule === 'master') {
@@ -1432,7 +1450,9 @@ var addInConstructor = function (api, state, callback) {
       }
     });
 
-    $('cgps-listbody').innerHTML = html || '<tr><td colspan="13" style="text-align:center; padding: 14px; color: #64748b;">Sin resultados coincidentes para la combinación de filtros aplicada</td></tr>';
+    if ($('cgps-listbody')) {
+      $('cgps-listbody').innerHTML = html || '<tr><td colspan="13" style="text-align:center; padding: 14px; color: #64748b;">Sin resultados coincidentes para la combinación de filtros aplicada</td></tr>';
+    }
     updateKPIs();
     highlightKpiCards();
   }
@@ -1588,7 +1608,15 @@ var addInConstructor = function (api, state, callback) {
     var devSearch = {};
 
     var sessionP = new Promise(function (ok) {
-      try { api.getSession(function (s) { ok(s); }); } catch (e) { ok(null); }
+      try { 
+        if (api && typeof api.getSession === 'function') {
+          api.getSession(function (s) { ok(s); }); 
+        } else {
+          ok(null);
+        }
+      } catch (e) { 
+        ok(null); 
+      }
     });
 
     var coreDataP = callMulti(api, [
@@ -1693,12 +1721,12 @@ var addInConstructor = function (api, state, callback) {
     setMsg('Filtros de fecha restablecidos.');
   });
 
-  // EVENTOS DE FILTRADO MASIVO (PEGADO)
+  // EVENTOS DE FILTRADO MASIVO
   $('cgps-btn-bulk').addEventListener('click', function() { applyBulkFilter($('cgps-bulk-input').value); });
   $('cgps-btn-bulk-clear').addEventListener('click', function() { $('cgps-bulk-input').value = ''; applyBulkFilter(''); });
   
   $('cgps-btn-bulk-std').addEventListener('click', function() { applyBulkFilter($('cgps-bulk-input-std').value); });
-  $('cgps-btn-clear-std').addEventListener('click', function() { $('cgps-bulk-input-std').value = ''; applyBulkFilter(''); });
+  $('cgps-btn-bulk-clear-std').addEventListener('click', function() { $('cgps-bulk-input-std').value = ''; applyBulkFilter(''); });
 
   // EXECUCIÓN BÚSQUEDA EXPLÍCITA DE GRUPOS/CLIENTES
   function triggerClientGroupSearch() {
@@ -1718,7 +1746,6 @@ var addInConstructor = function (api, state, callback) {
     }
   });
 
-  // EVENTO DE CAMBIO DE GRUPO EN REPORTES
   $('reports-group-select').addEventListener('change', handleReportGroupChange);
 
   // EVENTOS MODAL VISUAL
@@ -1775,7 +1802,7 @@ var addInConstructor = function (api, state, callback) {
   $('btn-mod-activations').addEventListener('click', function() { switchView('activations'); });
   $('testn-btn-back').addEventListener('click', function() { switchView('hub'); });
 
-  // EVENTOS DE BÚSQUEDA Y SELECTOR DE CAMPO
+  // BÚSQUEDA Y SELECTOR DE CAMPO
   var filterTimer = null;
   $('cgps-filter').addEventListener('input', function () { clearTimeout(filterTimer); filterTimer = setTimeout(renderList, 200); });
   $('cgps-filter-field').addEventListener('change', renderList);
@@ -1804,21 +1831,45 @@ var addInConstructor = function (api, state, callback) {
     renderList(); 
   });
 
-  load().then(function () { if (typeof callback === 'function') callback(); }).catch(function () { if (typeof callback === 'function') callback(); });
-
   return {
-    initialize: function (geotabApi, state, initializeCallback) { if (geotabApi) api = geotabApi; if (typeof initializeCallback === 'function') initializeCallback(); },
-    focus: function (geotabApi, state) {},
+    initialize: function (geotabApi, state, initializeCallback) {
+      if (geotabApi) api = geotabApi;
+      load().then(function () {
+        if (typeof initializeCallback === 'function') initializeCallback();
+      }).catch(function () {
+        if (typeof initializeCallback === 'function') initializeCallback();
+      });
+    },
+    focus: function (geotabApi, state) {
+      if (geotabApi) api = geotabApi;
+    },
     blur: function (geotabApi, state) {}
   };
 };
 
-// REGISTRO NATIVO CONTROL Z
+// REGISTRO DINÁMICO Y TOLERANTE PARA MYGEOTAB
 window.geotab = window.geotab || {};
 window.geotab.addin = window.geotab.addin || {};
+
+// Asignación directa a identificadores comunes
 window.geotab.addin["Control Z"] = addInConstructor;
 window.geotab.addin["control_z"] = addInConstructor;
 window.geotab.addin["control_z-index"] = addInConstructor;
+window.geotab.addin["ztest-index"] = addInConstructor;
+
+// Mapeo Proxy para capturar dinámicamente cualquier subclave (e.g. ztest-index?v70)
+try {
+  window.geotab.addin = new Proxy(window.geotab.addin, {
+    get: function(target, prop) {
+      if (prop in target) {
+        return target[prop];
+      }
+      return addInConstructor;
+    }
+  });
+} catch(e) {
+  console.warn("Proxy no soportado en el navegador:", e);
+}
 </script>
 </body>
 </html>
