@@ -239,16 +239,17 @@
           <table class="cgps-table">
             <thead>
               <tr>
-                <th style="width: 25%;">Nombre del Reporte / Plantilla</th>
-                <th style="width: 20%;">ID Plantilla</th>
-                <th style="width: 25%;">Grupos Asignados</th>
-                <th style="width: 15%; text-align: center;">Estado Envio</th>
-                <th style="width: 15%; text-align: center;">Acciones</th>
+                <th style="width: 22%;">Nombre del Reporte / Plantilla</th>
+                <th style="width: 15%;">ID Plantilla</th>
+                <th style="width: 23%;">Grupos Asignados</th>
+                <th style="width: 17%;">Última Modificación</th>
+                <th style="width: 11%; text-align: center;">Estado Envio</th>
+                <th style="width: 12%; text-align: center;">Acciones</th>
               </tr>
             </thead>
             <tbody id="reports-listbody">
               <tr>
-                <td colspan="5" style="text-align: center; color: #64748b; padding: 16px;">Seleccione un cliente arriba para cargar sus reportes disponibles.</td>
+                <td colspan="6" style="text-align: center; color: #64748b; padding: 16px;">Seleccione un cliente arriba para cargar sus reportes disponibles.</td>
               </tr>
             </tbody>
           </table>
@@ -541,6 +542,13 @@ var addInConstructor = function (api, state, callback) {
     var d = new Date(iso);
     if (isNaN(d.getTime()) || d.getFullYear() > 2040) return '';
     return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + pad(d.getFullYear());
+  }
+
+  function fmtDateTime(iso) {
+    if (!iso) return 'No registrada';
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return 'No registrada';
+    return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear() + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
   }
 
   function htmlEsc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }).replace(/'/g, '&#39;'); }
@@ -892,7 +900,7 @@ var addInConstructor = function (api, state, callback) {
 
     if (!gid) {
       $('sec-reports-validation-summary').style.display = 'none';
-      $('reports-listbody').innerHTML = '<tr><td colspan="5" style="text-align: center; color: #64748b; padding: 16px;">Seleccione un cliente arriba para cargar sus reportes disponibles.</td></tr>';
+      $('reports-listbody').innerHTML = '<tr><td colspan="6" style="text-align: center; color: #64748b; padding: 16px;">Seleccione un cliente arriba para cargar sus reportes disponibles.</td></tr>';
       $('reports-count-badge').textContent = '0 reportes encontrados';
       return;
     }
@@ -931,7 +939,7 @@ var addInConstructor = function (api, state, callback) {
     var tbody = $('reports-listbody');
 
     if (!schedulesList.length) {
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #b91c1c; padding: 16px;">No se encontraron programaciones de reporte asignadas al grupo o subgrupos seleccionados.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #b91c1c; padding: 16px;">No se encontraron programaciones de reporte asignadas al grupo o subgrupos seleccionados.</td></tr>';
       $('sec-reports-validation-summary').style.display = 'none';
       return;
     }
@@ -969,11 +977,18 @@ var addInConstructor = function (api, state, callback) {
       }).filter(function(v, i, self) { return self.indexOf(v) === i; }).join(', ') || 'Sin grupo explícito';
 
       var tplIdStr = s.template ? s.template.id : 'N/A';
+      
+      // Formateo de Fecha de Modificación
+      var lastModStr = fmtDateTime(s.lastModifiedDate);
+      if (s.lastModifiedUser && s.lastModifiedUser.name) {
+        lastModStr += ' <span style="color:#64748b; font-size:10px;">(' + htmlEsc(s.lastModifiedUser.name) + ')</span>';
+      }
 
       html += '<tr>' +
         '<td><b style="color:#1b4e85;">' + htmlEsc(s._resolvedName) + '</b></td>' +
         '<td><code style="background:#f1f5f9; padding:2px 6px; border-radius:4px; font-size:11px;">' + htmlEsc(tplIdStr) + '</code></td>' +
         '<td style="white-space:normal; word-break:break-word; font-size:11px;">' + htmlEsc(groupsText) + '</td>' +
+        '<td style="font-size:11px;">' + lastModStr + '</td>' +
         '<td style="text-align:center;"><span class="badge-audit-ok">Activo</span></td>' +
         '<td style="text-align:center;">' +
           '<div style="display:flex; gap:6px; justify-content:center;">' +
@@ -1468,11 +1483,11 @@ var addInConstructor = function (api, state, callback) {
 
       setMsg(all.length + ' activos y ' + Object.keys(groupsById).length + ' grupos sincronizados correctamente.');
 
-      // CARGA DE CustomReportSchedule
+      // CARGA DE CustomReportSchedule (Incluyendo lastModifiedDate y lastModifiedUser)
       callApi(api, 'Get', {
         typeName: 'CustomReportSchedule',
         propertySelector: {
-          fields: ['id', 'name', 'template', 'isActive', 'groups', 'scopeGroups', 'includeAllChildrenGroups', 'includeDirectChildrenOnlyGroups'],
+          fields: ['id', 'name', 'template', 'isActive', 'groups', 'scopeGroups', 'includeAllChildrenGroups', 'includeDirectChildrenOnlyGroups', 'lastModifiedDate', 'lastModifiedUser'],
           isIncluded: true
         }
       }).then(function(schedules) {
