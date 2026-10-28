@@ -421,13 +421,13 @@ var addInConstructor = function (api, state, callback) {
     }
   });
 
-  // DEFINICIÓN DE LOS 5 PARÁMETROS CON SU DESCRIPCIÓN CORRESPONDIENTE
+  // DEFINICIÓN DE LOS 5 PARÁMETROS EXACTOS CON SU CORRESPONDIENTE DESCRIPCIÓN
   var REQUIRED_PARAMS = [
-    { name: "Enable Gps Altitude Logging", offset: 181, bytesBase64: "CA==" },
-    { name: "Disable Accelerometer Record Limit", offset: 65, bytesBase64: "Ag==" },
-    { name: "High Res RPM allowed Error = 2 rpm", offset: 168, bytesBase64: "Ag==" },
-    { name: "Enable Engine Load", offset: 165, bytesBase64: "BA==" },
-    { name: "Enable Engine Retarder Selection And Accel Pedal", offset: 166, bytesBase64: "CQ==" }
+    { description: "Enable Gps Altitude Logging", offset: 181, bytes: "CA==" },
+    { description: "Disable Accelerometer Record Limit", offset: 65, bytes: "Ag==" },
+    { description: "High Res RPM allowed Error = 2 rpm", offset: 168, bytes: "Ag==" },
+    { description: "Enable Engine Load", offset: 165, bytes: "BA==" },
+    { description: "Enable Engine Retarder Selection And Accel Pedal", offset: 166, bytes: "CQ==" }
   ];
 
   var all = [], groupsById = {}, selected = {}, rawDevices = [];
@@ -486,7 +486,7 @@ var addInConstructor = function (api, state, callback) {
         found = customList.some(function(cp) {
           var offMatch = Number(cp.offset) === Number(p.offset);
           var bytesVal = String(cp.bytes || cp.bytesBase64 || cp.value || '');
-          var bytesMatch = (bytesVal === p.bytesBase64);
+          var bytesMatch = (bytesVal === p.bytes);
           return offMatch && bytesMatch;
         });
       }
@@ -1070,7 +1070,7 @@ var addInConstructor = function (api, state, callback) {
     applyBatchDeviceUpdates(payloads);
   }
 
-  // INYECCIÓN DE PARÁMETROS INCLUYENDO EL CAMPO DESCRIPTION EXACTO
+  // REEMPLAZO DIRECTO: ASIGNAR EXACTAMENTE LOS 5 PARÁMETROS SOLICITADOS
   function injectMissingParametersSafe() {
     var selIds = Object.keys(selected).filter(function (k) { return selected[k]; });
     if (!selIds.length) { setMsg('Seleccione al menos un activo usando los checkboxes.', true); return; }
@@ -1078,7 +1078,7 @@ var addInConstructor = function (api, state, callback) {
     var targets = all.filter(function(r) { return selected[r.id]; });
     if (!targets.length) return;
 
-    if (!window.confirm("🛡️ MODO SEGURO: Se completarán los 5 parámetros en " + targets.length + " activo(s) seleccionados. ¿Desea continuar?")) return;
+    if (!window.confirm("🛡️ MODO SEGURO: Se establecerán directamente los 5 parámetros requeridos en " + targets.length + " activo(s) seleccionados. ¿Desea continuar?")) return;
 
     setMsg('Ejecutando actualización segura de parámetros en Geotab…');
 
@@ -1086,39 +1086,15 @@ var addInConstructor = function (api, state, callback) {
     var promises = targets.map(function(r) {
       return callApi(api, 'Get', { typeName: 'Device', search: { id: r.id } }).then(function(resGet) {
         var liveDevice = (resGet && resGet[0]) ? resGet[0] : r.rawDevice;
-        var currentParams = Array.isArray(liveDevice.customParameters) ? liveDevice.customParameters : [];
 
-        var updatedParams = [];
-        currentParams.forEach(function(cp) {
-          if (cp && cp.offset !== undefined) {
-            var matchingReq = REQUIRED_PARAMS.find(function(p) { return Number(p.offset) === Number(cp.offset); });
-            updatedParams.push({
-              description: cp.description || (matchingReq ? matchingReq.name : ""),
-              offset: parseInt(cp.offset, 10),
-              bytes: cp.bytes || cp.bytesBase64 || cp.value || "",
-              isEnabled: true
-            });
-          }
-        });
-
-        REQUIRED_PARAMS.forEach(function(req) {
-          var index = updatedParams.findIndex(function(cp) {
-            return Number(cp.offset) === Number(req.offset);
-          });
-
-          var paramObj = {
-            description: req.name,
-            offset: parseInt(req.offset, 10),
-            bytes: req.bytesBase64,
-            isEnabled: true
-          };
-
-          if (index >= 0) {
-            updatedParams[index] = paramObj;
-          } else {
-            updatedParams.push(paramObj);
-          }
-        });
+        // ESTABLECER DIRECTAMENTE LOS 5 PARÁMETROS XML
+        var updatedParams = [
+          { description: "Enable Gps Altitude Logging", offset: 181, bytes: "CA==", isEnabled: true },
+          { description: "Disable Accelerometer Record Limit", offset: 65, bytes: "Ag==", isEnabled: true },
+          { description: "High Res RPM allowed Error = 2 rpm", offset: 168, bytes: "Ag==", isEnabled: true },
+          { description: "Enable Engine Load", offset: 165, bytes: "BA==", isEnabled: true },
+          { description: "Enable Engine Retarder Selection And Accel Pedal", offset: 166, bytes: "CQ==", isEnabled: true }
+        ];
 
         var devicePayload = {
           id: liveDevice.id,
