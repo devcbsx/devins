@@ -540,6 +540,16 @@ var addInConstructor = function (api, state, callback) {
 
   function htmlEsc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }).replace(/'/g, '&#39;'); }
 
+  function normalizeStr(str) {
+    if (!str) return '';
+    return String(str)
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
   function extractCustomPropertiesMap(d) {
     var map = {};
     var customList = d.customProperties || [];
@@ -577,30 +587,41 @@ var addInConstructor = function (api, state, callback) {
     return { count: count, missing: missing, total: REQUIRED_PARAMS.length };
   }
 
-  // ===== FILTRADO ESTRICTO DE UNIDADES "SIN SEGUIMIENTO" =====
+  // ===== EXCLUSIÓN ESTRICTA: UNIDADES ARCHIVADAS Y SIN SEGUIMIENTO =====
+  function isDeviceArchived(d) {
+    if (!d.activeTo) return false;
+    var activeToDate = new Date(d.activeTo);
+    if (isNaN(activeToDate.getTime())) return false;
+    // Dispositivos cuya fecha de baja es menor al año 2050 están archivados/desactivados
+    return activeToDate.getFullYear() < 2050 && activeToDate.getTime() < Date.now();
+  }
+
   function isSinSeguimientoDevice(d) {
-    var name = (d.name || '').toLowerCase();
-    var comment = (d.comment || '').toLowerCase();
-    var groupsStr = getGroupsList(d).toLowerCase();
-    
-    // Buscar cualquier coincidencia con la frase "sin seguimiento"
+    var name = normalizeStr(d.name);
+    var comment = normalizeStr(d.comment);
+    var groupsStr = normalizeStr(getGroupsList(d));
+
     if (name.indexOf('sin seguimiento') >= 0 || 
         comment.indexOf('sin seguimiento') >= 0 || 
         groupsStr.indexOf('sin seguimiento') >= 0) {
       return true;
     }
 
-    // Verificar en propiedades personalizadas (customProperties)
     var cpMap = extractCustomPropertiesMap(d);
     var keys = Object.keys(cpMap);
     for (var i = 0; i < keys.length; i++) {
-      var val = (cpMap[keys[i]] || '').toLowerCase();
-      if (val.indexOf('sin seguimiento') >= 0 || keys[i].toLowerCase().indexOf('sin seguimiento') >= 0) {
+      var val = normalizeStr(cpMap[keys[i]]);
+      var propKey = normalizeStr(keys[i]);
+      if (val.indexOf('sin seguimiento') >= 0 || propKey.indexOf('sin seguimiento') >= 0) {
         return true;
       }
     }
 
     return false;
+  }
+
+  function isExcludedDevice(d) {
+    return isDeviceArchived(d) || isSinSeguimientoDevice(d);
   }
 
   function getGroupsList(d) {
@@ -629,7 +650,7 @@ var addInConstructor = function (api, state, callback) {
     
     var estadoProv = (d.licenseState || '').trim() || getCustomValue(cpMap, /ESTADO|PROVINCIA/i);
 
-    var isSinSeg = isSinSeguimientoDevice(d);
+    var isExcluded = isExcludedDevice(d);
 
     var row = {
       id: d.id,
@@ -649,7 +670,7 @@ var addInConstructor = function (api, state, callback) {
       rawGroupIds: (d.groups || []).map(function(g){ return g.id; }),
       paramCount: paramStatus.count,
       paramMissing: paramStatus.missing,
-      isSinSeguimiento: isSinSeg
+      isExcluded: isExcluded
     };
     row._nom = name.toLowerCase(); row._p = row.placa.toLowerCase(); row._v = vin.toLowerCase(); row._s = serial.toLowerCase();
     row._hay = [name, row.placa, vin, serial, row.grupos, razonSocial, rucVal, estadoProv, anualidadVal, tipoVehiculoVal].join(' ').toLowerCase();
@@ -662,8 +683,9 @@ var addInConstructor = function (api, state, callback) {
 
   function rebuildRows() {
     all = rawDevices
+      .filter(function (d) { return !isExcludedDevice(d); }) // Exclusión previa estricta
       .map(function (d) { return toRow(d); })
-      .filter(function (r) { return !r.isSinSeguimiento; }) // Exclusión directa durante la construcción
+      .filter(function (r) { return !r.isExcluded; })
       .sort(function (a, b) { return a.placa.localeCompare(b.placa, 'es', { numeric: true }); });
     
     populateReportGroupsDropdown();
@@ -671,7 +693,7 @@ var addInConstructor = function (api, state, callback) {
   }
 
   function getActiveRowsForModule() {
-    return all.filter(function(r) { return !r.isSinSeguimiento; });
+    return all.filter(function(r) { return !r.isExcluded; });
   }
 
   function updateKPIs() {
@@ -1148,7 +1170,7 @@ var addInConstructor = function (api, state, callback) {
   }
 
   function isRowMatchingFilters(r) {
-    if (r.isSinSeguimiento) {
+    if (r.isExcluded) {
       return false;
     }
 
@@ -1403,8 +1425,7 @@ var addInConstructor = function (api, state, callback) {
   function load() {
     setMsg('Sincronizando activos de MyGeotab...');
 
-    var nowIso = new Date().toISOString();
-    var devSearch = { fromDate: nowIso, toDate: nowIso };
+    var devSearch = {};
 
     var sessionP = new Promise(function (ok) {
       try { api.getSession(function (s) { ok(s); }); } catch (e) { ok(null); }
@@ -1431,10 +1452,10 @@ var addInConstructor = function (api, state, callback) {
       groupsById = {};
       groups.forEach(function (g) { groupsById[g.id] = g; });
 
-      // Filtrado directo de dispositivos
+      // Filtrado estricto: Elimina CustomDevices, Archivadas y Sin Seguimiento
       rawDevices = devices.filter(function (d) {
         if (d.deviceType === 'CustomDevice') return false;
-        if (isSinSeguimientoDevice(d)) return false; // Exclusión estricta
+        if (isExcludedDevice(d)) return false;
         return true;
       });
 
