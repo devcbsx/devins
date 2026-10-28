@@ -353,9 +353,10 @@
       </div>
     </div>
 
+    <!-- NUEVA DISTRIBUCIÓN HORIZONTAL CONTINUA EN UNA SOLA FILA -->
     <div id="sec-controls-container" class="cgps-card" style="margin-top: 10px;">
-      <div class="cgps-controls-row">
-        <select id="cgps-filter-field" class="cgps-input" style="width: 170px; font-weight: 600; color: #1b4e85; background-color: #f8fafc;">
+      <div class="cgps-controls-row" style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; width: 100%;">
+        <select id="cgps-filter-field" class="cgps-input" style="width: 150px; font-weight: 600; color: #1b4e85; background-color: #f8fafc;">
           <option value="all">[ Todos los campos ]</option>
           <option value="nombreActivo">Nombre del Activo</option>
           <option value="placa">Placa</option>
@@ -368,13 +369,14 @@
           <option value="tipoVehiculo">Tipo Vehículo</option>
           <option value="grupos">Grupos</option>
         </select>
-        <input type="text" id="cgps-filter" class="cgps-input" placeholder="Buscar..." style="width: 260px;">
+        
+        <input type="text" id="cgps-filter" class="cgps-input" placeholder="Buscar..." style="width: 180px;">
+        
         <button id="cgps-sel-vis" type="button" class="cgps-btn cgps-btn-outline">Seleccionar visibles</button>
         <button id="cgps-sel-none" type="button" class="cgps-btn cgps-btn-outline">Limpiar selección</button>
-      </div>
-
-      <div id="mass-controls-row" class="cgps-controls-row" style="margin-top: 10px; border-top: 1px solid #cbd5e1; padding-top: 10px;">
-        <select id="cgps-mass-field-select" class="cgps-input" style="width: 180px; font-weight: 600; color: #0f172a; background-color: #ffffff;">
+        
+        <!-- EDICIÓN MASIVA Y BOTÓN VERDE EN LA MISMA LÍNEA CONTINUA -->
+        <select id="cgps-mass-field-select" class="cgps-input" style="width: 150px; font-weight: 600; color: #0f172a; background-color: #ffffff;">
           <option value="razon">Razón Social</option>
           <option value="ruc">RUC</option>
           <option value="nombreActivo" class="opt-valid-only">Nombre del Activo</option>
@@ -383,10 +385,13 @@
           <option value="anualidad" class="opt-valid-only">Anualidad</option>
           <option value="tipoVehiculo" class="opt-valid-only">Tipo Vehículo</option>
         </select>
-        <input type="text" id="cgps-mass-value-input" class="cgps-input" placeholder="Ingrese el nuevo valor..." style="width: 240px;">
+        
+        <input type="text" id="cgps-mass-value-input" class="cgps-input" placeholder="Ingrese el nuevo valor..." style="width: 180px;">
+        
         <button id="cgps-btn-apply-mass-unified" type="button" class="cgps-btn" style="background-color: #0284c7; color: #ffffff; font-weight: 700;">Guardar seleccionados</button>
         
-        <button id="cgps-btn-inject-params" type="button" class="cgps-btn" style="background-color: #15803d; color: #fff; margin-left: auto; display: none;">🛡️ Completar 5 Parámetros (Modo Seguro)</button>
+        <!-- BOTÓN VERDE CON TEXTO MODIFICADO -->
+        <button id="cgps-btn-inject-params" type="button" class="cgps-btn" style="background-color: #15803d; color: #fff; font-weight: 700; display: none;">🛡️ Completar 5 Parámetros</button>
       </div>
     </div>
 
@@ -610,7 +615,7 @@ var addInConstructor = function (api, state, callback) {
     return { count: count, missing: missing, total: REQUIRED_PARAMS.length };
   }
 
-  // ===== EXCLUSIÓN ESTRICTA: UNIDADES ARCHIVADAS Y SIN SEGUIMIENTO (API DeviceStatusInfo) =====
+  // ===== EXCLUSIÓN ESTRICTA: UNIDADES ARCHIVADAS Y SIN SEGUIMIENTO =====
   function isDeviceArchived(d) {
     if (!d.activeTo) return false;
     var activeToDate = new Date(d.activeTo);
@@ -619,11 +624,9 @@ var addInConstructor = function (api, state, callback) {
   }
 
   function isSinSeguimientoDevice(d) {
-    // 1. Detección nativa por API Geotab: Sin serial Number O sin registro en DeviceStatusInfo (nunca ha reportado / sin GPS)
     if (!d.serialNumber || !d.serialNumber.trim()) return true;
     if (!statusById[d.id]) return true;
 
-    // 2. Detección complementaria por etiquetas/textos
     var name = normalizeStr(d.name);
     var comment = normalizeStr(d.comment);
     var groupsStr = normalizeStr(getGroupsList(d));
@@ -1151,7 +1154,6 @@ var addInConstructor = function (api, state, callback) {
         $('sec-bulk-container').style.display = 'none';
         $('sec-controls-container').style.display = 'block';
         $('sec-table-container').style.display = 'block';
-        $('mass-controls-row').style.display = 'flex';
         updateMassSelectVisibility();
         renderHeader();
         renderList();
@@ -1168,7 +1170,6 @@ var addInConstructor = function (api, state, callback) {
         $('sec-bulk-container').style.display = 'block';
         $('sec-controls-container').style.display = 'block';
         $('sec-table-container').style.display = 'block';
-        $('mass-controls-row').style.display = 'flex';
         updateMassSelectVisibility();
         renderHeader();
         renderList();
@@ -1185,7 +1186,6 @@ var addInConstructor = function (api, state, callback) {
         $('sec-bulk-container').style.display = 'block';
         $('sec-controls-container').style.display = 'block';
         $('sec-table-container').style.display = 'block';
-        $('mass-controls-row').style.display = 'none';
         renderHeader();
         renderList();
       } else if (mod === 'audit') {
@@ -1517,7 +1517,6 @@ var addInConstructor = function (api, state, callback) {
       try { api.getSession(function (s) { ok(s); }); } catch (e) { ok(null); }
     });
 
-    // Carga de Device, Group y DeviceStatusInfo (Lógica de seguimiento)
     var coreDataP = callMulti(api, [
       ['Get', { typeName: 'Device', search: devSearch, resultsLimit: 5000, propertySelector: { fields: DEVICE_FIELDS, isIncluded: true } }],
       ['Get', { typeName: 'Group', propertySelector: { fields: ['id', 'name'], isIncluded: true } }],
@@ -1549,7 +1548,6 @@ var addInConstructor = function (api, state, callback) {
         }
       });
 
-      // Filtrado estricto: Elimina CustomDevices, Archivadas y Sin Seguimiento (API StatusInfo / No Serial)
       rawDevices = devices.filter(function (d) {
         if (d.deviceType === 'CustomDevice') return false;
         if (isExcludedDevice(d)) return false;
@@ -1561,7 +1559,6 @@ var addInConstructor = function (api, state, callback) {
 
       setMsg(all.length + ' activos y ' + Object.keys(groupsById).length + ' grupos sincronizados correctamente.');
 
-      // CARGA DE CustomReportSchedule
       callApi(api, 'Get', {
         typeName: 'CustomReportSchedule',
         propertySelector: {
