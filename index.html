@@ -101,7 +101,7 @@
   <!-- VISTA 2: CONTENEDOR DE MODULOS OPERATIVOS -->
   <div id="testn-module-view" style="display: none;">
     
-    <!-- ENCABEZADO UNIFICADO DENTRO DE LA BARRA AZUL (HERO BAR) COMO EN LA SEGUNDA IMAGEN -->
+    <!-- ENCABEZADO UNIFICADO DENTRO DE LA BARRA AZUL (HERO BAR) -->
     <div class="cgps-hero" style="margin-bottom: 10px;">
       <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
         <button id="testn-btn-back" type="button" class="cgps-btn cgps-btn-secondary" style="font-size: 13px;">← Volver</button>
@@ -177,12 +177,25 @@
     <div id="sec-reports" style="display: none;">
       <div class="cgps-card" style="margin-top: 10px;">
         <div style="font-size: 12px; font-weight: 700; color: #1b4e85; margin-bottom: 8px;">BUSCAR Y SELECCIONAR GRUPO O CLIENTE:</div>
-        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-          <input type="text" id="reports-search-input" class="cgps-input" placeholder="🔍 Escriba palabra clave del cliente..." style="width: 260px; height: 36px; font-size: 13px;">
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+          <input type="text" id="reports-search-input" class="cgps-input" placeholder="🔍 Escriba palabra clave del cliente..." style="width: 240px; height: 36px; font-size: 13px;">
+          <button id="reports-btn-search" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px; padding: 0 16px; font-weight: 700;">🔍 Buscar Cliente</button>
+          
           <select id="reports-group-select" class="cgps-input" style="width: 320px; height: 36px; font-weight: 600; color: #1b4e85;">
             <option value="">-- Seleccione un Grupo / Cliente --</option>
           </select>
           <span id="reports-unit-count" style="font-size: 13px; font-weight: 700; color: #0284c7;">0 activos en este grupo</span>
+        </div>
+
+        <!-- BARRA DE CARGA VISUAL DENTRO DEL CONTENEDOR DE BÚSQUEDA -->
+        <div id="reports-loading-bar-box" style="display: none; margin-top: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <span id="reports-loading-text" style="font-size: 11px; font-weight: 700; color: #0284c7;">Consultando base de datos y programaciones...</span>
+            <span id="reports-loading-spinner" class="cgps-spinner"></span>
+          </div>
+          <div style="width: 100%; height: 6px; background-color: #e2e8f0; border-radius: 3px; overflow: hidden;">
+            <div id="reports-loading-progress" style="width: 30%; height: 100%; background-color: #1b4e85; border-radius: 3px; transition: width 0.3s ease;"></div>
+          </div>
         </div>
       </div>
 
@@ -457,6 +470,20 @@
 
     .badge-audit-ok { background-color: #dcfce7; color: #15803d; padding: 3px 8px; border-radius: 4px; font-weight: 700; border: 1px solid #86efac; display: inline-block; }
     .badge-audit-warn { background-color: #fee2e2; color: #b91c1c; padding: 3px 8px; border-radius: 4px; font-weight: 700; border: 1px solid #fca5a5; display: inline-block; }
+
+    /* ESTILO SPINNER ANIMADO DE CARGA */
+    .cgps-spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid #cbd5e1;
+      border-top-color: #1b4e85;
+      border-radius: 50%;
+      animation: cgps-spin 0.8s linear infinite;
+    }
+    @keyframes cgps-spin {
+      to { transform: rotate(360deg); }
+    }
   `;
   var styleElem = document.createElement('style');
   styleElem.type = 'text/css';
@@ -576,7 +603,6 @@ var addInConstructor = function (api, state, callback) {
     return { count: count, missing: missing, total: REQUIRED_PARAMS.length };
   }
 
-  // ===== EXCLUSIÓN ESTRICTA: UNIDADES ARCHIVADAS Y SIN SEGUIMIENTO =====
   function isDeviceArchived(d) {
     if (!d.activeTo) return false;
     var activeToDate = new Date(d.activeTo);
@@ -786,6 +812,19 @@ var addInConstructor = function (api, state, callback) {
 
   function setMsg(t, err) { var m = $('cgps-msg'); m.textContent = t || ''; m.className = 'cgps-msg' + (err ? ' cgps-err' : ''); }
 
+  function showLoading(msg, progressPercent) {
+    $('reports-loading-bar-box').style.display = 'block';
+    $('reports-loading-text').textContent = msg || 'Cargando datos...';
+    $('reports-loading-progress').style.width = (progressPercent || 20) + '%';
+  }
+
+  function hideLoading() {
+    $('reports-loading-progress').style.width = '100%';
+    setTimeout(function() {
+      $('reports-loading-bar-box').style.display = 'none';
+    }, 300);
+  }
+
   function updateMassSelectVisibility() {
     var validOpts = document.querySelectorAll('.opt-valid-only');
     if (activeModule === 'valid') {
@@ -831,6 +870,10 @@ var addInConstructor = function (api, state, callback) {
       opt.textContent = g.name;
       sel.appendChild(opt);
     });
+
+    if (sortedGroups.length === 1) {
+      sel.selectedIndex = 1;
+    }
   }
 
   function getUnitsForSelectedReportGroup() {
@@ -878,14 +921,29 @@ var addInConstructor = function (api, state, callback) {
       return;
     }
 
+    showLoading("Filtrando programaciones CustomReportSchedule...", 40);
     setMsg("Filtrando programaciones CustomReportSchedule para el grupo seleccionado...");
 
-    const soloGrupo = await contarReportesDeGrupo(gid, false);
-    const grupoConSub = await contarReportesDeGrupo(gid, true);
+    try {
+      if (!rawSchedules || rawSchedules.length === 0) {
+        showLoading("Sincronizando programaciones desde Geotab...", 60);
+        const scheds = await callApi(api, 'Get', { typeName: 'CustomReportSchedule' });
+        rawSchedules = scheds || [];
+      }
 
-    $('reports-count-badge').textContent = `${soloGrupo.total} sólo este grupo | ${grupoConSub.total} total (con subgrupos)`;
+      showLoading("Procesando coincidencia de grupos y subgrupos...", 80);
+      const soloGrupo = await contarReportesDeGrupo(gid, false);
+      const grupoConSub = await contarReportesDeGrupo(gid, true);
 
-    renderClientSchedulesTable(grupoConSub.reportes, gid);
+      $('reports-count-badge').textContent = `${soloGrupo.total} sólo este grupo | ${grupoConSub.total} total (con subgrupos)`;
+
+      await renderClientSchedulesTable(grupoConSub.reportes, gid);
+    } catch (err) {
+      console.error("Error consultando reportes del grupo:", err);
+      setMsg("Error consultando reportes del grupo.", true);
+    } finally {
+      hideLoading();
+    }
   }
 
   async function resolveTemplateName(templateId) {
@@ -1038,7 +1096,6 @@ var addInConstructor = function (api, state, callback) {
     $('report-preview-modal').style.display = 'flex';
   }
 
-  // ===== TEXTO DE SOLICITUD ÁREA LEGAL =====
   function generateLegalText() {
     var selList = all.filter(function(r) { return selected[r.id]; });
     if (selList.length === 0) {
@@ -1094,7 +1151,6 @@ var addInConstructor = function (api, state, callback) {
     setMsg("Documento Word generado con éxito.");
   }
 
-  // ===== EXPORTAR A EXCEL (MÓDULO MASTER SWITCH) =====
   function exportMasterExcel() {
     var rowsToExport = getActiveRowsForModule().filter(function(r) { return isRowMatchingFilters(r); });
     if (rowsToExport.length === 0) {
@@ -1169,7 +1225,7 @@ var addInConstructor = function (api, state, callback) {
       if (mod === 'certi') {
         $('testn-mod-title').textContent = 'Certificado GPS';
         $('hdr-actions-certi').style.display = 'flex';
-        
+
         $('sec-master').style.display = 'none';
         $('sec-audit').style.display = 'none';
         $('sec-reports').style.display = 'none';
@@ -1577,20 +1633,15 @@ var addInConstructor = function (api, state, callback) {
 
       setMsg(all.length + ' activos y ' + Object.keys(groupsById).length + ' grupos sincronizados correctamente.');
 
-      callApi(api, 'Get', {
-        typeName: 'CustomReportSchedule',
-        propertySelector: {
-          fields: ['id', 'name', 'template', 'isActive', 'groups', 'scopeGroups', 'includeAllChildrenGroups', 'includeDirectChildrenOnlyGroups', 'lastModifiedDate', 'lastModifiedUser'],
-          isIncluded: true
-        }
-      }).then(function(schedules) {
-        rawSchedules = schedules || [];
-        if (activeModule === 'reports' && $('reports-group-select').value) {
-          handleReportGroupChange();
-        }
-      }).catch(function(err) {
-        console.warn("No se pudieron cargar CustomReportSchedule:", err);
-      });
+      callApi(api, 'Get', { typeName: 'CustomReportSchedule' })
+        .then(function(schedules) {
+          rawSchedules = schedules || [];
+          if (activeModule === 'reports' && $('reports-group-select').value) {
+            handleReportGroupChange();
+          }
+        }).catch(function(err) {
+          console.warn("No se pudieron cargar CustomReportSchedule:", err);
+        });
 
     }).catch(function (e) {
       setMsg('Error al sincronizar con Geotab: ' + (e && e.message ? e.message : e), true);
@@ -1647,12 +1698,24 @@ var addInConstructor = function (api, state, callback) {
   $('cgps-btn-bulk-clear').addEventListener('click', function() { $('cgps-bulk-input').value = ''; applyBulkFilter(''); });
   
   $('cgps-btn-bulk-std').addEventListener('click', function() { applyBulkFilter($('cgps-bulk-input-std').value); });
-  $('cgps-btn-bulk-clear-std').addEventListener('click', function() { $('cgps-bulk-input-std').value = ''; applyBulkFilter(''); });
+  $('cgps-btn-clear-std').addEventListener('click', function() { $('cgps-bulk-input-std').value = ''; applyBulkFilter(''); });
 
-  // EVENTO BUSCADOR EN VIVO DE CLIENTES/GRUPOS
-  $('reports-search-input').addEventListener('input', function() {
-    populateReportGroupsDropdown($('reports-search-input').value);
-    handleReportGroupChange();
+  // EXECUCIÓN BÚSQUEDA EXPLÍCITA DE GRUPOS/CLIENTES
+  function triggerClientGroupSearch() {
+    var query = $('reports-search-input').value;
+    showLoading("Buscando coincidencias de clientes...", 30);
+    setTimeout(function() {
+      populateReportGroupsDropdown(query);
+      handleReportGroupChange();
+    }, 150);
+  }
+
+  $('reports-btn-search').addEventListener('click', triggerClientGroupSearch);
+
+  $('reports-search-input').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      triggerClientGroupSearch();
+    }
   });
 
   // EVENTO DE CAMBIO DE GRUPO EN REPORTES
