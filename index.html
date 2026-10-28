@@ -421,7 +421,6 @@ var addInConstructor = function (api, state, callback) {
     }
   });
 
-  // DEFINICIÓN DE LOS 5 PARÁMETROS EXACTOS CON SU CORRESPONDIENTE DESCRIPCIÓN
   var REQUIRED_PARAMS = [
     { description: "Enable Gps Altitude Logging", offset: 181, bytes: "CA==" },
     { description: "Disable Accelerometer Record Limit", offset: 65, bytes: "Ag==" },
@@ -1070,7 +1069,7 @@ var addInConstructor = function (api, state, callback) {
     applyBatchDeviceUpdates(payloads);
   }
 
-  // REEMPLAZO DIRECTO: ASIGNAR EXACTAMENTE LOS 5 PARÁMETROS SOLICITADOS
+  // INYECCIÓN DE LOS 5 PARÁMETROS XML
   function injectMissingParametersSafe() {
     var selIds = Object.keys(selected).filter(function (k) { return selected[k]; });
     if (!selIds.length) { setMsg('Seleccione al menos un activo usando los checkboxes.', true); return; }
@@ -1078,17 +1077,22 @@ var addInConstructor = function (api, state, callback) {
     var targets = all.filter(function(r) { return selected[r.id]; });
     if (!targets.length) return;
 
-    if (!window.confirm("🛡️ MODO SEGURO: Se establecerán directamente los 5 parámetros requeridos en " + targets.length + " activo(s) seleccionados. ¿Desea continuar?")) return;
+    if (!window.confirm("🛡️ MODO SEGURO: Se inyectará la estructura de los 5 parámetros en el campo XML para " + targets.length + " activo(s) seleccionados. ¿Desea continuar?")) return;
 
-    setMsg('Ejecutando actualización segura de parámetros en Geotab…');
+    setMsg('Ejecutando inyección segura de parámetros XML en Geotab…');
+
+    var xmlString = "<Parameter Description='Enable Gps Altitude Logging' Offset='181' Bytes='08' IsEnabled='true'/>\n" +
+                    "<Parameter Description='Disable Accelerometer Record Limit' Offset='65' Bytes='02' IsEnabled='true'/>\n" +
+                    "<Parameter Description='High Res RPM allowed Error = 2 rpm' Offset='168' Bytes='02' IsEnabled='true'/>\n" +
+                    "<Parameter Description='Enable Engine Load' Offset='165' Bytes='04' IsEnabled='true'/>\n" +
+                    "<Parameter Description='Enable Engine Retarder Selection And Accel Pedal' Offset='166' Bytes='09' IsEnabled='true'/>";
 
     var completed = 0;
     var promises = targets.map(function(r) {
       return callApi(api, 'Get', { typeName: 'Device', search: { id: r.id } }).then(function(resGet) {
         var liveDevice = (resGet && resGet[0]) ? resGet[0] : r.rawDevice;
 
-        // ESTABLECER DIRECTAMENTE LOS 5 PARÁMETROS XML
-        var updatedParams = [
+        var customParamsList = [
           { description: "Enable Gps Altitude Logging", offset: 181, bytes: "CA==", isEnabled: true },
           { description: "Disable Accelerometer Record Limit", offset: 65, bytes: "Ag==", isEnabled: true },
           { description: "High Res RPM allowed Error = 2 rpm", offset: 168, bytes: "Ag==", isEnabled: true },
@@ -1101,8 +1105,9 @@ var addInConstructor = function (api, state, callback) {
           name: liveDevice.name,
           licensePlate: liveDevice.licensePlate,
           licenseState: liveDevice.licenseState,
+          parameterVersion: xmlString,
           customProperties: liveDevice.customProperties || [],
-          customParameters: updatedParams
+          customParameters: customParamsList
         };
 
         return callApi(api, 'Set', { typeName: 'Device', entity: devicePayload }).then(function() {
@@ -1116,12 +1121,12 @@ var addInConstructor = function (api, state, callback) {
     });
 
     Promise.all(promises).then(function() {
-      alert("✅ Actualización realizada con éxito. Se configuraron los 5 parámetros en " + completed + " activo(s).");
+      alert("✅ Inyección realizada con éxito. Se inyectaron los 5 parámetros en " + completed + " activo(s).");
       return load().then(function() {
         setMsg('✅ Actualización realizada con éxito.');
       });
     }).catch(function(err) {
-      setMsg('Error en el flujo seguro de modificación: ' + (err.message || err), true);
+      setMsg('Error en el flujo de inyección: ' + (err.message || err), true);
     });
   }
 
