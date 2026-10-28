@@ -212,7 +212,7 @@
       </div>
     </div>
 
-    <!-- RECUADRO INTEGRADO EN EL MÓDULO CERTI GPS: SELECCIÓN MASIVA + TEXTO ÁREA LEGAL -->
+    <!-- RECUADRO INTEGRADO EN EL MÓDULO CERTI GPS -->
     <div id="sec-certi-combined-box" class="certi-two-cols-grid" style="margin-top: 10px; display: none;">
       <!-- Columna 1: Selección Masiva -->
       <div class="cgps-card" style="margin: 0;">
@@ -226,7 +226,7 @@
         </div>
       </div>
 
-      <!-- Columna 2: Texto Solicitud Área Legal (Siempre Activo y Visible en Certi GPS) -->
+      <!-- Columna 2: Texto Solicitud Área Legal -->
       <div class="cgps-card" style="margin: 0; background-color: #ffffff !important;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
           <span style="font-size: 12px; font-weight: 700; color: #1b4e85;">TEXTO SOLICITUD ÁREA LEGAL</span>
@@ -236,7 +236,7 @@
       </div>
     </div>
 
-    <!-- Búsqueda / Selección Masiva Estándar (Para Módulos distintos de Certi GPS) -->
+    <!-- Búsqueda / Selección Masiva Estándar -->
     <div id="sec-bulk-container" class="cgps-card" style="margin-top: 10px;">
       <div style="font-size: 12px; font-weight: 700; margin-bottom: 6px; color: #1b4e85;">SELECCIÓN MASIVA DE ACTIVOS</div>
       <div style="display: flex; gap: 10px; align-items: flex-start; flex-wrap: wrap;">
@@ -248,10 +248,9 @@
       </div>
     </div>
 
-    <!-- Controles y Edición Masiva Unificada con Desplegable -->
+    <!-- Controles y Edición Masiva Unificada -->
     <div id="sec-controls-container" class="cgps-card" style="margin-top: 10px;">
       <div class="cgps-controls-row">
-        <!-- SELECTOR DE CAMPO A FILTRAR + INPUT DE BÚSQUEDA -->
         <select id="cgps-filter-field" class="cgps-input" style="width: 170px; font-weight: 600; color: #1b4e85; background-color: #f8fafc;">
           <option value="all">[ Todos los campos ]</option>
           <option value="nombreActivo">Nombre del Activo</option>
@@ -361,7 +360,6 @@
     .cgps-btn-secondary { background-color: #4277a8 !important; color: #ffffff !important; }
     .cgps-btn-outline { background-color: transparent; color: #1b4e85; border: 1px solid #1b4e85; }
     
-    /* DASHBOARD MÁS JUNTO Y COMPACTO */
     .cgps-kpi-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; width: 100%; }
     .cgps-card { background: #ffffff !important; border-radius: 8px; padding: 8px 10px; border: 1px solid #cbd5e1; width: 100%; }
     .kpi-btn-card { cursor: pointer !important; transition: all 0.2s !important; user-select: none; padding: 8px; text-align: center; }
@@ -1034,8 +1032,10 @@ var addInConstructor = function (api, state, callback) {
     });
 
     return Promise.all(promises).then(function() {
-      setMsg('✅ Guardado Exitoso en Geotab: Se actualizaron ' + completed + ' activo(s).');
-      load();
+      alert("✅ Actualización realizada con éxito en " + completed + " activo(s).");
+      return load().then(function() {
+        setMsg('✅ Actualización realizada con éxito.');
+      });
     }).catch(function(err) {
       setMsg('❌ Error al actualizar en Geotab: ' + (err.message || err), true);
     });
@@ -1114,8 +1114,10 @@ var addInConstructor = function (api, state, callback) {
     });
 
     Promise.all(promises).then(function() {
-      setMsg('✅ Proceso Seguro Completado: Se actualizaron y verificaron ' + completed + ' activo(s) en Geotab.');
-      load();
+      alert("✅ Actualización realizada con éxito. Se configuraron los 5 parámetros en " + completed + " activo(s).");
+      return load().then(function() {
+        setMsg('✅ Actualización realizada con éxito.');
+      });
     }).catch(function(err) {
       setMsg('Error en el flujo seguro de modificación: ' + (err.message || err), true);
     });
@@ -1306,7 +1308,7 @@ var addInConstructor = function (api, state, callback) {
   }
 
   function load() {
-    setMsg('Cargando activos de la base de datos…');
+    setMsg('Sincronizando activos de la base de datos de Geotab…');
 
     return Promise.all([
       callApi(api, 'Get', { typeName: 'Device' }),
@@ -1319,6 +1321,7 @@ var addInConstructor = function (api, state, callback) {
         databaseName = res[2].database;
       }
 
+      // FILTRO ESTRICTO CONTRA UNIDADES ARCHIVADAS EN GEOTAB
       rawDevices = (res[0] || []).filter(function (d) {
         if (d.toVersion) {
           var toVerDate = new Date(d.toVersion).getTime();
@@ -1326,7 +1329,10 @@ var addInConstructor = function (api, state, callback) {
             return false;
           }
         }
-        if (d.deviceType === 'CustomDevice' && d.comment && d.comment.toLowerCase().indexOf('archivado') >= 0) {
+        if (d.deviceType === 'CustomDevice' && d.comment && /archivad|baja|inactiv/i.test(d.comment)) {
+          return false;
+        }
+        if (d.comment && /archivad|desactivad/i.test(d.comment)) {
           return false;
         }
         return true;
@@ -1335,12 +1341,13 @@ var addInConstructor = function (api, state, callback) {
       groupsById = {}; propsById = {};
       (res[1] || []).forEach(function (g) { groupsById[g.id] = g; });
       rebuildRows();
+      renderList();
       
       if (activeModule === 'audit' && $('cgps-audit-input').value.trim()) {
         executeGroupAudit();
       }
 
-      setMsg(rawDevices.length + ' activos vigentes cargados correctamente.');
+      setMsg(rawDevices.length + ' activos vigentes sincronizados correctamente.');
     }).catch(function (e) {
       setMsg('No se pudieron cargar los activos: ' + (e && e.message ? e.message : e), true);
     });
