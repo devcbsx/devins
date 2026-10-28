@@ -166,7 +166,7 @@
       </div>
     </div>
 
-    <!-- KPIs Rápidos / DASHBOARD REORGANIZADO -->
+    <!-- KPIs Rápidos / DASHBOARD -->
     <div id="sec-kpi-container" class="cgps-kpi-grid" style="margin-top: 10px;">
       <div class="cgps-card kpi-btn-card" id="kpi-card-1" title="Mostrar todos los activos">
         <div class="cgps-kpi-title" id="kpi-title-1">UNIDADES CARGADAS</div>
@@ -429,11 +429,10 @@ var addInConstructor = function (api, state, callback) {
     { name: "Enable Engine Retarder Selection And Accel Pedal", offset: "166", bytesBase64: "CQ==", bytesHex: "09" }
   ];
 
-  var all = [], groupsById = {}, propsById = {}, selected = {}, rawDevices = [];
+  var all = [], groupsById = {}, selected = {}, rawDevices = [];
   var activeBulkTokens = [];
   var activeModule = 'hub';
   
-  // FILTROS DOBLES SEPARADOS (UNIDAD Y PARÁMETROS)
   var activeUnitFilter = 'all'; 
   var activeParamFilter = 'all';
 
@@ -450,42 +449,29 @@ var addInConstructor = function (api, state, callback) {
   function xmlEsc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function htmlEsc(s) { return xmlEsc(s).replace(/'/g, '&#39;'); }
 
-  // RESOLUCIÓN MEJORADA DE PROPIEDADES PERSONALIZADAS
-  function resolveProperty(d, regex) {
-    var list = d.customProperties || [];
-    for (var i = 0; i < list.length; i++) {
-      var item = list[i];
-      if (!item) continue;
-      
-      var pId = item.property ? item.property.id : null;
-      var pObj = pId ? propsById[pId] : null;
-      var propName = pObj && pObj.name ? pObj.name : (item.name || '');
-
-      if (propName && regex.test(propName) && item.value != null) {
-        return String(item.value).trim();
+  // RESOLUCIÓN DIRECTA DESDE CUSTOMPROPERTIES Y LICENSESTATE
+  function extractCustomPropertiesMap(d) {
+    var map = {};
+    var customList = d.customProperties || [];
+    for (var i = 0; i < customList.length; i++) {
+      var item = customList[i];
+      if (item && item.property && item.property.name) {
+        var pName = String(item.property.name).trim();
+        var val = item.value != null ? String(item.value).trim() : '';
+        map[pName] = val;
       }
     }
-
-    if (d.userDefinedFields) {
-      for (var k in d.userDefinedFields) {
-        if (regex.test(k) && d.userDefinedFields[k]) {
-          return String(d.userDefinedFields[k]).trim();
-        }
-      }
-    }
-
-    return '';
+    return map;
   }
 
-  function findPropertyId(regex) {
-    var keys = Object.keys(propsById);
+  function getCustomValue(map, regex) {
+    var keys = Object.keys(map);
     for (var i = 0; i < keys.length; i++) {
-      var p = propsById[keys[i]];
-      if (p && p.name && regex.test(p.name)) {
-        return p.id;
+      if (regex.test(keys[i])) {
+        return map[keys[i]];
       }
     }
-    return null;
+    return '';
   }
 
   function evalDeviceParameters(d) {
@@ -535,6 +521,17 @@ var addInConstructor = function (api, state, callback) {
     var vin = (d.vehicleIdentificationNumber || '').trim();
     var serial = (d.serialNumber || '').trim();
     var paramStatus = evalDeviceParameters(d);
+    
+    // MAPEO DE CUSTOM PROPERTIES DIRECTAS
+    var cpMap = extractCustomPropertiesMap(d);
+
+    var razonSocial = getCustomValue(cpMap, /RAZ[O\u00F3]N\s*SOCIAL/i) || getCustomValue(cpMap, /EMPRESA|CLIENTE/i);
+    var rucVal = getCustomValue(cpMap, /^RUC$/i) || getCustomValue(cpMap, /TAXID/i);
+    var anualidadVal = getCustomValue(cpMap, /ANUALIDAD/i);
+    var tipoVehiculoVal = getCustomValue(cpMap, /TIPO\s*DE\s*VEHICULO|TIPO\s*VEHICULO/i);
+    
+    // licenseState se mapea directamente como Estado/Provincia según la estructura Geotab
+    var estadoProv = (d.licenseState || '').trim() || getCustomValue(cpMap, /ESTADO|PROVINCIA/i);
 
     return {
       id: d.id,
@@ -545,11 +542,11 @@ var addInConstructor = function (api, state, callback) {
       serialNumber: serial,
       desde: fmtDate(d.activeFrom),
       activeFromRaw: d.activeFrom ? new Date(d.activeFrom) : null,
-      razon: resolveProperty(d, /raz[o\u00F3]n\s*social|empresa|cliente/i),
-      ruc: resolveProperty(d, /ruc|taxid/i),
-      estadoProvincia: resolveProperty(d, /estado|provincia/i),
-      anualidad: resolveProperty(d, /anualidad|a\u00F1o/i),
-      tipoVehiculo: resolveProperty(d, /tipo|type/i),
+      razon: razonSocial,
+      ruc: rucVal,
+      estadoProvincia: estadoProv,
+      anualidad: anualidadVal,
+      tipoVehiculo: tipoVehiculoVal,
       grupos: getGroupsList(d),
       paramCount: paramStatus.count,
       paramMissing: paramStatus.missing
@@ -987,14 +984,6 @@ var addInConstructor = function (api, state, callback) {
 
     setMsg('🛡️ Modo Seguro Geotab: Guardando modificaciones en ' + updatePayloads.length + ' activo(s)...');
 
-    var regexMap = {
-      razon: /raz[o\u00F3]n\s*social|empresa|cliente/i,
-      ruc: /ruc|taxid/i,
-      estadoProvincia: /estado|provincia/i,
-      anualidad: /anualidad|a\u00F1o/i,
-      tipoVehiculo: /tipo|type/i
-    };
-
     var completed = 0;
 
     var promises = updatePayloads.map(function(item) {
@@ -1011,17 +1000,23 @@ var addInConstructor = function (api, state, callback) {
             liveDevice.name = newValue;
           } else if (field === 'placa') {
             liveDevice.licensePlate = newValue;
-          } else if (regexMap[field]) {
-            var propRegex = regexMap[field];
-            var propId = findPropertyId(propRegex);
+          } else if (field === 'estadoProvincia') {
+            liveDevice.licenseState = newValue;
+          } else {
+            var targetPropNameMap = {
+              razon: 'RAZÓN SOCIAL',
+              ruc: 'RUC',
+              anualidad: 'ANUALIDAD',
+              tipoVehiculo: 'TIPO DE VEHICULO'
+            };
 
-            if (propId) {
+            var propName = targetPropNameMap[field];
+            if (propName) {
               var customProps = liveDevice.customProperties || [];
               var foundIdx = -1;
 
               for (var i = 0; i < customProps.length; i++) {
-                var pInfo = propsById[customProps[i].property && customProps[i].property.id];
-                if (pInfo && propRegex.test(pInfo.name)) {
+                if (customProps[i].property && customProps[i].property.name && customProps[i].property.name.toUpperCase() === propName.toUpperCase()) {
                   foundIdx = i;
                   break;
                 }
@@ -1031,7 +1026,7 @@ var addInConstructor = function (api, state, callback) {
                 customProps[foundIdx].value = newValue;
               } else {
                 customProps.push({
-                  property: { id: propId },
+                  property: { name: propName },
                   value: newValue
                 });
               }
@@ -1332,17 +1327,17 @@ var addInConstructor = function (api, state, callback) {
     var nowIso = new Date().toISOString();
 
     return Promise.all([
-      // FILTRADO DESDE EL SERVIDOR USANDO FROMDATE Y TODATE (OPCIÓN 1 GEOTAB)
+      // CONSULTA DE UNIDADES CON DESPACHO DE FILTRADO SERVIDOR (FROMDATE Y TODATE IGUALES)
       callApi(api, 'Get', { 
         typeName: 'Device', 
         search: { 
           fromDate: nowIso, 
           toDate: nowIso 
-        } 
+        },
+        resultsLimit: 5000
       }),
       callApi(api, 'Get', { typeName: 'Group' }).catch(function () { return []; }),
-      callApi(api, 'GetSystemStatus').catch(function() { return null; }),
-      callApi(api, 'Get', { typeName: 'CustomProperty' }).catch(function () { return []; })
+      callApi(api, 'GetSystemStatus').catch(function() { return null; })
     ]).then(function (res) {
       var nowMs = new Date().getTime();
 
@@ -1350,35 +1345,17 @@ var addInConstructor = function (api, state, callback) {
         databaseName = res[2].database;
       }
 
-      // CARGA DE PROPIEDADES PERSONALIZADAS DE LA BASE DE DATOS
-      propsById = {};
-      (res[3] || []).forEach(function(cp) {
-        if (cp && cp.id) {
-          propsById[cp.id] = cp;
-        }
-      });
-
-      // FILTRADO STRICTO LOCAL ADICIONAL POR ACTIVETO
+      // FILTRADO LOCAL ADICIONAL ESTRICTO POR FECHA ACTIVETO Y TIPO
       rawDevices = (res[0] || []).filter(function (d) {
-        // Validación con activeTo
         if (d.activeTo) {
           var activeToStr = String(d.activeTo);
           var activeToMs = new Date(d.activeTo).getTime();
 
-          // Si activeTo es menor o igual al instante actual, está archivada
           if (!isNaN(activeToMs) && activeToMs <= nowMs) {
             return false;
           }
 
-          // Verificación de la fecha "sin baja" (2050-01-01)
           if (activeToStr.indexOf('2050-01-01') < 0 && !isNaN(activeToMs) && activeToMs <= nowMs) {
-            return false;
-          }
-        }
-
-        if (d.toVersion) {
-          var toVerMs = new Date(d.toVersion).getTime();
-          if (!isNaN(toVerMs) && toVerMs <= nowMs) {
             return false;
           }
         }
