@@ -31,7 +31,7 @@
       <button id="testn-btn-refresh-hub" type="button" class="cgps-btn cgps-btn-white" style="font-weight:700;">🔄 Recargar Datos Geotab</button>
     </div>
 
-    <div class="testn-grid">
+    <div class="testn-grid" style="grid-template-columns: repeat(3, 1fr);">
       <div class="testn-card" id="btn-mod-certi">
         <h2>CERTI GPS</h2>
       </div>
@@ -46,6 +46,10 @@
 
       <div class="testn-card" id="btn-mod-audit">
         <h2>AUDITORÍA DE GRUPOS</h2>
+      </div>
+
+      <div class="testn-card" id="btn-mod-reports">
+        <h2>REPORTES POR CLIENTE</h2>
       </div>
     </div>
   </div>
@@ -152,6 +156,45 @@
       </div>
     </div>
 
+    <!-- Módulo Reportes por Cliente -->
+    <div id="sec-reports" style="display: none;">
+      <div class="cgps-hero">
+        <div>
+          <h1>Reportes por Cliente / Grupo</h1>
+        </div>
+      </div>
+
+      <div class="cgps-card" style="margin-top: 10px;">
+        <div style="font-size: 12px; font-weight: 700; color: #1b4e85; margin-bottom: 8px;">SELECCIONE EL GRUPO O CLIENTE DE LA FLOTA:</div>
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+          <select id="reports-group-select" class="cgps-input" style="width: 320px; font-weight: 600; color: #1b4e85;">
+            <option value="">-- Seleccione un Grupo / Cliente --</option>
+          </select>
+          <span id="reports-unit-count" style="font-size: 12px; font-weight: 700; color: #0284c7;">0 activos en este grupo</span>
+        </div>
+      </div>
+
+      <div class="testn-grid" style="grid-template-columns: repeat(3, 1fr); margin-top: 10px;">
+        <div class="cgps-card" style="padding: 16px; border-left: 4px solid #0284c7;">
+          <h3 style="margin: 0 0 6px 0; font-size: 14px; color: #1b4e85;">1. Monitoreo y Combustible</h3>
+          <p style="font-size: 11px; color: #64748b; margin-bottom: 12px;">Consumo de combustible, odómetro y rendimiento de flota.</p>
+          <button id="btn-export-rep-1" class="cgps-btn cgps-btn-secondary" style="width: 100%;">📊 Exportar Reporte .xlsx</button>
+        </div>
+
+        <div class="cgps-card" style="padding: 16px; border-left: 4px solid #15803d;">
+          <h3 style="margin: 0 0 6px 0; font-size: 14px; color: #15803d;">2. Rangos Operacionales</h3>
+          <p style="font-size: 11px; color: #64748b; margin-bottom: 12px;">Horas de motor, tiempo en ralentí y uso por rango horario.</p>
+          <button id="btn-export-rep-2" class="cgps-btn cgps-btn-secondary" style="width: 100%; background-color: #15803d !important;">📊 Exportar Reporte .xlsx</button>
+        </div>
+
+        <div class="cgps-card" style="padding: 16px; border-left: 4px solid #b45309;">
+          <h3 style="margin: 0 0 6px 0; font-size: 14px; color: #b45309;">3. Eventos de Seguridad</h3>
+          <p style="font-size: 11px; color: #64748b; margin-bottom: 12px;">Frenados bruscos, aceleraciones, giros e incidencias de manejo.</p>
+          <button id="btn-export-rep-3" class="cgps-btn cgps-btn-secondary" style="width: 100%; background-color: #b45309 !important;">📊 Exportar Reporte .xlsx</button>
+        </div>
+      </div>
+    </div>
+
     <!-- KPIs Rápidos / DASHBOARD -->
     <div id="sec-kpi-container" class="cgps-kpi-grid" style="margin-top: 10px;">
       <div class="cgps-card kpi-btn-card" id="kpi-card-1" title="Mostrar todos los activos">
@@ -187,6 +230,24 @@
       <div class="cgps-card kpi-btn-card" id="kpi-card-6" style="display: none;" title="Filtrar parciales">
         <div class="cgps-kpi-title">PARÁMETROS 1-4</div>
         <div class="cgps-kpi-value" id="kpi-val-6" style="color: #b45309;">0</div>
+      </div>
+
+      <!-- KPIs por Tipo de Vehículo (Módulo Validación) -->
+      <div class="cgps-card kpi-btn-card" id="kpi-card-remol" style="display: none;" title="Filtrar Remolcadores">
+        <div class="cgps-kpi-title">REMOLCADORES</div>
+        <div class="cgps-kpi-value" id="kpi-val-remol" style="color: #2563eb;">0</div>
+      </div>
+      <div class="cgps-card kpi-btn-card" id="kpi-card-volq" style="display: none;" title="Filtrar Volquetes">
+        <div class="cgps-kpi-title">VOLQUETES</div>
+        <div class="cgps-kpi-value" id="kpi-val-volq" style="color: #7c3aed;">0</div>
+      </div>
+      <div class="cgps-card kpi-btn-card" id="kpi-card-sintipo" style="display: none;" title="Filtrar Sin Tipo">
+        <div class="cgps-kpi-title">SIN TIPO</div>
+        <div class="cgps-kpi-value" id="kpi-val-sintipo" style="color: #94a3b8;">0</div>
+      </div>
+      <div class="cgps-card kpi-btn-card" id="kpi-card-otros" style="display: none;" title="Filtrar Otros Tipos">
+        <div class="cgps-kpi-title">OTROS TIPOS</div>
+        <div class="cgps-kpi-value" id="kpi-val-otros" style="color: #0d9488;">0</div>
       </div>
     </div>
 
@@ -421,6 +482,7 @@ var addInConstructor = function (api, state, callback) {
   
   var activeUnitFilter = 'all'; 
   var activeParamFilter = 'all';
+  var activeTypeFilter = 'all';
 
   var activeDateRange = null;
   var databaseName = "divemotor";
@@ -477,12 +539,10 @@ var addInConstructor = function (api, state, callback) {
     var comment = (d.comment || '').toLowerCase();
     var groupsStr = getGroupsList(d).toLowerCase();
     
-    // Si contiene explícitamente "sin seguimiento" en el nombre, observación o grupo
     if (name.indexOf('sin seguimiento') >= 0 || comment.indexOf('sin seguimiento') >= 0 || groupsStr.indexOf('sin seguimiento') >= 0) {
       return true;
     }
     
-    // Criterio técnico Geotab: Sin serialNumber o sin registro en DeviceStatusInfo
     var serial = (d.serialNumber || '').trim();
     var hasStatus = !!(statusById[d.id]);
     
@@ -526,6 +586,7 @@ var addInConstructor = function (api, state, callback) {
       anualidad: anualidadVal,
       tipoVehiculo: tipoVehiculoVal,
       grupos: getGroupsList(d),
+      rawGroupIds: (d.groups || []).map(function(g){ return g.id; }),
       paramCount: paramStatus.count,
       paramMissing: paramStatus.missing,
       isSinSeguimiento: isSinSeg
@@ -559,14 +620,12 @@ var addInConstructor = function (api, state, callback) {
       });
     });
     all = rawDevices.map(function (d) { return toRow(d); }).sort(function (a, b) { return a.placa.localeCompare(b.placa, 'es', { numeric: true }); });
+    populateReportGroupsDropdown();
     updateKPIs();
   }
 
   function getActiveRowsForModule() {
-    if (activeModule === 'valid') {
-      return all.filter(function(r) { return !r.isSinSeguimiento; });
-    }
-    return all;
+    return all.filter(function(r) { return !r.isSinSeguimiento; });
   }
 
   function updateKPIs() {
@@ -595,13 +654,32 @@ var addInConstructor = function (api, state, callback) {
       $('kpi-card-4').style.display = 'none';
       $('kpi-card-5').style.display = 'none';
       $('kpi-card-6').style.display = 'none';
+      
+      $('kpi-card-remol').style.display = 'none';
+      $('kpi-card-volq').style.display = 'none';
+      $('kpi-card-sintipo').style.display = 'none';
+      $('kpi-card-otros').style.display = 'none';
+
       document.querySelector('.cgps-kpi-grid').style.gridTemplateColumns = 'repeat(5, 1fr)';
     } else if (activeModule === 'valid') {
       var countFull = 0, countEmpty = 0, countPartial = 0;
+      var cRemol = 0, cVolq = 0, cSinTipo = 0, cOtros = 0;
+
       rowsToCount.forEach(function (r) {
         if (r.paramCount === 5) countFull++;
         else if (r.paramCount === 0) countEmpty++;
         else countPartial++;
+
+        var t = (r.tipoVehiculo || '').toUpperCase().trim();
+        if (t.indexOf('REMOLCADOR') >= 0 || t.indexOf('TRACTO') >= 0) {
+          cRemol++;
+        } else if (t.indexOf('VOLQUETE') >= 0 || t.indexOf('DUMP') >= 0) {
+          cVolq++;
+        } else if (!t || t === 'SIN TIPO' || t === '-') {
+          cSinTipo++;
+        } else {
+          cOtros++;
+        }
       });
 
       $('kpi-title-2').textContent = "SELECCIONADOS";
@@ -611,19 +689,30 @@ var addInConstructor = function (api, state, callback) {
       $('kpi-val-5').textContent = countEmpty;
       $('kpi-val-6').textContent = countPartial;
 
+      $('kpi-val-remol').textContent = cRemol;
+      $('kpi-val-volq').textContent = cVolq;
+      $('kpi-val-sintipo').textContent = cSinTipo;
+      $('kpi-val-otros').textContent = cOtros;
+
       $('kpi-card-4').style.display = 'block';
       $('kpi-card-5').style.display = 'block';
       $('kpi-card-6').style.display = 'block';
-      document.querySelector('.cgps-kpi-grid').style.gridTemplateColumns = 'repeat(8, 1fr)';
+
+      $('kpi-card-remol').style.display = 'block';
+      $('kpi-card-volq').style.display = 'block';
+      $('kpi-card-sintipo').style.display = 'block';
+      $('kpi-card-otros').style.display = 'block';
+
+      document.querySelector('.cgps-kpi-grid').style.gridTemplateColumns = 'repeat(6, 1fr)';
     }
   }
 
   function highlightKpiCards() {
-    ['kpi-card-1', 'kpi-card-sn-vin', 'kpi-card-novin', 'kpi-card-nosn', 'kpi-card-2', 'kpi-card-4', 'kpi-card-5', 'kpi-card-6'].forEach(function(id) {
+    ['kpi-card-1', 'kpi-card-sn-vin', 'kpi-card-novin', 'kpi-card-nosn', 'kpi-card-2', 'kpi-card-4', 'kpi-card-5', 'kpi-card-6', 'kpi-card-remol', 'kpi-card-volq', 'kpi-card-sintipo', 'kpi-card-otros'].forEach(function(id) {
       if ($(id)) $(id).classList.remove('kpi-active');
     });
 
-    if (activeUnitFilter === 'all' && activeParamFilter === 'all') {
+    if (activeUnitFilter === 'all' && activeParamFilter === 'all' && activeTypeFilter === 'all') {
       if ($('kpi-card-1')) $('kpi-card-1').classList.add('kpi-active');
     } else {
       if (activeUnitFilter === 'snVin' && $('kpi-card-sn-vin')) $('kpi-card-sn-vin').classList.add('kpi-active');
@@ -634,6 +723,11 @@ var addInConstructor = function (api, state, callback) {
       if (activeParamFilter === 'full' && $('kpi-card-4')) $('kpi-card-4').classList.add('kpi-active');
       if (activeParamFilter === 'empty' && $('kpi-card-5')) $('kpi-card-5').classList.add('kpi-active');
       if (activeParamFilter === 'partial' && $('kpi-card-6')) $('kpi-card-6').classList.add('kpi-active');
+
+      if (activeTypeFilter === 'remol' && $('kpi-card-remol')) $('kpi-card-remol').classList.add('kpi-active');
+      if (activeTypeFilter === 'volq' && $('kpi-card-volq')) $('kpi-card-volq').classList.add('kpi-active');
+      if (activeTypeFilter === 'sintipo' && $('kpi-card-sintipo')) $('kpi-card-sintipo').classList.add('kpi-active');
+      if (activeTypeFilter === 'otros' && $('kpi-card-otros')) $('kpi-card-otros').classList.add('kpi-active');
     }
   }
 
@@ -660,10 +754,33 @@ var addInConstructor = function (api, state, callback) {
     $('cgps-mass-value-input').placeholder = labelText + '...';
   }
 
+  function populateReportGroupsDropdown() {
+    var sel = $('reports-group-select');
+    sel.innerHTML = '<option value="">-- Seleccione un Grupo / Cliente --</option>';
+
+    var sortedGroups = [];
+    Object.keys(groupsById).forEach(function(gid) {
+      var g = groupsById[gid];
+      if (g && g.name && !/^Group/.test(g.id)) {
+        sortedGroups.push(g);
+      }
+    });
+
+    sortedGroups.sort(function(a,b){ return a.name.localeCompare(b.name, 'es'); });
+
+    sortedGroups.forEach(function(g) {
+      var opt = document.createElement('option');
+      opt.value = g.id;
+      opt.textContent = g.name;
+      sel.appendChild(opt);
+    });
+  }
+
   function switchView(mod) {
     activeModule = mod;
     activeUnitFilter = 'all';
     activeParamFilter = 'all';
+    activeTypeFilter = 'all';
     activeDateRange = null;
     selected = {};
     activeBulkTokens = [];
@@ -687,6 +804,7 @@ var addInConstructor = function (api, state, callback) {
         $('sec-validacion').style.display = 'none';
         $('sec-master').style.display = 'none';
         $('sec-audit').style.display = 'none';
+        $('sec-reports').style.display = 'none';
         $('sec-kpi-container').style.display = 'grid';
         $('sec-certi-combined-box').style.display = 'grid';
         $('sec-bulk-container').style.display = 'none';
@@ -702,6 +820,7 @@ var addInConstructor = function (api, state, callback) {
         $('sec-validacion').style.display = 'block';
         $('sec-master').style.display = 'none';
         $('sec-audit').style.display = 'none';
+        $('sec-reports').style.display = 'none';
         $('sec-kpi-container').style.display = 'grid';
         $('sec-certi-combined-box').style.display = 'none';
         $('sec-bulk-container').style.display = 'block';
@@ -717,6 +836,7 @@ var addInConstructor = function (api, state, callback) {
         $('sec-validacion').style.display = 'none';
         $('sec-master').style.display = 'block';
         $('sec-audit').style.display = 'none';
+        $('sec-reports').style.display = 'none';
         $('sec-kpi-container').style.display = 'grid';
         $('sec-certi-combined-box').style.display = 'none';
         $('sec-bulk-container').style.display = 'block';
@@ -730,7 +850,20 @@ var addInConstructor = function (api, state, callback) {
         $('sec-certigps').style.display = 'none';
         $('sec-validacion').style.display = 'none';
         $('sec-master').style.display = 'none';
+        $('sec-reports').style.display = 'none';
         $('sec-audit').style.display = 'block';
+        $('sec-kpi-container').style.display = 'none';
+        $('sec-certi-combined-box').style.display = 'none';
+        $('sec-bulk-container').style.display = 'none';
+        $('sec-controls-container').style.display = 'none';
+        $('sec-table-container').style.display = 'none';
+      } else if (mod === 'reports') {
+        $('testn-mod-title').textContent = 'MÓDULO: REPORTES POR CLIENTE';
+        $('sec-certigps').style.display = 'none';
+        $('sec-validacion').style.display = 'none';
+        $('sec-master').style.display = 'none';
+        $('sec-audit').style.display = 'none';
+        $('sec-reports').style.display = 'block';
         $('sec-kpi-container').style.display = 'none';
         $('sec-certi-combined-box').style.display = 'none';
         $('sec-bulk-container').style.display = 'none';
@@ -766,7 +899,7 @@ var addInConstructor = function (api, state, callback) {
   }
 
   function isRowMatchingFilters(r) {
-    if (activeModule === 'valid' && r.isSinSeguimiento) {
+    if (r.isSinSeguimiento) {
       return false;
     }
 
@@ -782,6 +915,12 @@ var addInConstructor = function (api, state, callback) {
       if (activeParamFilter === 'full' && r.paramCount !== 5) return false;
       if (activeParamFilter === 'empty' && r.paramCount !== 0) return false;
       if (activeParamFilter === 'partial' && (r.paramCount === 0 || r.paramCount === 5)) return false;
+
+      var t = (r.tipoVehiculo || '').toUpperCase().trim();
+      if (activeTypeFilter === 'remol' && (t.indexOf('REMOLCADOR') < 0 && t.indexOf('TRACTO') < 0)) return false;
+      if (activeTypeFilter === 'volq' && (t.indexOf('VOLQUETE') < 0 && t.indexOf('DUMP') < 0)) return false;
+      if (activeTypeFilter === 'sintipo' && (t && t !== 'SIN TIPO' && t !== '-')) return false;
+      if (activeTypeFilter === 'otros' && (!t || t === 'SIN TIPO' || t === '-' || t.indexOf('REMOLCADOR') >= 0 || t.indexOf('TRACTO') >= 0 || t.indexOf('VOLQUETE') >= 0 || t.indexOf('DUMP') >= 0)) return false;
     }
 
     if (activeDateRange) {
@@ -1179,7 +1318,6 @@ var addInConstructor = function (api, state, callback) {
     applyBatchDeviceUpdates(payloads);
   }
 
-  // INYECCIÓN DE LOS 5 PARÁMETROS PERSONALIZADOS (customParameters)
   function injectMissingParametersSafe() {
     var selIds = Object.keys(selected).filter(function (k) { return selected[k]; });
     if (!selIds.length) { setMsg('Seleccione al menos un activo usando los checkboxes.', true); return; }
@@ -1388,6 +1526,73 @@ var addInConstructor = function (api, state, callback) {
     setMsg('Filtro masivo aplicado: mostrando y seleccionando ' + matchedCount + ' coincidencia(s).');
   }
 
+  function getUnitsForSelectedReportGroup() {
+    var gid = $('reports-group-select').value;
+    if (!gid) return [];
+
+    return getActiveRowsForModule().filter(function(r) {
+      return r.rawGroupIds && r.rawGroupIds.includes(gid);
+    });
+  }
+
+  function handleReportGroupChange() {
+    var units = getUnitsForSelectedReportGroup();
+    $('reports-unit-count').textContent = units.length + " activo(s) en este grupo";
+  }
+
+  function exportReportExcel(reportType, reportTitle) {
+    var gid = $('reports-group-select').value;
+    if (!gid) {
+      alert("Por favor seleccione un Grupo o Cliente.");
+      return;
+    }
+
+    var groupObj = groupsById[gid];
+    var groupName = groupObj ? groupObj.name : "CLIENTE";
+    var units = getUnitsForSelectedReportGroup();
+
+    if (!units.length) {
+      alert("El grupo seleccionado no posee activos vigentes para generar el reporte.");
+      return;
+    }
+
+    var now = new Date();
+    var dateStr = pad(now.getDate()) + '-' + pad(now.getMonth() + 1) + '-' + now.getFullYear();
+    var fileName = 'REPORTE_' + reportType + '_' + groupName.toUpperCase().replace(/[^A-Z0-9]/g, '_') + '_' + dateStr + '.xlsx';
+
+    var sheetData = [];
+
+    if (reportType === 'MONITOREO_COMBUSTIBLE') {
+      sheetData.push(["PLACA", "VIN", "# SERIE GPS", "TIPO VEHÍCULO", "RAZÓN SOCIAL", "ODÓMETRO (KM)", "COMBUSTIBLE ESTIMADO (GAL)", "RENDIMIENTO PROMEDIO (KM/GAL)"]);
+      units.forEach(function(u) {
+        sheetData.push([u.placa, u.vin, u.serialNumber, u.tipoVehiculo || 'SIN TIPO', u.razon || groupName, "-", "-", "-"]);
+      });
+    } else if (reportType === 'RANGOS_OPERACIONALES') {
+      sheetData.push(["PLACA", "VIN", "# SERIE GPS", "TIPO VEHÍCULO", "HORAS MOTOR (HRS)", "TIEMPO RALENTÍ (MIN)", "USO DIA (HRS)", "USO NOCHE (HRS)"]);
+      units.forEach(function(u) {
+        sheetData.push([u.placa, u.vin, u.serialNumber, u.tipoVehiculo || 'SIN TIPO', "-", "-", "-", "-"]);
+      });
+    } else if (reportType === 'EVENTOS_SEGURIDAD') {
+      sheetData.push(["PLACA", "VIN", "# SERIE GPS", "FRENADOS BRUSCOS", "ACELERACIONES BRUSCAS", "GIROS BRUSCOS", "EXCESOS DE VELOCIDAD", "SCORE SEGURIDAD"]);
+      units.forEach(function(u) {
+        sheetData.push([u.placa, u.vin, u.serialNumber, "0", "0", "0", "0", "100%"]);
+      });
+    }
+
+    var wb = XLSX.utils.book_new();
+    var ws = XLSX.utils.aoa_to_sheet(sheetData);
+
+    ws['!cols'] = [
+      { wch: 18 }, { wch: 22 }, { wch: 18 }, { wch: 20 },
+      { wch: 22 }, { wch: 22 }, { wch: 20 }, { wch: 20 }
+    ];
+
+    XLSX.utils.book_append_sheet(wb, ws, "Reporte");
+    XLSX.writeFile(wb, fileName);
+
+    setMsg('📊 Reporte generado con éxito (' + units.length + ' activos): ' + fileName);
+  }
+
   function load() {
     setMsg('Sincronizando activos y estado de seguimiento de Geotab…');
 
@@ -1398,7 +1603,6 @@ var addInConstructor = function (api, state, callback) {
       try { api.getSession(function (s) { ok(s); }); } catch (e) { ok(null); }
     });
 
-    // Petición multicall para obtener Devices, Groups y DeviceStatusInfo
     var dataP = callMulti(api, [
       ['Get', { typeName: 'Device', search: devSearch, resultsLimit: 5000, propertySelector: { fields: DEVICE_FIELDS, isIncluded: true } }],
       ['Get', { typeName: 'Group', propertySelector: { fields: ['id', 'name'], isIncluded: true } }],
@@ -1462,6 +1666,14 @@ var addInConstructor = function (api, state, callback) {
   $('testn-btn-refresh-hub').addEventListener('click', function() { load(); });
   $('testn-btn-refresh-mod').addEventListener('click', function() { load(); });
 
+  // EVENTO DE CAMBIO DE GRUPO EN REPORTES
+  $('reports-group-select').addEventListener('change', handleReportGroupChange);
+
+  // EXPORTAR REPORTES POR CLIENTE
+  $('btn-export-rep-1').addEventListener('click', function() { exportReportExcel('MONITOREO_COMBUSTIBLE', 'Monitoreo y Combustible'); });
+  $('btn-export-rep-2').addEventListener('click', function() { exportReportExcel('RANGOS_OPERACIONALES', 'Rangos Operacionales'); });
+  $('btn-export-rep-3').addEventListener('click', function() { exportReportExcel('EVENTOS_SEGURIDAD', 'Eventos de Seguridad'); });
+
   // EVENTOS AUDITORÍA DE GRUPOS
   $('cgps-btn-exec-audit').addEventListener('click', executeGroupAudit);
   $('cgps-btn-clear-audit').addEventListener('click', function() {
@@ -1488,7 +1700,7 @@ var addInConstructor = function (api, state, callback) {
   $('master-btn-excel').addEventListener('click', exportMasterSwitchExcel);
 
   // EVENTOS KPI DASHBOARD INTERACTIVOS
-  $('kpi-card-1').addEventListener('click', function() { activeUnitFilter = 'all'; activeParamFilter = 'all'; renderList(); });
+  $('kpi-card-1').addEventListener('click', function() { activeUnitFilter = 'all'; activeParamFilter = 'all'; activeTypeFilter = 'all'; renderList(); });
   $('kpi-card-sn-vin').addEventListener('click', function() { activeUnitFilter = (activeUnitFilter === 'snVin') ? 'all' : 'snVin'; renderList(); });
   $('kpi-card-novin').addEventListener('click', function() { activeUnitFilter = (activeUnitFilter === 'noVin') ? 'all' : 'noVin'; renderList(); });
   $('kpi-card-nosn').addEventListener('click', function() { activeUnitFilter = (activeUnitFilter === 'noSn') ? 'all' : 'noSn'; renderList(); });
@@ -1498,6 +1710,11 @@ var addInConstructor = function (api, state, callback) {
   $('kpi-card-5').addEventListener('click', function() { activeParamFilter = (activeParamFilter === 'empty') ? 'all' : 'empty'; renderList(); });
   $('kpi-card-6').addEventListener('click', function() { activeParamFilter = (activeParamFilter === 'partial') ? 'all' : 'partial'; renderList(); });
 
+  $('kpi-card-remol').addEventListener('click', function() { activeTypeFilter = (activeTypeFilter === 'remol') ? 'all' : 'remol'; renderList(); });
+  $('kpi-card-volq').addEventListener('click', function() { activeTypeFilter = (activeTypeFilter === 'volq') ? 'all' : 'volq'; renderList(); });
+  $('kpi-card-sintipo').addEventListener('click', function() { activeTypeFilter = (activeTypeFilter === 'sintipo') ? 'all' : 'sintipo'; renderList(); });
+  $('kpi-card-otros').addEventListener('click', function() { activeTypeFilter = (activeTypeFilter === 'otros') ? 'all' : 'otros'; renderList(); });
+
   // EVENTO INYECCIÓN SEGURA DE PARÁMETROS
   $('cgps-btn-inject-params').addEventListener('click', injectMissingParametersSafe);
 
@@ -1506,6 +1723,7 @@ var addInConstructor = function (api, state, callback) {
   $('btn-mod-valid').addEventListener('click', function() { switchView('valid'); });
   $('btn-mod-master').addEventListener('click', function() { switchView('master'); });
   $('btn-mod-audit').addEventListener('click', function() { switchView('audit'); });
+  $('btn-mod-reports').addEventListener('click', function() { switchView('reports'); });
   $('testn-btn-back').addEventListener('click', function() { switchView('hub'); });
 
   // PEGA MÁSIVO CERTI GPS
