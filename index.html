@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<title>Test N</title>
+<title>Control Z</title>
 <!-- Librería SheetJS para exportación a Excel .xlsx -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
@@ -11,7 +11,7 @@
 <!-- MODAL DE LOGIN PERMANENTE -->
 <div id="testn-login-overlay" style="position: fixed; top:0; left:0; width:100vw; height:100vh; background-color: rgba(15, 23, 42, 0.85); z-index: 99999; display: flex; justify-content: center; align-items: center;">
   <div style="background: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); width: 100%; max-width: 360px; text-align: center;">
-    <div style="font-size: 11px; font-weight: 700; color: #1b4e85; letter-spacing: 0.5px; margin-bottom: 4px;">SISTEMA CONTROL</div>
+    <div style="font-size: 11px; font-weight: 700; color: #1b4e85; letter-spacing: 0.5px; margin-bottom: 4px;">SISTEMA CONTROL Z</div>
     <h2 style="margin: 0 0 15px 0; font-size: 18px; color: #1e293b;">Acceso al Módulo</h2>
     <p style="font-size: 12px; color: #64748b; margin-bottom: 20px;">Ingrese la clave de seguridad para continuar:</p>
     <input type="password" id="testn-pass-input" placeholder="Contraseña" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; text-align: center; margin-bottom: 12px; outline: none;">
@@ -31,11 +31,10 @@
       <button id="btn-close-prev-modal" type="button" class="cgps-btn cgps-btn-outline" style="font-size: 13px; padding: 4px 10px;">✕ Cerrar</button>
     </div>
 
-    <!-- Pestañas de configuración simulando la vista nativa de Geotab -->
+    <!-- Pestañas simulando interfaz nativa -->
     <div style="display: flex; gap: 15px; border-bottom: 1px solid #cbd5e1; margin-bottom: 15px; font-size: 12px; font-weight: 700; color: #1b4e85;">
       <span style="border-bottom: 2px solid #1b4e85; padding-bottom: 6px; cursor: pointer;">Vista de reporte</span>
-      <span style="color: #94a3b8; padding-bottom: 6px;">Panel de gráficos</span>
-      <span style="color: #94a3b8; padding-bottom: 6px;">Reporte por correo electrónico</span>
+      <span style="color: #94a3b8; padding-bottom: 6px;">Programación de envío</span>
     </div>
 
     <div style="display: flex; flex-direction: column; gap: 12px; font-size: 12px; color: #334155;">
@@ -44,14 +43,9 @@
         <div id="modal-prev-groups" style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px;"></div>
       </div>
 
-      <div id="box-prev-diagnostics" style="display: none;">
-        <b style="color: #1b4e85;">Diagnósticos / Variables adicionales incluidas:</b>
-        <div id="modal-prev-diagnostics" style="background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; margin-top: 4px; font-family: monospace;"></div>
-      </div>
-
-      <div id="box-prev-rules" style="display: none;">
-        <b style="color: #1b4e85;">Normas del evento (Reglas):</b>
-        <div id="modal-prev-rules" style="display: flex; flex-direction: column; gap: 4px; margin-top: 4px;"></div>
+      <div id="box-prev-template">
+        <b style="color: #1b4e85;">Plantilla Asociada:</b>
+        <div id="modal-prev-template-id" style="background: #f8fafc; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; margin-top: 4px; font-family: monospace;"></div>
       </div>
     </div>
 
@@ -68,7 +62,7 @@
   <div id="testn-hub-view">
     <div class="cgps-hero" style="margin-bottom: 20px;">
       <div>
-        <h1>PANEL DE MÓDULOS GPS</h1>
+        <h1>CONTROL Z - DASHBOARD GPS</h1>
       </div>
       <button id="testn-btn-refresh-hub" type="button" class="cgps-btn cgps-btn-white" style="font-weight:700;">🔄 Recargar Datos Geotab</button>
     </div>
@@ -140,7 +134,6 @@
         </div>
       </div>
 
-      <!-- Panel visible de filtros de fecha -->
       <div class="cgps-card" style="margin-top: 10px; background-color: #ffffff !important; border: 1px solid #94a3b8 !important;">
         <div style="font-size: 11px; font-weight: 700; color: #1b4e85; margin-bottom: 8px; text-transform: uppercase; letter-spacing:0.5px;">FILTRAR POR FECHA DE INSTALACIÓN:</div>
         <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
@@ -179,7 +172,6 @@
         </div>
       </div>
 
-      <!-- Resumen de Auditoría de Grupos -->
       <div id="cgps-audit-results-card" class="cgps-card" style="margin-top: 10px; display: none;">
         <div style="font-size: 13px; font-weight: 700; color: #1b4e85; margin-bottom: 10px;">RESULTADOS DE LA AUDITORÍA DE GRUPOS</div>
         <div class="cgps-table-scroll" style="max-height: 400px;">
@@ -217,7 +209,7 @@
         </div>
       </div>
 
-      <!-- Resumen de Validación de 3 Reportes Base del Cliente -->
+      <!-- Resumen del Análisis de Programaciones CustomReportSchedule -->
       <div id="sec-reports-validation-summary" class="testn-grid" style="grid-template-columns: repeat(3, 1fr); margin-top: 10px; display: none;">
         <div id="card-val-rep-1" class="cgps-card" style="padding: 12px; border-left: 4px solid #94a3b8;">
           <div style="font-size: 11px; font-weight: 700; color: #64748b;">1. MONITOREO Y COMBUSTIBLE</div>
@@ -235,18 +227,20 @@
         </div>
       </div>
 
-      <!-- Tabla de Reportes Asociados -->
       <div id="sec-reports-table-card" class="cgps-card" style="margin-top: 10px;">
-        <div style="font-size: 13px; font-weight: 700; color: #1b4e85; margin-bottom: 10px;">TODOS LOS REPORTES ASOCIADOS AL CLIENTE (MYGEOTAB API)</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
+          <div style="font-size: 13px; font-weight: 700; color: #1b4e85;">PROGRAMACIONES DE REPORTE ASOCIADAS (CustomReportSchedule API)</div>
+          <span id="reports-count-badge" style="font-size: 12px; font-weight: 700; background-color: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 12px;">0 reportes encontrados</span>
+        </div>
         <div class="cgps-table-scroll">
           <table class="cgps-table">
             <thead>
               <tr>
-                <th style="width: 25%;">Nombre del Reporte</th>
-                <th style="width: 28%;">Diagnósticos / Normas del Evento</th>
-                <th style="width: 22%;">Grupos con Acceso</th>
-                <th style="width: 12%; text-align: center;">Última Modificación</th>
-                <th style="width: 13%; text-align: center;">Acciones</th>
+                <th style="width: 25%;">Nombre del Reporte / Plantilla</th>
+                <th style="width: 20%;">ID Plantilla</th>
+                <th style="width: 25%;">Grupos Asignados</th>
+                <th style="width: 15%; text-align: center;">Estado Envio</th>
+                <th style="width: 15%; text-align: center;">Acciones</th>
               </tr>
             </thead>
             <tbody id="reports-listbody">
@@ -282,7 +276,6 @@
         <div class="cgps-kpi-value" id="kpi-val-2">0</div>
       </div>
 
-      <!-- KPIs específicos de Parámetros (Solo Módulo Validación) -->
       <div class="cgps-card kpi-btn-card" id="kpi-card-4" style="display: none;" title="Filtrar completos">
         <div class="cgps-kpi-title">PARÁMETROS 5/5</div>
         <div class="cgps-kpi-value" id="kpi-val-4" style="color: #16a34a;">0</div>
@@ -296,7 +289,6 @@
         <div class="cgps-kpi-value" id="kpi-val-6" style="color: #b45309;">0</div>
       </div>
 
-      <!-- KPIs por Tipo de Vehículo (Módulo Validación) -->
       <div class="cgps-card kpi-btn-card" id="kpi-card-remol" style="display: none;" title="Filtrar Remolcadores">
         <div class="cgps-kpi-title">REMOLCADORES</div>
         <div class="cgps-kpi-value" id="kpi-val-remol" style="color: #2563eb;">0</div>
@@ -315,7 +307,6 @@
       </div>
     </div>
 
-    <!-- RECUADRO INTEGRADO EN EL MÓDULO CERTI GPS -->
     <div id="sec-certi-combined-box" class="certi-two-cols-grid" style="margin-top: 10px; display: none;">
       <div class="cgps-card" style="margin: 0;">
         <div style="font-size: 12px; font-weight: 700; margin-bottom: 6px; color: #1b4e85;">SELECCIÓN MASIVA DE ACTIVOS</div>
@@ -337,7 +328,6 @@
       </div>
     </div>
 
-    <!-- Búsqueda / Selección Masiva Estándar -->
     <div id="sec-bulk-container" class="cgps-card" style="margin-top: 10px;">
       <div style="font-size: 12px; font-weight: 700; margin-bottom: 6px; color: #1b4e85;">SELECCIÓN MASIVA DE ACTIVOS</div>
       <div style="display: flex; gap: 10px; align-items: flex-start; flex-wrap: wrap;">
@@ -349,7 +339,6 @@
       </div>
     </div>
 
-    <!-- Controles y Edición Masiva Unificada -->
     <div id="sec-controls-container" class="cgps-card" style="margin-top: 10px;">
       <div class="cgps-controls-row">
         <select id="cgps-filter-field" class="cgps-input" style="width: 170px; font-weight: 600; color: #1b4e85; background-color: #f8fafc;">
@@ -370,7 +359,6 @@
         <button id="cgps-sel-none" type="button" class="cgps-btn cgps-btn-outline">Limpiar selección</button>
       </div>
 
-      <!-- SECCIÓN DE EDICIÓN MASIVA UNIFICADA -->
       <div id="mass-controls-row" class="cgps-controls-row" style="margin-top: 10px; border-top: 1px solid #cbd5e1; padding-top: 10px;">
         <select id="cgps-mass-field-select" class="cgps-input" style="width: 180px; font-weight: 600; color: #0f172a; background-color: #ffffff;">
           <option value="razon">Razón Social</option>
@@ -432,9 +420,7 @@
     }
     .cgps-wrapper { width: 100% !important; max-width: 100% !important; margin: 0 auto; }
     .cgps-hero { background-color: #1b4e85 !important; color: #ffffff !important; padding: 16px 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.06); width: 100%; flex-wrap: wrap; gap: 10px; }
-    .cgps-hero-tag { font-size: 10px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; opacity: 0.85; margin-bottom: 2px; }
     .cgps-hero h1 { margin: 0 0 4px 0; font-size: 20px; font-weight: 700; color: #ffffff !important; }
-    .cgps-hero p { margin: 0; font-size: 12px; opacity: 0.9; line-height: 1.3; color: #ffffff !important; }
     
     .testn-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; width: 100%; margin-top: 10px; }
     .testn-card {
@@ -454,7 +440,6 @@
     }
     .testn-card:hover { border-color: #1b4e85 !important; transform: translateY(-3px) !important; box-shadow: 0 8px 16px rgba(27, 78, 133, 0.12) !important; }
     .testn-card h2 { font-size: 17px !important; color: #1b4e85 !important; font-weight: 700 !important; margin: 0 0 8px 0 !important; text-transform: uppercase !important; }
-    .testn-card p { font-size: 12px !important; color: #64748b !important; margin: 0 !important; }
     
     .cgps-btn { padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; white-space: nowrap; transition: all 0.2s; }
     .cgps-btn-white { background-color: #ffffff !important; color: #1b4e85 !important; }
@@ -492,15 +477,6 @@
 
     .badge-audit-ok { background-color: #dcfce7; color: #15803d; padding: 3px 8px; border-radius: 4px; font-weight: 700; border: 1px solid #86efac; display: inline-block; }
     .badge-audit-warn { background-color: #fee2e2; color: #b91c1c; padding: 3px 8px; border-radius: 4px; font-weight: 700; border: 1px solid #fca5a5; display: inline-block; }
-
-    @media (max-width: 992px) {
-      .cgps-kpi-grid { grid-template-columns: repeat(4, 1fr) !important; }
-      .certi-two-cols-grid { grid-template-columns: 1fr !important; }
-    }
-    @media (max-width: 576px) {
-      .testn-grid { grid-template-columns: 1fr !important; }
-      .cgps-kpi-grid { grid-template-columns: repeat(2, 1fr) !important; }
-    }
   `;
   var styleElem = document.createElement('style');
   styleElem.type = 'text/css';
@@ -541,7 +517,7 @@ var addInConstructor = function (api, state, callback) {
   ];
 
   var all = [], groupsById = {}, statusById = {}, selected = {}, rawDevices = [];
-  var rawTemplates = [], rulesById = {};
+  var rawSchedules = [], templateNamesById = {};
   var activeBulkTokens = [];
   var activeModule = 'hub';
   
@@ -562,15 +538,7 @@ var addInConstructor = function (api, state, callback) {
     return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + pad(d.getFullYear());
   }
 
-  function fmtDateTime(iso) {
-    if (!iso) return '';
-    var d = new Date(iso);
-    if (isNaN(d.getTime()) || d.getFullYear() > 2040) return '';
-    return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + pad(d.getFullYear()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
-  }
-
-  function xmlEsc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
-  function htmlEsc(s) { return xmlEsc(s).replace(/'/g, '&#39;'); }
+  function htmlEsc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }).replace(/'/g, '&#39;'); }
 
   function extractCustomPropertiesMap(d) {
     var map = {};
@@ -617,15 +585,17 @@ var addInConstructor = function (api, state, callback) {
     if (name.indexOf('sin seguimiento') >= 0 || comment.indexOf('sin seguimiento') >= 0 || groupsStr.indexOf('sin seguimiento') >= 0) {
       return true;
     }
-    
-    var serial = (d.serialNumber || '').trim();
-    var hasStatus = !!(statusById[d.id]);
-    
-    if (!serial || !hasStatus) {
-      return true;
-    }
-
     return false;
+  }
+
+  function getGroupsList(d) {
+    var gs = d.groups || [];
+    var names = [];
+    for (var i = 0; i < gs.length; i++) { 
+      var g = groupsById[gs[i].id]; 
+      if (g && g.name && !/^Group/.test(g.id)) names.push(g.name.trim()); 
+    }
+    return names.join(', ');
   }
 
   function toRow(d) {
@@ -671,29 +641,11 @@ var addInConstructor = function (api, state, callback) {
     return row;
   }
 
-  function getGroupsList(d) {
-    var gs = d.groups || [];
-    var names = [];
-    for (var i = 0; i < gs.length; i++) { var g = groupsById[gs[i].id]; if (g && g.name && !/^Group/.test(g.id)) names.push(g.name.trim()); }
-    return names.join(', ');
-  }
-
   function callApi(apiRef, method, params) { return new Promise(function (ok, fail) { apiRef.call(method, params, ok, fail); }); }
   var $ = function (id) { return document.getElementById(id); };
   function callMulti(apiRef, calls) { return new Promise(function (ok, fail) { apiRef.multiCall(calls, ok, fail); }); }
-  function chunkArr(arr, size) { var out = []; for (var i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size)); return out; }
-  function seq(items, fn) { return items.reduce(function (p, it) { return p.then(function () { return fn(it); }); }, Promise.resolve()); }
-
-  var propDefs = {};
-  var DEVICE_FIELDS = ['id', 'name', 'licensePlate', 'licenseState', 'vehicleIdentificationNumber', 'serialNumber', 'activeFrom', 'activeTo', 'deviceType', 'groups', 'customProperties', 'customParameters', 'comment'];
 
   function rebuildRows() {
-    propDefs = {};
-    rawDevices.forEach(function (d) {
-      (d.customProperties || []).forEach(function (it) {
-        if (it && it.property && it.property.name && it.property.id) propDefs[String(it.property.name).trim()] = it.property;
-      });
-    });
     all = rawDevices.map(function (d) { return toRow(d); }).sort(function (a, b) { return a.placa.localeCompare(b.placa, 'es', { numeric: true }); });
     populateReportGroupsDropdown();
     updateKPIs();
@@ -864,7 +816,32 @@ var addInConstructor = function (api, state, callback) {
     });
   }
 
-  function handleReportGroupChange() {
+  // ===== LÓGICA ESPECÍFICA PARA CONTAR Y OBTENER REPORTES SEGÚN CustomReportSchedule =====
+  async function contarReportesDeGrupo(groupId, incluirSubgrupos) {
+    let objetivo = new Set([groupId]);
+
+    if (incluirSubgrupos) {
+      try {
+        const resG = await callApi(api, 'Get', { typeName: 'Group', search: { id: groupId } });
+        const recoger = (n) => (n.children || []).forEach(c => { objetivo.add(c.id); recoger(c); });
+        if (resG && resG[0]) recoger(resG[0]);
+      } catch (e) {
+        console.warn("No se pudieron cargar subgrupos recursivos:", e);
+      }
+    }
+
+    const ids = (arr) => (arr || []).map(x => x.id);
+
+    const reportes = rawSchedules.filter(s =>
+      [...ids(s.groups), ...ids(s.scopeGroups), 
+       ...ids(s.includeAllChildrenGroups), ...ids(s.includeDirectChildrenOnlyGroups)]
+        .some(id => objetivo.has(id))
+    );
+
+    return { total: reportes.length, reportes };
+  }
+
+  async function handleReportGroupChange() {
     var gid = $('reports-group-select').value;
     var units = getUnitsForSelectedReportGroup();
     $('reports-unit-count').textContent = units.length + " activo(s) en este grupo";
@@ -872,73 +849,92 @@ var addInConstructor = function (api, state, callback) {
     if (!gid) {
       $('sec-reports-validation-summary').style.display = 'none';
       $('reports-listbody').innerHTML = '<tr><td colspan="5" style="text-align: center; color: #64748b; padding: 16px;">Seleccione un cliente arriba para cargar sus reportes disponibles.</td></tr>';
+      $('reports-count-badge').textContent = '0 reportes encontrados';
       return;
     }
 
-    renderClientReportsFromApi(gid);
+    setMsg("Filtrando programaciones CustomReportSchedule para el grupo seleccionado...");
+
+    const soloGrupo = await contarReportesDeGrupo(gid, false);
+    const grupoConSub = await contarReportesDeGrupo(gid, true);
+
+    $('reports-count-badge').textContent = `${soloGrupo.total} sólo este grupo | ${grupoConSub.total} total (con subgrupos)`;
+
+    renderClientSchedulesTable(grupoConSub.reportes, gid);
   }
 
-  function renderClientReportsFromApi(selectedGroupId) {
-    var groupObj = groupsById[selectedGroupId];
-    var groupName = groupObj ? groupObj.name.toLowerCase() : '';
-    
-    // Filtrar las plantillas de reporte asociadas al grupo seleccionado o nombradas para este grupo
-    var matchedTemplates = rawTemplates.filter(function(tpl) {
-      var nameMatch = tpl.name && tpl.name.toLowerCase().indexOf(groupName) >= 0;
-      var groupMatch = Array.isArray(tpl.groups) && tpl.groups.some(function(g){ return g.id === selectedGroupId; });
-      return nameMatch || groupMatch;
-    });
+  async function resolveTemplateName(templateId) {
+    if (!templateId) return "Plantilla Sin ID";
+    if (templateNamesById[templateId]) return templateNamesById[templateId];
 
-    // Validar presencia de los 3 reportes base
+    try {
+      const res = await callApi(api, 'Get', {
+        typeName: 'ReportTemplate',
+        search: { id: templateId }
+      });
+      if (res && res[0] && res[0].name) {
+        templateNamesById[templateId] = res[0].name;
+        return res[0].name;
+      }
+    } catch (e) {
+      console.warn("No se pudo obtener nombre de plantilla:", templateId);
+    }
+
+    return templateId;
+  }
+
+  async function renderClientSchedulesTable(schedulesList, selectedGroupId) {
+    var tbody = $('reports-listbody');
+
+    if (!schedulesList.length) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #b91c1c; padding: 16px;">No se encontraron programaciones de reporte asignadas al grupo o subgrupos seleccionados.</td></tr>';
+      $('sec-reports-validation-summary').style.display = 'none';
+      return;
+    }
+
     var hasCombustible = false, hasRangos = false, hasSeguridad = false;
 
-    matchedTemplates.forEach(function(tpl) {
-      var nm = (tpl.name || '').toLowerCase();
-      if (nm.indexOf('combustible') >= 0 || nm.indexOf('monitoreo') >= 0) hasCombustible = true;
-      if (nm.indexOf('rangos') >= 0 || nm.indexOf('operacional') >= 0) hasRangos = true;
-      if (nm.indexOf('seguridad') >= 0 || nm.indexOf('nota de conducción') >= 0) hasSeguridad = true;
-    });
+    // Resolver nombres de plantillas dinámicamente
+    for (var i = 0; i < schedulesList.length; i++) {
+      var s = schedulesList[i];
+      var tplId = s.template ? s.template.id : null;
+      var tplName = tplId ? await resolveTemplateName(tplId) : "Plantilla Desconocida";
+      s._resolvedName = s.name || tplName;
+
+      var fullSearchStr = (s._resolvedName + " " + (tplId || "")).toLowerCase();
+      if (fullSearchStr.indexOf('combustible') >= 0 || fullSearchStr.indexOf('monitoreo') >= 0) hasCombustible = true;
+      if (fullSearchStr.indexOf('rangos') >= 0 || fullSearchStr.indexOf('operacional') >= 0) hasRangos = true;
+      if (fullSearchStr.indexOf('seguridad') >= 0 || fullSearchStr.indexOf('nota de conducción') >= 0) hasSeguridad = true;
+    }
 
     $('sec-reports-validation-summary').style.display = 'grid';
-
     updateValidationCard('card-val-rep-1', 'st-val-rep-1', '1. MONITOREO Y COMBUSTIBLE', hasCombustible);
     updateValidationCard('card-val-rep-2', 'st-val-rep-2', '2. RANGOS OPERACIONALES', hasRangos);
     updateValidationCard('card-val-rep-3', 'st-val-rep-3', '3. EVENTOS DE SEGURIDAD', hasSeguridad);
 
-    var tbody = $('reports-listbody');
-
-    if (!matchedTemplates.length) {
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #b91c1c; padding: 16px;">No se encontraron plantillas de reporte explícitamente configuradas para el grupo "' + htmlEsc(groupObj ? groupObj.name : '') + '".</td></tr>';
-      return;
-    }
-
     var html = '';
-    matchedTemplates.forEach(function(tpl) {
-      var diagList = tpl.diagnostics || tpl.additionalDiagnostics || [];
-      var ruleList = tpl.rules || tpl.eventRules || [];
-      
-      var detailsHtml = '';
-      if (diagList.length > 0) {
-        detailsHtml += '<div><b style="color:#0284c7;">Diagnósticos (' + diagList.length + '):</b> ' + htmlEsc(diagList.slice(0,3).map(function(d){ return d.name || d.id; }).join(', ')) + (diagList.length > 3 ? '...' : '') + '</div>';
-      }
-      if (ruleList.length > 0) {
-        var ruleNames = ruleList.map(function(r) { return rulesById[r.id] ? rulesById[r.id].name : (r.name || r.id); });
-        detailsHtml += '<div style="margin-top:2px;"><b style="color:#b45309;">Normas del Evento (' + ruleList.length + '):</b> ' + htmlEsc(ruleNames.slice(0,3).join(', ')) + (ruleNames.length > 3 ? '...' : '') + '</div>';
-      }
-      if (!detailsHtml) detailsHtml = '<span style="color:#94a3b8; font-style:italic;">Sin diagnósticos/reglas específicas asociadas</span>';
+    schedulesList.forEach(function(s) {
+      var allAssignedGroups = [
+        ...(s.groups || []),
+        ...(s.scopeGroups || []),
+        ...(s.includeAllChildrenGroups || []),
+        ...(s.includeDirectChildrenOnlyGroups || [])
+      ];
 
-      var tplGroups = (tpl.groups || []).map(function(g){ return groupsById[g.id] ? groupsById[g.id].name : g.id; }).join(', ') || 'Todos los grupos';
+      var groupsText = allAssignedGroups.map(function(g) {
+        return groupsById[g.id] ? groupsById[g.id].name : g.id;
+      }).filter(function(v, i, self) { return self.indexOf(v) === i; }).join(', ') || 'Sin grupo explícito';
 
-      var modDateStr = fmtDateTime(tpl.lastModifiedDate || tpl.updatedDate || new Date());
+      var tplIdStr = s.template ? s.template.id : 'N/A';
 
       html += '<tr>' +
-        '<td><b style="color:#1b4e85;">' + htmlEsc(tpl.name || 'Reporte Sin Nombre') + '</b></td>' +
-        '<td style="white-space:normal; word-break:break-word; font-size:11px;">' + detailsHtml + '</td>' +
-        '<td style="white-space:normal; word-break:break-word; font-size:11px;">' + htmlEsc(tplGroups) + '</td>' +
-        '<td style="text-align:center; font-weight:600; color:#475569;">' + htmlEsc(modDateStr) + '</td>' +
+        '<td><b style="color:#1b4e85;">' + htmlEsc(s._resolvedName) + '</b></td>' +
+        '<td><code style="background:#f1f5f9; padding:2px 6px; border-radius:4px; font-size:11px;">' + htmlEsc(tplIdStr) + '</code></td>' +
+        '<td style="white-space:normal; word-break:break-word; font-size:11px;">' + htmlEsc(groupsText) + '</td>' +
+        '<td style="text-align:center;"><span class="badge-audit-ok">Activo</span></td>' +
         '<td style="text-align:center;">' +
           '<div style="display:flex; gap:6px; justify-content:center;">' +
-            '<button type="button" class="cgps-btn cgps-btn-outline btn-view-report" data-id="' + htmlEsc(tpl.id) + '" style="padding: 4px 8px; font-size:11px;">👁️ Vista Previa</button>' +
+            '<button type="button" class="cgps-btn cgps-btn-outline btn-view-report" data-id="' + htmlEsc(s.id) + '" style="padding: 4px 8px; font-size:11px;">👁️ Vista Previa</button>' +
           '</div>' +
         '</td>' +
         '</tr>';
@@ -946,17 +942,18 @@ var addInConstructor = function (api, state, callback) {
 
     tbody.innerHTML = html;
 
-    // Adjuntar eventos a los botones creados
     var viewBtns = tbody.querySelectorAll('.btn-view-report');
     viewBtns.forEach(function(b) {
       b.addEventListener('click', function() {
-        var tplId = b.getAttribute('data-id');
-        var foundTpl = rawTemplates.find(function(t){ return t.id === tplId; });
-        if (foundTpl) {
-          openReportPreviewModal(foundTpl);
+        var schedId = b.getAttribute('data-id');
+        var foundSched = schedulesList.find(function(s){ return s.id === schedId; });
+        if (foundSched) {
+          openReportPreviewModal(foundSched);
         }
       });
     });
+
+    setMsg(`${schedulesList.length} programaciones analizadas correctamente.`);
   }
 
   function updateValidationCard(cardId, statusId, label, isOk) {
@@ -975,19 +972,25 @@ var addInConstructor = function (api, state, callback) {
     }
   }
 
-  function openReportPreviewModal(tpl) {
-    currentSelectedReportObj = tpl;
-    $('modal-prev-title').textContent = "REPORTE: " + (tpl.name || "Sin nombre");
-    $('modal-prev-id').textContent = "ID PLANILLA MYGEOTAB: " + (tpl.id || "N/A");
+  function openReportPreviewModal(s) {
+    currentSelectedReportObj = s;
+    $('modal-prev-title').textContent = "PROGRAMACIÓN: " + (s._resolvedName || s.name || "Sin nombre");
+    $('modal-prev-id').textContent = "ID PROGRAMACIÓN: " + (s.id || "N/A");
 
-    // Grupos
     var gContainer = $('modal-prev-groups');
     gContainer.innerHTML = '';
-    var groupsList = tpl.groups || [];
-    if (groupsList.length === 0) {
-      gContainer.innerHTML = '<span style="background:#e2e8f0; padding:3px 8px; border-radius:4px;">Todos los grupos</span>';
+    
+    var allAssignedGroups = [
+      ...(s.groups || []),
+      ...(s.scopeGroups || []),
+      ...(s.includeAllChildrenGroups || []),
+      ...(s.includeDirectChildrenOnlyGroups || [])
+    ];
+
+    if (allAssignedGroups.length === 0) {
+      gContainer.innerHTML = '<span style="background:#e2e8f0; padding:3px 8px; border-radius:4px;">Sin grupos asociados</span>';
     } else {
-      groupsList.forEach(function(g) {
+      allAssignedGroups.forEach(function(g) {
         var gName = groupsById[g.id] ? groupsById[g.id].name : g.id;
         var tag = document.createElement('span');
         tag.style.cssText = 'background:#eff6ff; color:#1b4e85; padding:3px 8px; border-radius:4px; border:1px solid #bfdbfe; font-weight:600;';
@@ -996,39 +999,11 @@ var addInConstructor = function (api, state, callback) {
       });
     }
 
-    // Diagnósticos
-    var diagBox = $('box-prev-diagnostics');
-    var diagContainer = $('modal-prev-diagnostics');
-    var diags = tpl.diagnostics || tpl.additionalDiagnostics || [];
-    if (diags.length > 0) {
-      diagBox.style.display = 'block';
-      diagContainer.textContent = diags.map(function(d){ return d.name || d.id; }).join(', ');
-    } else {
-      diagBox.style.display = 'none';
-    }
+    $('modal-prev-template-id').textContent = s.template ? "Template ID: " + s.template.id : "Sin Template ID";
 
-    // Normas de eventos / Reglas
-    var rulesBox = $('box-prev-rules');
-    var rulesContainer = $('modal-prev-rules');
-    var rules = tpl.rules || tpl.eventRules || [];
-    if (rules.length > 0) {
-      rulesBox.style.display = 'block';
-      rulesContainer.innerHTML = '';
-      rules.forEach(function(r, idx) {
-        var rName = rulesById[r.id] ? rulesById[r.id].name : (r.name || r.id);
-        var item = document.createElement('div');
-        item.style.cssText = 'background:#f1f5f9; padding:4px 8px; border-radius:4px; font-weight:600; display:flex; align-items:center; gap:8px;';
-        item.innerHTML = '<span style="background:#1b4e85; color:#fff; border-radius:50%; width:18px; height:18px; display:inline-flex; justify-content:center; align-items:center; font-size:10px;">' + (idx+1) + '</span> ' + htmlEsc(rName);
-        rulesContainer.appendChild(item);
-      });
-    } else {
-      rulesBox.style.display = 'none';
-    }
-
-    // Enlace a la interfaz nativa
     var btnGeotab = $('modal-btn-open-geotab');
     var refUrl = window.location.href.split('#')[0];
-    btnGeotab.href = refUrl + '#reportTemplate,id:' + tpl.id;
+    btnGeotab.href = refUrl + '#customReportSchedule,id:' + s.id;
 
     $('report-preview-modal').style.display = 'flex';
   }
@@ -1375,414 +1350,6 @@ var addInConstructor = function (api, state, callback) {
     setMsg('Auditoría del árbol de grupos finalizada.');
   }
 
-  // ===== ESCRITURA SEGURA: GET en lote → fusionar → SET en lote (entidad completa) → GET verificación =====
-  var PROP_CFG = {
-    razon: { name: 'RAZÓN SOCIAL', rx: [/RAZ[O\u00D3]N\s*SOCIAL/i, /EMPRESA|CLIENTE/i] },
-    ruc: { name: 'RUC', rx: [/^RUC$/i, /TAXID/i] },
-    anualidad: { name: 'ANUALIDAD', rx: [/ANUALIDAD/i] },
-    tipoVehiculo: { name: 'TIPO DE VEHICULO', rx: [/TIPO\s*DE\s*VEHICULO|TIPO\s*VEHICULO/i] }
-  };
-
-  function findCustomProp(device, field) {
-    var cfg = PROP_CFG[field], list = device.customProperties || [];
-    if (!cfg) return null;
-    for (var k = 0; k < cfg.rx.length; k++) {
-      for (var i = 0; i < list.length; i++) {
-        var nm = list[i] && list[i].property && list[i].property.name;
-        if (nm && cfg.rx[k].test(String(nm).trim())) return list[i];
-      }
-    }
-    return null;
-  }
-
-  function findPropDef(cfg) {
-    var keys = Object.keys(propDefs);
-    for (var k = 0; k < cfg.rx.length; k++) {
-      for (var i = 0; i < keys.length; i++) { if (cfg.rx[k].test(keys[i])) return propDefs[keys[i]]; }
-    }
-    return null;
-  }
-
-  function readField(d, field) {
-    if (field === 'nombreActivo') return (d.name || '').trim();
-    if (field === 'placa') return (d.licensePlate || '').trim();
-    if (field === 'estadoProvincia') return (d.licenseState || '').trim();
-    var it = findCustomProp(d, field);
-    return it && it.value != null ? String(it.value).trim() : '';
-  }
-
-  function applyField(d, field, value) {
-    var v = String(value == null ? '' : value).trim();
-    if (readField(d, field) === v) return false;
-    if (field === 'nombreActivo') { d.name = v; return true; }
-    if (field === 'placa') { d.licensePlate = v; return true; }
-    if (field === 'estadoProvincia') { d.licenseState = v; return true; }
-    var cfg = PROP_CFG[field];
-    if (!cfg) return false;
-    var it = findCustomProp(d, field);
-    if (it) { it.value = v; return true; }
-    var def = findPropDef(cfg);
-    d.customProperties = d.customProperties || [];
-    d.customProperties.push({ property: def && def.id ? { id: def.id } : { name: cfg.name }, value: v });
-    return true;
-  }
-
-  function mergeRequiredParams(device) {
-    var list = Array.isArray(device.customParameters) ? device.customParameters.slice() : [];
-    var changed = false;
-    REQUIRED_PARAMS.forEach(function (p) {
-      var idx = -1;
-      for (var i = 0; i < list.length; i++) { if (Number(list[i].offset) === p.offset) { idx = i; break; } }
-      var wanted = { description: p.description, offset: p.offset, bytes: p.bytes, isEnabled: true };
-      if (idx < 0) { list.push(wanted); changed = true; }
-      else if (String(list[idx].bytes) !== p.bytes || list[idx].isEnabled === false) { list[idx] = wanted; changed = true; }
-    });
-    if (changed) device.customParameters = list;
-    return changed;
-  }
-
-  function fetchLiveDevices(ids) {
-    var byId = {};
-    return seq(chunkArr(ids, 50), function (part) {
-      var calls = part.map(function (id) { return ['Get', { typeName: 'Device', search: { id: id } }]; });
-      return callMulti(api, calls).then(function (res) {
-        res.forEach(function (list) { var d = Array.isArray(list) ? list[0] : list; if (d && d.id) byId[d.id] = d; });
-      }).catch(function () {
-        return seq(part, function (id) {
-          return callApi(api, 'Get', { typeName: 'Device', search: { id: id } }).then(function (list) {
-            if (list && list[0]) byId[id] = list[0];
-          }).catch(function () {});
-        });
-      });
-    }).then(function () { return byId; });
-  }
-
-  function saveDevices(devices) {
-    var result = { saved: [], failed: [] };
-    return seq(chunkArr(devices, 25), function (part) {
-      var calls = part.map(function (d) { return ['Set', { typeName: 'Device', entity: d }]; });
-      return callMulti(api, calls).then(function () {
-        part.forEach(function (d) { result.saved.push(d.id); });
-      }).catch(function () {
-        return seq(part, function (d) {
-          return callApi(api, 'Set', { typeName: 'Device', entity: d })
-            .then(function () { result.saved.push(d.id); })
-            .catch(function (e) { result.failed.push({ id: d.id, name: d.name, err: (e && e.message) ? e.message : String(e) }); });
-        });
-      });
-    }).then(function () { return result; });
-  }
-
-  function applyFreshDevices(freshList) {
-    var pos = {};
-    rawDevices.forEach(function (d, i) { pos[d.id] = i; });
-    freshList.forEach(function (d) { if (pos[d.id] != null) rawDevices[pos[d.id]] = d; });
-    rebuildRows();
-    renderList();
-  }
-
-  function runSafeUpdate(targets, mutate, verify) {
-    var ids = targets.map(function (r) { return r.id; });
-    var rowById = {};
-    targets.forEach(function (r) { rowById[r.id] = r; });
-    var st = { unchanged: 0, verified: 0, failed: [], unverified: [] };
-
-    return fetchLiveDevices(ids).then(function (live) {
-      var toSave = [];
-      ids.forEach(function (id) {
-        var d = live[id];
-        if (!d) { st.failed.push({ id: id, name: rowById[id].nombreActivo, err: 'No se pudo leer el dispositivo' }); return; }
-        if (mutate(d, rowById[id])) toSave.push(d); else st.unchanged++;
-      });
-      return toSave.length ? saveDevices(toSave) : { saved: [], failed: [] };
-    }).then(function (res) {
-      res.failed.forEach(function (f) { st.failed.push(f); });
-      if (!res.saved.length) return st;
-      return fetchLiveDevices(res.saved).then(function (fresh) {
-        var freshList = [];
-        res.saved.forEach(function (id) {
-          var d = fresh[id];
-          if (d) freshList.push(d);
-          if (d && verify(d)) st.verified++;
-          else st.unverified.push({ id: id, name: rowById[id].nombreActivo, err: 'el cambio no se reflejó en Geotab tras el SET' });
-        });
-        if (freshList.length) applyFreshDevices(freshList);
-        return st;
-      });
-    });
-  }
-
-  function reportUpdate(st, label, okMsg) {
-    var bad = st.failed.length + st.unverified.length;
-    var msg = label + ': ' + st.verified + ' verificado(s)' + (st.unchanged ? ', ' + st.unchanged + ' sin cambios' : '');
-    if (bad) {
-      var names = st.failed.concat(st.unverified).slice(0, 5).map(function (x) { return x.name + ' (' + x.err + ')'; }).join('; ');
-      msg += ' · ❌ ' + bad + ' con problemas: ' + names;
-      setMsg(msg, true);
-      alert('⚠️ ' + msg);
-    } else {
-      setMsg('✅ ' + msg);
-      alert('✅ ' + (okMsg || msg));
-    }
-  }
-
-  function applyBatchDeviceUpdates(updatePayloads) {
-    if (!updatePayloads || !updatePayloads.length) {
-      setMsg('No hay cambios para guardar.', true);
-      return Promise.resolve();
-    }
-
-    setMsg('🛡️ Modo Seguro Geotab: Guardando modificaciones en ' + updatePayloads.length + ' activo(s)...');
-
-    var targets = [], fieldsById = {};
-    updatePayloads.forEach(function (it) { targets.push(it.row); fieldsById[it.row.id] = it.fields; });
-
-    return runSafeUpdate(targets, function (d) {
-      var f = fieldsById[d.id], changed = false;
-      Object.keys(f).forEach(function (k) { if (applyField(d, k, f[k])) changed = true; });
-      return changed;
-    }, function (d) {
-      var f = fieldsById[d.id];
-      return Object.keys(f).every(function (k) { return readField(d, k) === String(f[k]).trim(); });
-    }).then(function (st) {
-      reportUpdate(st, 'Actualización');
-    }).catch(function (err) {
-      setMsg('❌ Error al actualizar en Geotab: ' + (err && err.message ? err.message : err), true);
-    });
-  }
-
-  function applyUnifiedMassEdition() {
-    var selIds = Object.keys(selected).filter(function (k) { return selected[k]; });
-    if (!selIds.length) { 
-      setMsg('Por favor seleccione al menos un activo usando los checkboxes para aplicar la edición masiva.', true); 
-      return; 
-    }
-
-    var selectedField = $('cgps-mass-field-select').value;
-    var selectedOptText = $('cgps-mass-field-select').options[$('cgps-mass-field-select').selectedIndex].text;
-    var massValue = $('cgps-mass-value-input').value.trim();
-
-    if (!window.confirm("¿Está seguro de modificar masivamente el campo [" + selectedOptText + "] con el valor '" + massValue + "' para los " + selIds.length + " activo(s) SELECCIONADOS?")) return;
-
-    var targets = all.filter(function(r) { return selected[r.id]; });
-
-    var payloads = targets.map(function(r) {
-      var f = {};
-      f[selectedField] = massValue;
-      return { row: r, fields: f };
-    });
-
-    applyBatchDeviceUpdates(payloads);
-  }
-
-  function injectMissingParametersSafe() {
-    var selIds = Object.keys(selected).filter(function (k) { return selected[k]; });
-    if (!selIds.length) { setMsg('Seleccione al menos un activo usando los checkboxes.', true); return; }
-
-    var selectedRows = all.filter(function(r) { return selected[r.id]; });
-    var targets = selectedRows.filter(function(r) { return r.paramCount < REQUIRED_PARAMS.length; });
-
-    if (!targets.length) { setMsg('Los ' + selectedRows.length + ' activo(s) seleccionados ya tienen los 5 parámetros (5/5).'); return; }
-
-    if (!window.confirm("🛡️ MODO SEGURO: Se agregarán/corregirán los 5 parámetros personalizados en " + targets.length + " activo(s) (se conservan los parámetros existentes). ¿Desea continuar?")) return;
-
-    setMsg('Ejecutando inyección segura de parámetros personalizados en Geotab…');
-
-    runSafeUpdate(targets, function (d) {
-      return mergeRequiredParams(d);
-    }, function (d) {
-      return evalDeviceParameters(d).count === REQUIRED_PARAMS.length;
-    }).then(function (st) {
-      reportUpdate(st, 'Inyección de parámetros', "Inyección realizada con éxito. Se inyectaron los 5 parámetros en " + st.verified + " activo(s).");
-    }).catch(function (err) {
-      setMsg('Error en el flujo de inyección: ' + (err && err.message ? err.message : err), true);
-    });
-  }
-
-  function filterThisWeekToCut() {
-    var nowCut = new Date();
-    var dayOfWeek = nowCut.getDay();
-    var diffToMonday = (dayOfWeek === 0 ? -6 : 1 - dayOfWeek);
-
-    var mondayStart = new Date(nowCut);
-    mondayStart.setDate(nowCut.getDate() + diffToMonday);
-    mondayStart.setHours(0, 0, 0, 0);
-
-    activeDateRange = { start: mondayStart, end: nowCut };
-    
-    selected = {};
-    var count = 0;
-    all.forEach(function(r) {
-      if (isRowMatchingFilters(r)) {
-        selected[r.id] = true;
-        count++;
-      }
-    });
-
-    renderList();
-    setMsg('📅 Filtro aplicado: Mostrando ' + count + ' activo(s) de esta semana al corte.');
-  }
-
-  function filterCustomDateRange() {
-    var fromVal = $('master-date-from').value;
-    var toVal = $('master-date-to').value;
-
-    if (!fromVal || !toVal) {
-      setMsg('Por favor ingrese tanto la fecha de inicio (Desde) como la fecha de fin (Hasta).', true);
-      return;
-    }
-
-    var startDate = new Date(fromVal + 'T00:00:00');
-    var endDate = new Date(toVal + 'T23:59:59.999');
-
-    if (startDate > endDate) {
-      setMsg('La fecha de inicio (Desde) no puede ser posterior a la fecha de fin (Hasta).', true);
-      return;
-    }
-
-    activeDateRange = { start: startDate, end: endDate };
-
-    selected = {};
-    var count = 0;
-    all.forEach(function(r) {
-      if (isRowMatchingFilters(r)) {
-        selected[r.id] = true;
-        count++;
-      }
-    });
-
-    renderList();
-    setMsg('📅 Filtro aplicado: Mostrando ' + count + ' activo(s) en el rango ' + fmtDate(startDate) + ' - ' + fmtDate(endDate) + '.');
-  }
-
-  function resetDateFilters() {
-    activeDateRange = null;
-    $('master-date-from').value = '';
-    $('master-date-to').value = '';
-    renderList();
-    setMsg('Filtro de fechas removido: Mostrando unidades según los filtros de tabla activos.');
-  }
-
-  function exportMasterSwitchExcel() {
-    var list = all.filter(function(r) {
-      var isFiltered = isRowMatchingFilters(r);
-      var hasSerial = !!r.serialNumber && r.serialNumber.trim().length > 0;
-      var hasVin = !!r.vin && r.vin.trim().length > 0;
-      return isFiltered && hasSerial && hasVin;
-    });
-
-    if (list.length === 0) {
-      setMsg('No hay unidades con # SERIE que coincidan con la combinación de filtros para exportar.', true);
-      return;
-    }
-
-    var now = new Date();
-    var dateStr = pad(now.getDate()) + '-' + pad(now.getMonth() + 1) + '-' + now.getFullYear();
-    var timeStr = pad(now.getHours()) + '-' + pad(now.getMinutes()) + '-' + pad(now.getSeconds());
-    
-    var fileName = 'LISTA MASTER SWITCH DIVEMOTOR CAMIONES-' + dateStr + '_' + timeStr + '.xlsx';
-
-    var sheetData = [
-      ["PLACA", "BASE DE DATOS", "VIN", "# SERIE"]
-    ];
-
-    list.forEach(function(r) {
-      sheetData.push([
-        r.placa || r.nombreActivo,
-        databaseName,
-        r.vin,
-        r.serialNumber
-      ]);
-    });
-
-    var wb = XLSX.utils.book_new();
-    var ws = XLSX.utils.aoa_to_sheet(sheetData);
-
-    ws['!cols'] = [
-      { wch: 24 },
-      { wch: 18 },
-      { wch: 24 },
-      { wch: 20 }
-    ];
-
-    XLSX.utils.book_append_sheet(wb, ws, "Hoja3");
-    XLSX.writeFile(wb, fileName);
-
-    setMsg('📊 Archivo Excel generado con éxito (' + list.length + ' activos): ' + fileName);
-  }
-
-  function generateCertiLegalText() {
-    var list = all.filter(function(r) { return selected[r.id] && isRowMatchingFilters(r); });
-    if (!list.length) { setMsg('Seleccione al menos un activo usando los checkboxes para generar el texto legal.', true); return; }
-
-    var primaryRazon = list[0].razon || 'NOMBRE DE LA EMPRESA';
-    var primaryRuc = list[0].ruc || 'XXXXXXXXX';
-
-    var txt = "Buen día estimada Área Legal,\n\n";
-    txt += "Se solicita tu apoyo en la realización del certificado solicitado por el cliente. Considere que debe describir como beneficiaria al cliente DIVEIMPORT. Adjunto información de la(s) unidad(es):\n\n";
-    txt += "DATOS DE LA EMPRESA\n\n";
-    txt += "NOMBRE:    " + primaryRazon + "\n";
-    txt += "RUC:       " + primaryRuc + "\n\n";
-
-    list.forEach(function(r, idx) {
-      txt += (idx + 1) + ". PLACA: " + (r.placa || 'S/P') + " | VIN: " + (r.vin || 'S/V') + "\n";
-    });
-
-    txt += "\nQuedo atento a sus comentarios.";
-
-    $('cgps-legal-text').value = txt;
-    setMsg('Texto para el Área Legal generado correctamente.');
-  }
-
-  function generateCertiWord() {
-    var list = all.filter(function(r) { return selected[r.id] && isRowMatchingFilters(r); });
-    if (!list.length) { setMsg('Seleccione al menos un activo usando los checkboxes para generar el documento Word.', true); return; }
-
-    var htmlDoc = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>" +
-      "<head><meta charset='utf-8'><title>Anexo 01</title><style>body{font-family:Arial,sans-serif;font-size:11pt;} table{border-collapse:collapse;width:100%;} th,td{border:1px solid #000;padding:6px;font-size:10pt;}</style></head><body>" +
-      "<h2 style='text-align:center;'>ANEXO N° 01: CONSTANCIA DE SERVICIO GPS</h2>" +
-      "<p>Se certifica que los siguientes vehículos cuentan con el servicio de localización GPS activo:</p>" +
-      "<table><thead><tr style='background-color:#f2f2f2;'><th>N°</th><th>Placa</th><th>VIN</th><th>Razón Social</th><th>RUC</th><th>Fecha Instalación</th></tr></thead><tbody>";
-
-    list.forEach(function(r, idx) {
-      htmlDoc += "<tr><td>" + (idx + 1) + "</td><td>" + xmlEsc(r.placa) + "</td><td>" + xmlEsc(r.vin) + "</td><td>" + xmlEsc(r.razon) + "</td><td>" + xmlEsc(r.ruc) + "</td><td>" + xmlEsc(r.desde) + "</td></tr>";
-    });
-
-    htmlDoc += "</tbody></table></body></html>";
-
-    var blob = new Blob(['\ufeff', htmlDoc], { type: 'application/msword' });
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement('a');
-    a.href = url;
-    a.download = 'ANEXO_01_CERTI_GPS.doc';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setMsg('Documento Word (Anexo N°01) descargado.');
-  }
-
-  function processBulkInputGeneral(inputElemId) {
-    var rawText = $(inputElemId).value.trim();
-    if (!rawText) { setMsg('Por favor pegue una lista de unidades.', true); return; }
-
-    activeBulkTokens = rawText.split(/[\n\r,;\t]+/).map(function (s) { return s.trim().toLowerCase(); }).filter(function (s) { return s.length > 0; });
-    if (activeBulkTokens.length === 0) { setMsg('No se detectaron elementos válidos.', true); return; }
-
-    selected = {};
-    var matchedCount = 0;
-
-    all.forEach(function (r) {
-      var nom = r._nom, p = r._p, v = r._v, s = r._s;
-      var isMatch = activeBulkTokens.some(function (token) {
-        return nom === token || p === token || v === token || s === token || (token.length >= 3 && (nom.indexOf(token) >= 0 || p.indexOf(token) >= 0 || v.indexOf(token) >= 0 || s.indexOf(token) >= 0));
-      });
-      if (isMatch) { selected[r.id] = true; matchedCount++; }
-    });
-
-    renderList();
-    setMsg('Filtro masivo aplicado: mostrando y seleccionando ' + matchedCount + ' coincidencia(s).');
-  }
-
   function exportReportUnitsExcel() {
     if (!currentSelectedReportObj) return;
 
@@ -1793,7 +1360,7 @@ var addInConstructor = function (api, state, callback) {
 
     var now = new Date();
     var dateStr = pad(now.getDate()) + '-' + pad(now.getMonth() + 1) + '-' + now.getFullYear();
-    var fileName = 'DETALLE_' + currentSelectedReportObj.name.toUpperCase().replace(/[^A-Z0-9]/g, '_') + '_' + dateStr + '.xlsx';
+    var fileName = 'DETALLE_' + (currentSelectedReportObj._resolvedName || 'REPORTE').toUpperCase().replace(/[^A-Z0-9]/g, '_') + '_' + dateStr + '.xlsx';
 
     var sheetData = [
       ["PLACA", "VIN", "# SERIE GPS", "TIPO VEHÍCULO", "ESTADO / PROVINCIA", "RAZÓN SOCIAL"]
@@ -1816,8 +1383,9 @@ var addInConstructor = function (api, state, callback) {
     setMsg('📊 Archivo exportado con éxito: ' + fileName);
   }
 
+  // ===== FUNCIÓN DE CARGA COMPLETA RESILIENTE =====
   function load() {
-    setMsg('Sincronizando datos de MyGeotab (Devices, Groups, Templates, Rules)…');
+    setMsg('Sincronizando activos de MyGeotab...');
 
     var nowIso = new Date().toISOString();
     var devSearch = { fromDate: nowIso, toDate: nowIso };
@@ -1826,81 +1394,57 @@ var addInConstructor = function (api, state, callback) {
       try { api.getSession(function (s) { ok(s); }); } catch (e) { ok(null); }
     });
 
-    // Petición completa a la API incluyendo ReportTemplate y Rule
-    var dataP = callMulti(api, [
-      ['Get', { typeName: 'Device', search: devSearch, resultsLimit: 5000, propertySelector: { fields: DEVICE_FIELDS, isIncluded: true } }],
-      ['Get', { typeName: 'Group', propertySelector: { fields: ['id', 'name'], isIncluded: true } }],
-      ['Get', { typeName: 'DeviceStatusInfo' }],
-      ['Get', { typeName: 'ReportTemplate' }],
-      ['Get', { typeName: 'Rule', propertySelector: { fields: ['id', 'name'], isIncluded: true } }]
+    var coreDataP = callMulti(api, [
+      ['Get', { typeName: 'Device', search: devSearch, resultsLimit: 5000 }],
+      ['Get', { typeName: 'Group' }]
     ]).catch(function () {
       return Promise.all([
         callApi(api, 'Get', { typeName: 'Device', search: devSearch, resultsLimit: 5000 }),
-        callApi(api, 'Get', { typeName: 'Group' }).catch(function () { return []; }),
-        callApi(api, 'Get', { typeName: 'DeviceStatusInfo' }).catch(function () { return []; }),
-        callApi(api, 'Get', { typeName: 'ReportTemplate' }).catch(function () { return []; }),
-        callApi(api, 'Get', { typeName: 'Rule' }).catch(function () { return []; })
+        callApi(api, 'Get', { typeName: 'Group' }).catch(function () { return []; })
       ]);
     });
 
-    return Promise.all([dataP, sessionP]).then(function (res) {
-      var nowMs = new Date().getTime();
+    return Promise.all([coreDataP, sessionP]).then(function (res) {
       var devices = (res[0] && res[0][0]) || [];
       var groups = (res[0] && res[0][1]) || [];
-      var statusInfos = (res[0] && res[0][2]) || [];
-      var templates = (res[0] && res[0][3]) || [];
-      var rules = (res[0] && res[0][4]) || [];
 
       if (res[1] && res[1].database) {
         databaseName = res[1].database;
       }
 
-      statusById = {};
-      statusInfos.forEach(function (s) {
-        if (s && s.device && s.device.id) {
-          statusById[s.device.id] = s;
-        }
-      });
-
       rawDevices = devices.filter(function (d) {
         if (d.deviceType === 'CustomDevice') return false;
-        if (d.activeTo) {
-          var activeToMs = new Date(d.activeTo).getTime();
-          if (!isNaN(activeToMs) && activeToMs <= nowMs) return false;
-        }
         return true;
       });
 
       groupsById = {};
       groups.forEach(function (g) { groupsById[g.id] = g; });
 
-      rulesById = {};
-      rules.forEach(function (r) { rulesById[r.id] = r; });
-
-      rawTemplates = templates;
-
       rebuildRows();
       renderList();
 
-      if (activeModule === 'reports' && $('reports-group-select').value) {
-        renderClientReportsFromApi($('reports-group-select').value);
-      }
+      setMsg(rawDevices.length + ' activos y ' + Object.keys(groupsById).length + ' grupos sincronizados correctamente.');
 
-      if (activeModule === 'audit' && $('cgps-audit-input').value.trim()) {
-        executeGroupAudit();
-      }
+      // CARGA DE CustomReportSchedule USANDO EL SELECTOR PROPORCIONADO POR API
+      callApi(api, 'Get', {
+        typeName: 'CustomReportSchedule',
+        propertySelector: {
+          fields: ['id', 'name', 'template', 'isActive', 'groups', 'scopeGroups', 'includeAllChildrenGroups', 'includeDirectChildrenOnlyGroups'],
+          isIncluded: true
+        }
+      }).then(function(schedules) {
+        rawSchedules = schedules || [];
+        if (activeModule === 'reports' && $('reports-group-select').value) {
+          handleReportGroupChange();
+        }
+      }).catch(function(err) {
+        console.warn("No se pudieron cargar CustomReportSchedule:", err);
+      });
 
-      setMsg(rawDevices.length + ' activos y ' + rawTemplates.length + ' plantillas de reporte sincronizados.');
     }).catch(function (e) {
-      setMsg('No se pudieron cargar los activos: ' + (e && e.message ? e.message : e), true);
+      setMsg('Error al sincronizar con Geotab: ' + (e && e.message ? e.message : e), true);
     });
   }
-
-  // EVENTO APLICAR EDICIÓN MASIVA UNIFICADA
-  $('cgps-btn-apply-mass-unified').addEventListener('click', applyUnifiedMassEdition);
-
-  // MANEJO DEL SELECTOR Y CAMBIO DE PLACEHOLDER DINÁMICO
-  $('cgps-mass-field-select').addEventListener('change', updateMassInputPlaceholder);
 
   // BOTONES DE RECARGA/SINCRONIZACIÓN
   $('testn-btn-refresh-hub').addEventListener('click', function() { load(); });
@@ -1931,21 +1475,7 @@ var addInConstructor = function (api, state, callback) {
   });
 
   // EVENTOS CERTI GPS
-  $('cgps-btn-doc').addEventListener('click', generateCertiWord);
-  $('cgps-btn-mail').addEventListener('click', generateCertiLegalText);
   $('cgps-btn-view').addEventListener('click', function() { switchView('certi'); setMsg('Visualizando tabla de activos.'); });
-  $('cgps-btn-copy-legal').addEventListener('click', function() {
-    var txt = $('cgps-legal-text');
-    txt.select();
-    document.execCommand('copy');
-    setMsg('Texto legal copiado al portapapeles.');
-  });
-
-  // EVENTOS MASTER SWITCH
-  $('master-btn-week').addEventListener('click', filterThisWeekToCut);
-  $('master-btn-custom-range').addEventListener('click', filterCustomDateRange);
-  $('master-btn-reset-dates').addEventListener('click', resetDateFilters);
-  $('master-btn-excel').addEventListener('click', exportMasterSwitchExcel);
 
   // EVENTOS KPI DASHBOARD INTERACTIVOS
   $('kpi-card-1').addEventListener('click', function() { activeUnitFilter = 'all'; activeParamFilter = 'all'; activeTypeFilter = 'all'; renderList(); });
@@ -1953,18 +1483,6 @@ var addInConstructor = function (api, state, callback) {
   $('kpi-card-novin').addEventListener('click', function() { activeUnitFilter = (activeUnitFilter === 'noVin') ? 'all' : 'noVin'; renderList(); });
   $('kpi-card-nosn').addEventListener('click', function() { activeUnitFilter = (activeUnitFilter === 'noSn') ? 'all' : 'noSn'; renderList(); });
   $('kpi-card-2').addEventListener('click', function() { activeUnitFilter = (activeUnitFilter === 'selected') ? 'all' : 'selected'; renderList(); });
-
-  $('kpi-card-4').addEventListener('click', function() { activeParamFilter = (activeParamFilter === 'full') ? 'all' : 'full'; renderList(); });
-  $('kpi-card-5').addEventListener('click', function() { activeParamFilter = (activeParamFilter === 'empty') ? 'all' : 'empty'; renderList(); });
-  $('kpi-card-6').addEventListener('click', function() { activeParamFilter = (activeParamFilter === 'partial') ? 'all' : 'partial'; renderList(); });
-
-  $('kpi-card-remol').addEventListener('click', function() { activeTypeFilter = (activeTypeFilter === 'remol') ? 'all' : 'remol'; renderList(); });
-  $('kpi-card-volq').addEventListener('click', function() { activeTypeFilter = (activeTypeFilter === 'volq') ? 'all' : 'volq'; renderList(); });
-  $('kpi-card-sintipo').addEventListener('click', function() { activeTypeFilter = (activeTypeFilter === 'sintipo') ? 'all' : 'sintipo'; renderList(); });
-  $('kpi-card-otros').addEventListener('click', function() { activeTypeFilter = (activeTypeFilter === 'otros') ? 'all' : 'otros'; renderList(); });
-
-  // EVENTO INYECCIÓN SEGURA DE PARÁMETROS
-  $('cgps-btn-inject-params').addEventListener('click', injectMissingParametersSafe);
 
   // NAVEGACIÓN
   $('btn-mod-certi').addEventListener('click', function() { switchView('certi'); });
@@ -1974,14 +1492,6 @@ var addInConstructor = function (api, state, callback) {
   $('btn-mod-reports').addEventListener('click', function() { switchView('reports'); });
   $('testn-btn-back').addEventListener('click', function() { switchView('hub'); });
 
-  // PEGA MÁSIVO CERTI GPS
-  $('cgps-btn-bulk').addEventListener('click', function() { processBulkInputGeneral('cgps-bulk-input'); });
-  $('cgps-btn-bulk-clear').addEventListener('click', function () { $('cgps-bulk-input').value = ''; activeBulkTokens = []; selected = {}; renderList(); setMsg('Filtro masivo limpiado.'); });
-
-  // PEGA MÁSIVO OTROS MÓDULOS
-  $('cgps-btn-bulk-std').addEventListener('click', function() { processBulkInputGeneral('cgps-bulk-input-std'); });
-  $('cgps-btn-bulk-clear-std').addEventListener('click', function () { $('cgps-bulk-input-std').value = ''; activeBulkTokens = []; selected = {}; renderList(); setMsg('Filtro masivo limpiado.'); });
-
   // EVENTOS DE BÚSQUEDA Y SELECTOR DE CAMPO
   var filterTimer = null;
   $('cgps-filter').addEventListener('input', function () { clearTimeout(filterTimer); filterTimer = setTimeout(renderList, 200); });
@@ -1990,7 +1500,6 @@ var addInConstructor = function (api, state, callback) {
   // MANEJO DE SELECCIÓN EN TABLA
   $('cgps-listbody').addEventListener('change', function (e) {
     var id = e.target.getAttribute('data-id');
-
     if (e.target.type === 'checkbox' && id) {
       selected[id] = e.target.checked;
       renderList();
@@ -2021,12 +1530,12 @@ var addInConstructor = function (api, state, callback) {
   };
 };
 
-// REGISTRO UNIFICADO EN GEOTAB
+// REGISTRO NATIVO BAJO "CONTROL Z"
 window.geotab = window.geotab || {};
 window.geotab.addin = window.geotab.addin || {};
-window.geotab.addin["Test N"] = addInConstructor;
-window.geotab.addin["test_n"] = addInConstructor;
-window.geotab.addin["test_n-index"] = addInConstructor;
+window.geotab.addin["Control Z"] = addInConstructor;
+window.geotab.addin["control_z"] = addInConstructor;
+window.geotab.addin["control_z-index"] = addInConstructor;
 </script>
 </body>
 </html>
