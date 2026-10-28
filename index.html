@@ -422,11 +422,11 @@ var addInConstructor = function (api, state, callback) {
   });
 
   var REQUIRED_PARAMS = [
-    { name: "Enable Gps Altitude Logging", offset: "181", bytesBase64: "CA==", bytesHex: "08" },
-    { name: "Disable Accelerometer Record Limit", offset: "65", bytesBase64: "Ag==", bytesHex: "02" },
-    { name: "High Res RPM allowed Error = 2 rpm", offset: "168", bytesBase64: "Ag==", bytesHex: "02" },
-    { name: "Enable Engine Load", offset: "165", bytesBase64: "BA==", bytesHex: "04" },
-    { name: "Enable Engine Retarder Selection And Accel Pedal", offset: "166", bytesBase64: "CQ==", bytesHex: "09" }
+    { name: "Enable Gps Altitude Logging", offset: 181, bytesBase64: "CA==", bytesHex: "08" },
+    { name: "Disable Accelerometer Record Limit", offset: 65, bytesBase64: "Ag==", bytesHex: "02" },
+    { name: "High Res RPM allowed Error = 2 rpm", offset: 168, bytesBase64: "Ag==", bytesHex: "02" },
+    { name: "Enable Engine Load", offset: 165, bytesBase64: "BA==", bytesHex: "04" },
+    { name: "Enable Engine Retarder Selection And Accel Pedal", offset: 166, bytesBase64: "CQ==", bytesHex: "09" }
   ];
 
   var all = [], groupsById = {}, selected = {}, rawDevices = [];
@@ -449,7 +449,6 @@ var addInConstructor = function (api, state, callback) {
   function xmlEsc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function htmlEsc(s) { return xmlEsc(s).replace(/'/g, '&#39;'); }
 
-  // RESOLUCIÓN DIRECTA DESDE CUSTOMPROPERTIES Y LICENSESTATE
   function extractCustomPropertiesMap(d) {
     var map = {};
     var customList = d.customProperties || [];
@@ -487,7 +486,7 @@ var addInConstructor = function (api, state, callback) {
 
       if (Array.isArray(customList)) {
         found = customList.some(function(cp) {
-          var offMatch = String(cp.offset) === p.offset;
+          var offMatch = String(cp.offset) === String(p.offset);
           var bytesVal = String(cp.bytes || cp.bytesBase64 || cp.value || '');
           var bytesMatch = (bytesVal === p.bytesBase64) || (bytesVal.toUpperCase().indexOf(p.bytesHex) >= 0);
           return offMatch && bytesMatch;
@@ -522,7 +521,6 @@ var addInConstructor = function (api, state, callback) {
     var serial = (d.serialNumber || '').trim();
     var paramStatus = evalDeviceParameters(d);
     
-    // MAPEO DE CUSTOM PROPERTIES DIRECTAS
     var cpMap = extractCustomPropertiesMap(d);
 
     var razonSocial = getCustomValue(cpMap, /RAZ[O\u00F3]N\s*SOCIAL/i) || getCustomValue(cpMap, /EMPRESA|CLIENTE/i);
@@ -530,7 +528,6 @@ var addInConstructor = function (api, state, callback) {
     var anualidadVal = getCustomValue(cpMap, /ANUALIDAD/i);
     var tipoVehiculoVal = getCustomValue(cpMap, /TIPO\s*DE\s*VEHICULO|TIPO\s*VEHICULO/i);
     
-    // licenseState se mapea directamente como Estado/Provincia según la estructura Geotab
     var estadoProv = (d.licenseState || '').trim() || getCustomValue(cpMap, /ESTADO|PROVINCIA/i);
 
     return {
@@ -767,13 +764,11 @@ var addInConstructor = function (api, state, callback) {
     var hasSn = !!r.serialNumber && r.serialNumber.trim().length > 0;
     var hasVin = !!r.vin && r.vin.trim().length > 0;
 
-    // 1. FILTRO DE TIPO DE UNIDAD (ESTADO GENERAL DE SERIAL/VIN)
     if (activeUnitFilter === 'snVin' && (!hasSn || !hasVin)) return false;
     if (activeUnitFilter === 'noVin' && hasVin) return false;
     if (activeUnitFilter === 'noSn' && hasSn) return false;
     if (activeUnitFilter === 'selected' && !selected[r.id]) return false;
 
-    // 2. FILTRO INDEPENDIENTE DE PARÁMETROS (MÓDULO VALIDACIÓN)
     if (activeModule === 'valid') {
       if (activeParamFilter === 'full' && r.paramCount !== 5) return false;
       if (activeParamFilter === 'empty' && r.paramCount !== 0) return false;
@@ -1079,6 +1074,7 @@ var addInConstructor = function (api, state, callback) {
     applyBatchDeviceUpdates(payloads);
   }
 
+  // CORRECCIÓN ESTRICTA DEL FLUJO SEGURO DE PARÁMETROS (FORMATEO DE JSON ACEPTE GEOTAB)
   function injectMissingParametersSafe() {
     var selIds = Object.keys(selected).filter(function (k) { return selected[k]; });
     if (!selIds.length) { setMsg('Seleccione al menos un activo usando los checkboxes.', true); return; }
@@ -1094,28 +1090,36 @@ var addInConstructor = function (api, state, callback) {
     var promises = targets.map(function(r) {
       return callApi(api, 'Get', { typeName: 'Device', search: { id: r.id } }).then(function(resGet) {
         var liveDevice = (resGet && resGet[0]) ? resGet[0] : r.rawDevice;
-        var currentParams = liveDevice.customParameters || [];
+        var currentParams = Array.isArray(liveDevice.customParameters) ? liveDevice.customParameters : [];
+
+        // SANITIZACIÓN DEL ARREGLO DE PARÁMETROS PARA PREVENIR ERRORES DE SERIALIZACIÓN JSON
+        var updatedParams = currentParams.map(function(cp) {
+          return {
+            offset: Number(cp.offset),
+            bytes: cp.bytes || cp.bytesBase64 || cp.value || "",
+            isEnabled: cp.isEnabled !== undefined ? Boolean(cp.isEnabled) : true
+          };
+        });
 
         REQUIRED_PARAMS.forEach(function(req) {
-          var index = currentParams.findIndex(function(cp) {
-            return String(cp.offset) === req.offset;
+          var index = updatedParams.findIndex(function(cp) {
+            return Number(cp.offset) === Number(req.offset);
           });
 
           var paramObj = {
-            description: req.name,
-            offset: req.offset,
+            offset: Number(req.offset),
             bytes: req.bytesBase64,
             isEnabled: true
           };
 
           if (index >= 0) {
-            currentParams[index] = paramObj;
+            updatedParams[index] = paramObj;
           } else {
-            currentParams.push(paramObj);
+            updatedParams.push(paramObj);
           }
         });
 
-        liveDevice.customParameters = currentParams;
+        liveDevice.customParameters = updatedParams;
 
         return callApi(api, 'Set', { typeName: 'Device', entity: liveDevice }).then(function() {
           return callApi(api, 'Get', { typeName: 'Device', search: { id: r.id } }).then(function(verifGet) {
@@ -1327,7 +1331,6 @@ var addInConstructor = function (api, state, callback) {
     var nowIso = new Date().toISOString();
 
     return Promise.all([
-      // CONSULTA DE UNIDADES CON DESPACHO DE FILTRADO SERVIDOR (FROMDATE Y TODATE IGUALES)
       callApi(api, 'Get', { 
         typeName: 'Device', 
         search: { 
@@ -1345,7 +1348,6 @@ var addInConstructor = function (api, state, callback) {
         databaseName = res[2].database;
       }
 
-      // FILTRADO LOCAL ADICIONAL ESTRICTO POR FECHA ACTIVETO Y TIPO
       rawDevices = (res[0] || []).filter(function (d) {
         if (d.activeTo) {
           var activeToStr = String(d.activeTo);
