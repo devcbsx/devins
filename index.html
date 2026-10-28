@@ -100,48 +100,29 @@
 
   <!-- VISTA 2: CONTENEDOR DE MODULOS OPERATIVOS -->
   <div id="testn-module-view" style="display: none;">
-    <div style="margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
-      <button id="testn-btn-back" type="button" class="cgps-btn cgps-btn-secondary">← Volver al Panel Principal</button>
-      <div style="display: flex; align-items: center; gap: 10px;">
-        <button id="testn-btn-refresh-mod" type="button" class="cgps-btn cgps-btn-outline" style="font-weight: 700;">🔄 Sincronizar Datos</button>
-        <span id="testn-mod-title" style="font-size: 14px; font-weight: 700; color: #1b4e85;"></span>
+    
+    <!-- ENCABEZADO UNIFICADO DENTRO DE LA BARRA AZUL (HERO BAR) COMO EN LA SEGUNDA IMAGEN -->
+    <div class="cgps-hero" style="margin-bottom: 10px;">
+      <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+        <button id="testn-btn-back" type="button" class="cgps-btn cgps-btn-secondary" style="font-size: 13px;">← Volver</button>
+        <h1 id="testn-mod-title" style="font-size: 18px; margin: 0; text-transform: uppercase;">MÓDULO</h1>
+        <button id="testn-btn-refresh-mod" type="button" class="cgps-btn cgps-btn-white" style="font-weight: 700; font-size: 12px;">🔄 Sincronizar Datos</button>
+      </div>
+
+      <!-- BOTONES DE ACCIÓN ESPECÍFICOS SEGÚN MÓDULO -->
+      <div id="hdr-actions-certi" style="display: none; gap: 8px;">
+        <button id="cgps-btn-doc" type="button" class="cgps-btn cgps-btn-white">Generar Word</button>
+        <button id="cgps-btn-mail" type="button" class="cgps-btn cgps-btn-secondary">Generar Texto Legal</button>
+        <button id="cgps-btn-view" type="button" class="cgps-btn cgps-btn-outline" style="color:#fff; border-color:#fff;">Visualizar Tabla</button>
+      </div>
+
+      <div id="hdr-actions-master" style="display: none; gap: 8px;">
+        <button id="master-btn-excel" type="button" class="cgps-btn cgps-btn-white" style="font-weight:700;">📊 Descargar Excel .xlsx</button>
       </div>
     </div>
 
-    <!-- Módulo Certificado GPS -->
-    <div id="sec-certigps" style="display: none;">
-      <div class="cgps-hero">
-        <div>
-          <h1>Certificado GPS</h1>
-        </div>
-        <div style="display: flex; gap: 8px;">
-          <button id="cgps-btn-doc" type="button" class="cgps-btn cgps-btn-white">Generar Word</button>
-          <button id="cgps-btn-mail" type="button" class="cgps-btn cgps-btn-secondary">Generar Texto Legal</button>
-          <button id="cgps-btn-view" type="button" class="cgps-btn cgps-btn-outline" style="color:#fff; border-color:#fff;">Visualizar Tabla</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Módulo Validación de Variables -->
-    <div id="sec-validacion" style="display: none;">
-      <div class="cgps-hero">
-        <div>
-          <h1>Validación de Variables GPS</h1>
-        </div>
-      </div>
-    </div>
-
-    <!-- Módulo Master Switch -->
+    <!-- Módulo Master Switch (Controles de Fecha) -->
     <div id="sec-master" style="display: none;">
-      <div class="cgps-hero">
-        <div>
-          <h1>Master Switch Camiones</h1>
-        </div>
-        <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
-          <button id="master-btn-excel" type="button" class="cgps-btn cgps-btn-white" style="font-weight:700;">📊 Descargar Excel .xlsx</button>
-        </div>
-      </div>
-
       <div class="cgps-card" style="margin-top: 10px; background-color: #ffffff !important; border: 1px solid #94a3b8 !important;">
         <div style="font-size: 11px; font-weight: 700; color: #1b4e85; margin-bottom: 8px; text-transform: uppercase; letter-spacing:0.5px;">FILTRAR POR FECHA DE INSTALACIÓN:</div>
         <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
@@ -163,12 +144,6 @@
 
     <!-- Módulo Auditoría de Grupos -->
     <div id="sec-audit" style="display: none;">
-      <div class="cgps-hero">
-        <div>
-          <h1>Auditoría de Grupos por Texto Masivo</h1>
-        </div>
-      </div>
-
       <div class="cgps-card" style="margin-top: 10px;">
         <div style="font-size: 12px; font-weight: 700; margin-bottom: 6px; color: #1b4e85;">PEGADO DE LISTA PARA AUDITORÍA DE GRUPOS</div>
         <div style="display: flex; gap: 10px; align-items: flex-start; flex-wrap: wrap;">
@@ -200,12 +175,6 @@
 
     <!-- Módulo Reportes por Cliente -->
     <div id="sec-reports" style="display: none;">
-      <div class="cgps-hero">
-        <div>
-          <h1>Reportes por Cliente / Grupo</h1>
-        </div>
-      </div>
-
       <div class="cgps-card" style="margin-top: 10px;">
         <div style="font-size: 12px; font-weight: 700; color: #1b4e85; margin-bottom: 8px;">BUSCAR Y SELECCIONAR GRUPO O CLIENTE:</div>
         <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
@@ -263,11 +232,6 @@
 
     <!-- MÓDULO: ACTIVACIONES DE UNIDADES (EN BLANCO) -->
     <div id="sec-activations" style="display: none;">
-      <div class="cgps-hero">
-        <div>
-          <h1>Activaciones de Unidades</h1>
-        </div>
-      </div>
       <div class="cgps-card" style="margin-top: 10px; padding: 30px; text-align: center;">
         <h3 style="color: #1b4e85; margin: 0 0 8px 0;">Módulo en Desarrollo</h3>
         <p style="color: #64748b; font-size: 13px; margin: 0;">Esta sección está preparada para incorporar el flujo de activaciones de unidades.</p>
@@ -297,7 +261,6 @@
         <div class="cgps-kpi-title">PARÁMETROS 5/5</div>
         <div class="cgps-kpi-value" id="kpi-val-4" style="color: #16a34a;">0</div>
       </div>
-      <!-- KPIS CONSOLIDADOS: PARÁMETROS < 5 -->
       <div class="cgps-card kpi-btn-card" id="kpi-card-less5" style="display: none;" title="Filtrar unidades con menos de 5 parámetros">
         <div class="cgps-kpi-title">PARÁMETROS &lt; 5</div>
         <div class="cgps-kpi-value" id="kpi-val-less5" style="color: #dc2626;">0</div>
@@ -353,7 +316,7 @@
       </div>
     </div>
 
-    <!-- NUEVA DISTRIBUCIÓN HORIZONTAL CONTINUA EN UNA SOLA FILA -->
+    <!-- CONTROLES UNIFICADOS EN UNA FILA CONTINUA -->
     <div id="sec-controls-container" class="cgps-card" style="margin-top: 10px;">
       <div class="cgps-controls-row" style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; width: 100%;">
         <select id="cgps-filter-field" class="cgps-input" style="width: 150px; font-weight: 600; color: #1b4e85; background-color: #f8fafc;">
@@ -375,7 +338,6 @@
         <button id="cgps-sel-vis" type="button" class="cgps-btn cgps-btn-outline">Seleccionar visibles</button>
         <button id="cgps-sel-none" type="button" class="cgps-btn cgps-btn-outline">Limpiar selección</button>
         
-        <!-- EDICIÓN MASIVA Y BOTÓN VERDE EN LA MISMA LÍNEA CONTINUA -->
         <select id="cgps-mass-field-select" class="cgps-input" style="width: 150px; font-weight: 600; color: #0f172a; background-color: #ffffff;">
           <option value="razon">Razón Social</option>
           <option value="ruc">RUC</option>
@@ -390,7 +352,6 @@
         
         <button id="cgps-btn-apply-mass-unified" type="button" class="cgps-btn" style="background-color: #0284c7; color: #ffffff; font-weight: 700;">Guardar seleccionados</button>
         
-        <!-- BOTÓN VERDE CON TEXTO MODIFICADO -->
         <button id="cgps-btn-inject-params" type="button" class="cgps-btn" style="background-color: #15803d; color: #fff; font-weight: 700; display: none;">🛡️ Completar 5 Parámetros</button>
       </div>
     </div>
@@ -438,8 +399,8 @@
       color: #1e293b !important;
     }
     .cgps-wrapper { width: 100% !important; max-width: 100% !important; margin: 0 auto; }
-    .cgps-hero { background-color: #1b4e85 !important; color: #ffffff !important; padding: 16px 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.06); width: 100%; flex-wrap: wrap; gap: 10px; }
-    .cgps-hero h1 { margin: 0 0 4px 0; font-size: 20px; font-weight: 700; color: #ffffff !important; }
+    .cgps-hero { background-color: #1b4e85 !important; color: #ffffff !important; padding: 12px 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.06); width: 100%; flex-wrap: wrap; gap: 10px; }
+    .cgps-hero h1 { margin: 0; font-size: 18px; font-weight: 700; color: #ffffff !important; }
     
     .testn-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; width: 100%; margin-top: 10px; }
     .testn-card {
@@ -1077,6 +1038,7 @@ var addInConstructor = function (api, state, callback) {
     $('report-preview-modal').style.display = 'flex';
   }
 
+  // ===== TEXTO DE SOLICITUD ÁREA LEGAL =====
   function generateLegalText() {
     var selList = all.filter(function(r) { return selected[r.id]; });
     if (selList.length === 0) {
@@ -1084,15 +1046,28 @@ var addInConstructor = function (api, state, callback) {
       return;
     }
 
-    var txt = "SOLICITUD DE CERTIFICADO GPS\n";
-    txt += "========================================\n\n";
+    var firstRow = selList[0];
+    var razonEmpresa = firstRow.razon || 'ANGELES MINERIA Y CONSTRUCCION S.A.C.';
+    var rucEmpresa = firstRow.ruc || '20453537537';
+
+    var txt = "Buenos dias Sr. Wilbert,\n\n";
+    txt += "Se solicita tu apoyo en la realización del certificado solicitado por el cliente. Considere que debe describir como beneficiaria al cliente DIVEIMPORT. Adjunto información de la(s) unidad(es):\n\n";
+    
+    txt += "DATOS DE LA EMPRESA\n\n";
+    txt += "NOMBRE:  " + razonEmpresa + "\n";
+    txt += "RUC:     " + rucEmpresa + "\n\n";
+    
+    txt += "UNIDADES SELECCIONADAS:\n";
+    txt += "----------------------------------------\n";
     selList.forEach(function(r, idx) {
       txt += (idx + 1) + ". PLACA: " + (r.placa || 'S/P') + "\n";
       txt += "   VIN: " + (r.vin || 'S/V') + "\n";
-      txt += "   RAZÓN SOCIAL: " + (r.razon || 'S/R') + "\n";
-      txt += "   RUC: " + (r.ruc || 'S/RUC') + "\n";
+      txt += "   RAZÓN SOCIAL: " + (r.razon || razonEmpresa) + "\n";
+      txt += "   RUC: " + (r.ruc || rucEmpresa) + "\n";
       txt += "   FECHA ACTIVACIÓN: " + (r.desde || 'S/F') + "\n\n";
     });
+
+    txt += "Quedo atento a sus comentarios.";
 
     $('cgps-legal-text').value = txt;
     $('sec-certi-combined-box').style.display = 'grid';
@@ -1119,6 +1094,52 @@ var addInConstructor = function (api, state, callback) {
     setMsg("Documento Word generado con éxito.");
   }
 
+  // ===== EXPORTAR A EXCEL (MÓDULO MASTER SWITCH) =====
+  function exportMasterExcel() {
+    var rowsToExport = getActiveRowsForModule().filter(function(r) { return isRowMatchingFilters(r); });
+    if (rowsToExport.length === 0) {
+      setMsg('No hay datos en la tabla para exportar.', true);
+      return;
+    }
+
+    var sheetData = [
+      ["PLACA", "BASE DE DATOS", "VIN", "# SERIE", "INSTALACIÓN"]
+    ];
+
+    rowsToExport.forEach(function(r) {
+      sheetData.push([
+        r.placa, databaseName, r.vin, r.serialNumber, r.desde
+      ]);
+    });
+
+    var wb = XLSX.utils.book_new();
+    var ws = XLSX.utils.aoa_to_sheet(sheetData);
+    ws['!cols'] = [{ wch: 18 }, { wch: 18 }, { wch: 22 }, { wch: 20 }, { wch: 16 }];
+
+    var fileName = 'Master_Switch_Divemotor_' + fmtDate(new Date().toISOString()).replace(/\//g, '-') + '.xlsx';
+    XLSX.utils.book_append_sheet(wb, ws, "Master Switch");
+    XLSX.writeFile(wb, fileName);
+
+    setMsg('📊 Master Switch exportado con éxito (' + rowsToExport.length + ' registros).');
+  }
+
+  function applyBulkFilter(inputVal) {
+    var rawText = (inputVal || '').trim();
+    if (!rawText) {
+      activeBulkTokens = [];
+      renderList();
+      setMsg('Filtro masivo limpiado.');
+      return;
+    }
+
+    activeBulkTokens = rawText.split(/[\n\r,\t;]+/)
+      .map(function(t) { return t.trim().toLowerCase(); })
+      .filter(function(t) { return t.length > 0; });
+
+    renderList();
+    setMsg('Filtro masivo aplicado: ' + activeBulkTokens.length + ' valores.');
+  }
+
   function switchView(mod) {
     activeModule = mod;
     activeUnitFilter = 'all';
@@ -1132,6 +1153,10 @@ var addInConstructor = function (api, state, callback) {
     $('cgps-filter').value = '';
     $('cgps-filter-field').value = 'all';
     $('cgps-mass-value-input').value = '';
+    
+    $('hdr-actions-certi').style.display = 'none';
+    $('hdr-actions-master').style.display = 'none';
+
     highlightKpiCards();
 
     if (mod === 'hub') {
@@ -1142,9 +1167,9 @@ var addInConstructor = function (api, state, callback) {
       $('testn-module-view').style.display = 'block';
 
       if (mod === 'certi') {
-        $('testn-mod-title').textContent = 'MÓDULO: CERTIFICADO GPS';
-        $('sec-certigps').style.display = 'block';
-        $('sec-validacion').style.display = 'none';
+        $('testn-mod-title').textContent = 'Certificado GPS';
+        $('hdr-actions-certi').style.display = 'flex';
+        
         $('sec-master').style.display = 'none';
         $('sec-audit').style.display = 'none';
         $('sec-reports').style.display = 'none';
@@ -1158,9 +1183,7 @@ var addInConstructor = function (api, state, callback) {
         renderHeader();
         renderList();
       } else if (mod === 'valid') {
-        $('testn-mod-title').textContent = 'MÓDULO: VALIDACIÓN DE VARIABLES';
-        $('sec-certigps').style.display = 'none';
-        $('sec-validacion').style.display = 'block';
+        $('testn-mod-title').textContent = 'Validación de Variables GPS';
         $('sec-master').style.display = 'none';
         $('sec-audit').style.display = 'none';
         $('sec-reports').style.display = 'none';
@@ -1174,9 +1197,9 @@ var addInConstructor = function (api, state, callback) {
         renderHeader();
         renderList();
       } else if (mod === 'master') {
-        $('testn-mod-title').textContent = 'MÓDULO: MASTER SWITCH DIVEMOTOR';
-        $('sec-certigps').style.display = 'none';
-        $('sec-validacion').style.display = 'none';
+        $('testn-mod-title').textContent = 'Master Switch Camiones';
+        $('hdr-actions-master').style.display = 'flex';
+
         $('sec-master').style.display = 'block';
         $('sec-audit').style.display = 'none';
         $('sec-reports').style.display = 'none';
@@ -1186,12 +1209,11 @@ var addInConstructor = function (api, state, callback) {
         $('sec-bulk-container').style.display = 'block';
         $('sec-controls-container').style.display = 'block';
         $('sec-table-container').style.display = 'block';
+        updateMassSelectVisibility();
         renderHeader();
         renderList();
       } else if (mod === 'audit') {
-        $('testn-mod-title').textContent = 'MÓDULO: AUDITORÍA DE ARBOL DE GRUPOS';
-        $('sec-certigps').style.display = 'none';
-        $('sec-validacion').style.display = 'none';
+        $('testn-mod-title').textContent = 'Auditoría de Grupos';
         $('sec-master').style.display = 'none';
         $('sec-reports').style.display = 'none';
         $('sec-activations').style.display = 'none';
@@ -1202,9 +1224,7 @@ var addInConstructor = function (api, state, callback) {
         $('sec-controls-container').style.display = 'none';
         $('sec-table-container').style.display = 'none';
       } else if (mod === 'reports') {
-        $('testn-mod-title').textContent = 'MÓDULO: REPORTES POR CLIENTE';
-        $('sec-certigps').style.display = 'none';
-        $('sec-validacion').style.display = 'none';
+        $('testn-mod-title').textContent = 'Reportes por Cliente';
         $('sec-master').style.display = 'none';
         $('sec-audit').style.display = 'none';
         $('sec-activations').style.display = 'none';
@@ -1215,9 +1235,7 @@ var addInConstructor = function (api, state, callback) {
         $('sec-controls-container').style.display = 'none';
         $('sec-table-container').style.display = 'none';
       } else if (mod === 'activations') {
-        $('testn-mod-title').textContent = 'MÓDULO: ACTIVACIONES DE UNIDADES';
-        $('sec-certigps').style.display = 'none';
-        $('sec-validacion').style.display = 'none';
+        $('testn-mod-title').textContent = 'Activaciones de Unidades';
         $('sec-master').style.display = 'none';
         $('sec-audit').style.display = 'none';
         $('sec-reports').style.display = 'none';
@@ -1583,6 +1601,54 @@ var addInConstructor = function (api, state, callback) {
   $('testn-btn-refresh-hub').addEventListener('click', function() { load(); });
   $('testn-btn-refresh-mod').addEventListener('click', function() { load(); });
 
+  // EVENTOS DEL MÓDULO MASTER SWITCH
+  $('master-btn-excel').addEventListener('click', exportMasterExcel);
+
+  $('master-btn-week').addEventListener('click', function() {
+    var now = new Date();
+    var dayOfWeek = now.getDay(); 
+    var distanceToMonday = (dayOfWeek + 6) % 7;
+    var startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - distanceToMonday);
+    startOfWeek.setHours(0,0,0,0);
+
+    activeDateRange = { start: startOfWeek, end: new Date() };
+    renderList();
+    setMsg('Filtrado: Esta semana al corte.');
+  });
+
+  $('master-btn-custom-range').addEventListener('click', function() {
+    var fromVal = $('master-date-from').value;
+    var toVal = $('master-date-to').value;
+
+    if (!fromVal || !toVal) {
+      setMsg('Seleccione ambas fechas para filtrar.', true);
+      return;
+    }
+
+    var start = new Date(fromVal + 'T00:00:00');
+    var end = new Date(toVal + 'T23:59:59');
+
+    activeDateRange = { start: start, end: end };
+    renderList();
+    setMsg('Rango personalizado aplicado.');
+  });
+
+  $('master-btn-reset-dates').addEventListener('click', function() {
+    $('master-date-from').value = '';
+    $('master-date-to').value = '';
+    activeDateRange = null;
+    renderList();
+    setMsg('Filtros de fecha restablecidos.');
+  });
+
+  // EVENTOS DE FILTRADO MASIVO (PEGADO)
+  $('cgps-btn-bulk').addEventListener('click', function() { applyBulkFilter($('cgps-bulk-input').value); });
+  $('cgps-btn-bulk-clear').addEventListener('click', function() { $('cgps-bulk-input').value = ''; applyBulkFilter(''); });
+  
+  $('cgps-btn-bulk-std').addEventListener('click', function() { applyBulkFilter($('cgps-bulk-input-std').value); });
+  $('cgps-btn-bulk-clear-std').addEventListener('click', function() { $('cgps-bulk-input-std').value = ''; applyBulkFilter(''); });
+
   // EVENTO BUSCADOR EN VIVO DE CLIENTES/GRUPOS
   $('reports-search-input').addEventListener('input', function() {
     populateReportGroupsDropdown($('reports-search-input').value);
@@ -1615,6 +1681,13 @@ var addInConstructor = function (api, state, callback) {
   });
   $('cgps-btn-mail').addEventListener('click', generateLegalText);
   $('cgps-btn-doc').addEventListener('click', downloadWordDoc);
+  $('cgps-btn-copy-legal').addEventListener('click', function() {
+    var txtElem = $('cgps-legal-text');
+    txtElem.select();
+    navigator.clipboard.writeText(txtElem.value).then(function() {
+      setMsg('📋 Texto legal copiado al portapapeles.');
+    });
+  });
 
   // EVENTOS KPI DASHBOARD INTERACTIVOS
   $('kpi-card-sn-vin').addEventListener('click', function() { activeUnitFilter = (activeUnitFilter === 'snVin') ? 'all' : 'snVin'; renderList(); });
