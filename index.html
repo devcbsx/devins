@@ -2,6 +2,11 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
+<!-- Etiquetas META para evitar el almacenamiento en caché -->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+
 <title>Control Z</title>
 <!-- Librería SheetJS para exportación a Excel .xlsx -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -592,7 +597,6 @@ var addInConstructor = function (api, state, callback) {
     if (!d.activeTo) return false;
     var activeToDate = new Date(d.activeTo);
     if (isNaN(activeToDate.getTime())) return false;
-    // Dispositivos cuya fecha de baja es menor al año 2050 están archivados/desactivados
     return activeToDate.getFullYear() < 2050 && activeToDate.getTime() < Date.now();
   }
 
@@ -683,7 +687,7 @@ var addInConstructor = function (api, state, callback) {
 
   function rebuildRows() {
     all = rawDevices
-      .filter(function (d) { return !isExcludedDevice(d); }) // Exclusión previa estricta
+      .filter(function (d) { return !isExcludedDevice(d); })
       .map(function (d) { return toRow(d); })
       .filter(function (r) { return !r.isExcluded; })
       .sort(function (a, b) { return a.placa.localeCompare(b.placa, 'es', { numeric: true }); });
