@@ -91,6 +91,11 @@
       <div class="testn-card" id="btn-mod-reports">
         <h2>REPORTES POR CLIENTE</h2>
       </div>
+
+      <!-- NUEVO MÓDULO -->
+      <div class="testn-card" id="btn-mod-activations">
+        <h2>ACTIVACIONES DE UNIDADES</h2>
+      </div>
     </div>
   </div>
 
@@ -254,6 +259,19 @@
             </tbody>
           </table>
         </div>
+      </div>
+    </div>
+
+    <!-- NUEVO MÓDULO: ACTIVACIONES DE UNIDADES (EN BLANCO) -->
+    <div id="sec-activations" style="display: none;">
+      <div class="cgps-hero">
+        <div>
+          <h1>Activaciones de Unidades</h1>
+        </div>
+      </div>
+      <div class="cgps-card" style="margin-top: 10px; padding: 30px; text-align: center;">
+        <h3 style="color: #1b4e85; margin: 0 0 8px 0;">Módulo en Desarrollo</h3>
+        <p style="color: #64748b; font-size: 13px; margin: 0;">Esta sección está preparada para incorporar el flujo de activaciones de unidades.</p>
       </div>
     </div>
 
@@ -978,7 +996,6 @@ var addInConstructor = function (api, state, callback) {
 
       var tplIdStr = s.template ? s.template.id : 'N/A';
       
-      // Formateo de Fecha de Modificación
       var lastModStr = fmtDateTime(s.lastModifiedDate);
       if (s.lastModifiedUser && s.lastModifiedUser.name) {
         lastModStr += ' <span style="color:#64748b; font-size:10px;">(' + htmlEsc(s.lastModifiedUser.name) + ')</span>';
@@ -1095,6 +1112,7 @@ var addInConstructor = function (api, state, callback) {
         $('sec-master').style.display = 'none';
         $('sec-audit').style.display = 'none';
         $('sec-reports').style.display = 'none';
+        $('sec-activations').style.display = 'none';
         $('sec-kpi-container').style.display = 'grid';
         $('sec-certi-combined-box').style.display = 'grid';
         $('sec-bulk-container').style.display = 'none';
@@ -1111,6 +1129,7 @@ var addInConstructor = function (api, state, callback) {
         $('sec-master').style.display = 'none';
         $('sec-audit').style.display = 'none';
         $('sec-reports').style.display = 'none';
+        $('sec-activations').style.display = 'none';
         $('sec-kpi-container').style.display = 'grid';
         $('sec-certi-combined-box').style.display = 'none';
         $('sec-bulk-container').style.display = 'block';
@@ -1127,6 +1146,7 @@ var addInConstructor = function (api, state, callback) {
         $('sec-master').style.display = 'block';
         $('sec-audit').style.display = 'none';
         $('sec-reports').style.display = 'none';
+        $('sec-activations').style.display = 'none';
         $('sec-kpi-container').style.display = 'grid';
         $('sec-certi-combined-box').style.display = 'none';
         $('sec-bulk-container').style.display = 'block';
@@ -1141,6 +1161,7 @@ var addInConstructor = function (api, state, callback) {
         $('sec-validacion').style.display = 'none';
         $('sec-master').style.display = 'none';
         $('sec-reports').style.display = 'none';
+        $('sec-activations').style.display = 'none';
         $('sec-audit').style.display = 'block';
         $('sec-kpi-container').style.display = 'none';
         $('sec-certi-combined-box').style.display = 'none';
@@ -1153,7 +1174,21 @@ var addInConstructor = function (api, state, callback) {
         $('sec-validacion').style.display = 'none';
         $('sec-master').style.display = 'none';
         $('sec-audit').style.display = 'none';
+        $('sec-activations').style.display = 'none';
         $('sec-reports').style.display = 'block';
+        $('sec-kpi-container').style.display = 'none';
+        $('sec-certi-combined-box').style.display = 'none';
+        $('sec-bulk-container').style.display = 'none';
+        $('sec-controls-container').style.display = 'none';
+        $('sec-table-container').style.display = 'none';
+      } else if (mod === 'activations') {
+        $('testn-mod-title').textContent = 'MÓDULO: ACTIVACIONES DE UNIDADES';
+        $('sec-certigps').style.display = 'none';
+        $('sec-validacion').style.display = 'none';
+        $('sec-master').style.display = 'none';
+        $('sec-audit').style.display = 'none';
+        $('sec-reports').style.display = 'none';
+        $('sec-activations').style.display = 'block';
         $('sec-kpi-container').style.display = 'none';
         $('sec-certi-combined-box').style.display = 'none';
         $('sec-bulk-container').style.display = 'none';
@@ -1483,7 +1518,7 @@ var addInConstructor = function (api, state, callback) {
 
       setMsg(all.length + ' activos y ' + Object.keys(groupsById).length + ' grupos sincronizados correctamente.');
 
-      // CARGA DE CustomReportSchedule (Incluyendo lastModifiedDate y lastModifiedUser)
+      // CARGA DE CustomReportSchedule
       callApi(api, 'Get', {
         typeName: 'CustomReportSchedule',
         propertySelector: {
@@ -1535,7 +1570,7 @@ var addInConstructor = function (api, state, callback) {
   // EVENTOS CERTI GPS
   $('cgps-btn-view').addEventListener('click', function() { switchView('certi'); setMsg('Visualizando tabla de activos.'); });
 
-  // EVENTOS KPI DASHBOARD INTERACTIVOS (INCLUIDOS TIPOS DE VEHÍCULO)
+  // EVENTOS KPI DASHBOARD INTERACTIVOS
   $('kpi-card-1').addEventListener('click', function() { activeUnitFilter = 'all'; activeParamFilter = 'all'; activeTypeFilter = 'all'; renderList(); });
   $('kpi-card-sn-vin').addEventListener('click', function() { activeUnitFilter = (activeUnitFilter === 'snVin') ? 'all' : 'snVin'; renderList(); });
   $('kpi-card-novin').addEventListener('click', function() { activeUnitFilter = (activeUnitFilter === 'noVin') ? 'all' : 'noVin'; renderList(); });
@@ -1557,6 +1592,7 @@ var addInConstructor = function (api, state, callback) {
   $('btn-mod-master').addEventListener('click', function() { switchView('master'); });
   $('btn-mod-audit').addEventListener('click', function() { switchView('audit'); });
   $('btn-mod-reports').addEventListener('click', function() { switchView('reports'); });
+  $('btn-mod-activations').addEventListener('click', function() { switchView('activations'); });
   $('testn-btn-back').addEventListener('click', function() { switchView('hub'); });
 
   // EVENTOS DE BÚSQUEDA Y SELECTOR DE CAMPO
