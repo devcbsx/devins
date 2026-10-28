@@ -31,7 +31,6 @@
       <button id="btn-close-prev-modal" type="button" class="cgps-btn cgps-btn-outline" style="font-size: 13px; padding: 4px 10px;">✕ Cerrar</button>
     </div>
 
-    <!-- Pestañas simulando la vista nativa de Geotab -->
     <div style="display: flex; gap: 15px; border-bottom: 1px solid #cbd5e1; margin-bottom: 15px; font-size: 12px; font-weight: 700; color: #1b4e85;">
       <span style="border-bottom: 2px solid #1b4e85; padding-bottom: 6px; cursor: pointer;">Vista de reporte</span>
       <span style="color: #94a3b8; padding-bottom: 6px;">Programación de envío</span>
@@ -209,7 +208,6 @@
         </div>
       </div>
 
-      <!-- Resumen del Análisis de Programaciones CustomReportSchedule -->
       <div id="sec-reports-validation-summary" class="testn-grid" style="grid-template-columns: repeat(3, 1fr); margin-top: 10px; display: none;">
         <div id="card-val-rep-1" class="cgps-card" style="padding: 12px; border-left: 4px solid #94a3b8;">
           <div style="font-size: 11px; font-weight: 700; color: #64748b;">1. MONITOREO Y COMBUSTIBLE</div>
@@ -420,9 +418,7 @@
     }
     .cgps-wrapper { width: 100% !important; max-width: 100% !important; margin: 0 auto; }
     .cgps-hero { background-color: #1b4e85 !important; color: #ffffff !important; padding: 16px 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.06); width: 100%; flex-wrap: wrap; gap: 10px; }
-    .cgps-hero-tag { font-size: 10px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; opacity: 0.85; margin-bottom: 2px; }
     .cgps-hero h1 { margin: 0 0 4px 0; font-size: 20px; font-weight: 700; color: #ffffff !important; }
-    .cgps-hero p { margin: 0; font-size: 12px; opacity: 0.9; line-height: 1.3; color: #ffffff !important; }
     
     .testn-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; width: 100%; margin-top: 10px; }
     .testn-card {
@@ -442,7 +438,6 @@
     }
     .testn-card:hover { border-color: #1b4e85 !important; transform: translateY(-3px) !important; box-shadow: 0 8px 16px rgba(27, 78, 133, 0.12) !important; }
     .testn-card h2 { font-size: 17px !important; color: #1b4e85 !important; font-weight: 700 !important; margin: 0 0 8px 0 !important; text-transform: uppercase !important; }
-    .testn-card p { font-size: 12px !important; color: #64748b !important; margin: 0 !important; }
     
     .cgps-btn { padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; white-space: nowrap; transition: all 0.2s; }
     .cgps-btn-white { background-color: #ffffff !important; color: #1b4e85 !important; }
@@ -480,15 +475,6 @@
 
     .badge-audit-ok { background-color: #dcfce7; color: #15803d; padding: 3px 8px; border-radius: 4px; font-weight: 700; border: 1px solid #86efac; display: inline-block; }
     .badge-audit-warn { background-color: #fee2e2; color: #b91c1c; padding: 3px 8px; border-radius: 4px; font-weight: 700; border: 1px solid #fca5a5; display: inline-block; }
-
-    @media (max-width: 992px) {
-      .cgps-kpi-grid { grid-template-columns: repeat(4, 1fr) !important; }
-      .certi-two-cols-grid { grid-template-columns: 1fr !important; }
-    }
-    @media (max-width: 576px) {
-      .testn-grid { grid-template-columns: 1fr !important; }
-      .cgps-kpi-grid { grid-template-columns: repeat(2, 1fr) !important; }
-    }
   `;
   var styleElem = document.createElement('style');
   styleElem.type = 'text/css';
@@ -528,7 +514,9 @@ var addInConstructor = function (api, state, callback) {
     { description: "Enable Engine Retarder Selection And Accel Pedal", offset: 166, bytes: "CQ==" }
   ];
 
-  var all = [], groupsById = {}, statusById = {}, selected = {}, rawDevices = [];
+  var DEVICE_FIELDS = ['id', 'name', 'licensePlate', 'licenseState', 'vehicleIdentificationNumber', 'serialNumber', 'activeFrom', 'activeTo', 'deviceType', 'groups', 'customProperties', 'customParameters', 'comment'];
+
+  var all = [], groupsById = {}, selected = {}, rawDevices = [];
   var rawSchedules = [], templateNamesById = {};
   var activeBulkTokens = [];
   var activeModule = 'hub';
@@ -597,15 +585,17 @@ var addInConstructor = function (api, state, callback) {
     if (name.indexOf('sin seguimiento') >= 0 || comment.indexOf('sin seguimiento') >= 0 || groupsStr.indexOf('sin seguimiento') >= 0) {
       return true;
     }
-    
-    var serial = (d.serialNumber || '').trim();
-    var hasStatus = !!(statusById[d.id]);
-    
-    if (!serial || !hasStatus) {
-      return true;
-    }
-
     return false;
+  }
+
+  function getGroupsList(d) {
+    var gs = d.groups || [];
+    var names = [];
+    for (var i = 0; i < gs.length; i++) { 
+      var g = groupsById[gs[i].id]; 
+      if (g && g.name && !/^Group/.test(g.id)) names.push(g.name.trim()); 
+    }
+    return names.join(', ');
   }
 
   function toRow(d) {
@@ -651,29 +641,11 @@ var addInConstructor = function (api, state, callback) {
     return row;
   }
 
-  function getGroupsList(d) {
-    var gs = d.groups || [];
-    var names = [];
-    for (var i = 0; i < gs.length; i++) { var g = groupsById[gs[i].id]; if (g && g.name && !/^Group/.test(g.id)) names.push(g.name.trim()); }
-    return names.join(', ');
-  }
-
   function callApi(apiRef, method, params) { return new Promise(function (ok, fail) { apiRef.call(method, params, ok, fail); }); }
   var $ = function (id) { return document.getElementById(id); };
   function callMulti(apiRef, calls) { return new Promise(function (ok, fail) { apiRef.multiCall(calls, ok, fail); }); }
-  function chunkArr(arr, size) { var out = []; for (var i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size)); return out; }
-  function seq(items, fn) { return items.reduce(function (p, it) { return p.then(function () { return fn(it); }); }, Promise.resolve()); }
-
-  var propDefs = {};
-  var DEVICE_FIELDS = ['id', 'name', 'licensePlate', 'licenseState', 'vehicleIdentificationNumber', 'serialNumber', 'activeFrom', 'activeTo', 'deviceType', 'groups', 'customProperties', 'customParameters', 'comment'];
 
   function rebuildRows() {
-    propDefs = {};
-    rawDevices.forEach(function (d) {
-      (d.customProperties || []).forEach(function (it) {
-        if (it && it.property && it.property.name && it.property.id) propDefs[String(it.property.name).trim()] = it.property;
-      });
-    });
     all = rawDevices.map(function (d) { return toRow(d); }).sort(function (a, b) { return a.placa.localeCompare(b.placa, 'es', { numeric: true }); });
     populateReportGroupsDropdown();
     updateKPIs();
@@ -844,7 +816,7 @@ var addInConstructor = function (api, state, callback) {
     });
   }
 
-  // ===== LÓGICA ESPECÍFICA DE FILTRADO Y RECURSIVIDAD DE SUBGRUPOS CON CustomReportSchedule =====
+  // ===== CustomReportSchedule API CON RECURSIVIDAD Y BÚSQUEDA EN SUBGRUPOS =====
   async function contarReportesDeGrupo(groupId, incluirSubgrupos) {
     let objetivo = new Set([groupId]);
 
@@ -922,7 +894,6 @@ var addInConstructor = function (api, state, callback) {
 
     var hasCombustible = false, hasRangos = false, hasSeguridad = false;
 
-    // Resolver nombres de plantillas asociadas
     for (var i = 0; i < schedulesList.length; i++) {
       var s = schedulesList[i];
       var tplId = s.template ? s.template.id : null;
@@ -1422,8 +1393,8 @@ var addInConstructor = function (api, state, callback) {
     });
 
     var coreDataP = callMulti(api, [
-      ['Get', { typeName: 'Device', search: devSearch, resultsLimit: 5000 }],
-      ['Get', { typeName: 'Group' }]
+      ['Get', { typeName: 'Device', search: devSearch, resultsLimit: 5000, propertySelector: { fields: DEVICE_FIELDS, isIncluded: true } }],
+      ['Get', { typeName: 'Group', propertySelector: { fields: ['id', 'name'], isIncluded: true } }]
     ]).catch(function () {
       return Promise.all([
         callApi(api, 'Get', { typeName: 'Device', search: devSearch, resultsLimit: 5000 }),
@@ -1504,12 +1475,21 @@ var addInConstructor = function (api, state, callback) {
   // EVENTOS CERTI GPS
   $('cgps-btn-view').addEventListener('click', function() { switchView('certi'); setMsg('Visualizando tabla de activos.'); });
 
-  // EVENTOS KPI DASHBOARD INTERACTIVOS
+  // EVENTOS KPI DASHBOARD INTERACTIVOS (INCLUIDOS TIPOS DE VEHÍCULO)
   $('kpi-card-1').addEventListener('click', function() { activeUnitFilter = 'all'; activeParamFilter = 'all'; activeTypeFilter = 'all'; renderList(); });
   $('kpi-card-sn-vin').addEventListener('click', function() { activeUnitFilter = (activeUnitFilter === 'snVin') ? 'all' : 'snVin'; renderList(); });
   $('kpi-card-novin').addEventListener('click', function() { activeUnitFilter = (activeUnitFilter === 'noVin') ? 'all' : 'noVin'; renderList(); });
   $('kpi-card-nosn').addEventListener('click', function() { activeUnitFilter = (activeUnitFilter === 'noSn') ? 'all' : 'noSn'; renderList(); });
   $('kpi-card-2').addEventListener('click', function() { activeUnitFilter = (activeUnitFilter === 'selected') ? 'all' : 'selected'; renderList(); });
+
+  $('kpi-card-4').addEventListener('click', function() { activeParamFilter = (activeParamFilter === 'full') ? 'all' : 'full'; renderList(); });
+  $('kpi-card-5').addEventListener('click', function() { activeParamFilter = (activeParamFilter === 'empty') ? 'all' : 'empty'; renderList(); });
+  $('kpi-card-6').addEventListener('click', function() { activeParamFilter = (activeParamFilter === 'partial') ? 'all' : 'partial'; renderList(); });
+
+  $('kpi-card-remol').addEventListener('click', function() { activeTypeFilter = (activeTypeFilter === 'remol') ? 'all' : 'remol'; renderList(); });
+  $('kpi-card-volq').addEventListener('click', function() { activeTypeFilter = (activeTypeFilter === 'volq') ? 'all' : 'volq'; renderList(); });
+  $('kpi-card-sintipo').addEventListener('click', function() { activeTypeFilter = (activeTypeFilter === 'sintipo') ? 'all' : 'sintipo'; renderList(); });
+  $('kpi-card-otros').addEventListener('click', function() { activeTypeFilter = (activeTypeFilter === 'otros') ? 'all' : 'otros'; renderList(); });
 
   // NAVEGACIÓN
   $('btn-mod-certi').addEventListener('click', function() { switchView('certi'); });
