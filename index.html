@@ -421,7 +421,7 @@ var addInConstructor = function (api, state, callback) {
     }
   });
 
-  // LOS 5 PARÁMETROS REQUERIDOS CON BASE64 Y NUMERIC OFFSET
+  // DEFINICIÓN DE LOS 5 PARÁMETROS CON SU DESCRIPCIÓN CORRESPONDIENTE
   var REQUIRED_PARAMS = [
     { name: "Enable Gps Altitude Logging", offset: 181, bytesBase64: "CA==" },
     { name: "Disable Accelerometer Record Limit", offset: 65, bytesBase64: "Ag==" },
@@ -1017,7 +1017,6 @@ var addInConstructor = function (api, state, callback) {
           }
         });
 
-        // SANITIZAR ENTIDAD DEVICE ANTES DEL SET
         var devicePayload = {
           id: liveDevice.id,
           name: liveDevice.name,
@@ -1071,7 +1070,7 @@ var addInConstructor = function (api, state, callback) {
     applyBatchDeviceUpdates(payloads);
   }
 
-  // SOLUCIÓN AL ERROR "JSON DATA": CONSTRUCCIÓN LIMPIA DEL PAYLOAD DE DISPOSITIVO Y PARÁMETROS
+  // INYECCIÓN DE PARÁMETROS INCLUYENDO EL CAMPO DESCRIPTION EXACTO
   function injectMissingParametersSafe() {
     var selIds = Object.keys(selected).filter(function (k) { return selected[k]; });
     if (!selIds.length) { setMsg('Seleccione al menos un activo usando los checkboxes.', true); return; }
@@ -1089,11 +1088,12 @@ var addInConstructor = function (api, state, callback) {
         var liveDevice = (resGet && resGet[0]) ? resGet[0] : r.rawDevice;
         var currentParams = Array.isArray(liveDevice.customParameters) ? liveDevice.customParameters : [];
 
-        // 1. Conservar parámetros existentes sanitizados
         var updatedParams = [];
         currentParams.forEach(function(cp) {
           if (cp && cp.offset !== undefined) {
+            var matchingReq = REQUIRED_PARAMS.find(function(p) { return Number(p.offset) === Number(cp.offset); });
             updatedParams.push({
+              description: cp.description || (matchingReq ? matchingReq.name : ""),
               offset: parseInt(cp.offset, 10),
               bytes: cp.bytes || cp.bytesBase64 || cp.value || "",
               isEnabled: true
@@ -1101,13 +1101,13 @@ var addInConstructor = function (api, state, callback) {
           }
         });
 
-        // 2. Fusionar los 5 requeridos con bytes en Base64 estricto
         REQUIRED_PARAMS.forEach(function(req) {
           var index = updatedParams.findIndex(function(cp) {
             return Number(cp.offset) === Number(req.offset);
           });
 
           var paramObj = {
+            description: req.name,
             offset: parseInt(req.offset, 10),
             bytes: req.bytesBase64,
             isEnabled: true
@@ -1120,7 +1120,6 @@ var addInConstructor = function (api, state, callback) {
           }
         });
 
-        // 3. Crear payload limpio excluyendo metadatos pesados incompatibles con la API Set
         var devicePayload = {
           id: liveDevice.id,
           name: liveDevice.name,
