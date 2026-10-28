@@ -450,12 +450,30 @@ var addInConstructor = function (api, state, callback) {
   function xmlEsc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function htmlEsc(s) { return xmlEsc(s).replace(/'/g, '&#39;'); }
 
+  // RESOLUCIÓN MEJORADA DE PROPIEDADES PERSONALIZADAS
   function resolveProperty(d, regex) {
     var list = d.customProperties || [];
     for (var i = 0; i < list.length; i++) {
-      var p = propsById[list[i].property && list[i].property.id];
-      if (p && list[i].value && regex.test(p.name)) return String(list[i].value).trim();
+      var item = list[i];
+      if (!item) continue;
+      
+      var pId = item.property ? item.property.id : null;
+      var pObj = pId ? propsById[pId] : null;
+      var propName = pObj && pObj.name ? pObj.name : (item.name || '');
+
+      if (propName && regex.test(propName) && item.value != null) {
+        return String(item.value).trim();
+      }
     }
+
+    if (d.userDefinedFields) {
+      for (var k in d.userDefinedFields) {
+        if (regex.test(k) && d.userDefinedFields[k]) {
+          return String(d.userDefinedFields[k]).trim();
+        }
+      }
+    }
+
     return '';
   }
 
@@ -1311,35 +1329,58 @@ var addInConstructor = function (api, state, callback) {
   function load() {
     setMsg('Sincronizando activos de la base de datos de Geotab…');
 
+    var nowIso = new Date().toISOString();
+
     return Promise.all([
-      callApi(api, 'Get', { typeName: 'Device' }),
+      // FILTRADO DESDE EL SERVIDOR USANDO FROMDATE Y TODATE (OPCIÓN 1 GEOTAB)
+      callApi(api, 'Get', { 
+        typeName: 'Device', 
+        search: { 
+          fromDate: nowIso, 
+          toDate: nowIso 
+        } 
+      }),
       callApi(api, 'Get', { typeName: 'Group' }).catch(function () { return []; }),
-      callApi(api, 'GetSystemStatus').catch(function() { return null; })
+      callApi(api, 'GetSystemStatus').catch(function() { return null; }),
+      callApi(api, 'Get', { typeName: 'CustomProperty' }).catch(function () { return []; })
     ]).then(function (res) {
-      var now = new Date().getTime();
+      var nowMs = new Date().getTime();
 
       if (res[2] && res[2].database) {
         databaseName = res[2].database;
       }
 
-      // EXCLUSIÓN ESTRICTA DE UNIDADES ARCHIVADAS / INACTIVAS / DADAS DE BAJA
+      // CARGA DE PROPIEDADES PERSONALIZADAS DE LA BASE DE DATOS
+      propsById = {};
+      (res[3] || []).forEach(function(cp) {
+        if (cp && cp.id) {
+          propsById[cp.id] = cp;
+        }
+      });
+
+      // FILTRADO STRICTO LOCAL ADICIONAL POR ACTIVETO
       rawDevices = (res[0] || []).filter(function (d) {
-        if (d.toVersion) {
-          var toVerDate = new Date(d.toVersion).getTime();
-          if (!isNaN(toVerDate) && toVerDate <= now) {
+        // Validación con activeTo
+        if (d.activeTo) {
+          var activeToStr = String(d.activeTo);
+          var activeToMs = new Date(d.activeTo).getTime();
+
+          // Si activeTo es menor o igual al instante actual, está archivada
+          if (!isNaN(activeToMs) && activeToMs <= nowMs) {
+            return false;
+          }
+
+          // Verificación de la fecha "sin baja" (2050-01-01)
+          if (activeToStr.indexOf('2050-01-01') < 0 && !isNaN(activeToMs) && activeToMs <= nowMs) {
             return false;
           }
         }
 
-        var fullDump = (JSON.stringify(d) || '').toLowerCase();
-        
-        // Exclusión explícita de VINs/unidades dadas de baja
-        if (fullDump.indexOf('archivad') >= 0 || fullDump.indexOf('baja') >= 0 || fullDump.indexOf('inactiv') >= 0 || fullDump.indexOf('desactivad') >= 0) {
-          return false;
-        }
-
-        if (d.vehicleIdentificationNumber && d.vehicleIdentificationNumber.toUpperCase().indexOf('9BM958136RB315444') >= 0) {
-          return false;
+        if (d.toVersion) {
+          var toVerMs = new Date(d.toVersion).getTime();
+          if (!isNaN(toVerMs) && toVerMs <= nowMs) {
+            return false;
+          }
         }
 
         if (d.deviceType === 'CustomDevice') {
@@ -1349,7 +1390,7 @@ var addInConstructor = function (api, state, callback) {
         return true;
       });
 
-      groupsById = {}; propsById = {};
+      groupsById = {};
       (res[1] || []).forEach(function (g) { groupsById[g.id] = g; });
       rebuildRows();
       renderList();
@@ -1399,7 +1440,7 @@ var addInConstructor = function (api, state, callback) {
   $('master-btn-reset-dates').addEventListener('click', resetDateFilters);
   $('master-btn-excel').addEventListener('click', exportMasterSwitchExcel);
 
-  // EVENTOS KPI DASHBOARD INTERACTIVOS (CONMUTACIÓN INDEPENDIENTE POR CATEGORÍA)
+  // EVENTOS KPI DASHBOARD INTERACTIVOS
   $('kpi-card-1').addEventListener('click', function() { activeUnitFilter = 'all'; activeParamFilter = 'all'; renderList(); });
   $('kpi-card-sn-vin').addEventListener('click', function() { activeUnitFilter = (activeUnitFilter === 'snVin') ? 'all' : 'snVin'; renderList(); });
   $('kpi-card-novin').addEventListener('click', function() { activeUnitFilter = (activeUnitFilter === 'noVin') ? 'all' : 'noVin'; renderList(); });
