@@ -297,13 +297,10 @@
         <div class="cgps-kpi-title">PARÁMETROS 5/5</div>
         <div class="cgps-kpi-value" id="kpi-val-4" style="color: #16a34a;">0</div>
       </div>
-      <div class="cgps-card kpi-btn-card" id="kpi-card-5" style="display: none;" title="Filtrar sin parámetros">
-        <div class="cgps-kpi-title">PARÁMETROS 0/5</div>
-        <div class="cgps-kpi-value" id="kpi-val-5" style="color: #dc2626;">0</div>
-      </div>
-      <div class="cgps-card kpi-btn-card" id="kpi-card-6" style="display: none;" title="Filtrar parciales">
-        <div class="cgps-kpi-title">PARÁMETROS 1-4</div>
-        <div class="cgps-kpi-value" id="kpi-val-6" style="color: #b45309;">0</div>
+      <!-- KPIS CONSOLIDADOS: PARÁMETROS < 5 -->
+      <div class="cgps-card kpi-btn-card" id="kpi-card-less5" style="display: none;" title="Filtrar unidades con menos de 5 parámetros">
+        <div class="cgps-kpi-title">PARÁMETROS &lt; 5</div>
+        <div class="cgps-kpi-value" id="kpi-val-less5" style="color: #dc2626;">0</div>
       </div>
 
       <div class="cgps-card kpi-btn-card" id="kpi-card-remol" style="display: none;" title="Filtrar Remolcadores">
@@ -535,7 +532,7 @@ var addInConstructor = function (api, state, callback) {
 
   var DEVICE_FIELDS = ['id', 'name', 'licensePlate', 'licenseState', 'vehicleIdentificationNumber', 'serialNumber', 'activeFrom', 'activeTo', 'deviceType', 'groups', 'customProperties', 'customParameters', 'comment'];
 
-  var all = [], groupsById = {}, selected = {}, rawDevices = [];
+  var all = [], groupsById = {}, statusById = {}, selected = {}, rawDevices = [];
   var rawSchedules = [], templateNamesById = {};
   var activeBulkTokens = [];
   var activeModule = 'hub';
@@ -613,7 +610,7 @@ var addInConstructor = function (api, state, callback) {
     return { count: count, missing: missing, total: REQUIRED_PARAMS.length };
   }
 
-  // ===== EXCLUSIÓN ESTRICTA: UNIDADES ARCHIVADAS Y SIN SEGUIMIENTO =====
+  // ===== EXCLUSIÓN ESTRICTA: UNIDADES ARCHIVADAS Y SIN SEGUIMIENTO (API DeviceStatusInfo) =====
   function isDeviceArchived(d) {
     if (!d.activeTo) return false;
     var activeToDate = new Date(d.activeTo);
@@ -622,6 +619,11 @@ var addInConstructor = function (api, state, callback) {
   }
 
   function isSinSeguimientoDevice(d) {
+    // 1. Detección nativa por API Geotab: Sin serial Number O sin registro en DeviceStatusInfo (nunca ha reportado / sin GPS)
+    if (!d.serialNumber || !d.serialNumber.trim()) return true;
+    if (!statusById[d.id]) return true;
+
+    // 2. Detección complementaria por etiquetas/textos
     var name = normalizeStr(d.name);
     var comment = normalizeStr(d.comment);
     var groupsStr = normalizeStr(getGroupsList(d));
@@ -744,8 +746,7 @@ var addInConstructor = function (api, state, callback) {
       $('kpi-title-2').textContent = "SELECCIONADOS";
       $('kpi-val-2').textContent = selCount;
       $('kpi-card-4').style.display = 'none';
-      $('kpi-card-5').style.display = 'none';
-      $('kpi-card-6').style.display = 'none';
+      $('kpi-card-less5').style.display = 'none';
       
       $('kpi-card-remol').style.display = 'none';
       $('kpi-card-volq').style.display = 'none';
@@ -754,13 +755,12 @@ var addInConstructor = function (api, state, callback) {
 
       document.querySelector('.cgps-kpi-grid').style.gridTemplateColumns = 'repeat(4, 1fr)';
     } else if (activeModule === 'valid') {
-      var countFull = 0, countEmpty = 0, countPartial = 0;
+      var countFull = 0, countLess5 = 0;
       var cRemol = 0, cVolq = 0, cSinTipo = 0, cOtros = 0;
 
       rowsToCount.forEach(function (r) {
         if (r.paramCount === 5) countFull++;
-        else if (r.paramCount === 0) countEmpty++;
-        else countPartial++;
+        else countLess5++;
 
         var t = (r.tipoVehiculo || '').toUpperCase().trim();
         if (t.indexOf('REMOLCADOR') >= 0 || t.indexOf('TRACTO') >= 0) {
@@ -778,8 +778,7 @@ var addInConstructor = function (api, state, callback) {
       $('kpi-val-2').textContent = selCount;
       
       $('kpi-val-4').textContent = countFull;
-      $('kpi-val-5').textContent = countEmpty;
-      $('kpi-val-6').textContent = countPartial;
+      $('kpi-val-less5').textContent = countLess5;
 
       $('kpi-val-remol').textContent = cRemol;
       $('kpi-val-volq').textContent = cVolq;
@@ -787,8 +786,7 @@ var addInConstructor = function (api, state, callback) {
       $('kpi-val-otros').textContent = cOtros;
 
       $('kpi-card-4').style.display = 'block';
-      $('kpi-card-5').style.display = 'block';
-      $('kpi-card-6').style.display = 'block';
+      $('kpi-card-less5').style.display = 'block';
 
       $('kpi-card-remol').style.display = 'block';
       $('kpi-card-volq').style.display = 'block';
@@ -800,7 +798,7 @@ var addInConstructor = function (api, state, callback) {
   }
 
   function highlightKpiCards() {
-    ['kpi-card-sn-vin', 'kpi-card-novin', 'kpi-card-nosn', 'kpi-card-2', 'kpi-card-4', 'kpi-card-5', 'kpi-card-6', 'kpi-card-remol', 'kpi-card-volq', 'kpi-card-sintipo', 'kpi-card-otros'].forEach(function(id) {
+    ['kpi-card-sn-vin', 'kpi-card-novin', 'kpi-card-nosn', 'kpi-card-2', 'kpi-card-4', 'kpi-card-less5', 'kpi-card-remol', 'kpi-card-volq', 'kpi-card-sintipo', 'kpi-card-otros'].forEach(function(id) {
       if ($(id)) $(id).classList.remove('kpi-active');
     });
 
@@ -813,8 +811,7 @@ var addInConstructor = function (api, state, callback) {
       if (activeUnitFilter === 'selected' && $('kpi-card-2')) $('kpi-card-2').classList.add('kpi-active');
 
       if (activeParamFilter === 'full' && $('kpi-card-4')) $('kpi-card-4').classList.add('kpi-active');
-      if (activeParamFilter === 'empty' && $('kpi-card-5')) $('kpi-card-5').classList.add('kpi-active');
-      if (activeParamFilter === 'partial' && $('kpi-card-6')) $('kpi-card-6').classList.add('kpi-active');
+      if (activeParamFilter === 'less5' && $('kpi-card-less5')) $('kpi-card-less5').classList.add('kpi-active');
 
       if (activeTypeFilter === 'remol' && $('kpi-card-remol')) $('kpi-card-remol').classList.add('kpi-active');
       if (activeTypeFilter === 'volq' && $('kpi-card-volq')) $('kpi-card-volq').classList.add('kpi-active');
@@ -1274,8 +1271,7 @@ var addInConstructor = function (api, state, callback) {
 
     if (activeModule === 'valid') {
       if (activeParamFilter === 'full' && r.paramCount !== 5) return false;
-      if (activeParamFilter === 'empty' && r.paramCount !== 0) return false;
-      if (activeParamFilter === 'partial' && (r.paramCount === 0 || r.paramCount === 5)) return false;
+      if (activeParamFilter === 'less5' && r.paramCount === 5) return false;
 
       var t = (r.tipoVehiculo || '').toUpperCase().trim();
       if (activeTypeFilter === 'remol' && (t.indexOf('REMOLCADOR') < 0 && t.indexOf('TRACTO') < 0)) return false;
@@ -1342,7 +1338,7 @@ var addInConstructor = function (api, state, callback) {
           '</tr>';
       } else {
         var badgeClass = r.paramCount === 5 ? 'badge-full' : (r.paramCount === 0 ? 'badge-empty' : 'badge-partial');
-        var badgeLabel = r.paramCount + '/5 ' + (r.paramCount === 5 ? 'OK' : (r.paramCount === 0 ? 'Sin Param' : 'Parcial'));
+        var badgeLabel = r.paramCount + '/5 ' + (r.paramCount === 5 ? 'OK' : 'Incompleto');
 
         html += '<tr>' +
           '<td style="text-align:center;"><input type="checkbox" data-id="' + htmlEsc(r.id) + '"' + (isSel ? ' checked' : '') + '></td>' +
@@ -1513,7 +1509,7 @@ var addInConstructor = function (api, state, callback) {
   }
 
   function load() {
-    setMsg('Sincronizando activos de MyGeotab...');
+    setMsg('Sincronizando activos y DeviceStatusInfo de MyGeotab...');
 
     var devSearch = {};
 
@@ -1521,19 +1517,23 @@ var addInConstructor = function (api, state, callback) {
       try { api.getSession(function (s) { ok(s); }); } catch (e) { ok(null); }
     });
 
+    // Carga de Device, Group y DeviceStatusInfo (Lógica de seguimiento)
     var coreDataP = callMulti(api, [
       ['Get', { typeName: 'Device', search: devSearch, resultsLimit: 5000, propertySelector: { fields: DEVICE_FIELDS, isIncluded: true } }],
-      ['Get', { typeName: 'Group', propertySelector: { fields: ['id', 'name'], isIncluded: true } }]
+      ['Get', { typeName: 'Group', propertySelector: { fields: ['id', 'name'], isIncluded: true } }],
+      ['Get', { typeName: 'DeviceStatusInfo' }]
     ]).catch(function () {
       return Promise.all([
         callApi(api, 'Get', { typeName: 'Device', search: devSearch, resultsLimit: 5000 }),
-        callApi(api, 'Get', { typeName: 'Group' }).catch(function () { return []; })
+        callApi(api, 'Get', { typeName: 'Group' }).catch(function () { return []; }),
+        callApi(api, 'Get', { typeName: 'DeviceStatusInfo' }).catch(function () { return []; })
       ]);
     });
 
     return Promise.all([coreDataP, sessionP]).then(function (res) {
       var devices = (res[0] && res[0][0]) || [];
       var groups = (res[0] && res[0][1]) || [];
+      var statuses = (res[0] && res[0][2]) || [];
 
       if (res[1] && res[1].database) {
         databaseName = res[1].database;
@@ -1542,7 +1542,14 @@ var addInConstructor = function (api, state, callback) {
       groupsById = {};
       groups.forEach(function (g) { groupsById[g.id] = g; });
 
-      // Filtrado estricto: Elimina CustomDevices, Archivadas y Sin Seguimiento
+      statusById = {};
+      statuses.forEach(function (s) {
+        if (s && s.device) {
+          statusById[s.device.id] = s;
+        }
+      });
+
+      // Filtrado estricto: Elimina CustomDevices, Archivadas y Sin Seguimiento (API StatusInfo / No Serial)
       rawDevices = devices.filter(function (d) {
         if (d.deviceType === 'CustomDevice') return false;
         if (isExcludedDevice(d)) return false;
@@ -1619,8 +1626,7 @@ var addInConstructor = function (api, state, callback) {
   $('kpi-card-2').addEventListener('click', function() { activeUnitFilter = (activeUnitFilter === 'selected') ? 'all' : 'selected'; renderList(); });
 
   $('kpi-card-4').addEventListener('click', function() { activeParamFilter = (activeParamFilter === 'full') ? 'all' : 'full'; renderList(); });
-  $('kpi-card-5').addEventListener('click', function() { activeParamFilter = (activeParamFilter === 'empty') ? 'all' : 'empty'; renderList(); });
-  $('kpi-card-6').addEventListener('click', function() { activeParamFilter = (activeParamFilter === 'partial') ? 'all' : 'partial'; renderList(); });
+  $('kpi-card-less5').addEventListener('click', function() { activeParamFilter = (activeParamFilter === 'less5') ? 'all' : 'less5'; renderList(); });
 
   $('kpi-card-remol').addEventListener('click', function() { activeTypeFilter = (activeTypeFilter === 'remol') ? 'all' : 'remol'; renderList(); });
   $('kpi-card-volq').addEventListener('click', function() { activeTypeFilter = (activeTypeFilter === 'volq') ? 'all' : 'volq'; renderList(); });
