@@ -26,9 +26,7 @@
   <div id="testn-hub-view">
     <div class="cgps-hero" style="margin-bottom: 20px;">
       <div>
-        <div class="cgps-hero-tag">TEST N · CONTROL DE DOCUMENTOS & VALIDACIÓN</div>
         <h1>PANEL DE MÓDULOS GPS</h1>
-        <p>Seleccione el módulo operativo al que desea ingresar.</p>
       </div>
       <button id="testn-btn-refresh-hub" type="button" class="cgps-btn cgps-btn-white" style="font-weight:700;">🔄 Recargar Datos Geotab</button>
     </div>
@@ -36,22 +34,18 @@
     <div class="testn-grid">
       <div class="testn-card" id="btn-mod-certi">
         <h2>CERTI GPS</h2>
-        <p>Generación de Anexo N°01 en Word y solicitudes para el Área Legal.</p>
       </div>
 
       <div class="testn-card" id="btn-mod-valid">
         <h2>VALIDACIÓN DE VARIABLES</h2>
-        <p>Edición masiva e individual en Modo Seguro, visualización de grupos, fecha de instalación y parámetros XML (5/5).</p>
       </div>
 
       <div class="testn-card" id="btn-mod-master">
         <h2>MASTER SWITCH</h2>
-        <p>Filtro por fecha de instalación ("Esta Semana al Corte" / Rango Personalizado) y descarga Excel.</p>
       </div>
 
       <div class="testn-card" id="btn-mod-audit">
         <h2>AUDITORÍA DE GRUPOS</h2>
-        <p>Valida de forma flexible si existen los grupos registrados a partir de pegado de texto masivo.</p>
       </div>
     </div>
   </div>
@@ -70,9 +64,7 @@
     <div id="sec-certigps" style="display: none;">
       <div class="cgps-hero">
         <div>
-          <div class="cgps-hero-tag">TEST N · CONTROL DE DOCUMENTOS</div>
           <h1>Certificado GPS</h1>
-          <p>Seleccione los activos de la base de datos para emitir el Anexo N°01 formal en Word.</p>
         </div>
         <div style="display: flex; gap: 8px;">
           <button id="cgps-btn-doc" type="button" class="cgps-btn cgps-btn-white">Generar Word</button>
@@ -86,9 +78,7 @@
     <div id="sec-validacion" style="display: none;">
       <div class="cgps-hero">
         <div>
-          <div class="cgps-hero-tag">TEST N · AUDITORÍA Y MODO SEGURO</div>
           <h1>Validación de Variables GPS</h1>
-          <p>Modo seguro: GET → Fusionar Atributos → SET → GET Verificación.</p>
         </div>
       </div>
     </div>
@@ -97,9 +87,7 @@
     <div id="sec-master" style="display: none;">
       <div class="cgps-hero">
         <div>
-          <div class="cgps-hero-tag">TEST N · MASTER SWITCH DIVEMOTOR</div>
           <h1>Master Switch Camiones</h1>
-          <p>Filtre por fecha de instalación y exporte el reporte oficial en Excel.</p>
         </div>
         <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
           <button id="master-btn-excel" type="button" class="cgps-btn cgps-btn-white" style="font-weight:700;">📊 Descargar Excel .xlsx</button>
@@ -130,9 +118,7 @@
     <div id="sec-audit" style="display: none;">
       <div class="cgps-hero">
         <div>
-          <div class="cgps-hero-tag">TEST N · VALIDACIÓN DE ARBOL DE GRUPOS</div>
           <h1>Auditoría de Grupos por Texto Masivo</h1>
-          <p>Pegue el texto continuo de observaciones/clientes para verificar si el grupo existe en Geotab.</p>
         </div>
       </div>
 
@@ -322,7 +308,7 @@
     .cgps-wrapper { width: 100% !important; max-width: 100% !important; margin: 0 auto; }
     .cgps-hero { background-color: #1b4e85 !important; color: #ffffff !important; padding: 16px 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.06); width: 100%; flex-wrap: wrap; gap: 10px; }
     .cgps-hero-tag { font-size: 10px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; opacity: 0.85; margin-bottom: 2px; }
-    .cgps-hero h1 { margin: 0 0 4px 0; font-size: 20px; font-weight: 700; color: #ffffff !important; }
+    .cgps-hero h1 { margin: 0; font-size: 20px; font-weight: 700; color: #ffffff !important; }
     .cgps-hero p { margin: 0; font-size: 12px; opacity: 0.9; line-height: 1.3; color: #ffffff !important; }
     
     .testn-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; width: 100%; margin-top: 10px; }
@@ -342,7 +328,7 @@
       box-shadow: 0 2px 4px rgba(0,0,0,0.04) !important;
     }
     .testn-card:hover { border-color: #1b4e85 !important; transform: translateY(-3px) !important; box-shadow: 0 8px 16px rgba(27, 78, 133, 0.12) !important; }
-    .testn-card h2 { font-size: 17px !important; color: #1b4e85 !important; font-weight: 700 !important; margin: 0 0 8px 0 !important; text-transform: uppercase !important; }
+    .testn-card h2 { font-size: 17px !important; color: #1b4e85 !important; font-weight: 700 !important; margin: 0 !important; text-transform: uppercase !important; }
     .testn-card p { font-size: 12px !important; color: #64748b !important; margin: 0 !important; }
     
     .cgps-btn { padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; white-space: nowrap; transition: all 0.2s; }
@@ -554,33 +540,26 @@ var addInConstructor = function (api, state, callback) {
 
   function updateKPIs() {
     var selCount = Object.keys(selected).filter(function (k) { return selected[k]; }).length;
-    $('kpi-total').textContent = all.length;
-
-    var countSnVin = 0, countNoVin = 0, countNoSn = 0;
     
-    all.forEach(function(r) {
-      var hasSn = !!r.serialNumber && r.serialNumber.trim().length > 0;
-      var hasVin = !!r.vin && r.vin.trim().length > 0;
+    if (activeModule === 'valid') {
+      var validRows = all.filter(function(r) { return r._hay.indexOf('sin seguimiento') < 0; });
+      $('kpi-total').textContent = validRows.length;
 
-      if (hasSn && hasVin) countSnVin++;
-      if (!hasVin) countNoVin++;
-      if (!hasSn) countNoSn++;
-    });
+      var countSnVin = 0, countNoVin = 0, countNoSn = 0;
+      validRows.forEach(function(r) {
+        var hasSn = !!r.serialNumber && r.serialNumber.trim().length > 0;
+        var hasVin = !!r.vin && r.vin.trim().length > 0;
+        if (hasSn && hasVin) countSnVin++;
+        if (!hasVin) countNoVin++;
+        if (!hasSn) countNoSn++;
+      });
 
-    $('kpi-sn-vin').textContent = countSnVin;
-    $('kpi-no-vin').textContent = countNoVin;
-    $('kpi-no-sn').textContent = countNoSn;
+      $('kpi-sn-vin').textContent = countSnVin;
+      $('kpi-no-vin').textContent = countNoVin;
+      $('kpi-no-sn').textContent = countNoSn;
 
-    if (activeModule === 'certi' || activeModule === 'master') {
-      $('kpi-title-2').textContent = "SELECCIONADOS";
-      $('kpi-val-2').textContent = selCount;
-      $('kpi-card-4').style.display = 'none';
-      $('kpi-card-5').style.display = 'none';
-      $('kpi-card-6').style.display = 'none';
-      document.querySelector('.cgps-kpi-grid').style.gridTemplateColumns = 'repeat(5, 1fr)';
-    } else if (activeModule === 'valid') {
       var countFull = 0, countEmpty = 0, countPartial = 0;
-      all.forEach(function (r) {
+      validRows.forEach(function (r) {
         if (r.paramCount === 5) countFull++;
         else if (r.paramCount === 0) countEmpty++;
         else countPartial++;
@@ -597,6 +576,28 @@ var addInConstructor = function (api, state, callback) {
       $('kpi-card-5').style.display = 'block';
       $('kpi-card-6').style.display = 'block';
       document.querySelector('.cgps-kpi-grid').style.gridTemplateColumns = 'repeat(8, 1fr)';
+    } else {
+      $('kpi-total').textContent = all.length;
+
+      var countSnVin = 0, countNoVin = 0, countNoSn = 0;
+      all.forEach(function(r) {
+        var hasSn = !!r.serialNumber && r.serialNumber.trim().length > 0;
+        var hasVin = !!r.vin && r.vin.trim().length > 0;
+        if (hasSn && hasVin) countSnVin++;
+        if (!hasVin) countNoVin++;
+        if (!hasSn) countNoSn++;
+      });
+
+      $('kpi-sn-vin').textContent = countSnVin;
+      $('kpi-no-vin').textContent = countNoVin;
+      $('kpi-no-sn').textContent = countNoSn;
+
+      $('kpi-title-2').textContent = "SELECCIONADOS";
+      $('kpi-val-2').textContent = selCount;
+      $('kpi-card-4').style.display = 'none';
+      $('kpi-card-5').style.display = 'none';
+      $('kpi-card-6').style.display = 'none';
+      document.querySelector('.cgps-kpi-grid').style.gridTemplateColumns = 'repeat(5, 1fr)';
     }
   }
 
@@ -748,6 +749,10 @@ var addInConstructor = function (api, state, callback) {
   }
 
   function isRowMatchingFilters(r) {
+    if (activeModule === 'valid') {
+      if (r._hay.indexOf('sin seguimiento') >= 0) return false;
+    }
+
     var hasSn = !!r.serialNumber && r.serialNumber.trim().length > 0;
     var hasVin = !!r.vin && r.vin.trim().length > 0;
 
@@ -1464,7 +1469,7 @@ var addInConstructor = function (api, state, callback) {
   $('kpi-card-2').addEventListener('click', function() { activeUnitFilter = (activeUnitFilter === 'selected') ? 'all' : 'selected'; renderList(); });
 
   $('kpi-card-4').addEventListener('click', function() { activeParamFilter = (activeParamFilter === 'full') ? 'all' : 'full'; renderList(); });
-  $('kpi-card-5').addEventListener('click', function() { activeParamFilter = (activeParamFilter === 'empty') ? 'all' : 'empty'; renderList(); });
+  $('kpi-card-5').addEventListener('click', function() { activeParamFilter = (activeParamFilter === 'empty') ? 'all' : 'all'; renderList(); });
   $('kpi-card-6').addEventListener('click', function() { activeParamFilter = (activeParamFilter === 'partial') ? 'all' : 'partial'; renderList(); });
 
   // EVENTO INYECCIÓN SEGURA DE PARÁMETROS
