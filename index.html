@@ -421,12 +421,13 @@ var addInConstructor = function (api, state, callback) {
     }
   });
 
+  // LOS 5 PARÁMETROS REQUERIDOS CON BASE64 Y NUMERIC OFFSET
   var REQUIRED_PARAMS = [
-    { name: "Enable Gps Altitude Logging", offset: 181, bytesBase64: "CA==", bytesHex: "08" },
-    { name: "Disable Accelerometer Record Limit", offset: 65, bytesBase64: "Ag==", bytesHex: "02" },
-    { name: "High Res RPM allowed Error = 2 rpm", offset: 168, bytesBase64: "Ag==", bytesHex: "02" },
-    { name: "Enable Engine Load", offset: 165, bytesBase64: "BA==", bytesHex: "04" },
-    { name: "Enable Engine Retarder Selection And Accel Pedal", offset: 166, bytesBase64: "CQ==", bytesHex: "09" }
+    { name: "Enable Gps Altitude Logging", offset: 181, bytesBase64: "CA==" },
+    { name: "Disable Accelerometer Record Limit", offset: 65, bytesBase64: "Ag==" },
+    { name: "High Res RPM allowed Error = 2 rpm", offset: 168, bytesBase64: "Ag==" },
+    { name: "Enable Engine Load", offset: 165, bytesBase64: "BA==" },
+    { name: "Enable Engine Retarder Selection And Accel Pedal", offset: 166, bytesBase64: "CQ==" }
   ];
 
   var all = [], groupsById = {}, selected = {}, rawDevices = [];
@@ -475,9 +476,6 @@ var addInConstructor = function (api, state, callback) {
 
   function evalDeviceParameters(d) {
     var customList = d.customParameters || [];
-    var paramVerString = typeof d.parameterVersion === 'string' ? d.parameterVersion : JSON.stringify(d.parameterVersion || '');
-    var strCustomDump = JSON.stringify(customList);
-
     var count = 0;
     var missing = [];
 
@@ -486,22 +484,11 @@ var addInConstructor = function (api, state, callback) {
 
       if (Array.isArray(customList)) {
         found = customList.some(function(cp) {
-          var offMatch = String(cp.offset) === String(p.offset);
+          var offMatch = Number(cp.offset) === Number(p.offset);
           var bytesVal = String(cp.bytes || cp.bytesBase64 || cp.value || '');
-          var bytesMatch = (bytesVal === p.bytesBase64) || (bytesVal.toUpperCase().indexOf(p.bytesHex) >= 0);
+          var bytesMatch = (bytesVal === p.bytesBase64);
           return offMatch && bytesMatch;
         });
-      }
-
-      if (!found) {
-        var regOff = new RegExp('Offset=[\'"]?' + p.offset + '[\'"]?', 'i');
-        var regB64 = new RegExp('Bytes=[\'"]?' + p.bytesBase64.replace(/=/g, '\\=') + '[\'"]?', 'i');
-        var regHex = new RegExp('Bytes=[\'"]?' + p.bytesHex + '[\'"]?', 'i');
-
-        var matchOff = regOff.test(paramVerString) || regOff.test(strCustomDump);
-        var matchBytes = regB64.test(paramVerString) || regB64.test(strCustomDump) || regHex.test(paramVerString) || regHex.test(strCustomDump);
-
-        if (matchOff && matchBytes) found = true;
       }
 
       if (found) {
@@ -1030,7 +1017,17 @@ var addInConstructor = function (api, state, callback) {
           }
         });
 
-        return callApi(api, 'Set', { typeName: 'Device', entity: liveDevice }).then(function() {
+        // SANITIZAR ENTIDAD DEVICE ANTES DEL SET
+        var devicePayload = {
+          id: liveDevice.id,
+          name: liveDevice.name,
+          licensePlate: liveDevice.licensePlate,
+          licenseState: liveDevice.licenseState,
+          customProperties: liveDevice.customProperties || [],
+          customParameters: liveDevice.customParameters || []
+        };
+
+        return callApi(api, 'Set', { typeName: 'Device', entity: devicePayload }).then(function() {
           return callApi(api, 'Get', { typeName: 'Device', search: { id: r.id } }).then(function(verifGet) {
             if (verifGet && verifGet[0]) {
               completed++;
@@ -1074,7 +1071,7 @@ var addInConstructor = function (api, state, callback) {
     applyBatchDeviceUpdates(payloads);
   }
 
-  // CORRECCIÓN ESTRICTA DEL FLUJO SEGURO DE PARÁMETROS (FORMATEO DE JSON ACEPTE GEOTAB)
+  // SOLUCIÓN AL ERROR "JSON DATA": CONSTRUCCIÓN LIMPIA DEL PAYLOAD DE DISPOSITIVO Y PARÁMETROS
   function injectMissingParametersSafe() {
     var selIds = Object.keys(selected).filter(function (k) { return selected[k]; });
     if (!selIds.length) { setMsg('Seleccione al menos un activo usando los checkboxes.', true); return; }
@@ -1092,22 +1089,26 @@ var addInConstructor = function (api, state, callback) {
         var liveDevice = (resGet && resGet[0]) ? resGet[0] : r.rawDevice;
         var currentParams = Array.isArray(liveDevice.customParameters) ? liveDevice.customParameters : [];
 
-        // SANITIZACIÓN DEL ARREGLO DE PARÁMETROS PARA PREVENIR ERRORES DE SERIALIZACIÓN JSON
-        var updatedParams = currentParams.map(function(cp) {
-          return {
-            offset: Number(cp.offset),
-            bytes: cp.bytes || cp.bytesBase64 || cp.value || "",
-            isEnabled: cp.isEnabled !== undefined ? Boolean(cp.isEnabled) : true
-          };
+        // 1. Conservar parámetros existentes sanitizados
+        var updatedParams = [];
+        currentParams.forEach(function(cp) {
+          if (cp && cp.offset !== undefined) {
+            updatedParams.push({
+              offset: parseInt(cp.offset, 10),
+              bytes: cp.bytes || cp.bytesBase64 || cp.value || "",
+              isEnabled: true
+            });
+          }
         });
 
+        // 2. Fusionar los 5 requeridos con bytes en Base64 estricto
         REQUIRED_PARAMS.forEach(function(req) {
           var index = updatedParams.findIndex(function(cp) {
             return Number(cp.offset) === Number(req.offset);
           });
 
           var paramObj = {
-            offset: Number(req.offset),
+            offset: parseInt(req.offset, 10),
             bytes: req.bytesBase64,
             isEnabled: true
           };
@@ -1119,9 +1120,17 @@ var addInConstructor = function (api, state, callback) {
           }
         });
 
-        liveDevice.customParameters = updatedParams;
+        // 3. Crear payload limpio excluyendo metadatos pesados incompatibles con la API Set
+        var devicePayload = {
+          id: liveDevice.id,
+          name: liveDevice.name,
+          licensePlate: liveDevice.licensePlate,
+          licenseState: liveDevice.licenseState,
+          customProperties: liveDevice.customProperties || [],
+          customParameters: updatedParams
+        };
 
-        return callApi(api, 'Set', { typeName: 'Device', entity: liveDevice }).then(function() {
+        return callApi(api, 'Set', { typeName: 'Device', entity: devicePayload }).then(function() {
           return callApi(api, 'Get', { typeName: 'Device', search: { id: r.id } }).then(function(verifGet) {
             if (verifGet && verifGet[0]) {
               completed++;
