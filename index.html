@@ -31,7 +31,7 @@
       <button id="btn-close-prev-modal" type="button" class="cgps-btn cgps-btn-outline" style="font-size: 13px; padding: 4px 10px;">✕ Cerrar</button>
     </div>
 
-    <!-- Pestañas simulando interfaz nativa -->
+    <!-- Pestañas simulando la vista nativa de Geotab -->
     <div style="display: flex; gap: 15px; border-bottom: 1px solid #cbd5e1; margin-bottom: 15px; font-size: 12px; font-weight: 700; color: #1b4e85;">
       <span style="border-bottom: 2px solid #1b4e85; padding-bottom: 6px; cursor: pointer;">Vista de reporte</span>
       <span style="color: #94a3b8; padding-bottom: 6px;">Programación de envío</span>
@@ -420,7 +420,9 @@
     }
     .cgps-wrapper { width: 100% !important; max-width: 100% !important; margin: 0 auto; }
     .cgps-hero { background-color: #1b4e85 !important; color: #ffffff !important; padding: 16px 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.06); width: 100%; flex-wrap: wrap; gap: 10px; }
+    .cgps-hero-tag { font-size: 10px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; opacity: 0.85; margin-bottom: 2px; }
     .cgps-hero h1 { margin: 0 0 4px 0; font-size: 20px; font-weight: 700; color: #ffffff !important; }
+    .cgps-hero p { margin: 0; font-size: 12px; opacity: 0.9; line-height: 1.3; color: #ffffff !important; }
     
     .testn-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; width: 100%; margin-top: 10px; }
     .testn-card {
@@ -440,6 +442,7 @@
     }
     .testn-card:hover { border-color: #1b4e85 !important; transform: translateY(-3px) !important; box-shadow: 0 8px 16px rgba(27, 78, 133, 0.12) !important; }
     .testn-card h2 { font-size: 17px !important; color: #1b4e85 !important; font-weight: 700 !important; margin: 0 0 8px 0 !important; text-transform: uppercase !important; }
+    .testn-card p { font-size: 12px !important; color: #64748b !important; margin: 0 !important; }
     
     .cgps-btn { padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; white-space: nowrap; transition: all 0.2s; }
     .cgps-btn-white { background-color: #ffffff !important; color: #1b4e85 !important; }
@@ -477,6 +480,15 @@
 
     .badge-audit-ok { background-color: #dcfce7; color: #15803d; padding: 3px 8px; border-radius: 4px; font-weight: 700; border: 1px solid #86efac; display: inline-block; }
     .badge-audit-warn { background-color: #fee2e2; color: #b91c1c; padding: 3px 8px; border-radius: 4px; font-weight: 700; border: 1px solid #fca5a5; display: inline-block; }
+
+    @media (max-width: 992px) {
+      .cgps-kpi-grid { grid-template-columns: repeat(4, 1fr) !important; }
+      .certi-two-cols-grid { grid-template-columns: 1fr !important; }
+    }
+    @media (max-width: 576px) {
+      .testn-grid { grid-template-columns: 1fr !important; }
+      .cgps-kpi-grid { grid-template-columns: repeat(2, 1fr) !important; }
+    }
   `;
   var styleElem = document.createElement('style');
   styleElem.type = 'text/css';
@@ -585,17 +597,15 @@ var addInConstructor = function (api, state, callback) {
     if (name.indexOf('sin seguimiento') >= 0 || comment.indexOf('sin seguimiento') >= 0 || groupsStr.indexOf('sin seguimiento') >= 0) {
       return true;
     }
-    return false;
-  }
-
-  function getGroupsList(d) {
-    var gs = d.groups || [];
-    var names = [];
-    for (var i = 0; i < gs.length; i++) { 
-      var g = groupsById[gs[i].id]; 
-      if (g && g.name && !/^Group/.test(g.id)) names.push(g.name.trim()); 
+    
+    var serial = (d.serialNumber || '').trim();
+    var hasStatus = !!(statusById[d.id]);
+    
+    if (!serial || !hasStatus) {
+      return true;
     }
-    return names.join(', ');
+
+    return false;
   }
 
   function toRow(d) {
@@ -641,11 +651,29 @@ var addInConstructor = function (api, state, callback) {
     return row;
   }
 
+  function getGroupsList(d) {
+    var gs = d.groups || [];
+    var names = [];
+    for (var i = 0; i < gs.length; i++) { var g = groupsById[gs[i].id]; if (g && g.name && !/^Group/.test(g.id)) names.push(g.name.trim()); }
+    return names.join(', ');
+  }
+
   function callApi(apiRef, method, params) { return new Promise(function (ok, fail) { apiRef.call(method, params, ok, fail); }); }
   var $ = function (id) { return document.getElementById(id); };
   function callMulti(apiRef, calls) { return new Promise(function (ok, fail) { apiRef.multiCall(calls, ok, fail); }); }
+  function chunkArr(arr, size) { var out = []; for (var i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size)); return out; }
+  function seq(items, fn) { return items.reduce(function (p, it) { return p.then(function () { return fn(it); }); }, Promise.resolve()); }
+
+  var propDefs = {};
+  var DEVICE_FIELDS = ['id', 'name', 'licensePlate', 'licenseState', 'vehicleIdentificationNumber', 'serialNumber', 'activeFrom', 'activeTo', 'deviceType', 'groups', 'customProperties', 'customParameters', 'comment'];
 
   function rebuildRows() {
+    propDefs = {};
+    rawDevices.forEach(function (d) {
+      (d.customProperties || []).forEach(function (it) {
+        if (it && it.property && it.property.name && it.property.id) propDefs[String(it.property.name).trim()] = it.property;
+      });
+    });
     all = rawDevices.map(function (d) { return toRow(d); }).sort(function (a, b) { return a.placa.localeCompare(b.placa, 'es', { numeric: true }); });
     populateReportGroupsDropdown();
     updateKPIs();
@@ -816,7 +844,7 @@ var addInConstructor = function (api, state, callback) {
     });
   }
 
-  // ===== LÓGICA ESPECÍFICA PARA CONTAR Y OBTENER REPORTES SEGÚN CustomReportSchedule =====
+  // ===== LÓGICA ESPECÍFICA DE FILTRADO Y RECURSIVIDAD DE SUBGRUPOS CON CustomReportSchedule =====
   async function contarReportesDeGrupo(groupId, incluirSubgrupos) {
     let objetivo = new Set([groupId]);
 
@@ -894,7 +922,7 @@ var addInConstructor = function (api, state, callback) {
 
     var hasCombustible = false, hasRangos = false, hasSeguridad = false;
 
-    // Resolver nombres de plantillas dinámicamente
+    // Resolver nombres de plantillas asociadas
     for (var i = 0; i < schedulesList.length; i++) {
       var s = schedulesList[i];
       var tplId = s.template ? s.template.id : null;
@@ -1383,7 +1411,6 @@ var addInConstructor = function (api, state, callback) {
     setMsg('📊 Archivo exportado con éxito: ' + fileName);
   }
 
-  // ===== FUNCIÓN DE CARGA COMPLETA RESILIENTE =====
   function load() {
     setMsg('Sincronizando activos de MyGeotab...');
 
@@ -1425,7 +1452,7 @@ var addInConstructor = function (api, state, callback) {
 
       setMsg(rawDevices.length + ' activos y ' + Object.keys(groupsById).length + ' grupos sincronizados correctamente.');
 
-      // CARGA DE CustomReportSchedule USANDO EL SELECTOR PROPORCIONADO POR API
+      // CARGA DE CustomReportSchedule
       callApi(api, 'Get', {
         typeName: 'CustomReportSchedule',
         propertySelector: {
@@ -1530,7 +1557,7 @@ var addInConstructor = function (api, state, callback) {
   };
 };
 
-// REGISTRO NATIVO BAJO "CONTROL Z"
+// REGISTRO NATIVO CONTROL Z
 window.geotab = window.geotab || {};
 window.geotab.addin = window.geotab.addin || {};
 window.geotab.addin["Control Z"] = addInConstructor;
