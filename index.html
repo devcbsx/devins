@@ -577,14 +577,29 @@ var addInConstructor = function (api, state, callback) {
     return { count: count, missing: missing, total: REQUIRED_PARAMS.length };
   }
 
+  // ===== FILTRADO ESTRICTO DE UNIDADES "SIN SEGUIMIENTO" =====
   function isSinSeguimientoDevice(d) {
     var name = (d.name || '').toLowerCase();
     var comment = (d.comment || '').toLowerCase();
     var groupsStr = getGroupsList(d).toLowerCase();
     
-    if (name.indexOf('sin seguimiento') >= 0 || comment.indexOf('sin seguimiento') >= 0 || groupsStr.indexOf('sin seguimiento') >= 0) {
+    // Buscar cualquier coincidencia con la frase "sin seguimiento"
+    if (name.indexOf('sin seguimiento') >= 0 || 
+        comment.indexOf('sin seguimiento') >= 0 || 
+        groupsStr.indexOf('sin seguimiento') >= 0) {
       return true;
     }
+
+    // Verificar en propiedades personalizadas (customProperties)
+    var cpMap = extractCustomPropertiesMap(d);
+    var keys = Object.keys(cpMap);
+    for (var i = 0; i < keys.length; i++) {
+      var val = (cpMap[keys[i]] || '').toLowerCase();
+      if (val.indexOf('sin seguimiento') >= 0 || keys[i].toLowerCase().indexOf('sin seguimiento') >= 0) {
+        return true;
+      }
+    }
+
     return false;
   }
 
@@ -646,7 +661,11 @@ var addInConstructor = function (api, state, callback) {
   function callMulti(apiRef, calls) { return new Promise(function (ok, fail) { apiRef.multiCall(calls, ok, fail); }); }
 
   function rebuildRows() {
-    all = rawDevices.map(function (d) { return toRow(d); }).sort(function (a, b) { return a.placa.localeCompare(b.placa, 'es', { numeric: true }); });
+    all = rawDevices
+      .map(function (d) { return toRow(d); })
+      .filter(function (r) { return !r.isSinSeguimiento; }) // Exclusión directa durante la construcción
+      .sort(function (a, b) { return a.placa.localeCompare(b.placa, 'es', { numeric: true }); });
+    
     populateReportGroupsDropdown();
     updateKPIs();
   }
@@ -816,7 +835,6 @@ var addInConstructor = function (api, state, callback) {
     });
   }
 
-  // ===== CustomReportSchedule API CON RECURSIVIDAD Y BÚSQUEDA EN SUBGRUPOS =====
   async function contarReportesDeGrupo(groupId, incluirSubgrupos) {
     let objetivo = new Set([groupId]);
 
@@ -1410,18 +1428,20 @@ var addInConstructor = function (api, state, callback) {
         databaseName = res[1].database;
       }
 
-      rawDevices = devices.filter(function (d) {
-        if (d.deviceType === 'CustomDevice') return false;
-        return true;
-      });
-
       groupsById = {};
       groups.forEach(function (g) { groupsById[g.id] = g; });
+
+      // Filtrado directo de dispositivos
+      rawDevices = devices.filter(function (d) {
+        if (d.deviceType === 'CustomDevice') return false;
+        if (isSinSeguimientoDevice(d)) return false; // Exclusión estricta
+        return true;
+      });
 
       rebuildRows();
       renderList();
 
-      setMsg(rawDevices.length + ' activos y ' + Object.keys(groupsById).length + ' grupos sincronizados correctamente.');
+      setMsg(all.length + ' activos y ' + Object.keys(groupsById).length + ' grupos sincronizados correctamente.');
 
       // CARGA DE CustomReportSchedule
       callApi(api, 'Get', {
