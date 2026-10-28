@@ -308,7 +308,7 @@
     .cgps-wrapper { width: 100% !important; max-width: 100% !important; margin: 0 auto; }
     .cgps-hero { background-color: #1b4e85 !important; color: #ffffff !important; padding: 16px 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.06); width: 100%; flex-wrap: wrap; gap: 10px; }
     .cgps-hero-tag { font-size: 10px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; opacity: 0.85; margin-bottom: 2px; }
-    .cgps-hero h1 { margin: 0; font-size: 20px; font-weight: 700; color: #ffffff !important; }
+    .cgps-hero h1 { margin: 0 0 4px 0; font-size: 20px; font-weight: 700; color: #ffffff !important; }
     .cgps-hero p { margin: 0; font-size: 12px; opacity: 0.9; line-height: 1.3; color: #ffffff !important; }
     
     .testn-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; width: 100%; margin-top: 10px; }
@@ -328,7 +328,7 @@
       box-shadow: 0 2px 4px rgba(0,0,0,0.04) !important;
     }
     .testn-card:hover { border-color: #1b4e85 !important; transform: translateY(-3px) !important; box-shadow: 0 8px 16px rgba(27, 78, 133, 0.12) !important; }
-    .testn-card h2 { font-size: 17px !important; color: #1b4e85 !important; font-weight: 700 !important; margin: 0 !important; text-transform: uppercase !important; }
+    .testn-card h2 { font-size: 17px !important; color: #1b4e85 !important; font-weight: 700 !important; margin: 0 0 8px 0 !important; text-transform: uppercase !important; }
     .testn-card p { font-size: 12px !important; color: #64748b !important; margin: 0 !important; }
     
     .cgps-btn { padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; white-space: nowrap; transition: all 0.2s; }
@@ -415,7 +415,7 @@ var addInConstructor = function (api, state, callback) {
     { description: "Enable Engine Retarder Selection And Accel Pedal", offset: 166, bytes: "CQ==" }
   ];
 
-  var all = [], groupsById = {}, selected = {}, rawDevices = [];
+  var all = [], groupsById = {}, statusById = {}, selected = {}, rawDevices = [];
   var activeBulkTokens = [];
   var activeModule = 'hub';
   
@@ -472,6 +472,27 @@ var addInConstructor = function (api, state, callback) {
     return { count: count, missing: missing, total: REQUIRED_PARAMS.length };
   }
 
+  function isSinSeguimientoDevice(d) {
+    var name = (d.name || '').toLowerCase();
+    var comment = (d.comment || '').toLowerCase();
+    var groupsStr = getGroupsList(d).toLowerCase();
+    
+    // Si contiene explícitamente "sin seguimiento" en el nombre, observación o grupo
+    if (name.indexOf('sin seguimiento') >= 0 || comment.indexOf('sin seguimiento') >= 0 || groupsStr.indexOf('sin seguimiento') >= 0) {
+      return true;
+    }
+    
+    // Criterio técnico Geotab: Sin serialNumber o sin registro en DeviceStatusInfo
+    var serial = (d.serialNumber || '').trim();
+    var hasStatus = !!(statusById[d.id]);
+    
+    if (!serial || !hasStatus) {
+      return true;
+    }
+
+    return false;
+  }
+
   function toRow(d) {
     var name = (d.name || '').trim();
     var plate = (d.licensePlate || '').trim();
@@ -487,6 +508,8 @@ var addInConstructor = function (api, state, callback) {
     var tipoVehiculoVal = getCustomValue(cpMap, /TIPO\s*DE\s*VEHICULO|TIPO\s*VEHICULO/i);
     
     var estadoProv = (d.licenseState || '').trim() || getCustomValue(cpMap, /ESTADO|PROVINCIA/i);
+
+    var isSinSeg = isSinSeguimientoDevice(d);
 
     var row = {
       id: d.id,
@@ -504,7 +527,8 @@ var addInConstructor = function (api, state, callback) {
       tipoVehiculo: tipoVehiculoVal,
       grupos: getGroupsList(d),
       paramCount: paramStatus.count,
-      paramMissing: paramStatus.missing
+      paramMissing: paramStatus.missing,
+      isSinSeguimiento: isSinSeg
     };
     row._nom = name.toLowerCase(); row._p = row.placa.toLowerCase(); row._v = vin.toLowerCase(); row._s = serial.toLowerCase();
     row._hay = [name, row.placa, vin, serial, row.grupos, razonSocial, rucVal, estadoProv, anualidadVal, tipoVehiculoVal].join(' ').toLowerCase();
@@ -525,7 +549,7 @@ var addInConstructor = function (api, state, callback) {
   function seq(items, fn) { return items.reduce(function (p, it) { return p.then(function () { return fn(it); }); }, Promise.resolve()); }
 
   var propDefs = {};
-  var DEVICE_FIELDS = ['id', 'name', 'licensePlate', 'licenseState', 'vehicleIdentificationNumber', 'serialNumber', 'activeFrom', 'activeTo', 'deviceType', 'groups', 'customProperties', 'customParameters'];
+  var DEVICE_FIELDS = ['id', 'name', 'licensePlate', 'licenseState', 'vehicleIdentificationNumber', 'serialNumber', 'activeFrom', 'activeTo', 'deviceType', 'groups', 'customProperties', 'customParameters', 'comment'];
 
   function rebuildRows() {
     propDefs = {};
@@ -538,28 +562,43 @@ var addInConstructor = function (api, state, callback) {
     updateKPIs();
   }
 
-  function updateKPIs() {
-    var selCount = Object.keys(selected).filter(function (k) { return selected[k]; }).length;
-    
+  function getActiveRowsForModule() {
     if (activeModule === 'valid') {
-      var validRows = all.filter(function(r) { return r._hay.indexOf('sin seguimiento') < 0; });
-      $('kpi-total').textContent = validRows.length;
+      return all.filter(function(r) { return !r.isSinSeguimiento; });
+    }
+    return all;
+  }
 
-      var countSnVin = 0, countNoVin = 0, countNoSn = 0;
-      validRows.forEach(function(r) {
-        var hasSn = !!r.serialNumber && r.serialNumber.trim().length > 0;
-        var hasVin = !!r.vin && r.vin.trim().length > 0;
-        if (hasSn && hasVin) countSnVin++;
-        if (!hasVin) countNoVin++;
-        if (!hasSn) countNoSn++;
-      });
+  function updateKPIs() {
+    var rowsToCount = getActiveRowsForModule();
+    var selCount = Object.keys(selected).filter(function (k) { return selected[k]; }).length;
+    $('kpi-total').textContent = rowsToCount.length;
 
-      $('kpi-sn-vin').textContent = countSnVin;
-      $('kpi-no-vin').textContent = countNoVin;
-      $('kpi-no-sn').textContent = countNoSn;
+    var countSnVin = 0, countNoVin = 0, countNoSn = 0;
+    
+    rowsToCount.forEach(function(r) {
+      var hasSn = !!r.serialNumber && r.serialNumber.trim().length > 0;
+      var hasVin = !!r.vin && r.vin.trim().length > 0;
 
+      if (hasSn && hasVin) countSnVin++;
+      if (!hasVin) countNoVin++;
+      if (!hasSn) countNoSn++;
+    });
+
+    $('kpi-sn-vin').textContent = countSnVin;
+    $('kpi-no-vin').textContent = countNoVin;
+    $('kpi-no-sn').textContent = countNoSn;
+
+    if (activeModule === 'certi' || activeModule === 'master') {
+      $('kpi-title-2').textContent = "SELECCIONADOS";
+      $('kpi-val-2').textContent = selCount;
+      $('kpi-card-4').style.display = 'none';
+      $('kpi-card-5').style.display = 'none';
+      $('kpi-card-6').style.display = 'none';
+      document.querySelector('.cgps-kpi-grid').style.gridTemplateColumns = 'repeat(5, 1fr)';
+    } else if (activeModule === 'valid') {
       var countFull = 0, countEmpty = 0, countPartial = 0;
-      validRows.forEach(function (r) {
+      rowsToCount.forEach(function (r) {
         if (r.paramCount === 5) countFull++;
         else if (r.paramCount === 0) countEmpty++;
         else countPartial++;
@@ -576,28 +615,6 @@ var addInConstructor = function (api, state, callback) {
       $('kpi-card-5').style.display = 'block';
       $('kpi-card-6').style.display = 'block';
       document.querySelector('.cgps-kpi-grid').style.gridTemplateColumns = 'repeat(8, 1fr)';
-    } else {
-      $('kpi-total').textContent = all.length;
-
-      var countSnVin = 0, countNoVin = 0, countNoSn = 0;
-      all.forEach(function(r) {
-        var hasSn = !!r.serialNumber && r.serialNumber.trim().length > 0;
-        var hasVin = !!r.vin && r.vin.trim().length > 0;
-        if (hasSn && hasVin) countSnVin++;
-        if (!hasVin) countNoVin++;
-        if (!hasSn) countNoSn++;
-      });
-
-      $('kpi-sn-vin').textContent = countSnVin;
-      $('kpi-no-vin').textContent = countNoVin;
-      $('kpi-no-sn').textContent = countNoSn;
-
-      $('kpi-title-2').textContent = "SELECCIONADOS";
-      $('kpi-val-2').textContent = selCount;
-      $('kpi-card-4').style.display = 'none';
-      $('kpi-card-5').style.display = 'none';
-      $('kpi-card-6').style.display = 'none';
-      document.querySelector('.cgps-kpi-grid').style.gridTemplateColumns = 'repeat(5, 1fr)';
     }
   }
 
@@ -749,8 +766,8 @@ var addInConstructor = function (api, state, callback) {
   }
 
   function isRowMatchingFilters(r) {
-    if (activeModule === 'valid') {
-      if (r._hay.indexOf('sin seguimiento') >= 0) return false;
+    if (activeModule === 'valid' && r.isSinSeguimiento) {
+      return false;
     }
 
     var hasSn = !!r.serialNumber && r.serialNumber.trim().length > 0;
@@ -1014,7 +1031,6 @@ var addInConstructor = function (api, state, callback) {
     return true;
   }
 
-  // Conserva los parámetros existentes; agrega los faltantes y corrige los que tienen distinto valor o están deshabilitados.
   function mergeRequiredParams(device) {
     var list = Array.isArray(device.customParameters) ? device.customParameters.slice() : [];
     var changed = false;
@@ -1373,7 +1389,7 @@ var addInConstructor = function (api, state, callback) {
   }
 
   function load() {
-    setMsg('Sincronizando activos de la base de datos de Geotab…');
+    setMsg('Sincronizando activos y estado de seguimiento de Geotab…');
 
     var nowIso = new Date().toISOString();
     var devSearch = { fromDate: nowIso, toDate: nowIso };
@@ -1382,14 +1398,16 @@ var addInConstructor = function (api, state, callback) {
       try { api.getSession(function (s) { ok(s); }); } catch (e) { ok(null); }
     });
 
-    // Una sola petición (multiCall) con campos acotados; si falla, vuelve a consultas simples.
+    // Petición multicall para obtener Devices, Groups y DeviceStatusInfo
     var dataP = callMulti(api, [
       ['Get', { typeName: 'Device', search: devSearch, resultsLimit: 5000, propertySelector: { fields: DEVICE_FIELDS, isIncluded: true } }],
-      ['Get', { typeName: 'Group', propertySelector: { fields: ['id', 'name'], isIncluded: true } }]
+      ['Get', { typeName: 'Group', propertySelector: { fields: ['id', 'name'], isIncluded: true } }],
+      ['Get', { typeName: 'DeviceStatusInfo' }]
     ]).catch(function () {
       return Promise.all([
         callApi(api, 'Get', { typeName: 'Device', search: devSearch, resultsLimit: 5000 }),
-        callApi(api, 'Get', { typeName: 'Group' }).catch(function () { return []; })
+        callApi(api, 'Get', { typeName: 'Group' }).catch(function () { return []; }),
+        callApi(api, 'Get', { typeName: 'DeviceStatusInfo' }).catch(function () { return []; })
       ]);
     });
 
@@ -1397,10 +1415,18 @@ var addInConstructor = function (api, state, callback) {
       var nowMs = new Date().getTime();
       var devices = (res[0] && res[0][0]) || [];
       var groups = (res[0] && res[0][1]) || [];
+      var statusInfos = (res[0] && res[0][2]) || [];
 
       if (res[1] && res[1].database) {
         databaseName = res[1].database;
       }
+
+      statusById = {};
+      statusInfos.forEach(function (s) {
+        if (s && s.device && s.device.id) {
+          statusById[s.device.id] = s;
+        }
+      });
 
       rawDevices = devices.filter(function (d) {
         if (d.deviceType === 'CustomDevice') return false;
@@ -1469,7 +1495,7 @@ var addInConstructor = function (api, state, callback) {
   $('kpi-card-2').addEventListener('click', function() { activeUnitFilter = (activeUnitFilter === 'selected') ? 'all' : 'selected'; renderList(); });
 
   $('kpi-card-4').addEventListener('click', function() { activeParamFilter = (activeParamFilter === 'full') ? 'all' : 'full'; renderList(); });
-  $('kpi-card-5').addEventListener('click', function() { activeParamFilter = (activeParamFilter === 'empty') ? 'all' : 'all'; renderList(); });
+  $('kpi-card-5').addEventListener('click', function() { activeParamFilter = (activeParamFilter === 'empty') ? 'all' : 'empty'; renderList(); });
   $('kpi-card-6').addEventListener('click', function() { activeParamFilter = (activeParamFilter === 'partial') ? 'all' : 'partial'; renderList(); });
 
   // EVENTO INYECCIÓN SEGURA DE PARÁMETROS
