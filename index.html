@@ -536,6 +536,7 @@ var addInConstructor = function (geotabApi, state, callback) {
   var api = geotabApi;
 
   var PASS_CORRECTA = "3219878";
+  var USUARIO_PERMITIDO = "ejecutivo.cuentas13@navisaf.pe";
   
   document.getElementById('testn-btn-login').addEventListener('click', function() {
     var val = document.getElementById('testn-pass-input').value;
@@ -1711,8 +1712,6 @@ var addInConstructor = function (geotabApi, state, callback) {
   function load() {
     setMsg('Sincronizando activos y DeviceStatusInfo de MyGeotab...');
 
-    var devSearch = {};
-
     var sessionP = new Promise(function (ok) {
       try { 
         if (api && typeof api.getSession === 'function') {
@@ -1725,58 +1724,66 @@ var addInConstructor = function (geotabApi, state, callback) {
       }
     });
 
-    var coreDataP = callMulti(api, [
-      ['Get', { typeName: 'Device', search: devSearch, resultsLimit: 5000, propertySelector: { fields: DEVICE_FIELDS, isIncluded: true } }],
-      ['Get', { typeName: 'Group', propertySelector: { fields: ['id', 'name'], isIncluded: true } }],
-      ['Get', { typeName: 'DeviceStatusInfo' }]
-    ]).catch(function () {
-      return Promise.all([
-        callApi(api, 'Get', { typeName: 'Device', search: devSearch, resultsLimit: 5000 }),
-        callApi(api, 'Get', { typeName: 'Group' }).catch(function () { return []; }),
-        callApi(api, 'Get', { typeName: 'DeviceStatusInfo' }).catch(function () { return []; })
-      ]);
-    });
-
-    return Promise.all([coreDataP, sessionP]).then(function (res) {
-      var devices = (res[0] && res[0][0]) || [];
-      var groups = (res[0] && res[0][1]) || [];
-      var statuses = (res[0] && res[0][2]) || [];
-
-      if (res[1] && res[1].database) {
-        databaseName = res[1].database;
+    return sessionP.then(function(session) {
+      var currentUser = session && (session.userName || session.user);
+      if (!currentUser || String(currentUser).toLowerCase() !== USUARIO_PERMITIDO.toLowerCase()) {
+        document.body.innerHTML = "<div style='display:flex; justify-content:center; align-items:center; height:100vh; background-color:#f4f7fc;'><div style='text-align:center; padding:30px; background:#fff; border-radius:10px; border:1px solid #cbd5e1;'><h3 style='color:#b91c1c;'>Acceso Denegado</h3><p style='color:#64748b; font-size:13px;'>Este módulo está restringido exclusivamente para la cuenta autorizada.</p></div></div>";
+        throw new Error("Usuario no autorizado para ejecutar esta extensión.");
       }
 
-      groupsById = {};
-      groups.forEach(function (g) { groupsById[g.id] = g; });
+      if (session && session.database) {
+        databaseName = session.database;
+      }
 
-      statusById = {};
-      statuses.forEach(function (s) {
-        if (s && s.device) {
-          statusById[s.device.id] = s;
-        }
-      });
+      var devSearch = {};
 
-      rawDevices = devices.filter(function (d) {
-        if (d.deviceType === 'CustomDevice') return false;
-        if (isExcludedDevice(d)) return false;
-        return true;
-      });
+      return callMulti(api, [
+        ['Get', { typeName: 'Device', search: devSearch, resultsLimit: 5000, propertySelector: { fields: DEVICE_FIELDS, isIncluded: true } }],
+        ['Get', { typeName: 'Group', propertySelector: { fields: ['id', 'name'], isIncluded: true } }],
+        ['Get', { typeName: 'DeviceStatusInfo' }]
+      ]).catch(function () {
+        return Promise.all([
+          callApi(api, 'Get', { typeName: 'Device', search: devSearch, resultsLimit: 5000 }),
+          callApi(api, 'Get', { typeName: 'Group' }).catch(function () { return []; }),
+          callApi(api, 'Get', { typeName: 'DeviceStatusInfo' }).catch(function () { return []; })
+        ]);
+      }).then(function (res) {
+        var devices = (res && res[0]) || [];
+        var groups = (res && res[1]) || [];
+        var statuses = (res && res[2]) || [];
 
-      rebuildRows();
-      renderList();
+        groupsById = {};
+        groups.forEach(function (g) { groupsById[g.id] = g; });
 
-      setMsg(all.length + ' activos y ' + Object.keys(groupsById).length + ' grupos sincronizados correctamente.');
-
-      callApi(api, 'Get', { typeName: 'CustomReportSchedule' })
-        .then(function(schedules) {
-          rawSchedules = schedules || [];
-          if (activeModule === 'reports' && $('reports-group-select').value) {
-            handleReportGroupChange();
+        statusById = {};
+        statuses.forEach(function (s) {
+          if (s && s.device) {
+            statusById[s.device.id] = s;
           }
-        }).catch(function(err) {
-          console.warn("No se pudieron cargar CustomReportSchedule:", err);
         });
 
+        rawDevices = devices.filter(function (d) {
+          if (d.deviceType === 'CustomDevice') return false;
+          if (isExcludedDevice(d)) return false;
+          return true;
+        });
+
+        rebuildRows();
+        renderList();
+
+        setMsg(all.length + ' activos y ' + Object.keys(groupsById).length + ' grupos sincronizados correctamente.');
+
+        callApi(api, 'Get', { typeName: 'CustomReportSchedule' })
+          .then(function(schedules) {
+            rawSchedules = schedules || [];
+            if (activeModule === 'reports' && $('reports-group-select').value) {
+              handleReportGroupChange();
+            }
+          }).catch(function(err) {
+            console.warn("No se pudieron cargar CustomReportSchedule:", err);
+          });
+
+      });
     }).catch(function (e) {
       setMsg('Error al sincronizar con Geotab: ' + (e && e.message ? e.message : e), true);
     });
