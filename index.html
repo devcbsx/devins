@@ -1273,22 +1273,12 @@ var addInConstructor = function (geotabApi, state, callback) {
     var razonEmpresa = firstRow.razon || 'ANGELES MINERIA Y CONSTRUCCION S.A.C.';
     var rucEmpresa = firstRow.ruc || '20453537537';
 
-    var txt = "Buenos dias Sr. Wilbert,\n\n";
+    var txt = "Buen dia Area Legal,\n\n";
     txt += "Se solicita tu apoyo en la realización del certificado solicitado por el cliente. Considere que debe describir como beneficiaria al cliente DIVEIMPORT. Adjunto información de la(s) unidad(es):\n\n";
     
     txt += "DATOS DE LA EMPRESA\n\n";
     txt += "NOMBRE:  " + razonEmpresa + "\n";
     txt += "RUC:     " + rucEmpresa + "\n\n";
-    
-    txt += "UNIDADES SELECCIONADAS:\n";
-    txt += "----------------------------------------\n";
-    selList.forEach(function(r, idx) {
-      txt += (idx + 1) + ". PLACA: " + (r.placa || 'S/P') + "\n";
-      txt += "   VIN: " + (r.vin || 'S/V') + "\n";
-      txt += "   RAZÓN SOCIAL: " + (r.razon || razonEmpresa) + "\n";
-      txt += "   RUC: " + (r.ruc || rucEmpresa) + "\n";
-      txt += "   FECHA ACTIVACIÓN: " + (r.desde || 'S/F') + "\n\n";
-    });
 
     txt += "Quedo atento a sus comentarios.";
 
