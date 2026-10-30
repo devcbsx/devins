@@ -80,6 +80,49 @@
   </div>
 </div>
 
+<!-- MODAL PARA CREAR NUEVO REPORTE -->
+<div id="create-report-modal" style="position: fixed; top:0; left:0; width:100vw; height:100vh; background-color: rgba(15, 23, 42, 0.75); z-index: 9999; display: none; justify-content: center; align-items: center; padding: 20px;">
+  <div style="background: #ffffff; padding: 24px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 16px;">
+      <h2 style="margin:0; font-size: 17px; color: #1b4e85;">➕ CREAR NUEVO REPORTE DESDE BASE GITHUB</h2>
+      <button id="btn-close-create-modal" type="button" class="cgps-btn cgps-btn-outline" style="font-size: 13px; padding: 4px 10px;">✕ Cancelar</button>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 14px; font-size: 12px;">
+      <div>
+        <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">1. Seleccionar Reporte Excel Base (GitHub):</label>
+        <select id="create-rep-base-select" class="cgps-input" style="width: 100%; height: 36px; font-weight: 600;">
+          <option value="monitoreo">1. Monitoreo y Combustible (Excel Base)</option>
+          <option value="rangos">2. Rangos Operacionales (Excel Base)</option>
+          <option value="seguridad">3. Eventos de Seguridad (Excel Base)</option>
+        </select>
+        <div id="create-rep-github-url" style="font-size: 10px; color: #64748b; margin-top: 4px; font-family: monospace;">Ruta GitHub: https://raw.githubusercontent.com/navisaf/templates/main/monitoreo_combustible.xlsx</div>
+      </div>
+
+      <div>
+        <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">2. Nombre del Nuevo Reporte:</label>
+        <input type="text" id="create-rep-name" class="cgps-input" placeholder="Ej: Monitoreo de Flota - Cliente X" style="width: 100%; height: 36px;">
+      </div>
+
+      <div>
+        <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">3. Grupo Destino (Asignación):</label>
+        <input type="text" id="create-rep-group-display" class="cgps-input" style="width: 100%; height: 36px; background-color: #f1f5f9; font-weight: 700;" readonly>
+      </div>
+
+      <div>
+        <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">4. Diagnósticos Correspondientes (Separados por comas o saltos de línea):</label>
+        <textarea id="create-rep-diagnostics" class="cgps-textarea" rows="4" placeholder="Odómetro, Tiempo de funcionamiento del motor, Cantidad total de combustible utilizado..." style="width: 100%;"></textarea>
+      </div>
+
+      <div id="create-rep-status" style="font-size: 12px; font-weight: 700; min-height: 18px;"></div>
+    </div>
+
+    <div style="text-align: right; margin-top: 20px; border-top: 1px solid #e2e8f0; padding-top: 12px; display: flex; justify-content: flex-end; gap: 10px;">
+      <button id="btn-submit-create-report" type="button" class="cgps-btn" style="background-color: #1b4e85; color: #fff; font-size: 13px; font-weight: 700; padding: 8px 16px;">💾 Subir e Inyectar Reporte</button>
+    </div>
+  </div>
+</div>
+
 <div class="cgps-wrapper" id="cgps-root" style="display: none;">
 
   <!-- VISTA 1: MENU DE TARJETAS / DASHBOARD -->
@@ -138,6 +181,10 @@
 
       <div id="hdr-actions-master" style="display: none; gap: 8px;">
         <button id="master-btn-excel" type="button" class="cgps-btn cgps-btn-white" style="font-weight:700;">📊 Descargar Excel .xlsx</button>
+      </div>
+
+      <div id="hdr-actions-reports" style="display: none; gap: 8px;">
+        <button id="reports-btn-open-create-modal" type="button" class="cgps-btn cgps-btn-white" style="font-weight:700;">➕ Crear Nuevo Reporte</button>
       </div>
     </div>
 
@@ -252,6 +299,7 @@
             <div id="rep-dash-total" style="font-size: 26px; font-weight: 800; color: #1b4e85;">0</div>
           </div>
           <div style="display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; margin-left: auto;">
+            <label style="font-size: 11px; font-weight: 700; color: #64748b;">Buscar por palabra clave<br><input type="text" id="rep-filter-keyword" class="cgps-input" placeholder="🔍 Buscar reporte..." style="height: 36px; width: 180px;"></label>
             <label style="font-size: 11px; font-weight: 700; color: #64748b;">Modificado desde<br><input type="date" id="rep-filter-from" class="cgps-input" style="height: 36px;"></label>
             <label style="font-size: 11px; font-weight: 700; color: #64748b;">Hasta<br><input type="date" id="rep-filter-to" class="cgps-input" style="height: 36px;"></label>
             <label style="font-size: 11px; font-weight: 700; color: #64748b;">Último usuario<br><select id="rep-filter-user" class="cgps-input" style="height: 36px; min-width: 180px;"><option value="">Todos</option></select></label>
@@ -540,6 +588,13 @@ var addInConstructor = function (geotabApi, state, callback) {
   var PASS_CORRECTA = "3219878";
   var USUARIO_PERMITIDO = "ejecutivo.cuentas13@navisaf.pe";
   
+  // URLs GitHub para descargar archivos base Excel si fuera necesario
+  var GITHUB_TEMPLATES = {
+    monitoreo: "https://raw.githubusercontent.com/navisaf/templates/main/monitoreo_combustible.xlsx",
+    rangos: "https://raw.githubusercontent.com/navisaf/templates/main/rangos_operacionales.xlsx",
+    seguridad: "https://raw.githubusercontent.com/navisaf/templates/main/eventos_seguridad.xlsx"
+  };
+
   document.getElementById('testn-btn-login').addEventListener('click', function() {
     var val = document.getElementById('testn-pass-input').value;
     if (val === PASS_CORRECTA) {
@@ -569,7 +624,6 @@ var addInConstructor = function (geotabApi, state, callback) {
   var all = [], groupsById = {}, statusById = {}, selected = {}, rawDevices = [];
   var rawSchedules = [], templateNamesById = {};
   var usersById = {}, rulesById = {}, diagById = {}, currentReportRows = [];
-  // Hash de MyGeotab para abrir/editar el reporte. Ajustar si tu versión usa otra ruta (copie lo que aparece tras '#' al editar un reporte).
   var REPORT_LINK_HASH = '#customReportSchedule,id:';
   var activeBulkTokens = [];
   var activeModule = 'hub';
@@ -1010,42 +1064,11 @@ var addInConstructor = function (geotabApi, state, callback) {
     }
   }
 
-  async function resolveTemplateName(templateId) {
-    if (!templateId) return "Plantilla Sin ID";
-    if (templateNamesById[templateId]) return templateNamesById[templateId];
-
-    try {
-      const res = await callApi(api, 'Get', {
-        typeName: 'ReportTemplate',
-        search: { id: templateId }
-      });
-      if (res && res[0] && res[0].name) {
-        templateNamesById[templateId] = res[0].name;
-        return res[0].name;
-      }
-    } catch (e) {
-      console.warn("No se pudo obtener nombre de plantilla:", templateId);
-    }
-
-    return templateId;
-  }
-
-  // Geotab devuelve null para elementos que la API no puede resolver (sin permiso o eliminados): se cuentan aparte.
-  function namesOf(list, cache, label) {
-    var names = [], hidden = 0;
-    (list || []).forEach(function (x) {
-      if (x && x.id) names.push(cache[x.id] || x.id); else hidden++;
-    });
-    if (hidden) names.push('⚠ ' + hidden + ' ' + label + ' no disponible(s) vía API');
-    return names;
-  }
-
   function reportUserId(s) {
     var u = s.lastModifiedUser;
     return u ? (typeof u === 'string' ? u : u.id) : null;
   }
 
-  // Resuelve nombres por id en lotes (multiCall) y los guarda en caché; si falla, muestra el id.
   async function resolveNames(typeName, ids, cache) {
     var pending = ids.filter(function (id, i, a) { return id && cache[id] == null && a.indexOf(id) === i; });
     var fields = typeName === 'User' ? ['id', 'name', 'firstName', 'lastName'] : ['id', 'name'];
@@ -1147,6 +1170,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     }).join('');
     $('rep-filter-from').value = '';
     $('rep-filter-to').value = '';
+    if ($('rep-filter-keyword')) $('rep-filter-keyword').value = '';
 
     $('sec-reports-dashboard').style.display = 'block';
     applyReportFilters();
@@ -1155,6 +1179,7 @@ var addInConstructor = function (geotabApi, state, callback) {
 
   function applyReportFilters() {
     var from = $('rep-filter-from').value, to = $('rep-filter-to').value, usr = $('rep-filter-user').value;
+    var kw = ($('rep-filter-keyword') ? $('rep-filter-keyword').value : '').toLowerCase().trim();
     var fromMs = from ? new Date(from + 'T00:00:00').getTime() : null;
     var toMs = to ? new Date(to + 'T23:59:59').getTime() : null;
 
@@ -1162,6 +1187,12 @@ var addInConstructor = function (geotabApi, state, callback) {
       if (fromMs != null && s._lastMs < fromMs) return false;
       if (toMs != null && s._lastMs > toMs) return false;
       if (usr && s._userName !== usr) return false;
+      if (kw) {
+        var groupsText = [].concat(s.groups || [], s.scopeGroups || [], s.includeAllChildrenGroups || [], s.includeDirectChildrenOnlyGroups || [])
+          .map(function (g) { return groupsById[g.id] ? groupsById[g.id].name : g.id; }).join(' ');
+        var fullText = (s._resolvedName + ' ' + groupsText + ' ' + s._userName).toLowerCase();
+        if (fullText.indexOf(kw) < 0) return false;
+      }
       return true;
     });
 
@@ -1175,7 +1206,7 @@ var addInConstructor = function (geotabApi, state, callback) {
   function renderReportRows(list) {
     var tbody = $('reports-listbody');
     if (!list.length) {
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #64748b; padding: 16px;">Ningún reporte coincide con los filtros de fecha / usuario.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #64748b; padding: 16px;">Ningún reporte coincide con los filtros especificados.</td></tr>';
       return;
     }
     tbody.innerHTML = list.map(function (s) {
@@ -1191,6 +1222,15 @@ var addInConstructor = function (geotabApi, state, callback) {
         '<td style="text-align:center;"><button type="button" class="cgps-btn cgps-btn-outline btn-view-report" data-id="' + htmlEsc(s.id) + '" style="padding: 4px 8px; font-size:11px;">👁️ Ver</button></td>' +
         '</tr>';
     }).join('');
+  }
+
+  function namesOf(list, cache, label) {
+    var names = [], hidden = 0;
+    (list || []).forEach(function (x) {
+      if (x && x.id) names.push(cache[x.id] || x.id); else hidden++;
+    });
+    if (hidden) names.push('⚠ ' + hidden + ' ' + label + ' no disponible(s) vía API');
+    return names;
   }
 
   function updateValidationCard(cardId, statusId, label, isOk) {
@@ -1246,6 +1286,78 @@ var addInConstructor = function (geotabApi, state, callback) {
     btnGeotab.href = geotabBaseUrl() + REPORT_LINK_HASH + s.id;
 
     $('report-preview-modal').style.display = 'flex';
+  }
+
+  function openCreateReportModal() {
+    var gid = $('reports-group-select').value;
+    if (!gid) {
+      alert("Por favor, seleccione primero un Cliente / Grupo de la lista desplegable.");
+      return;
+    }
+    var groupObj = groupsById[gid];
+    var groupName = groupObj ? groupObj.name : gid;
+    
+    $('create-rep-group-display').value = groupName + " (" + gid + ")";
+    $('create-rep-name').value = "Reporte - " + groupName;
+    $('create-rep-diagnostics').value = "";
+    $('create-rep-status').textContent = "";
+    
+    updateCreateGitHubUrl();
+    $('create-report-modal').style.display = 'flex';
+  }
+
+  function updateCreateGitHubUrl() {
+    var selVal = $('create-rep-base-select').value;
+    var url = GITHUB_TEMPLATES[selVal] || "";
+    $('create-rep-github-url').textContent = "Ruta GitHub: " + url;
+  }
+
+  async function createAndSubmitReport() {
+    var gid = $('reports-group-select').value;
+    var repName = $('create-rep-name').value.trim();
+    var diagText = $('create-rep-diagnostics').value.trim();
+    var statusDiv = $('create-rep-status');
+
+    if (!repName) {
+      statusDiv.style.color = "#dc2626";
+      statusDiv.textContent = "Ingrese un nombre para el reporte.";
+      return;
+    }
+
+    statusDiv.style.color = "#0284c7";
+    statusDiv.textContent = "Creando programación de reporte en Geotab...";
+
+    var diagList = diagText ? diagText.split(/[\n\r,]+/).map(function(d){ return { id: d.trim() }; }).filter(function(d){ return d.id; }) : [];
+
+    try {
+      var newSchedule = {
+        name: repName,
+        isActive: true,
+        groups: [{ id: gid }],
+        arguments: {
+          diagnostics: diagList
+        }
+      };
+
+      var res = await callApi(api, 'Add', {
+        typeName: 'CustomReportSchedule',
+        entity: newSchedule
+      });
+
+      statusDiv.style.color = "#16a34a";
+      statusDiv.textContent = "✅ ¡Reporte creado con éxito en Geotab!";
+      
+      setTimeout(function() {
+        $('create-report-modal').style.display = 'none';
+        rawSchedules = [];
+        handleReportGroupChange();
+      }, 1200);
+
+    } catch (err) {
+      console.error("Error al crear reporte:", err);
+      statusDiv.style.color = "#dc2626";
+      statusDiv.textContent = "Error al crear reporte: " + (err.message || err);
+    }
   }
 
   function generateLegalText() {
@@ -1354,6 +1466,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     
     if($('hdr-actions-certi')) $('hdr-actions-certi').style.display = 'none';
     if($('hdr-actions-master')) $('hdr-actions-master').style.display = 'none';
+    if($('hdr-actions-reports')) $('hdr-actions-reports').style.display = 'none';
 
     highlightKpiCards();
 
@@ -1423,6 +1536,8 @@ var addInConstructor = function (geotabApi, state, callback) {
         $('sec-table-container').style.display = 'none';
       } else if (mod === 'reports') {
         $('testn-mod-title').textContent = 'Reportes por Cliente';
+        $('hdr-actions-reports').style.display = 'flex';
+
         $('sec-master').style.display = 'none';
         $('sec-audit').style.display = 'none';
         $('sec-activations').style.display = 'none';
@@ -1846,6 +1961,14 @@ var addInConstructor = function (geotabApi, state, callback) {
 
   $('reports-group-select').addEventListener('change', handleReportGroupChange);
 
+  // EVENTOS DEL MODAL DE CREACIÓN DE REPORTES
+  $('reports-btn-open-create-modal').addEventListener('click', openCreateReportModal);
+  $('btn-close-create-modal').addEventListener('click', function() {
+    $('create-report-modal').style.display = 'none';
+  });
+  $('create-rep-base-select').addEventListener('change', updateCreateGitHubUrl);
+  $('btn-submit-create-report').addEventListener('click', createAndSubmitReport);
+
   // EVENTOS MODAL VISUAL Y BOTONES DE COPIA
   $('btn-close-prev-modal').addEventListener('click', function() {
     $('report-preview-modal').style.display = 'none';
@@ -1873,11 +1996,18 @@ var addInConstructor = function (geotabApi, state, callback) {
     var found = currentReportRows.find(function (x) { return x.id === b.getAttribute('data-id'); });
     if (found) openReportPreviewModal(found);
   });
+
+  // FILTROS DE AUDITORÍA Y PALABRA CLAVE DE REPORTES
   $('rep-filter-from').addEventListener('change', applyReportFilters);
   $('rep-filter-to').addEventListener('change', applyReportFilters);
   $('rep-filter-user').addEventListener('change', applyReportFilters);
+  if ($('rep-filter-keyword')) $('rep-filter-keyword').addEventListener('input', applyReportFilters);
+  
   $('rep-filter-clear').addEventListener('click', function () {
-    $('rep-filter-from').value = ''; $('rep-filter-to').value = ''; $('rep-filter-user').value = '';
+    $('rep-filter-from').value = ''; 
+    $('rep-filter-to').value = ''; 
+    $('rep-filter-user').value = '';
+    if ($('rep-filter-keyword')) $('rep-filter-keyword').value = '';
     applyReportFilters();
   });
 
@@ -1987,7 +2117,6 @@ window.geotab.addin = window.geotab.addin || {};
   if (seg) { keys.push(seg); if (location.search) keys.push(seg + location.search); }
   keys.forEach(function (k) { reg[k] = addInConstructor; });
 
-  // Respaldo: acepta variantes con sufijo de versión (ej. "ztest-index?v71") sin responder a cualquier propiedad
   try {
     window.geotab.addin = new Proxy(reg, {
       has: function (t, p) { return (p in t) || (typeof p === 'string' && p.indexOf('ztest-index') === 0); },
