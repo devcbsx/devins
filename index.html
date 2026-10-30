@@ -53,12 +53,18 @@
       </div>
 
       <div id="box-prev-rules">
-        <b style="color: #1b4e85;">Normas del evento:</b>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <b style="color: #1b4e85;">Normas del evento:</b>
+          <button id="btn-copy-rules" type="button" class="cgps-btn cgps-btn-secondary" style="font-size: 10px; padding: 2px 8px;">📋 Copiar Normas</button>
+        </div>
         <div id="modal-prev-rules" style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; max-height: 150px; overflow: auto;"></div>
       </div>
 
       <div id="box-prev-diags">
-        <b style="color: #1b4e85;">Diagnósticos:</b>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <b style="color: #1b4e85;">Diagnósticos:</b>
+          <button id="btn-copy-diags" type="button" class="cgps-btn cgps-btn-secondary" style="font-size: 10px; padding: 2px 8px;">📋 Copiar Diagnósticos</button>
+        </div>
         <div id="modal-prev-diags" style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; max-height: 150px; overflow: auto;"></div>
       </div>
 
@@ -263,20 +269,16 @@
           <table class="cgps-table">
             <thead>
               <tr>
-                <th style="width: 14%;">Nombre del Reporte / Plantilla</th>
-                <th style="width: 8%;">ID Plantilla</th>
-                <th style="width: 13%;">Grupos Asignados</th>
-                <th style="width: 18%;">Normas del evento</th>
-                <th style="width: 18%;">Diagnósticos</th>
-                <th style="width: 9%;">Última Modificación</th>
-                <th style="width: 8%;">Modificado por</th>
-                <th style="width: 6%; text-align: center;">Estado</th>
-                <th style="width: 6%; text-align: center;">Acciones</th>
+                <th style="width: 35%;">Nombre del Reporte / Plantilla</th>
+                <th style="width: 35%;">Grupos Asignados</th>
+                <th style="width: 15%;">Última Modificación</th>
+                <th style="width: 15%;">Modificado por</th>
+                <th style="width: 10%; text-align: center;">Acciones</th>
               </tr>
             </thead>
             <tbody id="reports-listbody">
               <tr>
-                <td colspan="9" style="text-align: center; color: #64748b; padding: 16px;">Seleccione un cliente arriba para cargar sus reportes disponibles.</td>
+                <td colspan="5" style="text-align: center; color: #64748b; padding: 16px;">Seleccione un cliente arriba para cargar sus reportes disponibles.</td>
               </tr>
             </tbody>
           </table>
@@ -978,7 +980,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     if (!gid) {
       $('sec-reports-validation-summary').style.display = 'none';
       $('sec-reports-dashboard').style.display = 'none';
-      $('reports-listbody').innerHTML = '<tr><td colspan="9" style="text-align: center; color: #64748b; padding: 16px;">Seleccione un cliente arriba para cargar sus reportes disponibles.</td></tr>';
+      $('reports-listbody').innerHTML = '<tr><td colspan="5" style="text-align: center; color: #64748b; padding: 16px;">Seleccione un cliente arriba para cargar sus reportes disponibles.</td></tr>';
       $('reports-count-badge').textContent = '0 reportes encontrados';
       return;
     }
@@ -1075,30 +1077,21 @@ var addInConstructor = function (geotabApi, state, callback) {
     return (/geotab|copiloto/i.test(o) ? o : 'https://my.geotab.com') + '/' + (db || databaseName) + '/';
   }
 
-  function fillChips(container, list, emptyText) {
+  function fillInlineList(container, list, emptyText) {
     container.innerHTML = '';
     if (!list || !list.length) {
-      container.innerHTML = '<span style="background:#e2e8f0; padding:3px 8px; border-radius:4px;">' + htmlEsc(emptyText) + '</span>';
+      container.innerHTML = '<span style="color:#64748b; font-style: italic;">' + htmlEsc(emptyText) + '</span>';
       return;
     }
-    list.forEach(function (t) {
-      var tag = document.createElement('span');
-      tag.style.cssText = 'background:#f1f5f9; color:#334155; padding:3px 8px; border-radius:4px; border:1px solid #cbd5e1;';
-      tag.textContent = t;
-      container.appendChild(tag);
-    });
-  }
-
-  function listCell(list) {
-    if (!list.length) return '<span style="color:#94a3b8;">—</span>';
-    return '<div title="' + htmlEsc(list.join('\n')) + '" style="max-height:72px; overflow:auto; font-size:11px; line-height:1.35; white-space:normal;"><b>' + list.length + '</b> · ' + list.map(htmlEsc).join('<br>') + '</div>';
+    var txt = list.join(', ');
+    container.innerHTML = '<span style="color:#1e293b; font-size:12px; line-height:1.4;">' + htmlEsc(txt) + '</span>';
   }
 
   async function renderClientSchedulesTable(schedulesList, selectedGroupId) {
     var tbody = $('reports-listbody');
 
     if (!schedulesList.length) {
-      tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: #b91c1c; padding: 16px;">No se encontraron programaciones de reporte asignadas al grupo o subgrupos seleccionados.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #b91c1c; padding: 16px;">No se encontraron programaciones de reporte asignadas al grupo o subgrupos seleccionados.</td></tr>';
       $('sec-reports-validation-summary').style.display = 'none';
       $('sec-reports-dashboard').style.display = 'none';
       currentReportRows = [];
@@ -1182,27 +1175,19 @@ var addInConstructor = function (geotabApi, state, callback) {
   function renderReportRows(list) {
     var tbody = $('reports-listbody');
     if (!list.length) {
-      tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: #64748b; padding: 16px;">Ningún reporte coincide con los filtros de fecha / usuario.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #64748b; padding: 16px;">Ningún reporte coincide con los filtros de fecha / usuario.</td></tr>';
       return;
     }
     tbody.innerHTML = list.map(function (s) {
       var groupsText = [].concat(s.groups || [], s.scopeGroups || [], s.includeAllChildrenGroups || [], s.includeDirectChildrenOnlyGroups || [])
         .map(function (g) { return groupsById[g.id] ? groupsById[g.id].name : g.id; })
         .filter(function (v, i, self) { return self.indexOf(v) === i; }).join(', ') || 'Sin grupo explícito';
-      var tplIdStr = s.template ? s.template.id : 'N/A';
-      var estado = s.isActive !== false
-        ? '<span class="badge-audit-ok">Activo</span>'
-        : '<span style="background:#fee2e2; color:#b91c1c; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:700;">Inactivo</span>';
 
       return '<tr>' +
         '<td><b style="color:#1b4e85;">' + htmlEsc(s._resolvedName) + '</b></td>' +
-        '<td><code style="background:#f1f5f9; padding:2px 6px; border-radius:4px; font-size:11px;">' + htmlEsc(tplIdStr) + '</code></td>' +
         '<td style="white-space:normal; word-break:break-word; font-size:11px;">' + htmlEsc(groupsText) + '</td>' +
-        '<td>' + listCell(s._rules) + '</td>' +
-        '<td>' + listCell(s._diags) + '</td>' +
         '<td style="font-size:11px; white-space:normal;">' + htmlEsc(fmtDateTime(s.lastUpdated)) + '</td>' +
         '<td style="font-size:11px; white-space:normal; word-break:break-all;">' + htmlEsc(s._userName) + '</td>' +
-        '<td style="text-align:center;">' + estado + '</td>' +
         '<td style="text-align:center;"><button type="button" class="cgps-btn cgps-btn-outline btn-view-report" data-id="' + htmlEsc(s.id) + '" style="padding: 4px 8px; font-size:11px;">👁️ Ver</button></td>' +
         '</tr>';
     }).join('');
@@ -1253,8 +1238,8 @@ var addInConstructor = function (geotabApi, state, callback) {
     }
 
     $('modal-prev-template-id').textContent = s.template ? "Template ID: " + s.template.id : "Sin Template ID";
-    fillChips($('modal-prev-rules'), s._rules, 'Sin normas del evento');
-    fillChips($('modal-prev-diags'), s._diags, 'Sin diagnósticos');
+    fillInlineList($('modal-prev-rules'), s._rules, 'Sin normas del evento');
+    fillInlineList($('modal-prev-diags'), s._diags, 'Sin diagnósticos');
     $('modal-prev-audit').textContent = fmtDateTime(s.lastUpdated) + ' · ' + (s._userName || 'Sin usuario');
 
     var btnGeotab = $('modal-btn-open-geotab');
@@ -1861,9 +1846,25 @@ var addInConstructor = function (geotabApi, state, callback) {
 
   $('reports-group-select').addEventListener('change', handleReportGroupChange);
 
-  // EVENTOS MODAL VISUAL
+  // EVENTOS MODAL VISUAL Y BOTONES DE COPIA
   $('btn-close-prev-modal').addEventListener('click', function() {
     $('report-preview-modal').style.display = 'none';
+  });
+
+  $('btn-copy-rules').addEventListener('click', function() {
+    if (!currentSelectedReportObj || !currentSelectedReportObj._rules) return;
+    var txt = currentSelectedReportObj._rules.join(', ');
+    navigator.clipboard.writeText(txt).then(function() {
+      alert('📋 Normas copiadas al portapapeles');
+    });
+  });
+
+  $('btn-copy-diags').addEventListener('click', function() {
+    if (!currentSelectedReportObj || !currentSelectedReportObj._diags) return;
+    var txt = currentSelectedReportObj._diags.join(', ');
+    navigator.clipboard.writeText(txt).then(function() {
+      alert('📋 Diagnósticos copiados al portapapeles');
+    });
   });
 
   $('reports-listbody').addEventListener('click', function (e) {
