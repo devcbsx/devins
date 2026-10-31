@@ -80,52 +80,70 @@
   </div>
 </div>
 
-<!-- MODAL PARA COPIAR / CLONAR REPORTE DESDE OTRO CLIENTE -->
+<!-- MODAL PARA CLONAR Y CREAR REPORTE DESDE OTRO CLIENTE -->
 <div id="create-report-modal" style="position: fixed; top:0; left:0; width:100vw; height:100vh; background-color: rgba(15, 23, 42, 0.75); z-index: 9999; display: none; justify-content: center; align-items: center; padding: 20px;">
-  <div style="background: #ffffff; padding: 24px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); width: 100%; max-width: 650px; max-height: 90vh; overflow-y: auto;">
+  <div style="background: #ffffff; padding: 24px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); width: 100%; max-width: 680px; max-height: 90vh; overflow-y: auto;">
     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 16px;">
       <h2 style="margin:0; font-size: 17px; color: #1b4e85;">📋 CLONAR Y CREAR REPORTE DESDE OTRO CLIENTE</h2>
       <button id="btn-close-create-modal" type="button" class="cgps-btn cgps-btn-outline" style="font-size: 13px; padding: 4px 10px;">✕ Cancelar</button>
     </div>
 
     <div style="display: flex; flex-direction: column; gap: 14px; font-size: 12px;">
+      
+      <!-- PASO 1: SELECCIÓN DE GRUPO PADRE ORIGEN -->
       <div>
-        <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">1. Seleccionar Cliente Origen (Plantilla Base):</label>
+        <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">1. Categoría Base Origen:</label>
+        <select id="create-rep-parent-cat" class="cgps-input" style="width: 100%; height: 36px; font-weight: 700; color: #1b4e85;">
+          <option value="b278A">CLIENTES (b278A)</option>
+          <option value="b27A7">TIPO DE MOTOR (b27A7)</option>
+        </select>
+      </div>
+
+      <!-- PASO 2: FILTRO PALABRA CLAVE Y SELECCIÓN DE RAZÓN SOCIAL ORIGEN -->
+      <div>
+        <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">2. Filtrar Razón Social Origen (Cliente):</label>
         <div style="display: flex; gap: 6px;">
-          <input type="text" id="create-rep-source-search" class="cgps-input" placeholder="🔍 Filtrar origen por palabra clave..." style="width: 220px; height: 36px;">
+          <input type="text" id="create-rep-source-search" class="cgps-input" placeholder="🔍 Escriba palabra clave para buscar razón social..." style="width: 240px; height: 36px;">
           <select id="create-rep-source-group" class="cgps-input" style="flex: 1; height: 36px; font-weight: 600;">
             <option value="">-- Seleccione Cliente Origen --</option>
           </select>
         </div>
       </div>
 
+      <!-- PASO 3: SELECCIÓN DEL REPORTE BASE -->
       <div>
-        <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">2. Seleccionar Reporte Base a Clonar:</label>
+        <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">3. Seleccionar Reporte Base a Clonar:</label>
         <select id="create-rep-source-schedule" class="cgps-input" style="width: 100%; height: 36px; font-weight: 600;" disabled>
-          <option value="">-- Primero seleccione un cliente origen --</option>
+          <option value="">-- Primero seleccione la razón social origen --</option>
         </select>
       </div>
 
+      <!-- PASO 4: NOMBRE Y FORMATO DEL NUEVO REPORTE -->
       <div>
-        <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">3. Nombre del Nuevo Reporte:</label>
+        <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">4. Nombre del Nuevo Reporte (Formato + Razón Social):</label>
         <div style="display: flex; gap: 8px; margin-bottom: 6px;">
-          <select id="create-rep-name-prefix-preset" class="cgps-input" style="width: 320px; height: 36px; font-weight: 700; color: #1b4e85;">
+          <select id="create-rep-name-prefix-preset" class="cgps-input" style="width: 340px; height: 36px; font-weight: 700; color: #1b4e85;">
             <option value="Monitoreo de flota y rendimiento de combustible - ">Monitoreo de flota y rendimiento de combustible - </option>
             <option value="Eventos de seguridad - ">Eventos de seguridad - </option>
             <option value="Rangos Operacionales - ">Rangos Operacionales - </option>
           </select>
           <button id="btn-apply-prefix-preset" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px;">Aplicar Formato</button>
         </div>
-        <input type="text" id="create-rep-name" class="cgps-input" placeholder="Nombre completo editable del reporte" style="width: 100%; height: 36px; font-weight: 600;">
+        <input type="text" id="create-rep-name" class="cgps-input" placeholder="Nombre autogenerado o editable" style="width: 100%; height: 36px; font-weight: 600;">
       </div>
 
+      <!-- PASO 5: ASIGNACIÓN MÚLTIPLE DE GRUPOS DESTINO -->
       <div>
-        <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">4. Grupo Destino (Asignación):</label>
-        <input type="text" id="create-rep-group-display" class="cgps-input" style="width: 100%; height: 36px; background-color: #f1f5f9; font-weight: 700;" readonly>
+        <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">5. Asignar Grupos Destino (Múltiple Selección en Clientes / Tipo Motor):</label>
+        <input type="text" id="create-rep-dest-search" class="cgps-input" placeholder="🔍 Filtrar grupos destino..." style="width: 100%; height: 34px; margin-bottom: 6px;">
+        <div id="create-rep-dest-groups-list" style="max-height: 140px; overflow-y: auto; border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px; background: #f8fafc; display: flex; flex-direction: column; gap: 6px;">
+          <span style="color: #64748b; font-size: 11px;">Cargando lista de grupos destino...</span>
+        </div>
       </div>
 
+      <!-- PASO 6: DIAGNÓSTICOS COPIADOS DEL ORIGEN -->
       <div>
-        <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">5. Diagnósticos Copiados / Editables (Separados por comas o líneas):</label>
+        <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">6. Diagnósticos Copiados / Editables (Separados por comas o líneas):</label>
         <textarea id="create-rep-diagnostics" class="cgps-textarea" rows="4" placeholder="Cargando diagnósticos del reporte origen..." style="width: 100%;"></textarea>
       </div>
 
@@ -260,10 +278,16 @@
       <div class="cgps-card" style="margin-top: 10px;">
         <div style="font-size: 12px; font-weight: 700; color: #1b4e85; margin-bottom: 8px;">BUSCAR Y SELECCIONAR GRUPO O CLIENTE:</div>
         <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-          <input type="text" id="reports-search-input" class="cgps-input" placeholder="🔍 Escriba palabra clave del cliente..." style="width: 240px; height: 36px; font-size: 13px;">
+          
+          <select id="reports-parent-filter" class="cgps-input" style="width: 180px; height: 36px; font-weight: 700; color: #1b4e85;">
+            <option value="b278A">CLIENTES (b278A)</option>
+            <option value="b27A7">TIPO DE MOTOR (b27A7)</option>
+          </select>
+
+          <input type="text" id="reports-search-input" class="cgps-input" placeholder="🔍 Escriba palabra clave del cliente..." style="width: 220px; height: 36px; font-size: 13px;">
           <button id="reports-btn-search" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px; padding: 0 16px; font-weight: 700;">🔍 Buscar Cliente</button>
           
-          <select id="reports-group-select" class="cgps-input" style="width: 340px; height: 36px; font-weight: 600; color: #1b4e85;">
+          <select id="reports-group-select" class="cgps-input" style="width: 300px; height: 36px; font-weight: 600; color: #1b4e85;">
             <option value="">-- Seleccione un Grupo / Cliente --</option>
           </select>
           <span id="reports-unit-count" style="font-size: 13px; font-weight: 700; color: #0284c7;">0 activos en este grupo</span>
@@ -603,7 +627,6 @@ var addInConstructor = function (geotabApi, state, callback) {
   var PASS_CORRECTA = "3219878";
   var USUARIO_PERMITIDO = "ejecutivo.cuentas13@navisaf.pe";
 
-  // GRUPOS PADRES REQUERIDOS POR ID O NOMBRE
   var ALLOWED_PARENT_IDS = ["b278A", "b27A7", "b278a", "b27a7"];
   var ALLOWED_PARENT_NAMES = ["CLIENTES", "TIPO DE MOTOR"];
 
@@ -634,7 +657,7 @@ var addInConstructor = function (geotabApi, state, callback) {
   var DEVICE_FIELDS = ['id', 'name', 'licensePlate', 'licenseState', 'vehicleIdentificationNumber', 'serialNumber', 'activeFrom', 'activeTo', 'deviceType', 'groups', 'customProperties', 'customParameters', 'comment'];
 
   var all = [], groupsById = {}, statusById = {}, selected = {}, rawDevices = [];
-  var filteredAllowedGroupsList = []; // Carga ultrarrápida en memoria
+  var filteredAllowedGroupsList = []; 
   var rawSchedules = [], templateNamesById = {};
   var usersById = {}, rulesById = {}, diagById = {}, currentReportRows = [];
   var sourceGroupSchedules = [];
@@ -678,61 +701,41 @@ var addInConstructor = function (geotabApi, state, callback) {
       .trim();
   }
 
-  // ALGORITMO MEJORADO: Pre-procesa todos los grupos válidos rápidamente
-  function cacheAllowedGroups() {
-    var allowedIds = new Set();
-
-    // 1. Identificar nodos raíz
-    Object.keys(groupsById).forEach(function(gid) {
-      var g = groupsById[gid];
-      if (!g) return;
-      var gNameUpper = (g.name || '').toUpperCase().trim();
-      if (ALLOWED_PARENT_IDS.includes(g.id) || ALLOWED_PARENT_NAMES.includes(gNameUpper)) {
-        allowedIds.add(g.id);
-      }
-    });
-
-    // 2. Trazar ascendencia recursiva hacia los nodos raíz
-    filteredAllowedGroupsList = [];
-
+  // OBTENER GRUPOS DEPENDIENTES DE UN PADRE ESPECÍFICO
+  function getGroupsUnderParent(parentId) {
+    var result = [];
     Object.keys(groupsById).forEach(function(gid) {
       var g = groupsById[gid];
       if (!g || !g.name || /^Group/.test(g.id)) return;
 
       var current = g;
       var visited = new Set();
-      var isAllowed = false;
+      var isChild = false;
 
       while (current && current.id && !visited.has(current.id)) {
         visited.add(current.id);
         
         var cNameUpper = (current.name || '').toUpperCase().trim();
-        if (allowedIds.has(current.id) || ALLOWED_PARENT_IDS.includes(current.id) || ALLOWED_PARENT_NAMES.includes(cNameUpper)) {
-          isAllowed = true;
+        if (current.id === parentId || (parentId === 'b278A' && cNameUpper === 'CLIENTES') || (parentId === 'b27A7' && cNameUpper === 'TIPO DE MOTOR')) {
+          isChild = true;
           break;
         }
 
-        var parentId = current.parent ? (typeof current.parent === 'string' ? current.parent : current.parent.id) : null;
-        current = parentId ? groupsById[parentId] : null;
+        var pId = current.parent ? (typeof current.parent === 'string' ? current.parent : current.parent.id) : null;
+        current = pId ? groupsById[pId] : null;
       }
 
-      // Si no tiene padre explícito o Geotab no estructuró parent, incluir por defecto para no bloquear la búsqueda
-      if (isAllowed || Object.keys(groupsById).length < 50) {
-        filteredAllowedGroupsList.push(g);
+      if (isChild) {
+        result.push(g);
       }
     });
 
-    // Si por la jerarquía no se encontraron de forma estricta, incluir los grupos que no sean del sistema para garantizar la búsqueda
-    if (filteredAllowedGroupsList.length === 0) {
-      Object.keys(groupsById).forEach(function(gid) {
-        var g = groupsById[gid];
-        if (g && g.name && !/^Group/.test(g.id)) {
-          filteredAllowedGroupsList.push(g);
-        }
-      });
-    }
+    result.sort(function(a,b){ return a.name.localeCompare(b.name, 'es'); });
+    return result;
+  }
 
-    filteredAllowedGroupsList.sort(function(a,b){ return a.name.localeCompare(b.name, 'es'); });
+  function cacheAllowedGroups() {
+    filteredAllowedGroupsList = getGroupsUnderParent('b278A').concat(getGroupsUnderParent('b27A7'));
   }
 
   function extractCustomPropertiesMap(d) {
@@ -1034,18 +1037,21 @@ var addInConstructor = function (geotabApi, state, callback) {
     $('cgps-mass-value-input').placeholder = labelText + '...';
   }
 
-  // POBLAR SELECTOR DESPLEGABLE CON BÚSQUEDA RÁPIDA
-  function populateReportGroupsDropdown(filterQuery) {
+  // PASO 1 Y PASO 2: FILTRADO DE GRUPOS POR CATEGORÍA PADRE
+  function populateReportGroupsDropdown() {
+    var parentGid = $('reports-parent-filter').value;
+    var query = ($('reports-search-input').value || '').toLowerCase().trim();
     var sel = $('reports-group-select');
     if (!sel) return;
+
     sel.innerHTML = '<option value="">-- Seleccione un Grupo / Cliente --</option>';
 
-    var q = (filterQuery || '').toLowerCase().trim();
+    var subGroups = getGroupsUnderParent(parentGid);
     var count = 0;
 
-    for (var i = 0; i < filteredAllowedGroupsList.length; i++) {
-      var g = filteredAllowedGroupsList[i];
-      if (!q || g.name.toLowerCase().indexOf(q) >= 0) {
+    for (var i = 0; i < subGroups.length; i++) {
+      var g = subGroups[i];
+      if (!query || g.name.toLowerCase().indexOf(query) >= 0) {
         var opt = document.createElement('option');
         opt.value = g.id;
         opt.textContent = g.name + " (" + g.id + ")";
@@ -1092,6 +1098,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     return { total: reportes.length, reportes };
   }
 
+  // PASO 3: SELECCIÓN DE RAZÓN SOCIAL CARGA SUS REPORTES
   async function handleReportGroupChange() {
     var gid = $('reports-group-select').value;
     var units = getUnitsForSelectedReportGroup();
@@ -1105,8 +1112,8 @@ var addInConstructor = function (geotabApi, state, callback) {
       return;
     }
 
-    showLoading("Filtrando programaciones CustomReportSchedule...", 40);
-    setMsg("Filtrando programaciones CustomReportSchedule para el grupo seleccionado...");
+    showLoading("Filtrando programaciones de la razón social...", 40);
+    setMsg("Filtrando programaciones para la razón social seleccionada...");
 
     try {
       if (!rawSchedules || rawSchedules.length === 0) {
@@ -1354,23 +1361,47 @@ var addInConstructor = function (geotabApi, state, callback) {
     $('report-preview-modal').style.display = 'flex';
   }
 
-  // POBLAR CLIENTE ORIGEN EN MODAL
-  function populateSourceGroupsDropdown(filterQuery) {
+  // PASO 1 Y 2 DENTRO DEL MODAL: POBLAR CLIENTE ORIGEN POR CATEGORÍA
+  function populateSourceGroupsDropdown() {
+    var parentGid = $('create-rep-parent-cat').value;
+    var query = ($('create-rep-source-search').value || '').toLowerCase().trim();
     var sel = $('create-rep-source-group');
     if (!sel) return;
+
     sel.innerHTML = '<option value="">-- Seleccione Cliente Origen --</option>';
 
-    var q = (filterQuery || '').toLowerCase().trim();
+    var subGroups = getGroupsUnderParent(parentGid);
 
-    for (var i = 0; i < filteredAllowedGroupsList.length; i++) {
-      var g = filteredAllowedGroupsList[i];
-      if (!q || g.name.toLowerCase().indexOf(q) >= 0) {
+    for (var i = 0; i < subGroups.length; i++) {
+      var g = subGroups[i];
+      if (!query || g.name.toLowerCase().indexOf(query) >= 0) {
         var opt = document.createElement('option');
         opt.value = g.id;
         opt.textContent = g.name + " (" + g.id + ")";
         sel.appendChild(opt);
       }
     }
+  }
+
+  // PASO 5: RENDERS LISTA INTERACTIVA CON CHECKBOXES PARA GRUPOS DESTINO
+  function renderDestinationGroupsList() {
+    var container = $('create-rep-dest-groups-list');
+    var query = ($('create-rep-dest-search').value || '').toLowerCase().trim();
+    if (!container) return;
+
+    var allDestGroups = getGroupsUnderParent('b278A').concat(getGroupsUnderParent('b27A7'));
+    var html = '';
+
+    allDestGroups.forEach(function(g) {
+      if (!query || g.name.toLowerCase().indexOf(query) >= 0) {
+        html += '<label style="display: flex; align-items: center; gap: 6px; font-size: 11px; cursor: pointer;">' +
+          '<input type="checkbox" class="chk-dest-group" value="' + htmlEsc(g.id) + '"> ' +
+          '<span>' + htmlEsc(g.name) + ' (' + htmlEsc(g.id) + ')</span>' +
+          '</label>';
+      }
+    });
+
+    container.innerHTML = html || '<span style="color:#64748b; font-size:11px;">No se encontraron grupos destino coincidentes.</span>';
   }
 
   async function handleSourceGroupChange() {
@@ -1380,7 +1411,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     scheduleSel.disabled = true;
 
     if (!sourceGid) {
-      scheduleSel.innerHTML = '<option value="">-- Primero seleccione un cliente origen --</option>';
+      scheduleSel.innerHTML = '<option value="">-- Primero seleccione la razón social origen --</option>';
       return;
     }
 
@@ -1389,7 +1420,7 @@ var addInConstructor = function (geotabApi, state, callback) {
       sourceGroupSchedules = resObj.reportes;
 
       if (!sourceGroupSchedules || sourceGroupSchedules.length === 0) {
-        scheduleSel.innerHTML = '<option value="">-- Este cliente origen no tiene reportes cargados --</option>';
+        scheduleSel.innerHTML = '<option value="">-- Esta razón social no tiene reportes cargados --</option>';
         return;
       }
 
@@ -1410,6 +1441,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     }
   }
 
+  // PASO 4 Y 6: ADOPTAR FORMATO + RAZÓN SOCIAL Y EXTRAER DIAGNÓSTICOS
   function handleSourceScheduleChange() {
     var schedId = $('create-rep-source-schedule').value;
     if (!schedId) return;
@@ -1417,9 +1449,9 @@ var addInConstructor = function (geotabApi, state, callback) {
     var selectedSched = sourceGroupSchedules.find(function(s){ return s.id === schedId; });
     if (!selectedSched) return;
 
-    var destGid = $('reports-group-select').value;
-    var destGroupObj = groupsById[destGid];
-    var destName = destGroupObj ? destGroupObj.name : destGid;
+    var sourceGid = $('create-rep-source-group').value;
+    var sourceGroupObj = groupsById[sourceGid];
+    var razonSocialName = sourceGroupObj ? sourceGroupObj.name : sourceGid;
 
     var fullSearchStr = (selectedSched.name || '').toLowerCase();
     var prefix = "Monitoreo de flota y rendimiento de combustible - ";
@@ -1431,8 +1463,9 @@ var addInConstructor = function (geotabApi, state, callback) {
     }
 
     $('create-rep-name-prefix-preset').value = prefix;
-    $('create-rep-name').value = prefix + destName;
+    $('create-rep-name').value = prefix + razonSocialName;
 
+    // COPIAR DIAGNÓSTICOS TAL CUAL DEL REPORTE ELEGIDO
     var a = selectedSched.arguments || {};
     var diags = (a.diagnostics || []).map(function(d){ 
       return (diagById[d.id] || d.id); 
@@ -1444,45 +1477,42 @@ var addInConstructor = function (geotabApi, state, callback) {
   function applyNamePrefixPreset() {
     var prefix = $('create-rep-name-prefix-preset').value;
     var currentName = $('create-rep-name').value;
-    
-    var destGid = $('reports-group-select').value;
-    var destGroupObj = groupsById[destGid];
-    var destName = destGroupObj ? destGroupObj.name : destGid;
+    var razonSocialName = "";
+
+    var sourceGid = $('create-rep-source-group').value;
+    if (sourceGid && groupsById[sourceGid]) {
+      razonSocialName = groupsById[sourceGid].name;
+    }
 
     if (currentName.indexOf(' - ') >= 0) {
       var parts = currentName.split(' - ');
       parts.shift();
-      destName = parts.join(' - ');
+      razonSocialName = parts.join(' - ');
     }
 
-    $('create-rep-name').value = prefix + destName;
+    $('create-rep-name').value = prefix + razonSocialName;
   }
 
   function openCreateReportModal() {
-    var gid = $('reports-group-select').value;
-    if (!gid) {
-      alert("Por favor, seleccione primero un Cliente / Grupo de la lista desplegable.");
-      return;
-    }
-    var groupObj = groupsById[gid];
-    var groupName = groupObj ? groupObj.name : gid;
-    
-    $('create-rep-group-display').value = groupName + " (" + gid + ")";
     $('create-rep-name').value = "";
     $('create-rep-diagnostics').value = "";
     $('create-rep-status').textContent = "";
     $('create-rep-source-search').value = "";
+    $('create-rep-dest-search').value = "";
     
     populateSourceGroupsDropdown();
+    renderDestinationGroupsList();
     $('create-report-modal').style.display = 'flex';
   }
 
   async function createAndSubmitReport() {
-    var gid = $('reports-group-select').value;
     var sourceSchedId = $('create-rep-source-schedule').value;
     var repName = $('create-rep-name').value.trim();
     var diagText = $('create-rep-diagnostics').value.trim();
     var statusDiv = $('create-rep-status');
+
+    var selectedDestCheckboxes = document.querySelectorAll('.chk-dest-group:checked');
+    var destGroupsList = Array.from(selectedDestCheckboxes).map(function(cb) { return { id: cb.value }; });
 
     if (!sourceSchedId) {
       statusDiv.style.color = "#dc2626";
@@ -1493,6 +1523,12 @@ var addInConstructor = function (geotabApi, state, callback) {
     if (!repName) {
       statusDiv.style.color = "#dc2626";
       statusDiv.textContent = "Ingrese un nombre para el reporte.";
+      return;
+    }
+
+    if (destGroupsList.length === 0) {
+      statusDiv.style.color = "#dc2626";
+      statusDiv.textContent = "Seleccione al menos un grupo destino.";
       return;
     }
 
@@ -1513,7 +1549,7 @@ var addInConstructor = function (geotabApi, state, callback) {
         name: repName,
         isActive: true,
         template: sourceSched.template,
-        groups: [{ id: gid }],
+        groups: destGroupsList,
         arguments: {
           rules: (sourceSched.arguments && sourceSched.arguments.rules) ? sourceSched.arguments.rules : [],
           diagnostics: diagList
@@ -2070,7 +2106,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     });
   }
 
-  // BOTONES DE RECARGA/SINCRONIZACIÓN
+  // RECARGA Y SINCRONIZACIÓN
   $('testn-btn-refresh-hub').addEventListener('click', function() { load(); });
   $('testn-btn-refresh-mod').addEventListener('click', function() { load(); });
 
@@ -2115,35 +2151,42 @@ var addInConstructor = function (geotabApi, state, callback) {
     setMsg('Filtros de fecha restablecidos.');
   });
 
-  // EVENTOS DE FILTRADO MASIVO
+  // FILTRADO MASIVO DE ACTIVOS
   $('cgps-btn-bulk').addEventListener('click', function() { applyBulkFilter($('cgps-bulk-input').value); });
   $('cgps-btn-bulk-clear').addEventListener('click', function() { $('cgps-bulk-input').value = ''; applyBulkFilter(''); });
   
   $('cgps-btn-bulk-std').addEventListener('click', function() { applyBulkFilter($('cgps-bulk-input-std').value); });
   $('cgps-btn-bulk-clear-std').addEventListener('click', function() { $('cgps-bulk-input-std').value = ''; applyBulkFilter(''); });
 
-  // BÚSQUEDA Y SELECCIÓN DE CLIENTES DE RESPUESTA INMEDIATA
+  // BÚSQUEDA Y FILTRADO PASOS 1 Y 2
+  $('reports-parent-filter').addEventListener('change', populateReportGroupsDropdown);
+
   function triggerClientGroupSearch() {
-    var query = $('reports-search-input').value;
-    populateReportGroupsDropdown(query);
+    populateReportGroupsDropdown();
   }
 
   $('reports-btn-search').addEventListener('click', triggerClientGroupSearch);
 
   $('reports-search-input').addEventListener('keyup', function(e) {
-    populateReportGroupsDropdown(this.value);
+    populateReportGroupsDropdown();
   });
 
   $('reports-group-select').addEventListener('change', handleReportGroupChange);
 
-  // EVENTOS DEL MODAL DE CREACIÓN / CLONACIÓN DE REPORTES
+  // EVENTOS DEL MODAL DE CREACIÓN DE REPORTES
   $('reports-btn-open-create-modal').addEventListener('click', openCreateReportModal);
   $('btn-close-create-modal').addEventListener('click', function() {
     $('create-report-modal').style.display = 'none';
   });
 
+  $('create-rep-parent-cat').addEventListener('change', populateSourceGroupsDropdown);
+
   $('create-rep-source-search').addEventListener('keyup', function() {
-    populateSourceGroupsDropdown(this.value);
+    populateSourceGroupsDropdown();
+  });
+
+  $('create-rep-dest-search').addEventListener('keyup', function() {
+    renderDestinationGroupsList();
   });
 
   $('create-rep-source-group').addEventListener('change', handleSourceGroupChange);
@@ -2152,7 +2195,7 @@ var addInConstructor = function (geotabApi, state, callback) {
 
   $('btn-submit-create-report').addEventListener('click', createAndSubmitReport);
 
-  // EVENTOS MODAL VISUAL Y BOTONES DE COPIA
+  // EVENTOS MODAL VISUAL Y COPIA
   $('btn-close-prev-modal').addEventListener('click', function() {
     $('report-preview-modal').style.display = 'none';
   });
@@ -2180,7 +2223,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     if (found) openReportPreviewModal(found);
   });
 
-  // FILTROS DE AUDITORÍA Y PALABRA CLAVE DE REPORTES
+  // FILTROS DE REPORTES Y PALABRA CLAVE
   $('rep-filter-from').addEventListener('change', applyReportFilters);
   $('rep-filter-to').addEventListener('change', applyReportFilters);
   $('rep-filter-user').addEventListener('change', applyReportFilters);
@@ -2202,7 +2245,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     setMsg('Auditoría de grupos limpiada.');
   });
 
-  // EVENTOS CERTI GPS
+  // CERTI GPS
   $('cgps-btn-view').addEventListener('click', function() {
     switchView('certi');
     $('sec-controls-container').scrollIntoView({ behavior: 'smooth' });
@@ -2218,7 +2261,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     });
   });
 
-  // EVENTOS KPI DASHBOARD INTERACTIVOS
+  // EVENTOS KPI DASHBOARD
   $('kpi-card-sn-vin').addEventListener('click', function() { activeUnitFilter = (activeUnitFilter === 'snVin') ? 'all' : 'snVin'; renderList(); });
   $('kpi-card-novin').addEventListener('click', function() { activeUnitFilter = (activeUnitFilter === 'noVin') ? 'all' : 'noVin'; renderList(); });
   $('kpi-card-nosn').addEventListener('click', function() { activeUnitFilter = (activeUnitFilter === 'noSn') ? 'all' : 'noSn'; renderList(); });
@@ -2232,7 +2275,7 @@ var addInConstructor = function (geotabApi, state, callback) {
   $('kpi-card-sintipo').addEventListener('click', function() { activeTypeFilter = (activeTypeFilter === 'sintipo') ? 'all' : 'sintipo'; renderList(); });
   $('kpi-card-otros').addEventListener('click', function() { activeTypeFilter = (activeTypeFilter === 'otros') ? 'all' : 'otros'; renderList(); });
 
-  // NAVEGACIÓN
+  // NAVEGACIÓN ENTRE MÓDULOS
   $('btn-mod-certi').addEventListener('click', function() { switchView('certi'); });
   $('btn-mod-valid').addEventListener('click', function() { switchView('valid'); });
   $('btn-mod-master').addEventListener('click', function() { switchView('master'); });
@@ -2241,12 +2284,12 @@ var addInConstructor = function (geotabApi, state, callback) {
   $('btn-mod-activations').addEventListener('click', function() { switchView('activations'); });
   $('testn-btn-back').addEventListener('click', function() { switchView('hub'); });
 
-  // BÚSQUEDA Y SELECTOR DE CAMPO
+  // BÚSQUEDA Y SELECTOR DE CAMPO EN TABLA
   var filterTimer = null;
   $('cgps-filter').addEventListener('input', function () { clearTimeout(filterTimer); filterTimer = setTimeout(renderList, 200); });
   $('cgps-filter-field').addEventListener('change', renderList);
 
-  // MANEJO DE SELECCIÓN EN TABLA
+  // SELECCIÓN EN TABLA
   $('cgps-listbody').addEventListener('change', function (e) {
     var id = e.target.getAttribute('data-id');
     if (e.target.type === 'checkbox' && id) {
