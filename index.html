@@ -90,10 +90,7 @@
 
     <div style="display: flex; flex-direction: column; gap: 14px; font-size: 12px;">
       <div>
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-          <label style="font-weight: 700; color: #1b4e85;">1. Seleccionar Cliente Origen (Plantilla Base):</label>
-          <span style="font-size: 10px; color: #64748b; font-weight: 600;">(Solo de b278A y b27A7)</span>
-        </div>
+        <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">1. Seleccionar Cliente Origen (Plantilla Base):</label>
         <div style="display: flex; gap: 6px;">
           <input type="text" id="create-rep-source-search" class="cgps-input" placeholder="🔍 Filtrar origen por palabra clave..." style="width: 220px; height: 36px;">
           <select id="create-rep-source-group" class="cgps-input" style="flex: 1; height: 36px; font-weight: 600;">
@@ -110,7 +107,7 @@
       </div>
 
       <div>
-        <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">3. Nombre del Nuevo Reporte (Estructura Estándar Seleccionable):</label>
+        <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">3. Nombre del Nuevo Reporte:</label>
         <div style="display: flex; gap: 8px; margin-bottom: 6px;">
           <select id="create-rep-name-prefix-preset" class="cgps-input" style="width: 320px; height: 36px; font-weight: 700; color: #1b4e85;">
             <option value="Monitoreo de flota y rendimiento de combustible - ">Monitoreo de flota y rendimiento de combustible - </option>
@@ -261,7 +258,7 @@
     <!-- Módulo Reportes por Cliente -->
     <div id="sec-reports" style="display: none;">
       <div class="cgps-card" style="margin-top: 10px;">
-        <div style="font-size: 12px; font-weight: 700; color: #1b4e85; margin-bottom: 8px;">BUSCAR Y SELECCIONAR GRUPO O CLIENTE (Exclusivo CLIENTES b278A y TIPO DE MOTOR b27A7):</div>
+        <div style="font-size: 12px; font-weight: 700; color: #1b4e85; margin-bottom: 8px;">BUSCAR Y SELECCIONAR GRUPO O CLIENTE:</div>
         <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
           <input type="text" id="reports-search-input" class="cgps-input" placeholder="🔍 Escriba palabra clave del cliente..." style="width: 240px; height: 36px; font-size: 13px;">
           <button id="reports-btn-search" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px; padding: 0 16px; font-weight: 700;">🔍 Buscar Cliente</button>
@@ -636,6 +633,7 @@ var addInConstructor = function (geotabApi, state, callback) {
   var DEVICE_FIELDS = ['id', 'name', 'licensePlate', 'licenseState', 'vehicleIdentificationNumber', 'serialNumber', 'activeFrom', 'activeTo', 'deviceType', 'groups', 'customProperties', 'customParameters', 'comment'];
 
   var all = [], groupsById = {}, statusById = {}, selected = {}, rawDevices = [];
+  var filteredAllowedGroupsList = []; // Cache rápido de grupos filtrados por b278A y b27A7
   var rawSchedules = [], templateNamesById = {};
   var usersById = {}, rulesById = {}, diagById = {}, currentReportRows = [];
   var sourceGroupSchedules = [];
@@ -679,25 +677,33 @@ var addInConstructor = function (geotabApi, state, callback) {
       .trim();
   }
 
-  function isGroupUnderAllowedParents(groupId) {
-    if (!groupId) return false;
-    var current = groupsById[groupId];
-    var visited = new Set();
+  // Pre-calcular la lista permitida de grupos para respuesta ultrasónica en la búsqueda
+  function cacheAllowedGroups() {
+    filteredAllowedGroupsList = [];
+    Object.keys(groupsById).forEach(function(gid) {
+      var g = groupsById[gid];
+      if (!g || !g.name || /^Group/.test(g.id)) return;
 
-    while (current && current.id && !visited.has(current.id)) {
-      visited.add(current.id);
-      if (ALLOWED_PARENT_GROUPS.includes(current.id)) {
-        return true;
-      }
-      if (current.children && Array.isArray(current.children)) {
-        for (var i = 0; i < current.children.length; i++) {
-          if (ALLOWED_PARENT_GROUPS.includes(current.children[i].id)) return true;
+      var current = g;
+      var visited = new Set();
+      var isAllowed = false;
+
+      while (current && current.id && !visited.has(current.id)) {
+        visited.add(current.id);
+        if (ALLOWED_PARENT_GROUPS.includes(current.id)) {
+          isAllowed = true;
+          break;
         }
+        var parentId = current.parent ? (typeof current.parent === 'string' ? current.parent : current.parent.id) : null;
+        current = parentId ? groupsById[parentId] : null;
       }
-      var parentId = current.parent ? (typeof current.parent === 'string' ? current.parent : current.parent.id) : null;
-      current = parentId ? groupsById[parentId] : null;
-    }
-    return false;
+
+      if (isAllowed) {
+        filteredAllowedGroupsList.push(g);
+      }
+    });
+
+    filteredAllowedGroupsList.sort(function(a,b){ return a.name.localeCompare(b.name, 'es'); });
   }
 
   function extractCustomPropertiesMap(d) {
@@ -857,6 +863,7 @@ var addInConstructor = function (geotabApi, state, callback) {
       .filter(function (r) { return !r.isExcluded; })
       .sort(function (a, b) { return a.placa.localeCompare(b.placa, 'es', { numeric: true }); });
     
+    cacheAllowedGroups();
     populateReportGroupsDropdown();
     updateKPIs();
   }
@@ -998,7 +1005,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     $('cgps-mass-value-input').placeholder = labelText + '...';
   }
 
-  // FILTRADO EXCLUSIVO DE GRUPOS PADRES b278A Y b27A7
+  // BÚSQUEDA RÁPIDA ULTRASÓNICA SOBRE LA LISTA PRE-CALCULADA
   function populateReportGroupsDropdown(filterQuery) {
     var sel = $('reports-group-select');
     if (!sel) return;
@@ -1006,28 +1013,19 @@ var addInConstructor = function (geotabApi, state, callback) {
 
     var q = (filterQuery || '').toLowerCase().trim();
 
-    var sortedGroups = [];
-    Object.keys(groupsById).forEach(function(gid) {
-      var g = groupsById[gid];
-      if (g && g.name && !/^Group/.test(g.id)) {
-        if (isGroupUnderAllowedParents(g.id)) {
-          if (!q || g.name.toLowerCase().indexOf(q) >= 0) {
-            sortedGroups.push(g);
-          }
-        }
+    var count = 0;
+    for (var i = 0; i < filteredAllowedGroupsList.length; i++) {
+      var g = filteredAllowedGroupsList[i];
+      if (!q || g.name.toLowerCase().indexOf(q) >= 0) {
+        var opt = document.createElement('option');
+        opt.value = g.id;
+        opt.textContent = g.name + " (" + g.id + ")";
+        sel.appendChild(opt);
+        count++;
       }
-    });
+    }
 
-    sortedGroups.sort(function(a,b){ return a.name.localeCompare(b.name, 'es'); });
-
-    sortedGroups.forEach(function(g) {
-      var opt = document.createElement('option');
-      opt.value = g.id;
-      opt.textContent = g.name + " (" + g.id + ")";
-      sel.appendChild(opt);
-    });
-
-    if (sortedGroups.length === 1) {
+    if (count === 1) {
       sel.selectedIndex = 1;
     }
   }
@@ -1327,7 +1325,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     $('report-preview-modal').style.display = 'flex';
   }
 
-  // CORDENAMIENTO Y FILTRADO EN MODAL ORIGEN (b278A y b27A7)
+  // CORDENAMIENTO Y FILTRADO EN MODAL ORIGEN CON CACHE
   function populateSourceGroupsDropdown(filterQuery) {
     var sel = $('create-rep-source-group');
     if (!sel) return;
@@ -1335,26 +1333,15 @@ var addInConstructor = function (geotabApi, state, callback) {
 
     var q = (filterQuery || '').toLowerCase().trim();
 
-    var sortedGroups = [];
-    Object.keys(groupsById).forEach(function(gid) {
-      var g = groupsById[gid];
-      if (g && g.name && !/^Group/.test(g.id)) {
-        if (isGroupUnderAllowedParents(g.id)) {
-          if (!q || g.name.toLowerCase().indexOf(q) >= 0) {
-            sortedGroups.push(g);
-          }
-        }
+    for (var i = 0; i < filteredAllowedGroupsList.length; i++) {
+      var g = filteredAllowedGroupsList[i];
+      if (!q || g.name.toLowerCase().indexOf(q) >= 0) {
+        var opt = document.createElement('option');
+        opt.value = g.id;
+        opt.textContent = g.name + " (" + g.id + ")";
+        sel.appendChild(opt);
       }
-    });
-
-    sortedGroups.sort(function(a,b){ return a.name.localeCompare(b.name, 'es'); });
-
-    sortedGroups.forEach(function(g) {
-      var opt = document.createElement('option');
-      opt.value = g.id;
-      opt.textContent = g.name + " (" + g.id + ")";
-      sel.appendChild(opt);
-    });
+    }
   }
 
   async function handleSourceGroupChange() {
@@ -2106,20 +2093,21 @@ var addInConstructor = function (geotabApi, state, callback) {
   $('cgps-btn-bulk-std').addEventListener('click', function() { applyBulkFilter($('cgps-bulk-input-std').value); });
   $('cgps-btn-bulk-clear-std').addEventListener('click', function() { $('cgps-bulk-input-std').value = ''; applyBulkFilter(''); });
 
-  // BÚSQUEDA Y FILTRADO DE GRUPOS / CLIENTES
+  // BÚSQUEDA FLUIDA CON DEBOUNCE ULTRA RÁPIDO
+  var searchDebounceTimer = null;
   function triggerClientGroupSearch() {
     var query = $('reports-search-input').value;
-    showLoading("Buscando coincidencias de clientes autorizados (b278A / b27A7)...", 30);
-    setTimeout(function() {
-      populateReportGroupsDropdown(query);
-      handleReportGroupChange();
-    }, 150);
+    populateReportGroupsDropdown(query);
   }
 
   $('reports-btn-search').addEventListener('click', triggerClientGroupSearch);
 
   $('reports-search-input').addEventListener('input', function() {
-    populateReportGroupsDropdown(this.value);
+    var val = this.value;
+    clearTimeout(searchDebounceTimer);
+    searchDebounceTimer = setTimeout(function() {
+      populateReportGroupsDropdown(val);
+    }, 50);
   });
 
   $('reports-group-select').addEventListener('change', handleReportGroupChange);
@@ -2131,7 +2119,11 @@ var addInConstructor = function (geotabApi, state, callback) {
   });
 
   $('create-rep-source-search').addEventListener('input', function() {
-    populateSourceGroupsDropdown(this.value);
+    var val = this.value;
+    clearTimeout(searchDebounceTimer);
+    searchDebounceTimer = setTimeout(function() {
+      populateSourceGroupsDropdown(val);
+    }, 50);
   });
 
   $('create-rep-source-group').addEventListener('change', handleSourceGroupChange);
