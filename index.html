@@ -90,7 +90,7 @@
 
     <div style="display: flex; flex-direction: column; gap: 14px; font-size: 12px;">
       
-      <!-- PASO 1: SELECCIÓN DE GRUPO PADRE ORIGEN -->
+      <!-- PASO 1: SELECCIÓN DE CATEGORÍA BASE ORIGEN -->
       <div>
         <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">1. Categoría Base Origen:</label>
         <select id="create-rep-parent-cat" class="cgps-input" style="width: 100%; height: 36px; font-weight: 700; color: #1b4e85;">
@@ -103,14 +103,14 @@
       <div>
         <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">2. Filtrar Razón Social Origen (Cliente):</label>
         <div style="display: flex; gap: 6px;">
-          <input type="text" id="create-rep-source-search" class="cgps-input" placeholder="🔍 Escriba palabra clave para buscar razón social..." style="width: 240px; height: 36px;">
+          <input type="text" id="create-rep-source-search" class="cgps-input" placeholder="🔍 Escriba palabra clave para buscar..." style="width: 240px; height: 36px;">
           <select id="create-rep-source-group" class="cgps-input" style="flex: 1; height: 36px; font-weight: 600;">
             <option value="">-- Seleccione Cliente Origen --</option>
           </select>
         </div>
       </div>
 
-      <!-- PASO 3: SELECCIÓN DEL REPORTE BASE -->
+      <!-- PASO 3: SELECCIÓN DEL REPORTE BASE POR NOMBRE -->
       <div>
         <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">3. Seleccionar Reporte Base a Clonar:</label>
         <select id="create-rep-source-schedule" class="cgps-input" style="width: 100%; height: 36px; font-weight: 600;" disabled>
@@ -627,9 +627,6 @@ var addInConstructor = function (geotabApi, state, callback) {
   var PASS_CORRECTA = "3219878";
   var USUARIO_PERMITIDO = "ejecutivo.cuentas13@navisaf.pe";
 
-  var ALLOWED_PARENT_IDS = ["b278A", "b27A7", "b278a", "b27a7"];
-  var ALLOWED_PARENT_NAMES = ["CLIENTES", "TIPO DE MOTOR"];
-
   document.getElementById('testn-btn-login').addEventListener('click', function() {
     var val = document.getElementById('testn-pass-input').value;
     if (val === PASS_CORRECTA) {
@@ -701,34 +698,84 @@ var addInConstructor = function (geotabApi, state, callback) {
       .trim();
   }
 
-  // OBTENER GRUPOS DEPENDIENTES DE UN PADRE ESPECÍFICO
+  // ALGORITMO RECURSIVO MEJORADO: OBTIENE TODOS LOS SUBGRUPOS HOJA O INTERMEDIOS
   function getGroupsUnderParent(parentId) {
+    var parentG = groupsById[parentId];
+    var rootIds = new Set();
+
+    if (parentG) {
+      rootIds.add(parentG.id);
+    } else {
+      Object.keys(groupsById).forEach(function(gid) {
+        var g = groupsById[gid];
+        if (!g || !g.name) return;
+        var nameUpper = g.name.toUpperCase().trim();
+        if ((parentId === 'b278A' && nameUpper === 'CLIENTES') || 
+            (parentId === 'b27A7' && nameUpper === 'TIPO DE MOTOR')) {
+          rootIds.add(g.id);
+        }
+      });
+    }
+
     var result = [];
+    var childrenMap = {};
+
     Object.keys(groupsById).forEach(function(gid) {
       var g = groupsById[gid];
-      if (!g || !g.name || /^Group/.test(g.id)) return;
-
-      var current = g;
-      var visited = new Set();
-      var isChild = false;
-
-      while (current && current.id && !visited.has(current.id)) {
-        visited.add(current.id);
-        
-        var cNameUpper = (current.name || '').toUpperCase().trim();
-        if (current.id === parentId || (parentId === 'b278A' && cNameUpper === 'CLIENTES') || (parentId === 'b27A7' && cNameUpper === 'TIPO DE MOTOR')) {
-          isChild = true;
-          break;
-        }
-
-        var pId = current.parent ? (typeof current.parent === 'string' ? current.parent : current.parent.id) : null;
-        current = pId ? groupsById[pId] : null;
-      }
-
-      if (isChild) {
-        result.push(g);
+      if (!g) return;
+      var pId = g.parent ? (typeof g.parent === 'string' ? g.parent : g.parent.id) : null;
+      if (pId) {
+        if (!childrenMap[pId]) childrenMap[pId] = [];
+        childrenMap[pId].push(g);
       }
     });
+
+    var queue = Array.from(rootIds);
+    var visited = new Set(queue);
+
+    while (queue.length > 0) {
+      var currId = queue.shift();
+      var kids = childrenMap[currId] || [];
+
+      kids.forEach(function(child) {
+        if (!visited.has(child.id)) {
+          visited.add(child.id);
+          if (child.name && !/^Group/.test(child.id)) {
+            result.push(child);
+          }
+          queue.push(child.id);
+        }
+      });
+    }
+
+    // Si por la estructura Geotab no tiene enlace directo parent, fallback de coincidencia por ascendencia
+    if (result.length === 0) {
+      Object.keys(groupsById).forEach(function(gid) {
+        var g = groupsById[gid];
+        if (!g || !g.name || /^Group/.test(g.id)) return;
+        
+        var current = g;
+        var pathVisited = new Set();
+        var isChild = false;
+
+        while (current && current.id && !pathVisited.has(current.id)) {
+          pathVisited.add(current.id);
+          var cNameUpper = (current.name || '').toUpperCase().trim();
+          if (rootIds.has(current.id) || 
+             (parentId === 'b278A' && cNameUpper === 'CLIENTES') || 
+             (parentId === 'b27A7' && cNameUpper === 'TIPO DE MOTOR')) {
+            isChild = true;
+            break;
+          }
+          var pId = current.parent ? (typeof current.parent === 'string' ? current.parent : current.parent.id) : null;
+          current = pId ? groupsById[pId] : null;
+        }
+
+        if (isChild && !rootIds.has(g.id)) {
+          result.push(g);
+        }
+      });
+    }
 
     result.sort(function(a,b){ return a.name.localeCompare(b.name, 'es'); });
     return result;
@@ -1037,7 +1084,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     $('cgps-mass-value-input').placeholder = labelText + '...';
   }
 
-  // PASO 1 Y PASO 2: FILTRADO DE GRUPOS POR CATEGORÍA PADRE
+  // PASO 1 Y PASO 2: FILTRADO DE TODAS LAS RAZONES SOCIALES QUE DERIVAN DE LA CATEGORÍA BASE
   function populateReportGroupsDropdown() {
     var parentGid = $('reports-parent-filter').value;
     var query = ($('reports-search-input').value || '').toLowerCase().trim();
@@ -1098,7 +1145,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     return { total: reportes.length, reportes };
   }
 
-  // PASO 3: SELECCIÓN DE RAZÓN SOCIAL CARGA SUS REPORTES
+  // PASO 3: CARGAR REPORTES DE LA RAZÓN SOCIAL Y VALIDAR LOS 3 BÁSICOS
   async function handleReportGroupChange() {
     var gid = $('reports-group-select').value;
     var units = getUnitsForSelectedReportGroup();
@@ -1361,7 +1408,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     $('report-preview-modal').style.display = 'flex';
   }
 
-  // PASO 1 Y 2 DENTRO DEL MODAL: POBLAR CLIENTE ORIGEN POR CATEGORÍA
+  // PASO 1 Y 2 DENTRO DEL MODAL: POBLAR CLIENTES Y SUBGRUPOS DERIVADOS
   function populateSourceGroupsDropdown() {
     var parentGid = $('create-rep-parent-cat').value;
     var query = ($('create-rep-source-search').value || '').toLowerCase().trim();
@@ -1404,6 +1451,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     container.innerHTML = html || '<span style="color:#64748b; font-size:11px;">No se encontraron grupos destino coincidentes.</span>';
   }
 
+  // PASO 3: SELECCIÓN DEL REPORTE MOSTRANDO SU NOMBRE (NO ID)
   async function handleSourceGroupChange() {
     var sourceGid = $('create-rep-source-group').value;
     var scheduleSel = $('create-rep-source-schedule');
@@ -1424,10 +1472,17 @@ var addInConstructor = function (geotabApi, state, callback) {
         return;
       }
 
+      var tplIds = [];
+      sourceGroupSchedules.forEach(function(s) {
+        if (s.template && s.template.id) tplIds.push(s.template.id);
+      });
+      await resolveNames('ReportTemplate', tplIds, templateNamesById);
+
       scheduleSel.innerHTML = '<option value="">-- Seleccione el reporte a clonar --</option>';
       sourceGroupSchedules.forEach(function(s) {
         var tplId = s.template ? s.template.id : '';
-        var rName = s.name || (tplId ? (templateNamesById[tplId] || tplId) : 'Reporte sin nombre');
+        // Nombre limpio amigable en lugar de IDs
+        var rName = s.name || (tplId ? (templateNamesById[tplId] || 'Plantilla de Reporte') : 'Reporte de Cliente');
         var opt = document.createElement('option');
         opt.value = s.id;
         opt.textContent = rName;
@@ -1441,7 +1496,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     }
   }
 
-  // PASO 4 Y 6: ADOPTAR FORMATO + RAZÓN SOCIAL Y EXTRAER DIAGNÓSTICOS
+  // PASO 4 Y 6: ADOPTAR FORMATO + RAZÓN SOCIAL Y COPIAR DIAGNÓSTICOS
   function handleSourceScheduleChange() {
     var schedId = $('create-rep-source-schedule').value;
     if (!schedId) return;
@@ -1453,7 +1508,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     var sourceGroupObj = groupsById[sourceGid];
     var razonSocialName = sourceGroupObj ? sourceGroupObj.name : sourceGid;
 
-    var fullSearchStr = (selectedSched.name || '').toLowerCase();
+    var fullSearchStr = (selectedSched.name || (selectedSched.template ? templateNamesById[selectedSched.template.id] : '') || '').toLowerCase();
     var prefix = "Monitoreo de flota y rendimiento de combustible - ";
 
     if (fullSearchStr.indexOf('seguridad') >= 0) {
@@ -1465,7 +1520,6 @@ var addInConstructor = function (geotabApi, state, callback) {
     $('create-rep-name-prefix-preset').value = prefix;
     $('create-rep-name').value = prefix + razonSocialName;
 
-    // COPIAR DIAGNÓSTICOS TAL CUAL DEL REPORTE ELEGIDO
     var a = selectedSched.arguments || {};
     var diags = (a.diagnostics || []).map(function(d){ 
       return (diagById[d.id] || d.id); 
