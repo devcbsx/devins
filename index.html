@@ -296,15 +296,15 @@
             <label style="font-size: 13px; font-weight: 700; color: #1e293b;">2 Búsqueda de clientes o tipo de vehiculo</label>
             <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
               
-              <!-- 1. SELECTOR DE CLIENTE -->
+              <!-- 1. SELECTOR DE CLIENTE / SUBGRUPOS HOJA -->
               <select id="reports-group-select" class="cgps-input" style="width: 260px; height: 36px; font-weight: 700; color: #1b4e85;" disabled>
                 <option value="">-- Primero seleccione grupo principal --</option>
               </select>
 
-              <!-- 2. INPUT DE TEXTO DE BÚSQUEDA -->
+              <!-- 2. INPUT DE TEXTO DE BÚSQUEDA / FILTRO -->
               <input type="text" id="reports-search-input" class="cgps-input" placeholder="Filtrar por texto..." style="width: 200px; height: 36px; font-size: 13px; background-color: #f1f5f9;" disabled>
 
-              <!-- 3. BOTÓN BUSCAR CLIENTE -->
+              <!-- 3. BOTÓN BUSCAR CLIENTE (CONSULTA ESTATUS DE REPORTES) -->
               <button id="reports-btn-search" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px; padding: 0 16px; font-weight: 700; background-color: #4277a8; color: #fff;" disabled>🔍 Buscar Cliente</button>
               
               <span id="reports-unit-count" style="font-size: 13px; font-weight: 700; color: #0284c7; margin-left: auto;">0 activos en este grupo</span>
@@ -325,6 +325,7 @@
         </div>
       </div>
 
+      <!-- TARJETAS DE RESUMEN / ESTATUS DE REPORTES BÁSICOS -->
       <div id="sec-reports-validation-summary" class="testn-grid" style="grid-template-columns: repeat(3, 1fr); margin-top: 10px; display: none;">
         <div id="card-val-rep-1" class="cgps-card" style="padding: 12px; border-left: 4px solid #94a3b8;">
           <div style="font-size: 11px; font-weight: 700; color: #64748b;">1. MONITOREO Y COMBUSTIBLE</div>
@@ -385,7 +386,7 @@
             </thead>
             <tbody id="reports-listbody">
               <tr>
-                <td colspan="5" style="text-align: center; color: #64748b; padding: 16px;">Seleccione un cliente arriba para cargar sus reportes disponibles.</td>
+                <td colspan="5" style="text-align: center; color: #64748b; padding: 16px;">Seleccione un cliente arriba y haga clic en "Buscar Cliente" para cargar sus reportes disponibles.</td>
               </tr>
             </tbody>
           </table>
@@ -720,7 +721,7 @@ var addInConstructor = function (geotabApi, state, callback) {
       .trim();
   }
 
-  // RECORRIDO PROFUNDO DEL ÁRBOL
+  // RECORRIDO PROFUNDO DE LA JERARQUÍA PARA EXTRAER TODOS LOS SUBGRUPOS
   function getGroupsUnderParent(parentId) {
     if (!parentId) return [];
     var parentG = groupsById[parentId];
@@ -1106,7 +1107,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     $('cgps-mass-value-input').placeholder = labelText + '...';
   }
 
-  // POBLADO Y CONTROL DE DESHABILITACIÓN DEL PUNTO 2 SEGÚN EL PUNTO 1
+  // LLENAR TODOS LOS SUBGRUPOS EN EL DESPLEGABLE DE PUNTO 2 Y GESTIONAR ESTADOS
   function populateReportGroupsDropdown() {
     var parentGid = $('reports-parent-filter').value;
     var groupSel = $('reports-group-select');
@@ -1123,16 +1124,14 @@ var addInConstructor = function (geotabApi, state, callback) {
       return;
     }
 
-    // Habilitar controles si hay una opción seleccionada en el Punto 1
+    // Habilitar controles si se eligió categoría en Punto 1
     groupSel.disabled = false;
     inputSearch.disabled = false;
     btnSearch.disabled = false;
     inputSearch.style.backgroundColor = '#ffffff';
 
-    groupSel.innerHTML = '<option value="">-- Seleccione un Cliente / Grupo --</option>';
-
     var subGroups = getGroupsUnderParent(parentGid);
-    var count = 0;
+    groupSel.innerHTML = '<option value="">-- Seleccione un Cliente / Grupo (' + subGroups.length + ' disponibles) --</option>';
 
     for (var i = 0; i < subGroups.length; i++) {
       var g = subGroups[i];
@@ -1141,12 +1140,7 @@ var addInConstructor = function (geotabApi, state, callback) {
         opt.value = g.id;
         opt.textContent = g.name;
         groupSel.appendChild(opt);
-        count++;
       }
-    }
-
-    if (count === 1) {
-      groupSel.selectedIndex = 1;
     }
   }
 
@@ -1183,20 +1177,19 @@ var addInConstructor = function (geotabApi, state, callback) {
     return { total: reportes.length, reportes };
   }
 
+  // AL HACER CLIC EN "BUSCAR CLIENTE": EJECUTA LA BÚSQUEDA Y MUESTRA EL ESTATUS DE LOS REPORTES BÁSICOS ABAJO
   async function handleReportGroupChange() {
     var gid = $('reports-group-select').value;
-    var units = getUnitsForSelectedReportGroup();
-    $('reports-unit-count').textContent = units.length + " activo(s) en este grupo";
 
     if (!gid) {
-      $('sec-reports-validation-summary').style.display = 'none';
-      $('sec-reports-dashboard').style.display = 'none';
-      $('reports-listbody').innerHTML = '<tr><td colspan="5" style="text-align: center; color: #64748b; padding: 16px;">Seleccione un cliente arriba para cargar sus reportes disponibles.</td></tr>';
-      $('reports-count-badge').textContent = '0 reportes encontrados';
+      alert("Por favor, seleccione un cliente/grupo de la lista para buscar su información de reportes.");
       return;
     }
 
-    showLoading("Filtrando programaciones de la razón social...", 40);
+    var units = getUnitsForSelectedReportGroup();
+    $('reports-unit-count').textContent = units.length + " activo(s) en este grupo";
+
+    showLoading("Consultando programaciones del cliente...", 40);
     setMsg("Filtrando programaciones para la razón social seleccionada...");
 
     try {
@@ -1272,7 +1265,13 @@ var addInConstructor = function (geotabApi, state, callback) {
 
     if (!schedulesList.length) {
       tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #b91c1c; padding: 16px;">No se encontraron programaciones de reporte asignadas al grupo o subgrupos seleccionados.</td></tr>';
-      $('sec-reports-validation-summary').style.display = 'none';
+      
+      // Mostrar resumen indicando que están pendientes
+      $('sec-reports-validation-summary').style.display = 'grid';
+      updateValidationCard('card-val-rep-1', 'st-val-rep-1', '1. MONITOREO Y COMBUSTIBLE', false);
+      updateValidationCard('card-val-rep-2', 'st-val-rep-2', '2. RANGOS OPERACIONALES', false);
+      updateValidationCard('card-val-rep-3', 'st-val-rep-3', '3. EVENTOS DE SEGURIDAD', false);
+      
       $('sec-reports-dashboard').style.display = 'none';
       currentReportRows = [];
       return;
@@ -2179,9 +2178,6 @@ var addInConstructor = function (geotabApi, state, callback) {
         callApi(api, 'Get', { typeName: 'CustomReportSchedule' })
           .then(function(schedules) {
             rawSchedules = schedules || [];
-            if (activeModule === 'reports' && $('reports-group-select').value) {
-              handleReportGroupChange();
-            }
           }).catch(function(err) {
             console.warn("No se pudieron cargar CustomReportSchedule:", err);
           });
@@ -2249,15 +2245,17 @@ var addInConstructor = function (geotabApi, state, callback) {
     populateReportGroupsDropdown();
   });
 
-  $('reports-search-input').addEventListener('keyup', function() {
+  $('reports-search-input').addEventListener('keyup', function(e) {
     populateReportGroupsDropdown();
+    if (e.key === 'Enter') {
+      handleReportGroupChange();
+    }
   });
 
+  // EJECUTAR CONSULTA Y MOSTRAR RESUMEN INFERIOR AL DAR CLIC EN "BUSCAR CLIENTE"
   $('reports-btn-search').addEventListener('click', function() {
-    populateReportGroupsDropdown();
+    handleReportGroupChange();
   });
-
-  $('reports-group-select').addEventListener('change', handleReportGroupChange);
 
   // EVENTOS DEL MODAL DE CREACIÓN DE REPORTES
   $('reports-btn-open-create-modal').addEventListener('click', openCreateReportModal);
