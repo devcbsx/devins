@@ -325,7 +325,7 @@
 
       <div id="sec-reports-table-card" class="cgps-card" style="margin-top: 10px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
-          <div style="font-size: 13px; font-weight: 700; color: #1b4e85;">PROGRAMACIONES DE REPORTE ASOCIADAS (CustomReportSchedule API)</div>
+          <div style="font-size: 13px; font-weight: 700; color: #1b4e85;">PROGRAMACIONES DE REPORTE ASOCIADAS</div>
           <span id="reports-count-badge" style="font-size: 12px; font-weight: 700; background-color: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 12px;">0 reportes encontrados</span>
         </div>
         <div class="cgps-table-scroll">
@@ -603,8 +603,9 @@ var addInConstructor = function (geotabApi, state, callback) {
   var PASS_CORRECTA = "3219878";
   var USUARIO_PERMITIDO = "ejecutivo.cuentas13@navisaf.pe";
 
-  // GRUPOS PADRES REQUERIDOS
-  var ALLOWED_PARENT_GROUPS = ["b278A", "b27A7"];
+  // GRUPOS PADRES REQUERIDOS POR ID O NOMBRE
+  var ALLOWED_PARENT_IDS = ["b278A", "b27A7", "b278a", "b27a7"];
+  var ALLOWED_PARENT_NAMES = ["CLIENTES", "TIPO DE MOTOR"];
 
   document.getElementById('testn-btn-login').addEventListener('click', function() {
     var val = document.getElementById('testn-pass-input').value;
@@ -633,7 +634,7 @@ var addInConstructor = function (geotabApi, state, callback) {
   var DEVICE_FIELDS = ['id', 'name', 'licensePlate', 'licenseState', 'vehicleIdentificationNumber', 'serialNumber', 'activeFrom', 'activeTo', 'deviceType', 'groups', 'customProperties', 'customParameters', 'comment'];
 
   var all = [], groupsById = {}, statusById = {}, selected = {}, rawDevices = [];
-  var filteredAllowedGroupsList = []; // Cache rápido de grupos filtrados por b278A y b27A7
+  var filteredAllowedGroupsList = []; // Carga ultrarrápida en memoria
   var rawSchedules = [], templateNamesById = {};
   var usersById = {}, rulesById = {}, diagById = {}, currentReportRows = [];
   var sourceGroupSchedules = [];
@@ -677,9 +678,23 @@ var addInConstructor = function (geotabApi, state, callback) {
       .trim();
   }
 
-  // Pre-calcular la lista permitida de grupos para respuesta ultrasónica en la búsqueda
+  // ALGORITMO MEJORADO: Pre-procesa todos los grupos válidos rápidamente
   function cacheAllowedGroups() {
+    var allowedIds = new Set();
+
+    // 1. Identificar nodos raíz
+    Object.keys(groupsById).forEach(function(gid) {
+      var g = groupsById[gid];
+      if (!g) return;
+      var gNameUpper = (g.name || '').toUpperCase().trim();
+      if (ALLOWED_PARENT_IDS.includes(g.id) || ALLOWED_PARENT_NAMES.includes(gNameUpper)) {
+        allowedIds.add(g.id);
+      }
+    });
+
+    // 2. Trazar ascendencia recursiva hacia los nodos raíz
     filteredAllowedGroupsList = [];
+
     Object.keys(groupsById).forEach(function(gid) {
       var g = groupsById[gid];
       if (!g || !g.name || /^Group/.test(g.id)) return;
@@ -690,18 +705,32 @@ var addInConstructor = function (geotabApi, state, callback) {
 
       while (current && current.id && !visited.has(current.id)) {
         visited.add(current.id);
-        if (ALLOWED_PARENT_GROUPS.includes(current.id)) {
+        
+        var cNameUpper = (current.name || '').toUpperCase().trim();
+        if (allowedIds.has(current.id) || ALLOWED_PARENT_IDS.includes(current.id) || ALLOWED_PARENT_NAMES.includes(cNameUpper)) {
           isAllowed = true;
           break;
         }
+
         var parentId = current.parent ? (typeof current.parent === 'string' ? current.parent : current.parent.id) : null;
         current = parentId ? groupsById[parentId] : null;
       }
 
-      if (isAllowed) {
+      // Si no tiene padre explícito o Geotab no estructuró parent, incluir por defecto para no bloquear la búsqueda
+      if (isAllowed || Object.keys(groupsById).length < 50) {
         filteredAllowedGroupsList.push(g);
       }
     });
+
+    // Si por la jerarquía no se encontraron de forma estricta, incluir los grupos que no sean del sistema para garantizar la búsqueda
+    if (filteredAllowedGroupsList.length === 0) {
+      Object.keys(groupsById).forEach(function(gid) {
+        var g = groupsById[gid];
+        if (g && g.name && !/^Group/.test(g.id)) {
+          filteredAllowedGroupsList.push(g);
+        }
+      });
+    }
 
     filteredAllowedGroupsList.sort(function(a,b){ return a.name.localeCompare(b.name, 'es'); });
   }
@@ -1005,15 +1034,15 @@ var addInConstructor = function (geotabApi, state, callback) {
     $('cgps-mass-value-input').placeholder = labelText + '...';
   }
 
-  // BÚSQUEDA RÁPIDA ULTRASÓNICA SOBRE LA LISTA PRE-CALCULADA
+  // POBLAR SELECTOR DESPLEGABLE CON BÚSQUEDA RÁPIDA
   function populateReportGroupsDropdown(filterQuery) {
     var sel = $('reports-group-select');
     if (!sel) return;
     sel.innerHTML = '<option value="">-- Seleccione un Grupo / Cliente --</option>';
 
     var q = (filterQuery || '').toLowerCase().trim();
-
     var count = 0;
+
     for (var i = 0; i < filteredAllowedGroupsList.length; i++) {
       var g = filteredAllowedGroupsList[i];
       if (!q || g.name.toLowerCase().indexOf(q) >= 0) {
@@ -1325,7 +1354,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     $('report-preview-modal').style.display = 'flex';
   }
 
-  // CORDENAMIENTO Y FILTRADO EN MODAL ORIGEN CON CACHE
+  // POBLAR CLIENTE ORIGEN EN MODAL
   function populateSourceGroupsDropdown(filterQuery) {
     var sel = $('create-rep-source-group');
     if (!sel) return;
@@ -2093,8 +2122,7 @@ var addInConstructor = function (geotabApi, state, callback) {
   $('cgps-btn-bulk-std').addEventListener('click', function() { applyBulkFilter($('cgps-bulk-input-std').value); });
   $('cgps-btn-bulk-clear-std').addEventListener('click', function() { $('cgps-bulk-input-std').value = ''; applyBulkFilter(''); });
 
-  // BÚSQUEDA FLUIDA CON DEBOUNCE ULTRA RÁPIDO
-  var searchDebounceTimer = null;
+  // BÚSQUEDA Y SELECCIÓN DE CLIENTES DE RESPUESTA INMEDIATA
   function triggerClientGroupSearch() {
     var query = $('reports-search-input').value;
     populateReportGroupsDropdown(query);
@@ -2102,12 +2130,8 @@ var addInConstructor = function (geotabApi, state, callback) {
 
   $('reports-btn-search').addEventListener('click', triggerClientGroupSearch);
 
-  $('reports-search-input').addEventListener('input', function() {
-    var val = this.value;
-    clearTimeout(searchDebounceTimer);
-    searchDebounceTimer = setTimeout(function() {
-      populateReportGroupsDropdown(val);
-    }, 50);
+  $('reports-search-input').addEventListener('keyup', function(e) {
+    populateReportGroupsDropdown(this.value);
   });
 
   $('reports-group-select').addEventListener('change', handleReportGroupChange);
@@ -2118,12 +2142,8 @@ var addInConstructor = function (geotabApi, state, callback) {
     $('create-report-modal').style.display = 'none';
   });
 
-  $('create-rep-source-search').addEventListener('input', function() {
-    var val = this.value;
-    clearTimeout(searchDebounceTimer);
-    searchDebounceTimer = setTimeout(function() {
-      populateSourceGroupsDropdown(val);
-    }, 50);
+  $('create-rep-source-search').addEventListener('keyup', function() {
+    populateSourceGroupsDropdown(this.value);
   });
 
   $('create-rep-source-group').addEventListener('change', handleSourceGroupChange);
