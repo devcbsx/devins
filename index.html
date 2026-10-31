@@ -276,21 +276,41 @@
     <!-- Módulo Reportes por Cliente -->
     <div id="sec-reports" style="display: none;">
       <div class="cgps-card" style="margin-top: 10px;">
-        <div style="font-size: 12px; font-weight: 700; color: #1b4e85; margin-bottom: 8px;">BUSCAR Y SELECCIONAR GRUPO O CLIENTE:</div>
-        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        <div style="display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap;">
           
-          <select id="reports-parent-filter" class="cgps-input" style="width: 180px; height: 36px; font-weight: 700; color: #1b4e85;">
-            <option value="b278A">CLIENTES (b278A)</option>
-            <option value="b27A7">TIPO DE MOTOR (b27A7)</option>
-          </select>
+          <!-- SECCIÓN 1: SELECCIÓN DE GRUPO PRINCIPAL -->
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <label style="font-size: 13px; font-weight: 700; color: #1e293b;">1 Selección de grupo principal</label>
+            <select id="reports-parent-filter" class="cgps-input" style="width: 220px; height: 36px; font-weight: 700; color: #1b4e85;">
+              <option value="" disabled selected>-- Seleccione Grupo --</option>
+              <option value="b278A">CLIENTES (b278A)</option>
+              <option value="b27A7">TIPO DE MOTOR (b27A7)</option>
+            </select>
+          </div>
 
-          <input type="text" id="reports-search-input" class="cgps-input" placeholder="🔍 Escriba palabra clave del cliente..." style="width: 220px; height: 36px; font-size: 13px;">
-          <button id="reports-btn-search" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px; padding: 0 16px; font-weight: 700;">🔍 Buscar Cliente</button>
-          
-          <select id="reports-group-select" class="cgps-input" style="width: 300px; height: 36px; font-weight: 600; color: #1b4e85;">
-            <option value="">-- Seleccione un Grupo / Cliente --</option>
-          </select>
-          <span id="reports-unit-count" style="font-size: 13px; font-weight: 700; color: #0284c7;">0 activos en este grupo</span>
+          <!-- LÍNEA DIVISORA VERTICAL -->
+          <div style="width: 2px; height: 50px; background-color: #000000; margin: 0 5px; align-self: center;"></div>
+
+          <!-- SECCIÓN 2: BÚSQUEDA DE CLIENTES O TIPO DE VEHÍCULO (ORDEN EXACTO SEGÚN IMAGEN) -->
+          <div style="display: flex; flex-direction: column; gap: 4px; flex: 1;">
+            <label style="font-size: 13px; font-weight: 700; color: #1e293b;">2 Búsqueda de clientes o tipo de vehiculo</label>
+            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+              
+              <!-- 1. SELECTOR DE CLIENTE -->
+              <select id="reports-group-select" class="cgps-input" style="width: 260px; height: 36px; font-weight: 700; color: #1b4e85;" disabled>
+                <option value="">-- Primero seleccione grupo principal --</option>
+              </select>
+
+              <!-- 2. INPUT DE TEXTO DE BÚSQUEDA -->
+              <input type="text" id="reports-search-input" class="cgps-input" placeholder="Filtrar por texto..." style="width: 200px; height: 36px; font-size: 13px; background-color: #f1f5f9;" disabled>
+
+              <!-- 3. BOTÓN BUSCAR CLIENTE -->
+              <button id="reports-btn-search" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px; padding: 0 16px; font-weight: 700; background-color: #4277a8; color: #fff;" disabled>🔍 Buscar Cliente</button>
+              
+              <span id="reports-unit-count" style="font-size: 13px; font-weight: 700; color: #0284c7; margin-left: auto;">0 activos en este grupo</span>
+            </div>
+          </div>
+
         </div>
 
         <!-- BARRA DE CARGA VISUAL -->
@@ -565,6 +585,7 @@
     .testn-card h2 { font-size: 17px !important; color: #1b4e85 !important; font-weight: 700 !important; margin: 0 0 8px 0 !important; text-transform: uppercase !important; }
     
     .cgps-btn { padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; white-space: nowrap; transition: all 0.2s; }
+    .cgps-btn:disabled { opacity: 0.5; cursor: not-allowed !important; }
     .cgps-btn-white { background-color: #ffffff !important; color: #1b4e85 !important; }
     .cgps-btn-secondary { background-color: #4277a8 !important; color: #ffffff !important; }
     .cgps-btn-outline { background-color: transparent; color: #1b4e85; border: 1px solid #1b4e85; }
@@ -582,6 +603,7 @@
 
     .cgps-controls-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; width: 100%; }
     .cgps-input, .cgps-textarea { padding: 5px 8px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px; outline: none; background-color: #ffffff; }
+    .cgps-input:disabled { background-color: #f1f5f9 !important; cursor: not-allowed !important; color: #94a3b8 !important; }
     .cgps-textarea { font-family: monospace; resize: vertical; }
     .cgps-table-container { background-color: #ffffff; border-radius: 8px; border: 1px solid #cbd5e1; overflow: hidden; width: 100%; }
     .cgps-table-scroll { max-height: 440px; overflow-y: auto; width: 100%; }
@@ -698,8 +720,9 @@ var addInConstructor = function (geotabApi, state, callback) {
       .trim();
   }
 
-  // ALGORITMO RECURSIVO MEJORADO: OBTIENE TODOS LOS SUBGRUPOS HOJA O INTERMEDIOS
+  // RECORRIDO PROFUNDO DEL ÁRBOL
   function getGroupsUnderParent(parentId) {
+    if (!parentId) return [];
     var parentG = groupsById[parentId];
     var rootIds = new Set();
 
@@ -748,7 +771,6 @@ var addInConstructor = function (geotabApi, state, callback) {
       });
     }
 
-    // Si por la estructura Geotab no tiene enlace directo parent, fallback de coincidencia por ascendencia
     if (result.length === 0) {
       Object.keys(groupsById).forEach(function(gid) {
         var g = groupsById[gid];
@@ -1084,14 +1106,30 @@ var addInConstructor = function (geotabApi, state, callback) {
     $('cgps-mass-value-input').placeholder = labelText + '...';
   }
 
-  // PASO 1 Y PASO 2: FILTRADO DE TODAS LAS RAZONES SOCIALES QUE DERIVAN DE LA CATEGORÍA BASE
+  // POBLADO Y CONTROL DE DESHABILITACIÓN DEL PUNTO 2 SEGÚN EL PUNTO 1
   function populateReportGroupsDropdown() {
     var parentGid = $('reports-parent-filter').value;
-    var query = ($('reports-search-input').value || '').toLowerCase().trim();
-    var sel = $('reports-group-select');
-    if (!sel) return;
+    var groupSel = $('reports-group-select');
+    var inputSearch = $('reports-search-input');
+    var btnSearch = $('reports-btn-search');
+    var query = (inputSearch.value || '').toLowerCase().trim();
 
-    sel.innerHTML = '<option value="">-- Seleccione un Grupo / Cliente --</option>';
+    if (!parentGid) {
+      groupSel.innerHTML = '<option value="">-- Primero seleccione grupo principal --</option>';
+      groupSel.disabled = true;
+      inputSearch.disabled = true;
+      btnSearch.disabled = true;
+      inputSearch.style.backgroundColor = '#f1f5f9';
+      return;
+    }
+
+    // Habilitar controles si hay una opción seleccionada en el Punto 1
+    groupSel.disabled = false;
+    inputSearch.disabled = false;
+    btnSearch.disabled = false;
+    inputSearch.style.backgroundColor = '#ffffff';
+
+    groupSel.innerHTML = '<option value="">-- Seleccione un Cliente / Grupo --</option>';
 
     var subGroups = getGroupsUnderParent(parentGid);
     var count = 0;
@@ -1101,14 +1139,14 @@ var addInConstructor = function (geotabApi, state, callback) {
       if (!query || g.name.toLowerCase().indexOf(query) >= 0) {
         var opt = document.createElement('option');
         opt.value = g.id;
-        opt.textContent = g.name + " (" + g.id + ")";
-        sel.appendChild(opt);
+        opt.textContent = g.name;
+        groupSel.appendChild(opt);
         count++;
       }
     }
 
     if (count === 1) {
-      sel.selectedIndex = 1;
+      groupSel.selectedIndex = 1;
     }
   }
 
@@ -1145,7 +1183,6 @@ var addInConstructor = function (geotabApi, state, callback) {
     return { total: reportes.length, reportes };
   }
 
-  // PASO 3: CARGAR REPORTES DE LA RAZÓN SOCIAL Y VALIDAR LOS 3 BÁSICOS
   async function handleReportGroupChange() {
     var gid = $('reports-group-select').value;
     var units = getUnitsForSelectedReportGroup();
@@ -1408,7 +1445,6 @@ var addInConstructor = function (geotabApi, state, callback) {
     $('report-preview-modal').style.display = 'flex';
   }
 
-  // PASO 1 Y 2 DENTRO DEL MODAL: POBLAR CLIENTES Y SUBGRUPOS DERIVADOS
   function populateSourceGroupsDropdown() {
     var parentGid = $('create-rep-parent-cat').value;
     var query = ($('create-rep-source-search').value || '').toLowerCase().trim();
@@ -1430,7 +1466,6 @@ var addInConstructor = function (geotabApi, state, callback) {
     }
   }
 
-  // PASO 5: RENDERS LISTA INTERACTIVA CON CHECKBOXES PARA GRUPOS DESTINO
   function renderDestinationGroupsList() {
     var container = $('create-rep-dest-groups-list');
     var query = ($('create-rep-dest-search').value || '').toLowerCase().trim();
@@ -1451,7 +1486,6 @@ var addInConstructor = function (geotabApi, state, callback) {
     container.innerHTML = html || '<span style="color:#64748b; font-size:11px;">No se encontraron grupos destino coincidentes.</span>';
   }
 
-  // PASO 3: SELECCIÓN DEL REPORTE MOSTRANDO SU NOMBRE (NO ID)
   async function handleSourceGroupChange() {
     var sourceGid = $('create-rep-source-group').value;
     var scheduleSel = $('create-rep-source-schedule');
@@ -1481,7 +1515,6 @@ var addInConstructor = function (geotabApi, state, callback) {
       scheduleSel.innerHTML = '<option value="">-- Seleccione el reporte a clonar --</option>';
       sourceGroupSchedules.forEach(function(s) {
         var tplId = s.template ? s.template.id : '';
-        // Nombre limpio amigable en lugar de IDs
         var rName = s.name || (tplId ? (templateNamesById[tplId] || 'Plantilla de Reporte') : 'Reporte de Cliente');
         var opt = document.createElement('option');
         opt.value = s.id;
@@ -1496,7 +1529,6 @@ var addInConstructor = function (geotabApi, state, callback) {
     }
   }
 
-  // PASO 4 Y 6: ADOPTAR FORMATO + RAZÓN SOCIAL Y COPIAR DIAGNÓSTICOS
   function handleSourceScheduleChange() {
     var schedId = $('create-rep-source-schedule').value;
     if (!schedId) return;
@@ -2212,16 +2244,16 @@ var addInConstructor = function (geotabApi, state, callback) {
   $('cgps-btn-bulk-std').addEventListener('click', function() { applyBulkFilter($('cgps-bulk-input-std').value); });
   $('cgps-btn-bulk-clear-std').addEventListener('click', function() { $('cgps-bulk-input-std').value = ''; applyBulkFilter(''); });
 
-  // BÚSQUEDA Y FILTRADO PASOS 1 Y 2
-  $('reports-parent-filter').addEventListener('change', populateReportGroupsDropdown);
-
-  function triggerClientGroupSearch() {
+  // EVENTOS DE CAMBIO EN SELECCIÓN Y BÚSQUEDA DEL MÓDULO REPORTES
+  $('reports-parent-filter').addEventListener('change', function() {
     populateReportGroupsDropdown();
-  }
+  });
 
-  $('reports-btn-search').addEventListener('click', triggerClientGroupSearch);
+  $('reports-search-input').addEventListener('keyup', function() {
+    populateReportGroupsDropdown();
+  });
 
-  $('reports-search-input').addEventListener('keyup', function(e) {
+  $('reports-btn-search').addEventListener('click', function() {
     populateReportGroupsDropdown();
   });
 
