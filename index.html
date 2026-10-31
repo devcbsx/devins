@@ -80,45 +80,49 @@
   </div>
 </div>
 
-<!-- MODAL PARA CREAR NUEVO REPORTE -->
+<!-- MODAL PARA COPIAR / CLONAR REPORTE DESDE OTRO CLIENTE -->
 <div id="create-report-modal" style="position: fixed; top:0; left:0; width:100vw; height:100vh; background-color: rgba(15, 23, 42, 0.75); z-index: 9999; display: none; justify-content: center; align-items: center; padding: 20px;">
-  <div style="background: #ffffff; padding: 24px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto;">
+  <div style="background: #ffffff; padding: 24px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); width: 100%; max-width: 650px; max-height: 90vh; overflow-y: auto;">
     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 16px;">
-      <h2 style="margin:0; font-size: 17px; color: #1b4e85;">➕ CREAR NUEVO REPORTE DESDE BASE GITHUB</h2>
+      <h2 style="margin:0; font-size: 17px; color: #1b4e85;">📋 CLONAR Y CREAR REPORTE DESDE OTRO CLIENTE</h2>
       <button id="btn-close-create-modal" type="button" class="cgps-btn cgps-btn-outline" style="font-size: 13px; padding: 4px 10px;">✕ Cancelar</button>
     </div>
 
     <div style="display: flex; flex-direction: column; gap: 14px; font-size: 12px;">
       <div>
-        <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">1. Seleccionar Reporte Excel Base (GitHub):</label>
-        <select id="create-rep-base-select" class="cgps-input" style="width: 100%; height: 36px; font-weight: 600;">
-          <option value="monitoreo">1. Monitoreo y Combustible (Excel Base)</option>
-          <option value="rangos">2. Rangos Operacionales (Excel Base)</option>
-          <option value="seguridad">3. Eventos de Seguridad (Excel Base)</option>
+        <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">1. Seleccionar Cliente Origen (Plantilla Base):</label>
+        <select id="create-rep-source-group" class="cgps-input" style="width: 100%; height: 36px; font-weight: 600;">
+          <option value="">-- Seleccione Cliente Origen --</option>
         </select>
-        <div id="create-rep-github-url" style="font-size: 10px; color: #64748b; margin-top: 4px; font-family: monospace;">Ruta GitHub: https://raw.githubusercontent.com/navisaf/templates/main/monitoreo_combustible.xlsx</div>
       </div>
 
       <div>
-        <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">2. Nombre del Nuevo Reporte:</label>
-        <input type="text" id="create-rep-name" class="cgps-input" placeholder="Ej: Monitoreo de Flota - Cliente X" style="width: 100%; height: 36px;">
+        <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">2. Seleccionar Reporte Base a Clonar:</label>
+        <select id="create-rep-source-schedule" class="cgps-input" style="width: 100%; height: 36px; font-weight: 600;" disabled>
+          <option value="">-- Primero seleccione un cliente origen --</option>
+        </select>
       </div>
 
       <div>
-        <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">3. Grupo Destino (Asignación):</label>
+        <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">3. Nombre del Nuevo Reporte (Cliente Destino):</label>
+        <input type="text" id="create-rep-name" class="cgps-input" placeholder="Ej: Monitoreo de Flota - Nuevo Cliente" style="width: 100%; height: 36px;">
+      </div>
+
+      <div>
+        <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">4. Grupo Destino (Asignación):</label>
         <input type="text" id="create-rep-group-display" class="cgps-input" style="width: 100%; height: 36px; background-color: #f1f5f9; font-weight: 700;" readonly>
       </div>
 
       <div>
-        <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">4. Diagnósticos Correspondientes (Separados por comas o saltos de línea):</label>
-        <textarea id="create-rep-diagnostics" class="cgps-textarea" rows="4" placeholder="Odómetro, Tiempo de funcionamiento del motor, Cantidad total de combustible utilizado..." style="width: 100%;"></textarea>
+        <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">5. Diagnósticos Copiados / Editables (Separados por comas o líneas):</label>
+        <textarea id="create-rep-diagnostics" class="cgps-textarea" rows="4" placeholder="Cargando diagnósticos del reporte origen..." style="width: 100%;"></textarea>
       </div>
 
       <div id="create-rep-status" style="font-size: 12px; font-weight: 700; min-height: 18px;"></div>
     </div>
 
     <div style="text-align: right; margin-top: 20px; border-top: 1px solid #e2e8f0; padding-top: 12px; display: flex; justify-content: flex-end; gap: 10px;">
-      <button id="btn-submit-create-report" type="button" class="cgps-btn" style="background-color: #1b4e85; color: #fff; font-size: 13px; font-weight: 700; padding: 8px 16px;">💾 Subir e Inyectar Reporte</button>
+      <button id="btn-submit-create-report" type="button" class="cgps-btn" style="background-color: #1b4e85; color: #fff; font-size: 13px; font-weight: 700; padding: 8px 16px;">💾 Copiar y Crear Reporte</button>
     </div>
   </div>
 </div>
@@ -184,7 +188,7 @@
       </div>
 
       <div id="hdr-actions-reports" style="display: none; gap: 8px;">
-        <button id="reports-btn-open-create-modal" type="button" class="cgps-btn cgps-btn-white" style="font-weight:700;">➕ Crear Nuevo Reporte</button>
+        <button id="reports-btn-open-create-modal" type="button" class="cgps-btn cgps-btn-white" style="font-weight:700;">➕ Copiar Reporte de Cliente</button>
       </div>
     </div>
 
@@ -587,13 +591,6 @@ var addInConstructor = function (geotabApi, state, callback) {
 
   var PASS_CORRECTA = "3219878";
   var USUARIO_PERMITIDO = "ejecutivo.cuentas13@navisaf.pe";
-  
-  // URLs GitHub para descargar archivos base Excel si fuera necesario
-  var GITHUB_TEMPLATES = {
-    monitoreo: "https://raw.githubusercontent.com/navisaf/templates/main/monitoreo_combustible.xlsx",
-    rangos: "https://raw.githubusercontent.com/navisaf/templates/main/rangos_operacionales.xlsx",
-    seguridad: "https://raw.githubusercontent.com/navisaf/templates/main/eventos_seguridad.xlsx"
-  };
 
   document.getElementById('testn-btn-login').addEventListener('click', function() {
     var val = document.getElementById('testn-pass-input').value;
@@ -624,6 +621,7 @@ var addInConstructor = function (geotabApi, state, callback) {
   var all = [], groupsById = {}, statusById = {}, selected = {}, rawDevices = [];
   var rawSchedules = [], templateNamesById = {};
   var usersById = {}, rulesById = {}, diagById = {}, currentReportRows = [];
+  var sourceGroupSchedules = []; // Almacena reportes filtrados para clonación
   var REPORT_LINK_HASH = '#customReportSchedule,id:';
   var activeBulkTokens = [];
   var activeModule = 'hub';
@@ -1288,6 +1286,91 @@ var addInConstructor = function (geotabApi, state, callback) {
     $('report-preview-modal').style.display = 'flex';
   }
 
+  // LÓGICA DE COPIA Y CLONACIÓN DESDE OTRO CLIENTE
+  function populateSourceGroupsDropdown() {
+    var sel = $('create-rep-source-group');
+    if (!sel) return;
+    sel.innerHTML = '<option value="">-- Seleccione Cliente Origen --</option>';
+
+    var sortedGroups = [];
+    Object.keys(groupsById).forEach(function(gid) {
+      var g = groupsById[gid];
+      if (g && g.name && !/^Group/.test(g.id)) {
+        sortedGroups.push(g);
+      }
+    });
+
+    sortedGroups.sort(function(a,b){ return a.name.localeCompare(b.name, 'es'); });
+
+    sortedGroups.forEach(function(g) {
+      var opt = document.createElement('option');
+      opt.value = g.id;
+      opt.textContent = g.name;
+      sel.appendChild(opt);
+    });
+  }
+
+  async function handleSourceGroupChange() {
+    var sourceGid = $('create-rep-source-group').value;
+    var scheduleSel = $('create-rep-source-schedule');
+    scheduleSel.innerHTML = '<option value="">-- Cargando reportes del cliente origen... --</option>';
+    scheduleSel.disabled = true;
+
+    if (!sourceGid) {
+      scheduleSel.innerHTML = '<option value="">-- Primero seleccione un cliente origen --</option>';
+      return;
+    }
+
+    try {
+      var resObj = await contarReportesDeGrupo(sourceGid, true);
+      sourceGroupSchedules = resObj.reportes;
+
+      if (!sourceGroupSchedules || sourceGroupSchedules.length === 0) {
+        scheduleSel.innerHTML = '<option value="">-- Este cliente origen no tiene reportes cargados --</option>';
+        return;
+      }
+
+      scheduleSel.innerHTML = '<option value="">-- Seleccione el reporte a clonar --</option>';
+      sourceGroupSchedules.forEach(function(s) {
+        var tplId = s.template ? s.template.id : '';
+        var rName = s.name || (tplId ? (templateNamesById[tplId] || tplId) : 'Reporte sin nombre');
+        var opt = document.createElement('option');
+        opt.value = s.id;
+        opt.textContent = rName;
+        scheduleSel.appendChild(opt);
+      });
+
+      scheduleSel.disabled = false;
+    } catch (err) {
+      console.error("Error al cargar reportes del cliente origen:", err);
+      scheduleSel.innerHTML = '<option value="">-- Error al cargar reportes --</option>';
+    }
+  }
+
+  function handleSourceScheduleChange() {
+    var schedId = $('create-rep-source-schedule').value;
+    if (!schedId) return;
+
+    var selectedSched = sourceGroupSchedules.find(function(s){ return s.id === schedId; });
+    if (!selectedSched) return;
+
+    var tplId = selectedSched.template ? selectedSched.template.id : '';
+    var baseName = selectedSched.name || (tplId ? (templateNamesById[tplId] || tplId) : 'Reporte');
+    
+    var destGid = $('reports-group-select').value;
+    var destGroupObj = groupsById[destGid];
+    var destName = destGroupObj ? destGroupObj.name : destGid;
+
+    $('create-rep-name').value = baseName + " - " + destName;
+
+    var a = selectedSched.arguments || {};
+    var diags = (a.diagnostics || []).map(function(d){ 
+      return (diagById[d.id] || d.id); 
+    });
+
+    $('create-rep-diagnostics').value = diags.join(', ');
+  }
+
   function openCreateReportModal() {
     var gid = $('reports-group-select').value;
     if (!gid) {
@@ -1298,25 +1381,26 @@ var addInConstructor = function (geotabApi, state, callback) {
     var groupName = groupObj ? groupObj.name : gid;
     
     $('create-rep-group-display').value = groupName + " (" + gid + ")";
-    $('create-rep-name').value = "Reporte - " + groupName;
+    $('create-rep-name').value = "";
     $('create-rep-diagnostics').value = "";
     $('create-rep-status').textContent = "";
     
-    updateCreateGitHubUrl();
+    populateSourceGroupsDropdown();
     $('create-report-modal').style.display = 'flex';
-  }
-
-  function updateCreateGitHubUrl() {
-    var selVal = $('create-rep-base-select').value;
-    var url = GITHUB_TEMPLATES[selVal] || "";
-    $('create-rep-github-url').textContent = "Ruta GitHub: " + url;
   }
 
   async function createAndSubmitReport() {
     var gid = $('reports-group-select').value;
+    var sourceSchedId = $('create-rep-source-schedule').value;
     var repName = $('create-rep-name').value.trim();
     var diagText = $('create-rep-diagnostics').value.trim();
     var statusDiv = $('create-rep-status');
+
+    if (!sourceSchedId) {
+      statusDiv.style.color = "#dc2626";
+      statusDiv.textContent = "Seleccione un reporte origen para clonar.";
+      return;
+    }
 
     if (!repName) {
       statusDiv.style.color = "#dc2626";
@@ -1324,8 +1408,15 @@ var addInConstructor = function (geotabApi, state, callback) {
       return;
     }
 
+    var sourceSched = sourceGroupSchedules.find(function(s){ return s.id === sourceSchedId; });
+    if (!sourceSched) {
+      statusDiv.style.color = "#dc2626";
+      statusDiv.textContent = "No se encontró la configuración del reporte origen.";
+      return;
+    }
+
     statusDiv.style.color = "#0284c7";
-    statusDiv.textContent = "Creando programación de reporte en Geotab...";
+    statusDiv.textContent = "Clonando plantilla y registrando reporte en Geotab...";
 
     var diagList = diagText ? diagText.split(/[\n\r,]+/).map(function(d){ return { id: d.trim() }; }).filter(function(d){ return d.id; }) : [];
 
@@ -1333,8 +1424,10 @@ var addInConstructor = function (geotabApi, state, callback) {
       var newSchedule = {
         name: repName,
         isActive: true,
+        template: sourceSched.template,
         groups: [{ id: gid }],
         arguments: {
+          rules: (sourceSched.arguments && sourceSched.arguments.rules) ? sourceSched.arguments.rules : [],
           diagnostics: diagList
         }
       };
@@ -1345,7 +1438,7 @@ var addInConstructor = function (geotabApi, state, callback) {
       });
 
       statusDiv.style.color = "#16a34a";
-      statusDiv.textContent = "✅ ¡Reporte creado con éxito en Geotab!";
+      statusDiv.textContent = "✅ ¡Reporte clonado y registrado con éxito en Geotab!";
       
       setTimeout(function() {
         $('create-report-modal').style.display = 'none';
@@ -1356,7 +1449,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     } catch (err) {
       console.error("Error al crear reporte:", err);
       statusDiv.style.color = "#dc2626";
-      statusDiv.textContent = "Error al crear reporte: " + (err.message || err);
+      statusDiv.textContent = "Error al clonar reporte: " + (err.message || err);
     }
   }
 
@@ -1961,12 +2054,15 @@ var addInConstructor = function (geotabApi, state, callback) {
 
   $('reports-group-select').addEventListener('change', handleReportGroupChange);
 
-  // EVENTOS DEL MODAL DE CREACIÓN DE REPORTES
+  // EVENTOS DEL MODAL DE CREACIÓN / CLONACIÓN DE REPORTES
   $('reports-btn-open-create-modal').addEventListener('click', openCreateReportModal);
   $('btn-close-create-modal').addEventListener('click', function() {
     $('create-report-modal').style.display = 'none';
   });
-  $('create-rep-base-select').addEventListener('change', updateCreateGitHubUrl);
+
+  $('create-rep-source-group').addEventListener('change', handleSourceGroupChange);
+  $('create-rep-source-schedule').addEventListener('change', handleSourceScheduleChange);
+
   $('btn-submit-create-report').addEventListener('click', createAndSubmitReport);
 
   // EVENTOS MODAL VISUAL Y BOTONES DE COPIA
@@ -2092,7 +2188,6 @@ var addInConstructor = function (geotabApi, state, callback) {
   return {
     initialize: function (geotabApi, state, initializeCallback) {
       if (geotabApi) api = geotabApi;
-      // Responder de inmediato a MyGeotab; la carga de miles de activos corre en segundo plano
       if (typeof initializeCallback === 'function') initializeCallback();
       if (!loadStarted) {
         loadStarted = true;
