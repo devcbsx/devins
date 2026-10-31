@@ -90,10 +90,16 @@
 
     <div style="display: flex; flex-direction: column; gap: 14px; font-size: 12px;">
       <div>
-        <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">1. Seleccionar Cliente Origen (Plantilla Base):</label>
-        <select id="create-rep-source-group" class="cgps-input" style="width: 100%; height: 36px; font-weight: 600;">
-          <option value="">-- Seleccione Cliente Origen --</option>
-        </select>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+          <label style="font-weight: 700; color: #1b4e85;">1. Seleccionar Cliente Origen (Plantilla Base):</label>
+          <span style="font-size: 10px; color: #64748b; font-weight: 600;">(Solo de b278A y b27A7)</span>
+        </div>
+        <div style="display: flex; gap: 6px;">
+          <input type="text" id="create-rep-source-search" class="cgps-input" placeholder="🔍 Filtrar origen por palabra clave..." style="width: 220px; height: 36px;">
+          <select id="create-rep-source-group" class="cgps-input" style="flex: 1; height: 36px; font-weight: 600;">
+            <option value="">-- Seleccione Cliente Origen --</option>
+          </select>
+        </div>
       </div>
 
       <div>
@@ -104,8 +110,16 @@
       </div>
 
       <div>
-        <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">3. Nombre del Nuevo Reporte (Cliente Destino):</label>
-        <input type="text" id="create-rep-name" class="cgps-input" placeholder="Ej: Monitoreo de Flota - Nuevo Cliente" style="width: 100%; height: 36px;">
+        <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">3. Nombre del Nuevo Reporte (Estructura Estándar Seleccionable):</label>
+        <div style="display: flex; gap: 8px; margin-bottom: 6px;">
+          <select id="create-rep-name-prefix-preset" class="cgps-input" style="width: 320px; height: 36px; font-weight: 700; color: #1b4e85;">
+            <option value="Monitoreo de flota y rendimiento de combustible - ">Monitoreo de flota y rendimiento de combustible - </option>
+            <option value="Eventos de seguridad - ">Eventos de seguridad - </option>
+            <option value="Rangos Operacionales - ">Rangos Operacionales - </option>
+          </select>
+          <button id="btn-apply-prefix-preset" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px;">Aplicar Formato</button>
+        </div>
+        <input type="text" id="create-rep-name" class="cgps-input" placeholder="Nombre completo editable del reporte" style="width: 100%; height: 36px; font-weight: 600;">
       </div>
 
       <div>
@@ -247,12 +261,12 @@
     <!-- Módulo Reportes por Cliente -->
     <div id="sec-reports" style="display: none;">
       <div class="cgps-card" style="margin-top: 10px;">
-        <div style="font-size: 12px; font-weight: 700; color: #1b4e85; margin-bottom: 8px;">BUSCAR Y SELECCIONAR GRUPO O CLIENTE:</div>
+        <div style="font-size: 12px; font-weight: 700; color: #1b4e85; margin-bottom: 8px;">BUSCAR Y SELECCIONAR GRUPO O CLIENTE (Exclusivo CLIENTES b278A y TIPO DE MOTOR b27A7):</div>
         <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
           <input type="text" id="reports-search-input" class="cgps-input" placeholder="🔍 Escriba palabra clave del cliente..." style="width: 240px; height: 36px; font-size: 13px;">
           <button id="reports-btn-search" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px; padding: 0 16px; font-weight: 700;">🔍 Buscar Cliente</button>
           
-          <select id="reports-group-select" class="cgps-input" style="width: 320px; height: 36px; font-weight: 600; color: #1b4e85;">
+          <select id="reports-group-select" class="cgps-input" style="width: 340px; height: 36px; font-weight: 600; color: #1b4e85;">
             <option value="">-- Seleccione un Grupo / Cliente --</option>
           </select>
           <span id="reports-unit-count" style="font-size: 13px; font-weight: 700; color: #0284c7;">0 activos en este grupo</span>
@@ -592,6 +606,9 @@ var addInConstructor = function (geotabApi, state, callback) {
   var PASS_CORRECTA = "3219878";
   var USUARIO_PERMITIDO = "ejecutivo.cuentas13@navisaf.pe";
 
+  // GRUPOS PADRES REQUERIDOS
+  var ALLOWED_PARENT_GROUPS = ["b278A", "b27A7"];
+
   document.getElementById('testn-btn-login').addEventListener('click', function() {
     var val = document.getElementById('testn-pass-input').value;
     if (val === PASS_CORRECTA) {
@@ -621,7 +638,7 @@ var addInConstructor = function (geotabApi, state, callback) {
   var all = [], groupsById = {}, statusById = {}, selected = {}, rawDevices = [];
   var rawSchedules = [], templateNamesById = {};
   var usersById = {}, rulesById = {}, diagById = {}, currentReportRows = [];
-  var sourceGroupSchedules = []; // Almacena reportes filtrados para clonación
+  var sourceGroupSchedules = [];
   var REPORT_LINK_HASH = '#customReportSchedule,id:';
   var activeBulkTokens = [];
   var activeModule = 'hub';
@@ -660,6 +677,27 @@ var addInConstructor = function (geotabApi, state, callback) {
       .replace(/[\u0300-\u036f]/g, "")
       .replace(/\s+/g, ' ')
       .trim();
+  }
+
+  function isGroupUnderAllowedParents(groupId) {
+    if (!groupId) return false;
+    var current = groupsById[groupId];
+    var visited = new Set();
+
+    while (current && current.id && !visited.has(current.id)) {
+      visited.add(current.id);
+      if (ALLOWED_PARENT_GROUPS.includes(current.id)) {
+        return true;
+      }
+      if (current.children && Array.isArray(current.children)) {
+        for (var i = 0; i < current.children.length; i++) {
+          if (ALLOWED_PARENT_GROUPS.includes(current.children[i].id)) return true;
+        }
+      }
+      var parentId = current.parent ? (typeof current.parent === 'string' ? current.parent : current.parent.id) : null;
+      current = parentId ? groupsById[parentId] : null;
+    }
+    return false;
   }
 
   function extractCustomPropertiesMap(d) {
@@ -960,6 +998,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     $('cgps-mass-value-input').placeholder = labelText + '...';
   }
 
+  // FILTRADO EXCLUSIVO DE GRUPOS PADRES b278A Y b27A7
   function populateReportGroupsDropdown(filterQuery) {
     var sel = $('reports-group-select');
     if (!sel) return;
@@ -971,8 +1010,10 @@ var addInConstructor = function (geotabApi, state, callback) {
     Object.keys(groupsById).forEach(function(gid) {
       var g = groupsById[gid];
       if (g && g.name && !/^Group/.test(g.id)) {
-        if (!q || g.name.toLowerCase().indexOf(q) >= 0) {
-          sortedGroups.push(g);
+        if (isGroupUnderAllowedParents(g.id)) {
+          if (!q || g.name.toLowerCase().indexOf(q) >= 0) {
+            sortedGroups.push(g);
+          }
         }
       }
     });
@@ -982,7 +1023,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     sortedGroups.forEach(function(g) {
       var opt = document.createElement('option');
       opt.value = g.id;
-      opt.textContent = g.name;
+      opt.textContent = g.name + " (" + g.id + ")";
       sel.appendChild(opt);
     });
 
@@ -1286,17 +1327,23 @@ var addInConstructor = function (geotabApi, state, callback) {
     $('report-preview-modal').style.display = 'flex';
   }
 
-  // LÓGICA DE COPIA Y CLONACIÓN DESDE OTRO CLIENTE
-  function populateSourceGroupsDropdown() {
+  // CORDENAMIENTO Y FILTRADO EN MODAL ORIGEN (b278A y b27A7)
+  function populateSourceGroupsDropdown(filterQuery) {
     var sel = $('create-rep-source-group');
     if (!sel) return;
     sel.innerHTML = '<option value="">-- Seleccione Cliente Origen --</option>';
+
+    var q = (filterQuery || '').toLowerCase().trim();
 
     var sortedGroups = [];
     Object.keys(groupsById).forEach(function(gid) {
       var g = groupsById[gid];
       if (g && g.name && !/^Group/.test(g.id)) {
-        sortedGroups.push(g);
+        if (isGroupUnderAllowedParents(g.id)) {
+          if (!q || g.name.toLowerCase().indexOf(q) >= 0) {
+            sortedGroups.push(g);
+          }
+        }
       }
     });
 
@@ -1305,7 +1352,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     sortedGroups.forEach(function(g) {
       var opt = document.createElement('option');
       opt.value = g.id;
-      opt.textContent = g.name;
+      opt.textContent = g.name + " (" + g.id + ")";
       sel.appendChild(opt);
     });
   }
@@ -1354,14 +1401,21 @@ var addInConstructor = function (geotabApi, state, callback) {
     var selectedSched = sourceGroupSchedules.find(function(s){ return s.id === schedId; });
     if (!selectedSched) return;
 
-    var tplId = selectedSched.template ? selectedSched.template.id : '';
-    var baseName = selectedSched.name || (tplId ? (templateNamesById[tplId] || tplId) : 'Reporte');
-    
     var destGid = $('reports-group-select').value;
     var destGroupObj = groupsById[destGid];
     var destName = destGroupObj ? destGroupObj.name : destGid;
 
-    $('create-rep-name').value = baseName + " - " + destName;
+    var fullSearchStr = (selectedSched.name || '').toLowerCase();
+    var prefix = "Monitoreo de flota y rendimiento de combustible - ";
+
+    if (fullSearchStr.indexOf('seguridad') >= 0) {
+      prefix = "Eventos de seguridad - ";
+    } else if (fullSearchStr.indexOf('rangos') >= 0) {
+      prefix = "Rangos Operacionales - ";
+    }
+
+    $('create-rep-name-prefix-preset').value = prefix;
+    $('create-rep-name').value = prefix + destName;
 
     var a = selectedSched.arguments || {};
     var diags = (a.diagnostics || []).map(function(d){ 
@@ -1369,6 +1423,23 @@ var addInConstructor = function (geotabApi, state, callback) {
     });
 
     $('create-rep-diagnostics').value = diags.join(', ');
+  }
+
+  function applyNamePrefixPreset() {
+    var prefix = $('create-rep-name-prefix-preset').value;
+    var currentName = $('create-rep-name').value;
+    
+    var destGid = $('reports-group-select').value;
+    var destGroupObj = groupsById[destGid];
+    var destName = destGroupObj ? destGroupObj.name : destGid;
+
+    if (currentName.indexOf(' - ') >= 0) {
+      var parts = currentName.split(' - ');
+      parts.shift();
+      destName = parts.join(' - ');
+    }
+
+    $('create-rep-name').value = prefix + destName;
   }
 
   function openCreateReportModal() {
@@ -1384,6 +1455,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     $('create-rep-name').value = "";
     $('create-rep-diagnostics').value = "";
     $('create-rep-status').textContent = "";
+    $('create-rep-source-search').value = "";
     
     populateSourceGroupsDropdown();
     $('create-report-modal').style.display = 'flex';
@@ -1932,7 +2004,7 @@ var addInConstructor = function (geotabApi, state, callback) {
 
       return callMulti(api, [
         ['Get', { typeName: 'Device', search: devSearch, resultsLimit: 5000, propertySelector: { fields: DEVICE_FIELDS, isIncluded: true } }],
-        ['Get', { typeName: 'Group', propertySelector: { fields: ['id', 'name'], isIncluded: true } }],
+        ['Get', { typeName: 'Group' }],
         ['Get', { typeName: 'DeviceStatusInfo' }]
       ]).catch(function () {
         return Promise.all([
@@ -2034,10 +2106,10 @@ var addInConstructor = function (geotabApi, state, callback) {
   $('cgps-btn-bulk-std').addEventListener('click', function() { applyBulkFilter($('cgps-bulk-input-std').value); });
   $('cgps-btn-bulk-clear-std').addEventListener('click', function() { $('cgps-bulk-input-std').value = ''; applyBulkFilter(''); });
 
-  // EXECUCIÓN BÚSQUEDA EXPLÍCITA DE GRUPOS/CLIENTES
+  // BÚSQUEDA Y FILTRADO DE GRUPOS / CLIENTES
   function triggerClientGroupSearch() {
     var query = $('reports-search-input').value;
-    showLoading("Buscando coincidencias de clientes...", 30);
+    showLoading("Buscando coincidencias de clientes autorizados (b278A / b27A7)...", 30);
     setTimeout(function() {
       populateReportGroupsDropdown(query);
       handleReportGroupChange();
@@ -2046,10 +2118,8 @@ var addInConstructor = function (geotabApi, state, callback) {
 
   $('reports-btn-search').addEventListener('click', triggerClientGroupSearch);
 
-  $('reports-search-input').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-      triggerClientGroupSearch();
-    }
+  $('reports-search-input').addEventListener('input', function() {
+    populateReportGroupsDropdown(this.value);
   });
 
   $('reports-group-select').addEventListener('change', handleReportGroupChange);
@@ -2060,8 +2130,13 @@ var addInConstructor = function (geotabApi, state, callback) {
     $('create-report-modal').style.display = 'none';
   });
 
+  $('create-rep-source-search').addEventListener('input', function() {
+    populateSourceGroupsDropdown(this.value);
+  });
+
   $('create-rep-source-group').addEventListener('change', handleSourceGroupChange);
   $('create-rep-source-schedule').addEventListener('change', handleSourceScheduleChange);
+  $('btn-apply-prefix-preset').addEventListener('click', applyNamePrefixPreset);
 
   $('btn-submit-create-report').addEventListener('click', createAndSubmitReport);
 
