@@ -276,36 +276,38 @@
     <!-- Módulo Reportes por Cliente -->
     <div id="sec-reports" style="display: none;">
       <div class="cgps-card" style="margin-top: 10px;">
-        <div style="display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap;">
+        <div style="display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap;">
           
-          <!-- SECCIÓN 1: SELECCIÓN DE GRUPO PRINCIPAL -->
+          <!-- SECCIÓN 1: SELECCIÓN DE GRUPO PRINCIPAL + BOTÓN "BUSCAR GRUPOS" -->
           <div style="display: flex; flex-direction: column; gap: 4px;">
             <label style="font-size: 13px; font-weight: 700; color: #1e293b;">1 Selección de grupo principal</label>
-            <select id="reports-parent-filter" class="cgps-input" style="width: 220px; height: 36px; font-weight: 700; color: #1b4e85;">
-              <option value="" disabled selected>-- Seleccione Grupo --</option>
-              <option value="b278A">CLIENTES (b278A)</option>
-              <option value="b27A7">TIPO DE MOTOR (b27A7)</option>
-            </select>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <select id="reports-parent-filter" class="cgps-input" style="width: 220px; height: 36px; font-weight: 700; color: #1b4e85;">
+                <option value="b278A">CLIENTES (b278A)</option>
+                <option value="b27A7">TIPO DE MOTOR (b27A7)</option>
+              </select>
+              <button id="reports-btn-fetch-groups" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px; padding: 0 16px; font-weight: 700; background-color: #3b6591; color: #fff;">Buscar grupos</button>
+            </div>
           </div>
 
           <!-- LÍNEA DIVISORA VERTICAL -->
-          <div style="width: 2px; height: 50px; background-color: #000000; margin: 0 5px; align-self: center;"></div>
+          <div style="width: 2px; height: 50px; background-color: #000000; margin: 0 4px; align-self: center;"></div>
 
           <!-- SECCIÓN 2: BÚSQUEDA DE CLIENTES O TIPO DE VEHÍCULO (ORDEN EXACTO SEGÚN IMAGEN) -->
           <div style="display: flex; flex-direction: column; gap: 4px; flex: 1;">
             <label style="font-size: 13px; font-weight: 700; color: #1e293b;">2 Búsqueda de clientes o tipo de vehiculo</label>
             <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
               
-              <!-- 1. SELECTOR DE CLIENTE / SUBGRUPOS HOJA -->
+              <!-- 1. SELECTOR DE SUBGRUPOS DETECTADOS -->
               <select id="reports-group-select" class="cgps-input" style="width: 260px; height: 36px; font-weight: 700; color: #1b4e85;" disabled>
-                <option value="">-- Primero seleccione grupo principal --</option>
+                <option value="">-- Clic en "Buscar grupos" primero --</option>
               </select>
 
               <!-- 2. INPUT DE TEXTO DE BÚSQUEDA / FILTRO -->
-              <input type="text" id="reports-search-input" class="cgps-input" placeholder="Filtrar por texto..." style="width: 200px; height: 36px; font-size: 13px; background-color: #f1f5f9;" disabled>
+              <input type="text" id="reports-search-input" class="cgps-input" placeholder="waraya..." style="width: 180px; height: 36px; font-size: 13px; background-color: #f1f5f9;" disabled>
 
-              <!-- 3. BOTÓN BUSCAR CLIENTE (CONSULTA ESTATUS DE REPORTES) -->
-              <button id="reports-btn-search" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px; padding: 0 16px; font-weight: 700; background-color: #4277a8; color: #fff;" disabled>🔍 Buscar Cliente</button>
+              <!-- 3. BOTÓN BUSCAR REPORTES -->
+              <button id="reports-btn-search" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px; padding: 0 16px; font-weight: 700; background-color: #3b6591; color: #fff;" disabled>Buscar reportes</button>
               
               <span id="reports-unit-count" style="font-size: 13px; font-weight: 700; color: #0284c7; margin-left: auto;">0 activos en este grupo</span>
             </div>
@@ -386,7 +388,7 @@
             </thead>
             <tbody id="reports-listbody">
               <tr>
-                <td colspan="5" style="text-align: center; color: #64748b; padding: 16px;">Seleccione un cliente arriba y haga clic en "Buscar Cliente" para cargar sus reportes disponibles.</td>
+                <td colspan="5" style="text-align: center; color: #64748b; padding: 16px;">Seleccione un grupo principal, haga clic en "Buscar grupos", seleccione uno y presione "Buscar reportes".</td>
               </tr>
             </tbody>
           </table>
@@ -693,6 +695,7 @@ var addInConstructor = function (geotabApi, state, callback) {
   var databaseName = "divemotor";
 
   var currentSelectedReportObj = null;
+  var fetchedSubGroups = []; // Cache local de subgrupos tras hacer clic en "Buscar grupos"
 
   function pad(n) { return n < 10 ? '0' + n : '' + n; }
   function fmtDate(iso) {
@@ -966,7 +969,6 @@ var addInConstructor = function (geotabApi, state, callback) {
       .sort(function (a, b) { return a.placa.localeCompare(b.placa, 'es', { numeric: true }); });
     
     cacheAllowedGroups();
-    populateReportGroupsDropdown();
     updateKPIs();
   }
 
@@ -1107,41 +1109,58 @@ var addInConstructor = function (geotabApi, state, callback) {
     $('cgps-mass-value-input').placeholder = labelText + '...';
   }
 
-  // LLENAR TODOS LOS SUBGRUPOS EN EL DESPLEGABLE DE PUNTO 2 Y GESTIONAR ESTADOS
-  function populateReportGroupsDropdown() {
+  // PASO 1 -> CLIC EN "BUSCAR GRUPOS": OBTIENE Y HABILITA TODOS LOS SUBGRUPOS EN EL DESPLEGABLE
+  function fetchAndPopulateSubGroups() {
     var parentGid = $('reports-parent-filter').value;
     var groupSel = $('reports-group-select');
     var inputSearch = $('reports-search-input');
     var btnSearch = $('reports-btn-search');
-    var query = (inputSearch.value || '').toLowerCase().trim();
 
     if (!parentGid) {
-      groupSel.innerHTML = '<option value="">-- Primero seleccione grupo principal --</option>';
-      groupSel.disabled = true;
-      inputSearch.disabled = true;
-      btnSearch.disabled = true;
-      inputSearch.style.backgroundColor = '#f1f5f9';
+      alert("Por favor, seleccione un grupo principal.");
       return;
     }
 
-    // Habilitar controles si se eligió categoría en Punto 1
-    groupSel.disabled = false;
-    inputSearch.disabled = false;
-    btnSearch.disabled = false;
-    inputSearch.style.backgroundColor = '#ffffff';
+    showLoading("Extrayendo subgrupos del árbol principal...", 50);
 
-    var subGroups = getGroupsUnderParent(parentGid);
-    groupSel.innerHTML = '<option value="">-- Seleccione un Cliente / Grupo (' + subGroups.length + ' disponibles) --</option>';
+    setTimeout(function() {
+      fetchedSubGroups = getGroupsUnderParent(parentGid);
 
-    for (var i = 0; i < subGroups.length; i++) {
-      var g = subGroups[i];
+      groupSel.disabled = false;
+      inputSearch.disabled = false;
+      btnSearch.disabled = false;
+      inputSearch.style.backgroundColor = '#ffffff';
+
+      filterReportGroupsOptions();
+      hideLoading();
+      setMsg("Se cargaron " + fetchedSubGroups.length + " subgrupos listos para consultar.");
+    }, 150);
+  }
+
+  // FILTRA LA LISTA DE SUBGRUPOS SEGÚN EL TEXTO DEL INPUT DE BÚSQUEDA
+  function filterReportGroupsOptions() {
+    var groupSel = $('reports-group-select');
+    var inputSearch = $('reports-search-input');
+    var query = (inputSearch.value || '').toLowerCase().trim();
+
+    if (!fetchedSubGroups || fetchedSubGroups.length === 0) return;
+
+    var currentVal = groupSel.value;
+    groupSel.innerHTML = '<option value="">-- Seleccione el grupo a analizar --</option>';
+
+    var matchCount = 0;
+    for (var i = 0; i < fetchedSubGroups.length; i++) {
+      var g = fetchedSubGroups[i];
       if (!query || g.name.toLowerCase().indexOf(query) >= 0) {
         var opt = document.createElement('option');
         opt.value = g.id;
         opt.textContent = g.name;
         groupSel.appendChild(opt);
+        matchCount++;
       }
     }
+
+    if (currentVal) groupSel.value = currentVal;
   }
 
   function getUnitsForSelectedReportGroup() {
@@ -1177,19 +1196,19 @@ var addInConstructor = function (geotabApi, state, callback) {
     return { total: reportes.length, reportes };
   }
 
-  // AL HACER CLIC EN "BUSCAR CLIENTE": EJECUTA LA BÚSQUEDA Y MUESTRA EL ESTATUS DE LOS REPORTES BÁSICOS ABAJO
+  // PASO 2 -> AL HACER CLIC EN "BUSCAR REPORTES": ANALIZA LOS REPORTES Y MUESTRA EL ESTATUS ABAJO
   async function handleReportGroupChange() {
     var gid = $('reports-group-select').value;
 
     if (!gid) {
-      alert("Por favor, seleccione un cliente/grupo de la lista para buscar su información de reportes.");
+      alert("Por favor, seleccione un grupo de la lista para buscar sus reportes.");
       return;
     }
 
     var units = getUnitsForSelectedReportGroup();
     $('reports-unit-count').textContent = units.length + " activo(s) en este grupo";
 
-    showLoading("Consultando programaciones del cliente...", 40);
+    showLoading("Consultando programaciones de reporte para el grupo seleccionado...", 40);
     setMsg("Filtrando programaciones para la razón social seleccionada...");
 
     try {
@@ -2240,19 +2259,16 @@ var addInConstructor = function (geotabApi, state, callback) {
   $('cgps-btn-bulk-std').addEventListener('click', function() { applyBulkFilter($('cgps-bulk-input-std').value); });
   $('cgps-btn-bulk-clear-std').addEventListener('click', function() { $('cgps-bulk-input-std').value = ''; applyBulkFilter(''); });
 
-  // EVENTOS DE CAMBIO EN SELECCIÓN Y BÚSQUEDA DEL MÓDULO REPORTES
-  $('reports-parent-filter').addEventListener('change', function() {
-    populateReportGroupsDropdown();
-  });
+  // EVENTOS DEL MÓDULO REPORTES POR CLIENTE
+  $('reports-btn-fetch-groups').addEventListener('click', fetchAndPopulateSubGroups);
 
   $('reports-search-input').addEventListener('keyup', function(e) {
-    populateReportGroupsDropdown();
+    filterReportGroupsOptions();
     if (e.key === 'Enter') {
       handleReportGroupChange();
     }
   });
 
-  // EJECUTAR CONSULTA Y MOSTRAR RESUMEN INFERIOR AL DAR CLIC EN "BUSCAR CLIENTE"
   $('reports-btn-search').addEventListener('click', function() {
     handleReportGroupChange();
   });
