@@ -724,7 +724,6 @@ var addInConstructor = function (geotabApi, state, callback) {
       .trim();
   }
 
-  // CORRECCIÓN CLAVE: RECORRIDO DE JERARQUÍA QUE EXCLUYE EL NODO RAÍZ Y TRAE ÚNICAMENTE SUBGRUPOS
   function getGroupsUnderParent(parentId) {
     if (!parentId) return [];
 
@@ -747,7 +746,6 @@ var addInConstructor = function (geotabApi, state, callback) {
 
     var subGroupsMap = {};
 
-    // 1. Recorrido descendente por propiedad "children" (Nativo Geotab)
     function collectChildren(group) {
       if (!group) return;
       if (group.children && Array.isArray(group.children)) {
@@ -767,7 +765,6 @@ var addInConstructor = function (geotabApi, state, callback) {
       }
     });
 
-    // 2. Recorrido ascendente por "parent" (En caso de referencias planas)
     Object.keys(groupsById).forEach(function(gid) {
       var g = groupsById[gid];
       if (!g || !g.name || /^Group/.test(g.id) || rootIds.has(g.id)) return;
@@ -1105,7 +1102,6 @@ var addInConstructor = function (geotabApi, state, callback) {
     $('cgps-mass-value-input').placeholder = labelText + '...';
   }
 
-  // PASO 1 -> CLIC EN "BUSCAR GRUPOS": EXTRAE Y HABILITA TODOS LOS SUBGRUPOS
   function fetchAndPopulateSubGroups() {
     var parentGid = $('reports-parent-filter').value;
     var groupSel = $('reports-group-select');
@@ -1133,7 +1129,6 @@ var addInConstructor = function (geotabApi, state, callback) {
     }, 150);
   }
 
-  // FILTRA LA LISTA DE SUBGRUPOS SEGÚN EL TEXTO DEL INPUT DE BÚSQUEDA
   function filterReportGroupsOptions() {
     var groupSel = $('reports-group-select');
     var inputSearch = $('reports-search-input');
@@ -1192,7 +1187,6 @@ var addInConstructor = function (geotabApi, state, callback) {
     return { total: reportes.length, reportes };
   }
 
-  // PASO 2 -> AL HACER CLIC EN "BUSCAR REPORTES": ANALIZA LOS REPORTES Y MUESTRA EL ESTATUS ABAJO
   async function handleReportGroupChange() {
     var gid = $('reports-group-select').value;
 
@@ -1604,6 +1598,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     $('create-report-modal').style.display = 'flex';
   }
 
+  // FUNCIÓN CORREGIDA: MAPEO DE DIAGNÓSTICOS VÁLIDOS VÍA ID PARA PREVENIR ERROR DE JSON
   async function createAndSubmitReport() {
     var sourceSchedId = $('create-rep-source-schedule').value;
     var repName = $('create-rep-name').value.trim();
@@ -1641,7 +1636,40 @@ var addInConstructor = function (geotabApi, state, callback) {
     statusDiv.style.color = "#0284c7";
     statusDiv.textContent = "Clonando plantilla y registrando reporte en Geotab...";
 
-    var diagList = diagText ? diagText.split(/[\n\r,]+/).map(function(d){ return { id: d.trim() }; }).filter(function(d){ return d.id; }) : [];
+    var diagList = [];
+    var sourceDiags = (sourceSched.arguments && sourceSched.arguments.diagnostics) ? sourceSched.arguments.diagnostics : [];
+
+    if (diagText) {
+      var rawInputTokens = diagText.split(/[\n\r,]+/).map(function(t){ return t.trim(); }).filter(Boolean);
+      var addedIds = new Set();
+
+      rawInputTokens.forEach(function(token) {
+        var matchOrig = sourceDiags.find(function(sd) { return sd.id === token; });
+        if (matchOrig && !addedIds.has(matchOrig.id)) {
+          addedIds.add(matchOrig.id);
+          diagList.push({ id: matchOrig.id });
+          return;
+        }
+
+        var foundId = null;
+        Object.keys(diagById).forEach(function(dKey) {
+          if (dKey === token || diagById[dKey] === token) {
+            foundId = dKey;
+          }
+        });
+
+        if (foundId && !addedIds.has(foundId)) {
+          addedIds.add(foundId);
+          diagList.push({ id: foundId });
+        }
+      });
+
+      if (diagList.length === 0 && sourceDiags.length > 0) {
+        diagList = sourceDiags.map(function(d){ return { id: d.id }; });
+      }
+    } else {
+      diagList = sourceDiags.map(function(d){ return { id: d.id }; });
+    }
 
     try {
       var newSchedule = {
