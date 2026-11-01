@@ -293,7 +293,7 @@
           <!-- LÍNEA DIVISORA VERTICAL -->
           <div style="width: 2px; height: 50px; background-color: #000000; margin: 0 4px; align-self: center;"></div>
 
-          <!-- SECCIÓN 2: BÚSQUEDA DE CLIENTES O TIPO DE VEHÍCULO (ORDEN EXACTO SEGÚN IMAGEN) -->
+          <!-- SECCIÓN 2: BÚSQUEDA DE CLIENTES O TIPO DE VEHÍCULO -->
           <div style="display: flex; flex-direction: column; gap: 4px; flex: 1;">
             <label style="font-size: 13px; font-weight: 700; color: #1e293b;">2 Búsqueda de clientes o tipo de vehiculo</label>
             <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
@@ -695,7 +695,7 @@ var addInConstructor = function (geotabApi, state, callback) {
   var databaseName = "divemotor";
 
   var currentSelectedReportObj = null;
-  var fetchedSubGroups = []; // Cache local de subgrupos tras hacer clic en "Buscar grupos"
+  var fetchedSubGroups = [];
 
   function pad(n) { return n < 10 ? '0' + n : '' + n; }
   function fmtDate(iso) {
@@ -724,86 +724,82 @@ var addInConstructor = function (geotabApi, state, callback) {
       .trim();
   }
 
-  // RECORRIDO PROFUNDO DE LA JERARQUÍA PARA EXTRAER TODOS LOS SUBGRUPOS
+  // CORRECCIÓN CLAVE: RECORRIDO DE JERARQUÍA QUE EXCLUYE EL NODO RAÍZ Y TRAE ÚNICAMENTE SUBGRUPOS
   function getGroupsUnderParent(parentId) {
     if (!parentId) return [];
-    var parentG = groupsById[parentId];
+
+    var rootGroup = groupsById[parentId];
     var rootIds = new Set();
 
-    if (parentG) {
-      rootIds.add(parentG.id);
-    } else {
-      Object.keys(groupsById).forEach(function(gid) {
-        var g = groupsById[gid];
-        if (!g || !g.name) return;
-        var nameUpper = g.name.toUpperCase().trim();
-        if ((parentId === 'b278A' && nameUpper === 'CLIENTES') || 
-            (parentId === 'b27A7' && nameUpper === 'TIPO DE MOTOR')) {
-          rootIds.add(g.id);
-        }
-      });
+    if (rootGroup) {
+      rootIds.add(rootGroup.id);
     }
-
-    var result = [];
-    var childrenMap = {};
 
     Object.keys(groupsById).forEach(function(gid) {
       var g = groupsById[gid];
-      if (!g) return;
-      var pId = g.parent ? (typeof g.parent === 'string' ? g.parent : g.parent.id) : null;
-      if (pId) {
-        if (!childrenMap[pId]) childrenMap[pId] = [];
-        childrenMap[pId].push(g);
+      if (!g || !g.name) return;
+      var nameUpper = g.name.toUpperCase().trim();
+      if ((parentId === 'b278A' && nameUpper === 'CLIENTES') || 
+          (parentId === 'b27A7' && nameUpper === 'TIPO DE MOTOR')) {
+        rootIds.add(g.id);
       }
     });
 
-    var queue = Array.from(rootIds);
-    var visited = new Set(queue);
+    var subGroupsMap = {};
 
-    while (queue.length > 0) {
-      var currId = queue.shift();
-      var kids = childrenMap[currId] || [];
-
-      kids.forEach(function(child) {
-        if (!visited.has(child.id)) {
-          visited.add(child.id);
-          if (child.name && !/^Group/.test(child.id)) {
-            result.push(child);
+    // 1. Recorrido descendente por propiedad "children" (Nativo Geotab)
+    function collectChildren(group) {
+      if (!group) return;
+      if (group.children && Array.isArray(group.children)) {
+        group.children.forEach(function(child) {
+          var fullChild = groupsById[child.id] || child;
+          if (fullChild && fullChild.id && !rootIds.has(fullChild.id) && !/^Group/.test(fullChild.id)) {
+            subGroupsMap[fullChild.id] = fullChild;
           }
-          queue.push(child.id);
-        }
-      });
+          collectChildren(fullChild);
+        });
+      }
     }
 
-    if (result.length === 0) {
-      Object.keys(groupsById).forEach(function(gid) {
-        var g = groupsById[gid];
-        if (!g || !g.name || /^Group/.test(g.id)) return;
+    rootIds.forEach(function(rId) {
+      if (groupsById[rId]) {
+        collectChildren(groupsById[rId]);
+      }
+    });
+
+    // 2. Recorrido ascendente por "parent" (En caso de referencias planas)
+    Object.keys(groupsById).forEach(function(gid) {
+      var g = groupsById[gid];
+      if (!g || !g.name || /^Group/.test(g.id) || rootIds.has(g.id)) return;
+
+      var current = g;
+      var visited = new Set();
+      var isChildOfRoot = false;
+
+      while (current && current.id && !visited.has(current.id)) {
+        visited.add(current.id);
+        var pId = current.parent ? (typeof current.parent === 'string' ? current.parent : current.parent.id) : null;
         
-        var current = g;
-        var pathVisited = new Set();
-        var isChild = false;
-
-        while (current && current.id && !pathVisited.has(current.id)) {
-          pathVisited.add(current.id);
-          var cNameUpper = (current.name || '').toUpperCase().trim();
-          if (rootIds.has(current.id) || 
-             (parentId === 'b278A' && cNameUpper === 'CLIENTES') || 
-             (parentId === 'b27A7' && cNameUpper === 'TIPO DE MOTOR')) {
-            isChild = true;
-            break;
-          }
-          var pId = current.parent ? (typeof current.parent === 'string' ? current.parent : current.parent.id) : null;
-          current = pId ? groupsById[pId] : null;
+        if (pId && rootIds.has(pId)) {
+          isChildOfRoot = true;
+          break;
         }
+        current = pId ? groupsById[pId] : null;
+      }
 
-        if (isChild && !rootIds.has(g.id)) {
-          result.push(g);
-        }
-      });
-    }
+      if (isChildOfRoot) {
+        subGroupsMap[g.id] = g;
+      }
+    });
 
-    result.sort(function(a,b){ return a.name.localeCompare(b.name, 'es'); });
+    var result = Object.keys(subGroupsMap).map(function(id) {
+      return subGroupsMap[id];
+    });
+
+    result.sort(function(a, b) { 
+      return (a.name || '').localeCompare(b.name || '', 'es'); 
+    });
+
     return result;
   }
 
@@ -1109,7 +1105,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     $('cgps-mass-value-input').placeholder = labelText + '...';
   }
 
-  // PASO 1 -> CLIC EN "BUSCAR GRUPOS": OBTIENE Y HABILITA TODOS LOS SUBGRUPOS EN EL DESPLEGABLE
+  // PASO 1 -> CLIC EN "BUSCAR GRUPOS": EXTRAE Y HABILITA TODOS LOS SUBGRUPOS
   function fetchAndPopulateSubGroups() {
     var parentGid = $('reports-parent-filter').value;
     var groupSel = $('reports-group-select');
@@ -1146,7 +1142,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     if (!fetchedSubGroups || fetchedSubGroups.length === 0) return;
 
     var currentVal = groupSel.value;
-    groupSel.innerHTML = '<option value="">-- Seleccione el grupo a analizar --</option>';
+    groupSel.innerHTML = '<option value="">-- Seleccione el grupo a analizar (' + fetchedSubGroups.length + ' subgrupos) --</option>';
 
     var matchCount = 0;
     for (var i = 0; i < fetchedSubGroups.length; i++) {
@@ -1285,7 +1281,6 @@ var addInConstructor = function (geotabApi, state, callback) {
     if (!schedulesList.length) {
       tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #b91c1c; padding: 16px;">No se encontraron programaciones de reporte asignadas al grupo o subgrupos seleccionados.</td></tr>';
       
-      // Mostrar resumen indicando que están pendientes
       $('sec-reports-validation-summary').style.display = 'grid';
       updateValidationCard('card-val-rep-1', 'st-val-rep-1', '1. MONITOREO Y COMBUSTIBLE', false);
       updateValidationCard('card-val-rep-2', 'st-val-rep-2', '2. RANGOS OPERACIONALES', false);
