@@ -1671,6 +1671,8 @@ var addInConstructor = function (geotabApi, state, callback) {
     SCHEDULE_READONLY_KEYS.forEach(function (k) { delete n[k]; });
 
     n.template = { id: tplId };
+    if (opt.userId) n.lastModifiedUser = { id: opt.userId };
+    if (opt.stamp) n.lastUpdated = new Date().toISOString();
     var destRefs = destGroups.map(function (g) { return { id: g.id }; });
 
     if (opt.scopeOnly) {
@@ -1847,13 +1849,26 @@ var addInConstructor = function (geotabApi, state, callback) {
     }
 
     // ----- Paso 2: programación apuntando a la plantilla nueva -----
+    var srcUserId = reportUserId(sourceSched);
+    var curUserId = null;
+    try {
+      var us = await callApi(api, 'Get', { typeName: 'User', search: { name: USUARIO_PERMITIDO } });
+      if (us && us[0] && us[0].id) curUserId = us[0].id;
+      dbg('USUARIO ACTUAL: ' + USUARIO_PERMITIDO + ' -> id ' + curUserId + ' | usuario del origen: ' + srcUserId);
+    } catch (ue) {
+      dbg('No se pudo resolver el usuario actual: ' + errDetail(ue));
+    }
     var variants = [
       { label: 'con scopeGroupFilter original', opt: { keepGroups: true, keepFilter: true } },
       { label: 'sin fechas fromUtc/toUtc', opt: { keepGroups: true, dropDates: true } },
       { label: 'sin fechas y sin campos vacíos', opt: { keepGroups: true, dropDates: true, prune: true } },
       { label: 'grupos en scopeGroups', opt: { keepGroups: true, scopeOnly: true } },
       { label: 'filtro original + sin fechas + sin vacíos', opt: { keepGroups: true, keepFilter: true, dropDates: true, prune: true } },
-      { label: 'sin groups', opt: {} }
+      { label: 'sin groups', opt: {} },
+      { label: 'con lastModifiedUser del origen + filtro', opt: { keepGroups: true, keepFilter: true, userId: srcUserId } },
+      { label: 'con usuario actual + lastUpdated + filtro', opt: { keepGroups: true, keepFilter: true, userId: curUserId, stamp: true } },
+      { label: 'con usuario actual, sin filtro', opt: { keepGroups: true, userId: curUserId } },
+      { label: 'con usuario actual, sin filtro, sin fechas ni vacíos', opt: { keepGroups: true, userId: curUserId, dropDates: true, prune: true } }
     ];
     var errors = [];
 
