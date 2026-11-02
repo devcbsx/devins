@@ -200,6 +200,13 @@
         <h2>ACTIVACIONES DE UNIDADES</h2>
         <p>Procesamiento inteligente de formato de respuesta</p>
       </div>
+
+      <!-- MÓDULO: FLASH REPORT (MCP) -->
+      <div class="testn-card" id="btn-mod-flash" style="border-color: #38bdf8 !important;">
+        <div class="testn-card-icon">💥</div>
+        <h2>FLASH REPORT (MCP)</h2>
+        <p>Generador de Prompts para Investigación de Siniestros e IA MCP</p>
+      </div>
     </div>
   </div>
 
@@ -339,7 +346,7 @@
 
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px;">
               <span id="reports-selected-groups-count" style="font-size: 12px; font-weight: 700; color: #0284c7;">0 subgrupos seleccionados</span>
-              <span id="reports-unit-count" style="font-size: 12px; font-weight: 700; color: #10b981;">0 activos en grupo(s)</span>
+              <span id="reports-unit-count" style="font-size: 12px; font-weight: 700; color: #10b981;">0 activo(s) en grupo(s)</span>
             </div>
           </div>
         </div>
@@ -444,6 +451,71 @@
             <button id="act-btn-copy" type="button" class="cgps-btn cgps-btn-secondary" style="padding: 4px 12px; font-size: 12px;">📋 Copiar Formato</button>
           </div>
           <textarea id="act-output-text" class="cgps-textarea" rows="14" style="width: 100%; font-family: 'JetBrains Mono', monospace; font-size: 12px; background-color: #f8fafc;" placeholder="El formato procesado aparecerá aquí listo para copiar..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- MÓDULO: FLASH REPORT (GENERADOR DE PROMPT MCP) -->
+    <div id="sec-flash" style="display: none;">
+      <div class="certi-two-cols-grid" style="margin-top: 12px;">
+        <!-- COLUMNA IZQUIERDA: CAMPOS DE ENTRADA MANUALES -->
+        <div class="cgps-card" style="margin: 0;">
+          <div style="font-size: 12px; font-weight: 800; color: #0284c7; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">
+            <span>📋</span> PARÁMETROS MANUALES DEL SINIESTRO
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <div style="display: flex; gap: 8px;">
+              <div style="flex: 1;">
+                <label style="font-size: 11px; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">Placa del Vehículo:</label>
+                <input type="text" id="flash-input-placa" class="cgps-input" placeholder="Ej: ABC-123" style="width: 100%; height: 36px; text-transform: uppercase;">
+              </div>
+              <div style="flex: 1;">
+                <label style="font-size: 11px; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">VIN:</label>
+                <input type="text" id="flash-input-vin" class="cgps-input" placeholder="VIN (17 caracteres)..." style="width: 100%; height: 36px; text-transform: uppercase;">
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 8px;">
+              <div style="flex: 1;">
+                <label style="font-size: 11px; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">Modelo del Vehículo:</label>
+                <input type="text" id="flash-input-modelo" class="cgps-input" placeholder="Ej: AROCS 3342 / Atego" style="width: 100%; height: 36px;">
+              </div>
+              <div style="flex: 1;">
+                <label style="font-size: 11px; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">Base MyGeotab:</label>
+                <input type="text" id="flash-input-base" class="cgps-input" value="divemotor" style="width: 100%; height: 36px; font-weight: 600;">
+              </div>
+            </div>
+
+            <div>
+              <label style="font-size: 11px; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">Fecha y Ventana (Hora local UTC-5 Lima):</label>
+              <input type="text" id="flash-input-ventana" class="cgps-input" placeholder="Ej: 15/10/2026 14:00–15:30" style="width: 100%; height: 36px;">
+            </div>
+
+            <div>
+              <label style="font-size: 11px; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">Relato del Cliente / Descripción del Suceso:</label>
+              <textarea id="flash-input-relato" class="cgps-textarea" rows="4" placeholder="Dónde ocurrió, hora aproximada, con qué/quién colisionó, lado dañado, quién conducía, heridos o carga peligrosa..." style="width: 100%; font-size: 11px;"></textarea>
+            </div>
+
+            <div>
+              <label style="font-size: 11px; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">Detalle de Fotografías Adjuntas:</label>
+              <textarea id="flash-input-fotos" class="cgps-textarea" rows="3" placeholder="Para cada foto: qué muestra, parte/lado de la unidad, si incluye fecha/hora o coordenadas..." style="width: 100%; font-size: 11px;"></textarea>
+            </div>
+
+            <div style="display: flex; gap: 8px; margin-top: 4px;">
+              <button id="flash-btn-generate" type="button" class="cgps-btn cgps-btn-primary" style="flex: 1; height: 38px; font-weight: 700;">⚡ Generar Prompt MCP</button>
+              <button id="flash-btn-clear" type="button" class="cgps-btn cgps-btn-outline" style="height: 38px;">Limpiar Campos</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- COLUMNA DERECHA: PROMPT FINAL COMPLETO PARA COPIAR -->
+        <div class="cgps-card" style="margin: 0; background: #ffffff;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="font-size: 12px; font-weight: 700; color: #0f172a;">PROMPT COMPLETO LISTO PARA IA / MCP</span>
+            <button id="flash-btn-copy" type="button" class="cgps-btn cgps-btn-secondary" style="padding: 4px 12px; font-size: 11px;">📋 Copiar Prompt MCP</button>
+          </div>
+          <textarea id="flash-output-prompt" class="cgps-textarea" rows="23" style="width: 100%; font-family: 'JetBrains Mono', monospace; font-size: 11px; background-color: #f8fafc;" placeholder="Haga clic en 'Generar Prompt MCP' para obtener la instrucción lista para copiar..."></textarea>
         </div>
       </div>
     </div>
@@ -1385,6 +1457,93 @@ var addInConstructor = function (geotabApi, state, callback) {
     });
   });
 
+  // LÓGICA DE GENERACIÓN DE PROMPT FLASH REPORT (MCP)
+  function generateFlashReportPrompt() {
+    var placa = ($('flash-input-placa').value || '').trim().toUpperCase() || '[XXX-000]';
+    var vin = ($('flash-input-vin').value || '').trim().toUpperCase() || '[...]';
+    var modelo = ($('flash-input-modelo').value || '').trim() || '[...]';
+    var baseGeotab = ($('flash-input-base').value || '').trim() || 'divemotor';
+    var ventana = ($('flash-input-ventana').value || '').trim() || '[dd/mm/aaaa hh:mm–hh:mm]';
+    var relato = ($('flash-input-relato').value || '').trim() || '[relato del cliente: dónde, hora aproximada, con qué o quién colisionó, en qué lado del vehículo fue la colisión, quién conducía, heridos o carga peligrosa]';
+    var fotos = ($('flash-input-fotos').value || '').trim() || '[detalles de fotos: qué muestra, qué parte y lado de la unidad, si trae hora o ubicación]';
+
+    var fullPrompt = `ROL
+Analista experto en telemetría e investigación de siniestros viales (Geotab / Divemotor Connect).
+Objetivo: validar si hubo colisión en la unidad indicada y entregar un informe HTML de 3 páginas con la estructura y el diseño descritos abajo.
+
+ENTRADAS
+- Base MyGeotab: [${baseGeotab}]
+- Placa: ${placa} · VIN: ${vin} · Modelo: ${modelo}
+- Fecha y ventana (hora local, UTC-5 Lima): ${ventana}
+- Descripción del suceso de acuerdo a imágenes y adjuntos: ${relato}
+  Detalle de fotos: ${fotos}
+
+USO DE LA DESCRIPCIÓN
+- Corroborar el tipo de impacto y el lado dañado con las fallas de telemetría (sensor ABS del eje delantero derecho/izquierdo, refrigerante, turbo, ventilador).
+- Mencionar las fotos solo en el texto (análisis, comentarios, recomendaciones). NO incrustar imágenes ni crear sección de evidencia fotográfica.
+- Si hay placas de mercancías peligrosas, recomendar verificar la carga.
+- Si el relato contradice la telemetría (hora, velocidad, tipo de impacto), indicarlo expresamente.
+- No inventar calles, ciudades ni conductores: usar solo coordenadas y datos de la base.
+
+REGLAS DE EFICIENCIA
+1. Convertir la ventana a UTC (Lima + 5 h) y usar SIEMPRE ventanas mínimas.
+2. Usar propertySelector para pedir solo los campos necesarios.
+3. NO usar AskDataAgent (devuelve datos irrelevantes) ni GetCountOf sobre StatusData.
+4. NO consultar ExceptionEvent de toda la ventana: solo los 3 min alrededor del pico.
+5. Resolver nombres (Diagnostic, Rule, Group) solo para los IDs que aparezcan en la ventana del evento.
+6. Hacer todos los cálculos (validación GPS, interpolación, coordenadas SVG, conversión a G) en UNA sola ejecución de Python y generar el HTML desde un script.
+7. Entregar el HTML como archivo (present_files), no pegado en el chat, salvo que se pida el código.
+
+FLUJO DE CONSULTAS (en este orden)
+1. Device por licensePlate → id, VIN, serie, zona horaria. Group del dispositivo → nombre del cliente.
+2. Trip de la ventana → inicio, fin, distancia, velocidad máx., punto de parada.
+3. FaultData de la ventana (dateTime, diagnostic, failureMode, faultState, lámparas): agrupar por instante; los fallos en cluster pegados al pico son la firma del impacto.
+4. LogRecord (dateTime, speed, lat, lon) de los últimos 7 min antes de la detención.
+5. Pico: StatusData DiagnosticAccelerationForwardBrakingId en 2–3 min alrededor de la detención; con el instante del pico, repetir con DiagnosticAccelerationSideToSideId y DiagnosticAccelerationUpDownId en ±3 s.
+6. StatusData DiagnosticEngineSpeedId (RPM) de −15 s a +10 s. Probar DiagnosticAcceleratorPedalPositionId (si viene vacío, indicar "no reporta").
+7. ExceptionEvent ±3 min del pico: reglas disparadas (frenada brusca con umbral en g) y si se disparó alguna regla de colisión (si no, anotarlo).
+8. GetPostedRoadSpeedsForDevice en la ventana → límite de vía (referencial).
+9. Historial de 3 meses del FaultData de cualquier falla NUEVA (p. ej. refrigerante SPN 111) → confirmar primera vez.
+10. Trips de las 48 h siguientes: reubicación, remolque o reanudación de operación.
+
+CONVERSIONES Y CRITERIOS
+- Aceleraciones en m/s²; G = valor / 9.80665. G vertical = (valor − línea base previa ≈ 9.48) / 9.80665.
+- Eje longitudinal negativo = desaceleración (impacto frontal típico).
+- Severidad: leve < 0.5 G · moderada 0.5–2 G · severa > 2 G.
+- Hora del impacto = instante del pico longitudinal; velocidad al impacto = interpolación lineal entre registros GPS vecinos (marcar con "~").
+- Todo en hora de Lima (UTC−5) en el informe.
+- Dictamen: "Colisión confirmada / Evento probable / Sin evidencia suficiente" + confianza Alta/Media/Baja. Alta solo con pico alto + fallas en cluster + detención + (video, airbag o EDR). Sin esos datos, Media. La foto o el relato refuerzan el dictamen pero no reemplazan la telemetría.
+
+VALIDACIÓN GPS (obligatoria, un bloque de Python)
+- Por cada par de registros: distancia (haversine) / Δt = velocidad implícita; comparar con el promedio de velocidades reportadas → error medio y máximo en km/h.
+- Distancia acumulada GPS vs velocidad integrada (relación ≈ 1.00).
+- Último registro vs stopPoint del Trip (metros).
+- Rumbo de los últimos 20 s y distancia entre impacto interpolado y parada.
+- Veredicto "GPS consistente" si error medio < 2 km/h y relación de distancias entre 0.98 y 1.02.
+
+ESTRUCTURA DEL INFORME (HTML + CSS embebido, A4 imprimible, @media print, sin scripts ni imágenes externas)
+Paleta: azul marino #0b2545, gris #5b6573, rojo #c62828, ámbar #e0a100, morado #5a1e9a.
+Página 1: cabecera "DIVEMOTOR Connect"; título "Informe de evento de colisión"; cliente; placa · modelo · VIN · fecha; ubicación (solo coordenadas); chips (dictamen, severidad, alerta posterior); cuadro rojo "HORA DEL IMPACTO" arriba a la derecha (columna de texto con min-width:0 para que no se corte); 4 KPIs (velocidad previa, G máx., velocidad al impacto, tipo de impacto); vista superior con zona de impacto + gráfico polar de G; esquema SVG de trayectoria de los últimos 47 s (puntos GPS reales, escala 100 m, norte, enlace a Google Maps); gráfico SVG velocidad + RPM de −12 s a +10 s con franja de desaceleración fuerte; gráfico SVG de G longitudinal/lateral con umbral 0.5 G y pico rotulado; "Análisis del evento" (5 viñetas) y "Línea de tiempo".
+Página 2: tabla segundo a segundo (−12 s a +10 s: hora, Δ, velocidad, RPM, G long/lat/vert, evento) y tabla en milisegundos del impacto (resultante = √(long² + lat²) en el mismo instante), nota de unidades.
+Página 3: tabla de fallas (hora, origen, código/alerta, estado), comentarios finales, recomendaciones, "Cómo se elaboró" (detección, datos usados, limitaciones) y cuadro verde "Validación GPS".
+
+COHERENCIA CON EL DAÑO
+- Falla de sensor ABS/rueda del eje 1 derecho/izquierdo → cruzar con el lado dañado de la foto o el relato.
+- Falla nueva de refrigerante, turbo o ventilador a segundos o minutos del pico → posible daño del frontal.
+
+LIMITACIONES A DECLARAR SIEMPRE
+Sin pedal/marcha/luces si no se reportan; sin airbag/EDR; velocidad interpolada; códigos propietarios ("Unknown Diagnostic 5210xx") y FMI sin decodificar; mapa esquemático sin calles; reglas de colisión de la cuenta que no se dispararon → revisar umbrales.
+
+RECOMENDACIONES TÍPICAS
+Inspección de taller del frontal y del sensor afectado; identificar al conductor si no hay ID; verificar la carga si hay rombos de mercancías peligrosas; revisar umbrales de reglas de colisión; atender fallas preexistentes (p. ej. DEF vacío); solicitar datos de ECU/EDR/video.
+
+SALIDA
+Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza, hora y coordenadas del impacto, veredicto GPS y hallazgos clave. Nada más.`;
+
+    $('flash-output-prompt').value = fullPrompt;
+    setMsg("Prompt MCP de Flash Report generado con éxito.");
+  }
+
   function initAutoReportGroups() {
     showLoading("Cargando clientes y tipos de motor...", 50);
 
@@ -2251,6 +2410,7 @@ var addInConstructor = function (geotabApi, state, callback) {
         $('sec-audit').style.display = 'none';
         $('sec-reports').style.display = 'none';
         $('sec-activations').style.display = 'none';
+        $('sec-flash').style.display = 'none';
         $('sec-kpi-container').style.display = 'grid';
         $('sec-certi-combined-box').style.display = 'grid';
         $('sec-bulk-container').style.display = 'none';
@@ -2265,6 +2425,7 @@ var addInConstructor = function (geotabApi, state, callback) {
         $('sec-audit').style.display = 'none';
         $('sec-reports').style.display = 'none';
         $('sec-activations').style.display = 'none';
+        $('sec-flash').style.display = 'none';
         $('sec-kpi-container').style.display = 'grid';
         $('sec-certi-combined-box').style.display = 'none';
         $('sec-bulk-container').style.display = 'block';
@@ -2281,6 +2442,7 @@ var addInConstructor = function (geotabApi, state, callback) {
         $('sec-audit').style.display = 'none';
         $('sec-reports').style.display = 'none';
         $('sec-activations').style.display = 'none';
+        $('sec-flash').style.display = 'none';
         $('sec-kpi-container').style.display = 'grid';
         $('sec-certi-combined-box').style.display = 'none';
         $('sec-bulk-container').style.display = 'block';
@@ -2294,6 +2456,7 @@ var addInConstructor = function (geotabApi, state, callback) {
         $('sec-master').style.display = 'none';
         $('sec-reports').style.display = 'none';
         $('sec-activations').style.display = 'none';
+        $('sec-flash').style.display = 'none';
         $('sec-audit').style.display = 'block';
         $('sec-kpi-container').style.display = 'none';
         $('sec-certi-combined-box').style.display = 'none';
@@ -2309,6 +2472,7 @@ var addInConstructor = function (geotabApi, state, callback) {
         $('sec-master').style.display = 'none';
         $('sec-audit').style.display = 'none';
         $('sec-activations').style.display = 'none';
+        $('sec-flash').style.display = 'none';
         $('sec-reports').style.display = 'block';
         $('sec-kpi-container').style.display = 'none';
         $('sec-certi-combined-box').style.display = 'none';
@@ -2322,7 +2486,20 @@ var addInConstructor = function (geotabApi, state, callback) {
         $('sec-master').style.display = 'none';
         $('sec-audit').style.display = 'none';
         $('sec-reports').style.display = 'none';
+        $('sec-flash').style.display = 'none';
         $('sec-activations').style.display = 'block';
+        $('sec-kpi-container').style.display = 'none';
+        $('sec-certi-combined-box').style.display = 'none';
+        $('sec-bulk-container').style.display = 'none';
+        $('sec-controls-container').style.display = 'none';
+        $('sec-table-container').style.display = 'none';
+      } else if (mod === 'flash') {
+        $('testn-mod-title').textContent = 'Flash Report (Generador Prompt MCP)';
+        $('sec-master').style.display = 'none';
+        $('sec-audit').style.display = 'none';
+        $('sec-reports').style.display = 'none';
+        $('sec-activations').style.display = 'none';
+        $('sec-flash').style.display = 'block';
         $('sec-kpi-container').style.display = 'none';
         $('sec-certi-combined-box').style.display = 'none';
         $('sec-bulk-container').style.display = 'none';
@@ -2817,6 +2994,28 @@ var addInConstructor = function (geotabApi, state, callback) {
     txtElem.select();
     navigator.clipboard.writeText(txtElem.value).then(function() {
       setMsg('📋 Texto legal copiado al portapapeles.');
+    });
+  });
+
+  // EVENTOS FLASH REPORT (MCP)
+  $('btn-mod-flash').addEventListener('click', function() { switchView('flash'); });
+  $('flash-btn-generate').addEventListener('click', generateFlashReportPrompt);
+  $('flash-btn-clear').addEventListener('click', function() {
+    $('flash-input-placa').value = '';
+    $('flash-input-vin').value = '';
+    $('flash-input-modelo').value = '';
+    $('flash-input-ventana').value = '';
+    $('flash-input-relato').value = '';
+    $('flash-input-fotos').value = '';
+    $('flash-output-prompt').value = '';
+    setMsg('Campos de Flash Report limpiados.');
+  });
+  $('flash-btn-copy').addEventListener('click', function() {
+    var outElem = $('flash-output-prompt');
+    if (!outElem.value) return;
+    outElem.select();
+    navigator.clipboard.writeText(outElem.value).then(function() {
+      setMsg('📋 Prompt MCP copiado al portapapeles.');
     });
   });
 
