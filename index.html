@@ -89,7 +89,6 @@
     </div>
 
     <div style="display: flex; flex-direction: column; gap: 14px; font-size: 12px;">
-      
       <div>
         <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">1. Filtrar Razón Social Origen (Cliente / Tipo Motor):</label>
         <div style="display: flex; gap: 6px;">
@@ -261,8 +260,6 @@
     <div id="sec-reports" style="display: none;">
       <div class="cgps-card" style="margin-top: 10px;">
         <div style="display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap;">
-          
-          <!-- BÚSQUEDA Y SELECCIÓN DE CLIENTES -->
           <div style="display: flex; flex-direction: column; gap: 4px; flex: 1;">
             <label style="font-size: 13px; font-weight: 700; color: #1e293b;">Búsqueda de clientes o tipo de vehículo</label>
             <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 6px;">
@@ -273,7 +270,6 @@
               <button id="reports-btn-search" type="button" class="cgps-btn cgps-btn-secondary" style="height: 34px; padding: 0 16px; font-weight: 700; background-color: #3b6591; color: #fff; margin-left: auto;">Buscar reportes</button>
             </div>
 
-            <!-- CONTENEDOR CON CASILLAS DE VERIFICACIÓN (CHECKBOXES) -->
             <div id="reports-subgroups-checklist" style="max-height: 140px; overflow-y: auto; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 10px; background: #f8fafc; display: flex; flex-direction: column; gap: 4px;">
               <span style="color: #64748b; font-size: 11px; font-style: italic;">Cargando lista de clientes y tipos de motor...</span>
             </div>
@@ -283,10 +279,8 @@
               <span id="reports-unit-count" style="font-size: 12px; font-weight: 700; color: #0284c7;">0 activos en grupo(s)</span>
             </div>
           </div>
-
         </div>
 
-        <!-- BARRA DE CARGA VISUAL -->
         <div id="reports-loading-bar-box" style="display: none; margin-top: 12px;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
             <span id="reports-loading-text" style="font-size: 11px; font-weight: 700; color: #0284c7;">Consultando base de datos y programaciones...</span>
@@ -298,7 +292,6 @@
         </div>
       </div>
 
-      <!-- TARJETAS DE RESUMEN / ESTATUS DE REPORTES BÁSICOS -->
       <div id="sec-reports-validation-summary" class="testn-grid" style="grid-template-columns: repeat(3, 1fr); margin-top: 10px; display: none;">
         <div id="card-val-rep-1" class="cgps-card" style="padding: 12px; border-left: 4px solid #94a3b8;">
           <div style="font-size: 11px; font-weight: 700; color: #64748b;">1. MONITOREO Y COMBUSTIBLE</div>
@@ -369,9 +362,26 @@
 
     <!-- MÓDULO: ACTIVACIONES DE UNIDADES -->
     <div id="sec-activations" style="display: none;">
-      <div class="cgps-card" style="margin-top: 10px; padding: 30px; text-align: center;">
-        <h3 style="color: #1b4e85; margin: 0 0 8px 0;">Módulo en Desarrollo</h3>
-        <p style="color: #64748b; font-size: 13px; margin: 0;">Esta sección está preparada para incorporar el flujo de activaciones de unidades.</p>
+      <div class="certi-two-cols-grid" style="margin-top: 10px;">
+        <div class="cgps-card" style="margin: 0;">
+          <div style="font-size: 12px; font-weight: 700; margin-bottom: 6px; color: #1b4e85;">PEGAR SOLICITUD DE ACTIVACIÓN</div>
+          <textarea id="act-input-text" class="cgps-textarea" placeholder="Pegue aquí el texto de la solicitud (incluyendo observaciones, si indica o no activación inmediata, clientes y modelos)..." rows="12" style="width: 100%; font-size: 11px;"></textarea>
+          <div style="display: flex; gap: 8px; margin-top: 8px;">
+            <button id="act-btn-process" type="button" class="cgps-btn cgps-btn-secondary" style="flex: 1; font-weight: 700;">⚡ Procesar y Generar Formato</button>
+            <button id="act-btn-clear" type="button" class="cgps-btn cgps-btn-outline">Limpiar</button>
+          </div>
+        </div>
+
+        <div class="cgps-card" style="margin: 0; background-color: #ffffff !important;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 12px; font-weight: 700; color: #1b4e85;">FORMATO DE RESPUESTA</span>
+              <span id="act-detected-badge" class="badge-param badge-full" style="display: none;">ACTIVACIÓN INMEDIATA</span>
+            </div>
+            <button id="act-btn-copy" type="button" class="cgps-btn cgps-btn-secondary" style="padding: 4px 10px; font-size: 11px;">📋 Copiar Formato</button>
+          </div>
+          <textarea id="act-output-text" class="cgps-textarea" rows="12" style="width: 100%; font-family: sans-serif; font-size: 11px; background-color: #f8fafc;" placeholder="El formato procesado aparecerá aquí listo para copiar..."></textarea>
+        </div>
       </div>
     </div>
 
@@ -1080,7 +1090,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     $('cgps-mass-value-input').placeholder = labelText + '...';
   }
 
-  // INYECCIÓN DE LOS 5 PARÁMETROS OBLIGATORIOS A LAS UNIDADES SELECCIONADAS
+  // INYECCIÓN DE LOS 5 PARÁMETROS OBLIGATORIOS
   async function injectRequiredParameters() {
     var selectedIds = Object.keys(selected).filter(function (k) { return selected[k]; });
     
@@ -1134,13 +1144,162 @@ var addInConstructor = function (geotabApi, state, callback) {
     }
   }
 
-  // DELEGACIÓN GLOBAL DE EVENTOS PARA CAPTURAR EL CLIC DEL BOTÓN EN CUALQUIER ESTADO DEL DOM
+  // DELEGACIÓN GLOBAL DE EVENTOS AL CLIC DE BOTONES
   document.addEventListener('click', function (e) {
     var target = e.target;
     if (target && (target.id === 'cgps-btn-inject-params' || target.closest('#cgps-btn-inject-params'))) {
       e.preventDefault();
       injectRequiredParameters();
     }
+  });
+
+  // LÓGICA DEL MÓDULO ACTIVACIONES DE UNIDADES
+  function processActivationsText() {
+    var raw = ($('act-input-text').value || '').trim();
+    var badge = $('act-detected-badge');
+    
+    if (!raw) {
+      setMsg("Ingrese o pegue el texto de solicitud a procesar.", true);
+      $('act-output-text').value = '';
+      if (badge) badge.style.display = 'none';
+      return;
+    }
+
+    var upper = raw.toUpperCase();
+    var isImmediate = upper.indexOf("ACTIVACION INMEDIATA") >= 0 || upper.indexOf("ACTIVACIÓN INMEDIATA") >= 0;
+    
+    if (upper.indexOf("NO INDICA") >= 0 && upper.indexOf("ACTIVACION INMEDIATA") >= 0) {
+      isImmediate = false;
+    }
+
+    var out = "Buen día estimados,\n\n";
+
+    if (!isImmediate) {
+      if (badge) {
+        badge.textContent = "NO REQUIERE ACTIVACIÓN INMEDIATA";
+        badge.className = "badge-param badge-partial";
+        badge.style.display = "inline-block";
+      }
+
+      out += "Dado que no indica que es una activación inmediata envío lo solicitado:\n\n";
+      out += "Para Camiones\n\n";
+      out += "BD: DIVEMOTOR\n";
+      out += "GRUPO: Unidades sin asignar\n\n";
+      out += "Para BUSES\n\n";
+      out += "BD: divemotor_buses\n";
+      out += "GRUPO: Unidades sin asignar\n\n";
+      out += "Saludos cordiales,";
+    } else {
+      if (badge) {
+        badge.textContent = "ACTIVACIÓN INMEDIATA DETECTADA";
+        badge.className = "badge-param badge-full";
+        badge.style.display = "inline-block";
+      }
+
+      out += "Al ser una activación inmediata considerar lo siguiente para los grupos:\n\n";
+
+      var clientBlocks = [];
+      var lines = raw.split(/[\r\n]+/);
+      var currentClient = null;
+      var currentModels = [];
+
+      lines.forEach(function(line) {
+        var cleanLine = line.trim();
+        if (!cleanLine) return;
+
+        var obsMatch = cleanLine.match(/OBSERVACIONES\s*:\s*(.*)/i);
+        if (obsMatch) {
+          cleanLine = obsMatch[1].trim();
+        }
+
+        var tokens = cleanLine.split(/\s*-\s*/);
+        
+        tokens.forEach(function(token) {
+          token = token.trim();
+          if (!token) return;
+
+          if (/^([A-Z0-9]{17})/i.test(token)) {
+            return;
+          }
+
+          if (/^(SI|NO|ACTIVACION INMEDIATA|NO INDICA|PENDIENTE|ACT\.\s*INMEDIATA)/i.test(token)) {
+            return;
+          }
+
+          var isModel = /\b(NEW ATEGO|AROCS|ACTROS|ACCELO|ATEGO|O\s*500|BUS)\b/i.test(token) || /\d{4}/.test(token);
+
+          if (!isModel && token.length >= 3) {
+            if (currentClient && currentModels.length >= 0) {
+              clientBlocks.push({ client: currentClient, models: currentModels });
+              currentModels = [];
+            }
+            currentClient = cleanLegalName(token);
+          } else if (isModel) {
+            var formattedModel = token.toUpperCase().trim();
+            if (currentClient && !currentModels.includes(formattedModel)) {
+              currentModels.push(formattedModel);
+            }
+          }
+        });
+      });
+
+      if (currentClient) {
+        clientBlocks.push({ client: currentClient, models: currentModels });
+      }
+
+      if (clientBlocks.length === 0) {
+        out += "UNIDADES DE [CLIENTE]\n\n";
+        out += "Para Camiones\n\n";
+        out += "BD: DIVEMOTOR\n";
+        out += "GRUPO CLIENTE : [NOMBRE CLIENTE]\n";
+        out += "GRUPO TIPO DE MOTOR - DIVEMOTOR:\n";
+        out += "*PARA [MODELO] : [MODELO]_[NOMBRE CLIENTE]\n\n";
+        out += "Para buses\n\n";
+      } else {
+        clientBlocks.forEach(function(b) {
+          var clientName = b.client || 'CLIENTE';
+          out += "UNIDADES DE " + clientName + "\n\n";
+          out += "BD: DIVEMOTOR\n";
+          out += "GRUPO CLIENTE : " + clientName + "\n";
+          out += "GRUPO TIPO DE MOTOR - DIVEMOTOR:\n";
+          
+          if (b.models.length > 0) {
+            b.models.forEach(function(m) {
+              var modelUpper = m.toUpperCase();
+              var simpleModel = modelUpper.split(' ')[0] || 'MODELO';
+              out += "*PARA " + simpleModel + " : " + modelUpper + "_" + clientName + "\n";
+            });
+          } else {
+            out += "*PARA [MODELO] : [MODELO]_" + clientName + "\n";
+          }
+          out += "\n";
+        });
+
+        out += "Para buses\n\n";
+      }
+
+      out += "Saludos cordiales,";
+    }
+
+    $('act-output-text').value = out;
+    setMsg("Formatos procesados correctamente.");
+  }
+
+  $('act-btn-process').addEventListener('click', processActivationsText);
+  $('act-btn-clear').addEventListener('click', function() {
+    $('act-input-text').value = '';
+    $('act-output-text').value = '';
+    if ($('act-detected-badge')) $('act-detected-badge').style.display = 'none';
+    setMsg("Texto de activaciones limpiado.");
+  });
+  
+  $('act-btn-copy').addEventListener('click', function() {
+    var outElem = $('act-output-text');
+    if (!outElem.value) return;
+    outElem.select();
+    navigator.clipboard.writeText(outElem.value).then(function() {
+      setMsg("📋 Formato de activación copiado al portapapeles.");
+    });
   });
 
   // CARGA AUTOMÁTICA DE TODOS LOS GRUPOS (CLIENTES + TIPO DE MOTOR)
@@ -1240,7 +1399,6 @@ var addInConstructor = function (geotabApi, state, callback) {
     return { total: reportes.length, reportes };
   }
 
-  // BUSCA REPORTES DE TODOS LOS GRUPOS SELECCIONADOS
   async function handleReportGroupChange() {
     var selectedGids = getSelectedSubGroupIds();
 
@@ -2295,7 +2453,7 @@ var addInConstructor = function (geotabApi, state, callback) {
   $('testn-btn-refresh-hub').addEventListener('click', function() { load(); });
   $('testn-btn-refresh-mod').addEventListener('click', function() { load(); });
 
-  // EVENTOS DEL MÓDULO MASTER SWITCH
+  // EVENTOS MASTER SWITCH
   $('master-btn-excel').addEventListener('click', exportMasterExcel);
 
   $('master-btn-week').addEventListener('click', function() {
@@ -2343,7 +2501,7 @@ var addInConstructor = function (geotabApi, state, callback) {
   $('cgps-btn-bulk-std').addEventListener('click', function() { applyBulkFilter($('cgps-bulk-input-std').value); });
   $('cgps-btn-bulk-clear-std').addEventListener('click', function() { $('cgps-bulk-input-std').value = ''; applyBulkFilter(''); });
 
-  // EVENTOS DEL MÓDULO REPORTES POR CLIENTE
+  // EVENTOS REPORTES POR CLIENTE
   $('reports-search-input').addEventListener('keyup', function() {
     renderSubGroupsChecklist();
   });
@@ -2364,7 +2522,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     handleReportGroupChange();
   });
 
-  // EVENTOS DEL MODAL DE CREACIÓN DE REPORTES
+  // CREACIÓN DE REPORTES
   $('reports-btn-open-create-modal').addEventListener('click', openCreateReportModal);
   $('btn-close-create-modal').addEventListener('click', function() {
     $('create-report-modal').style.display = 'none';
@@ -2381,7 +2539,6 @@ var addInConstructor = function (geotabApi, state, callback) {
   $('create-rep-source-group').addEventListener('change', handleSourceGroupChange);
   $('create-rep-source-schedule').addEventListener('change', handleSourceScheduleChange);
   $('btn-apply-prefix-preset').addEventListener('click', applyNamePrefixPreset);
-
   $('btn-submit-create-report').addEventListener('click', createAndSubmitReport);
 
   // EVENTOS MODAL VISUAL Y COPIA
@@ -2412,7 +2569,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     if (found) openReportPreviewModal(found);
   });
 
-  // FILTROS DE REPORTES Y PALABRA CLAVE
+  // FILTROS DE REPORTES
   $('rep-filter-from').addEventListener('change', applyReportFilters);
   $('rep-filter-to').addEventListener('change', applyReportFilters);
   $('rep-filter-user').addEventListener('change', applyReportFilters);
@@ -2426,7 +2583,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     applyReportFilters();
   });
 
-  // EVENTOS AUDITORÍA DE GRUPOS
+  // AUDITORÍA DE GRUPOS
   $('cgps-btn-exec-audit').addEventListener('click', executeGroupAudit);
   $('cgps-btn-clear-audit').addEventListener('click', function() {
     $('cgps-audit-input').value = '';
@@ -2473,7 +2630,7 @@ var addInConstructor = function (geotabApi, state, callback) {
   $('btn-mod-activations').addEventListener('click', function() { switchView('activations'); });
   $('testn-btn-back').addEventListener('click', function() { switchView('hub'); });
 
-  // BÚSQUEDA Y SELECTOR DE CAMPO EN TABLA
+  // BÚSQUEDA Y SELECTOR DE CAMPO
   var filterTimer = null;
   $('cgps-filter').addEventListener('input', function () { clearTimeout(filterTimer); filterTimer = setTimeout(renderList, 200); });
   $('cgps-filter-field').addEventListener('change', renderList);
