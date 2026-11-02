@@ -269,35 +269,20 @@
       <div class="cgps-card" style="margin-top: 10px;">
         <div style="display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap;">
           
-          <!-- SECCIÓN 1: SELECCIÓN DE GRUPO PRINCIPAL -->
-          <div style="display: flex; flex-direction: column; gap: 4px;">
-            <label style="font-size: 13px; font-weight: 700; color: #1e293b;">1 Selección de grupo principal</label>
-            <div style="display: flex; gap: 8px; align-items: center;">
-              <select id="reports-parent-filter" class="cgps-input" style="width: 220px; height: 36px; font-weight: 700; color: #1b4e85;">
-                <option value="b278A">CLIENTES (b278A)</option>
-                <option value="b27A7">TIPO DE MOTOR (b27A7)</option>
-              </select>
-              <button id="reports-btn-fetch-groups" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px; padding: 0 16px; font-weight: 700; background-color: #3b6591; color: #fff;">Buscar grupos</button>
-            </div>
-          </div>
-
-          <!-- LÍNEA DIVISORA VERTICAL -->
-          <div style="width: 2px; height: 50px; background-color: #000000; margin: 0 4px; align-self: center;"></div>
-
-          <!-- SECCIÓN 2: BÚSQUEDA DE CLIENTES Y SELECCIÓN MÚLTIPLE DE SUBGRUPOS -->
+          <!-- BÚSQUEDA Y SELECCIÓN DE CLIENTES (AUTOMÁTICA DE CLIENTES Y TIPO DE MOTOR) -->
           <div style="display: flex; flex-direction: column; gap: 4px; flex: 1;">
-            <label style="font-size: 13px; font-weight: 700; color: #1e293b;">2 Búsqueda de clientes o tipo de vehículo</label>
+            <label style="font-size: 13px; font-weight: 700; color: #1e293b;">Búsqueda de clientes o tipo de vehículo</label>
             <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 6px;">
-              <input type="text" id="reports-search-input" class="cgps-input" placeholder="Filtrar cliente..." style="width: 200px; height: 34px; font-size: 12px;" disabled>
-              <button id="reports-btn-select-all-subgroups" type="button" class="cgps-btn cgps-btn-outline" style="height: 34px; padding: 0 10px; font-size: 11px;" disabled>Marcar Todos</button>
-              <button id="reports-btn-deselect-all-subgroups" type="button" class="cgps-btn cgps-btn-outline" style="height: 34px; padding: 0 10px; font-size: 11px;" disabled>Desmarcar</button>
+              <input type="text" id="reports-search-input" class="cgps-input" placeholder="Filtrar cliente..." style="width: 240px; height: 34px; font-size: 12px;">
+              <button id="reports-btn-select-all-subgroups" type="button" class="cgps-btn cgps-btn-outline" style="height: 34px; padding: 0 10px; font-size: 11px;">Marcar Todos</button>
+              <button id="reports-btn-deselect-all-subgroups" type="button" class="cgps-btn cgps-btn-outline" style="height: 34px; padding: 0 10px; font-size: 11px;">Desmarcar</button>
               
-              <button id="reports-btn-search" type="button" class="cgps-btn cgps-btn-secondary" style="height: 34px; padding: 0 16px; font-weight: 700; background-color: #3b6591; color: #fff; margin-left: auto;" disabled>Buscar reportes</button>
+              <button id="reports-btn-search" type="button" class="cgps-btn cgps-btn-secondary" style="height: 34px; padding: 0 16px; font-weight: 700; background-color: #3b6591; color: #fff; margin-left: auto;">Buscar reportes</button>
             </div>
 
             <!-- CONTENEDOR CON CASILLAS DE VERIFICACIÓN (CHECKBOXES) -->
-            <div id="reports-subgroups-checklist" style="max-height: 120px; overflow-y: auto; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 10px; background: #f8fafc; display: flex; flex-direction: column; gap: 4px;">
-              <span style="color: #64748b; font-size: 11px; font-style: italic;">Haz clic en "Buscar grupos" para cargar la lista.</span>
+            <div id="reports-subgroups-checklist" style="max-height: 140px; overflow-y: auto; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 10px; background: #f8fafc; display: flex; flex-direction: column; gap: 4px;">
+              <span style="color: #64748b; font-size: 11px; font-style: italic;">Cargando lista de clientes y tipos de motor...</span>
             </div>
 
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
@@ -381,7 +366,7 @@
             </thead>
             <tbody id="reports-listbody">
               <tr>
-                <td colspan="5" style="text-align: center; color: #64748b; padding: 16px;">Seleccione un grupo principal, haga clic en "Buscar grupos", seleccione uno o más subgrupos y presione "Buscar reportes".</td>
+                <td colspan="5" style="text-align: center; color: #64748b; padding: 16px;">Seleccione uno o más clientes / grupos y presione "Buscar reportes".</td>
               </tr>
             </tbody>
           </table>
@@ -1095,42 +1080,35 @@ var addInConstructor = function (geotabApi, state, callback) {
     $('cgps-mass-value-input').placeholder = labelText + '...';
   }
 
-  // PASO 1 -> EXTRAER SUBGRUPOS Y RENDERIZAR CHECKLIST
-  function fetchAndPopulateSubGroups() {
-    var parentGid = $('reports-parent-filter').value;
-    var inputSearch = $('reports-search-input');
-    var btnSearch = $('reports-btn-search');
-    var btnSelectAll = $('reports-btn-select-all-subgroups');
-    var btnDeselectAll = $('reports-btn-deselect-all-subgroups');
+  // CARGA AUTOMÁTICA DE TODOS LOS GRUPOS (CLIENTES + TIPO DE MOTOR)
+  function initAutoReportGroups() {
+    showLoading("Cargando clientes y tipos de motor...", 50);
 
-    if (!parentGid) {
-      alert("Por favor, seleccione un grupo principal.");
-      return;
-    }
+    var clientSubgroups = getGroupsUnderParent('b278A');
+    var motorSubgroups = getGroupsUnderParent('b27A7');
 
-    showLoading("Extrayendo subgrupos del árbol principal...", 50);
+    var combinedMap = {};
+    clientSubgroups.concat(motorSubgroups).forEach(function(g) {
+      combinedMap[g.id] = g;
+    });
 
-    setTimeout(function() {
-      fetchedSubGroups = getGroupsUnderParent(parentGid);
+    fetchedSubGroups = Object.keys(combinedMap).map(function(k) { return combinedMap[k]; });
+    fetchedSubGroups.sort(function(a, b) {
+      return (a.name || '').localeCompare(b.name || '', 'es');
+    });
 
-      inputSearch.disabled = false;
-      btnSearch.disabled = false;
-      btnSelectAll.disabled = false;
-      btnDeselectAll.disabled = false;
-
-      renderSubGroupsChecklist();
-      hideLoading();
-      setMsg("Se cargaron " + fetchedSubGroups.length + " subgrupos listos para selección.");
-    }, 150);
+    renderSubGroupsChecklist();
+    hideLoading();
+    setMsg("Se cargaron " + fetchedSubGroups.length + " grupos (Clientes y Tipo de Motor) listos para selección.");
   }
 
-  // RENDERIZA LA LISTA DE CHECKBOXES PARA SELECCIÓN MÚLTIPLE DE SUBGRUPOS
+  // RENDERIZA LA LISTA DE CHECKBOXES PARA SELECCIÓN MÚLTIPLE
   function renderSubGroupsChecklist() {
     var container = $('reports-subgroups-checklist');
     var query = ($('reports-search-input').value || '').toLowerCase().trim();
 
     if (!fetchedSubGroups || fetchedSubGroups.length === 0) {
-      container.innerHTML = '<span style="color: #64748b; font-size: 11px;">No se encontraron subgrupos.</span>';
+      container.innerHTML = '<span style="color: #64748b; font-size: 11px;">No se encontraron grupos.</span>';
       return;
     }
 
@@ -1199,7 +1177,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     return { total: reportes.length, reportes };
   }
 
-  // PASO 2 -> BUSCA REPORTES DE TODOS LOS GRUPOS SELECCIONADOS
+  // BUSCA REPORTES DE TODOS LOS GRUPOS SELECCIONADOS
   async function handleReportGroupChange() {
     var selectedGids = getSelectedSubGroupIds();
 
@@ -1900,6 +1878,9 @@ var addInConstructor = function (geotabApi, state, callback) {
         $('sec-bulk-container').style.display = 'none';
         $('sec-controls-container').style.display = 'none';
         $('sec-table-container').style.display = 'none';
+
+        // CARGA AUTOMÁTICA AL ABRIR EL MÓDULO
+        initAutoReportGroups();
       } else if (mod === 'activations') {
         $('testn-mod-title').textContent = 'Activaciones de Unidades';
         $('sec-master').style.display = 'none';
@@ -2292,8 +2273,6 @@ var addInConstructor = function (geotabApi, state, callback) {
   $('cgps-btn-bulk-clear-std').addEventListener('click', function() { $('cgps-bulk-input-std').value = ''; applyBulkFilter(''); });
 
   // EVENTOS DEL MÓDULO REPORTES POR CLIENTE
-  $('reports-btn-fetch-groups').addEventListener('click', fetchAndPopulateSubGroups);
-
   $('reports-search-input').addEventListener('keyup', function() {
     renderSubGroupsChecklist();
   });
