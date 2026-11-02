@@ -89,16 +89,9 @@
     </div>
 
     <div style="display: flex; flex-direction: column; gap: 14px; font-size: 12px;">
+      
       <div>
-        <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">1. Categoría Base Origen:</label>
-        <select id="create-rep-parent-cat" class="cgps-input" style="width: 100%; height: 36px; font-weight: 700; color: #1b4e85;">
-          <option value="b278A">CLIENTES (b278A)</option>
-          <option value="b27A7">TIPO DE MOTOR (b27A7)</option>
-        </select>
-      </div>
-
-      <div>
-        <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">2. Filtrar Razón Social Origen (Cliente):</label>
+        <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">1. Filtrar Razón Social Origen (Cliente / Tipo Motor):</label>
         <div style="display: flex; gap: 6px;">
           <input type="text" id="create-rep-source-search" class="cgps-input" placeholder="🔍 Filtrar cliente..." style="width: 240px; height: 36px;">
           <select id="create-rep-source-group" class="cgps-input" style="flex: 1; height: 36px; font-weight: 600;">
@@ -108,14 +101,14 @@
       </div>
 
       <div>
-        <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">3. Seleccionar Reporte Base a Clonar:</label>
+        <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">2. Seleccionar Reporte Base a Clonar:</label>
         <select id="create-rep-source-schedule" class="cgps-input" style="width: 100%; height: 36px; font-weight: 600;" disabled>
           <option value="">-- Primero seleccione la razón social origen --</option>
         </select>
       </div>
 
       <div>
-        <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">4. Nombre del Nuevo Reporte (Formato + Razón Social):</label>
+        <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">3. Nombre del Nuevo Reporte (Formato + Razón Social):</label>
         <div style="display: flex; gap: 8px; margin-bottom: 6px;">
           <select id="create-rep-name-prefix-preset" class="cgps-input" style="width: 340px; height: 36px; font-weight: 700; color: #1b4e85;">
             <option value="Monitoreo de flota y rendimiento de combustible - ">Monitoreo de flota y rendimiento de combustible - </option>
@@ -128,7 +121,7 @@
       </div>
 
       <div>
-        <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">5. Asignar Grupos Destino (Múltiple Selección en Clientes / Tipo Motor):</label>
+        <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">4. Asignar Grupos Destino (Múltiple Selección en Clientes / Tipo Motor):</label>
         <input type="text" id="create-rep-dest-search" class="cgps-input" placeholder="🔍 Filtrar cliente..." style="width: 100%; height: 34px; margin-bottom: 6px;">
         <div id="create-rep-dest-groups-list" style="max-height: 140px; overflow-y: auto; border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px; background: #f8fafc; display: flex; flex-direction: column; gap: 6px;">
           <span style="color: #64748b; font-size: 11px;">Cargando lista de grupos destino...</span>
@@ -136,7 +129,7 @@
       </div>
 
       <div>
-        <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">6. Diagnósticos Copiados / Editables (Separados por comas o líneas):</label>
+        <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">5. Diagnósticos Copiados / Editables (Separados por comas o líneas):</label>
         <textarea id="create-rep-diagnostics" class="cgps-textarea" rows="4" placeholder="Cargando diagnósticos del reporte origen..." style="width: 100%;"></textarea>
       </div>
 
@@ -269,7 +262,7 @@
       <div class="cgps-card" style="margin-top: 10px;">
         <div style="display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap;">
           
-          <!-- BÚSQUEDA Y SELECCIÓN DE CLIENTES (AUTOMÁTICA DE CLIENTES Y TIPO DE MOTOR) -->
+          <!-- BÚSQUEDA Y SELECCIÓN DE CLIENTES -->
           <div style="display: flex; flex-direction: column; gap: 4px; flex: 1;">
             <label style="font-size: 13px; font-weight: 700; color: #1e293b;">Búsqueda de clientes o tipo de vehículo</label>
             <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 6px;">
@@ -1441,17 +1434,21 @@ var addInConstructor = function (geotabApi, state, callback) {
   }
 
   function populateSourceGroupsDropdown() {
-    var parentGid = $('create-rep-parent-cat').value;
     var query = ($('create-rep-source-search').value || '').toLowerCase().trim();
     var sel = $('create-rep-source-group');
     if (!sel) return;
 
     sel.innerHTML = '<option value="">-- Seleccione Cliente Origen --</option>';
 
-    var subGroups = getGroupsUnderParent(parentGid);
+    var subGroups = getGroupsUnderParent('b278A').concat(getGroupsUnderParent('b27A7'));
 
-    for (var i = 0; i < subGroups.length; i++) {
-      var g = subGroups[i];
+    var uniqueMap = {};
+    subGroups.forEach(function(g) { uniqueMap[g.id] = g; });
+    var allCombined = Object.keys(uniqueMap).map(function(k) { return uniqueMap[k]; });
+    allCombined.sort(function(a, b) { return (a.name || '').localeCompare(b.name || '', 'es'); });
+
+    for (var i = 0; i < allCombined.length; i++) {
+      var g = allCombined[i];
       if (!query || g.name.toLowerCase().indexOf(query) >= 0) {
         var opt = document.createElement('option');
         opt.value = g.id;
@@ -1467,9 +1464,14 @@ var addInConstructor = function (geotabApi, state, callback) {
     if (!container) return;
 
     var allDestGroups = getGroupsUnderParent('b278A').concat(getGroupsUnderParent('b27A7'));
+    var uniqueMap = {};
+    allDestGroups.forEach(function(g) { uniqueMap[g.id] = g; });
+    var allCombined = Object.keys(uniqueMap).map(function(k) { return uniqueMap[k]; });
+    allCombined.sort(function(a, b) { return (a.name || '').localeCompare(b.name || '', 'es'); });
+
     var html = '';
 
-    allDestGroups.forEach(function(g) {
+    allCombined.forEach(function(g) {
       if (!query || g.name.toLowerCase().indexOf(query) >= 0) {
         html += '<label style="display: flex; align-items: center; gap: 6px; font-size: 11px; cursor: pointer;">' +
           '<input type="checkbox" class="chk-dest-group" value="' + htmlEsc(g.id) + '"> ' +
@@ -1879,7 +1881,6 @@ var addInConstructor = function (geotabApi, state, callback) {
         $('sec-controls-container').style.display = 'none';
         $('sec-table-container').style.display = 'none';
 
-        // CARGA AUTOMÁTICA AL ABRIR EL MÓDULO
         initAutoReportGroups();
       } else if (mod === 'activations') {
         $('testn-mod-title').textContent = 'Activaciones de Unidades';
@@ -2298,8 +2299,6 @@ var addInConstructor = function (geotabApi, state, callback) {
   $('btn-close-create-modal').addEventListener('click', function() {
     $('create-report-modal').style.display = 'none';
   });
-
-  $('create-rep-parent-cat').addEventListener('change', populateSourceGroupsDropdown);
 
   $('create-rep-source-search').addEventListener('keyup', function() {
     populateSourceGroupsDropdown();
