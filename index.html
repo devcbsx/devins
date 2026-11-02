@@ -365,7 +365,7 @@
       <div class="certi-two-cols-grid" style="margin-top: 10px;">
         <div class="cgps-card" style="margin: 0;">
           <div style="font-size: 12px; font-weight: 700; margin-bottom: 6px; color: #1b4e85;">PEGAR SOLICITUD DE ACTIVACIÓN</div>
-          <textarea id="act-input-text" class="cgps-textarea" placeholder="Pegue aquí el texto de la solicitud (incluyendo observaciones, si indica o no activación inmediata, clientes y modelos)..." rows="12" style="width: 100%; font-size: 11px;"></textarea>
+          <textarea id="act-input-text" class="cgps-textarea" placeholder="Pegue aquí el texto de las Observaciones..." rows="14" style="width: 100%; font-size: 11px;"></textarea>
           <div style="display: flex; gap: 8px; margin-top: 8px;">
             <button id="act-btn-process" type="button" class="cgps-btn cgps-btn-secondary" style="flex: 1; font-weight: 700;">⚡ Procesar y Generar Formato</button>
             <button id="act-btn-clear" type="button" class="cgps-btn cgps-btn-outline">Limpiar</button>
@@ -380,7 +380,7 @@
             </div>
             <button id="act-btn-copy" type="button" class="cgps-btn cgps-btn-secondary" style="padding: 4px 10px; font-size: 11px;">📋 Copiar Formato</button>
           </div>
-          <textarea id="act-output-text" class="cgps-textarea" rows="12" style="width: 100%; font-family: sans-serif; font-size: 11px; background-color: #f8fafc;" placeholder="El formato procesado aparecerá aquí listo para copiar..."></textarea>
+          <textarea id="act-output-text" class="cgps-textarea" rows="14" style="width: 100%; font-family: sans-serif; font-size: 11px; background-color: #f8fafc;" placeholder="El formato procesado aparecerá aquí listo para copiar..."></textarea>
         </div>
       </div>
     </div>
@@ -1153,7 +1153,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     }
   });
 
-  // LÓGICA DEL MÓDULO ACTIVACIONES DE UNIDADES
+  // LÓGICA OPTIMIZADA DEL MÓDULO ACTIVACIONES DE UNIDADES
   function processActivationsText() {
     var raw = ($('act-input-text').value || '').trim();
     var badge = $('act-detected-badge');
@@ -1166,11 +1166,12 @@ var addInConstructor = function (geotabApi, state, callback) {
     }
 
     var upper = raw.toUpperCase();
-    var isImmediate = upper.indexOf("ACTIVACION INMEDIATA") >= 0 || upper.indexOf("ACTIVACIÓN INMEDIATA") >= 0;
     
-    if (upper.indexOf("NO INDICA") >= 0 && upper.indexOf("ACTIVACION INMEDIATA") >= 0) {
-      isImmediate = false;
-    }
+    // Evaluar si indica o no activación inmediata
+    var hasNoIndica = upper.indexOf("NO INDICA") >= 0;
+    var hasActInmediata = upper.indexOf("ACT. INMEDIATA") >= 0 || upper.indexOf("ACTIVACION INMEDIATA") >= 0 || upper.indexOf("ACTIVACIÓN INMEDIATA") >= 0;
+    
+    var isImmediate = hasActInmediata && !hasNoIndica;
 
     var out = "Buen día estimados,\n\n";
 
@@ -1198,49 +1199,52 @@ var addInConstructor = function (geotabApi, state, callback) {
 
       out += "Al ser una activación inmediata considerar lo siguiente para los grupos:\n\n";
 
+      // Limpieza de encabezado
+      var cleanBody = raw.replace(/^Observaciones\s*:\s*/i, '').trim();
+
+      // Separación de tokens
+      var tokens = cleanBody.split(/[\r\n]+/).reduce(function(acc, line) {
+        return acc.concat(line.split(/\s+-\s+/));
+      }, []);
+
       var clientBlocks = [];
-      var lines = raw.split(/[\r\n]+/);
       var currentClient = null;
       var currentModels = [];
 
-      lines.forEach(function(line) {
-        var cleanLine = line.trim();
-        if (!cleanLine) return;
+      tokens.forEach(function(token) {
+        var t = token.trim();
+        if (!t) return;
 
-        var obsMatch = cleanLine.match(/OBSERVACIONES\s*:\s*(.*)/i);
-        if (obsMatch) {
-          cleanLine = obsMatch[1].trim();
+        // Ignorar banderas de estado
+        if (/^(NO INDICA|ACT\.\s*INMEDIATA|ACTIVACION INMEDIATA|ACTIVACIÓN INMEDIATA|PENDIENTE)/i.test(t)) {
+          return;
         }
 
-        var tokens = cleanLine.split(/\s*-\s*/);
-        
-        tokens.forEach(function(token) {
-          token = token.trim();
-          if (!token) return;
+        // Detectar si es VIN / Chasis (17 caracteres alfanuméricos)
+        var isVin = /^[A-Z0-9]{17}$/i.test(t);
 
-          if (/^([A-Z0-9]{17})/i.test(token)) {
-            return;
+        if (isVin) {
+          return;
+        }
+
+        var isStock = /^STOCK$/i.test(t);
+
+        if (isStock) {
+          if (!currentClient) {
+            currentClient = "STOCK";
           }
+          return;
+        }
 
-          if (/^(SI|NO|ACTIVACION INMEDIATA|NO INDICA|PENDIENTE|ACT\.\s*INMEDIATA)/i.test(token)) {
-            return;
+        // Si no es VIN ni bandera de estado, es una Razón Social / Cliente
+        var parsedClient = cleanLegalName(t);
+        if (parsedClient && parsedClient.length >= 3) {
+          if (currentClient) {
+            clientBlocks.push({ client: currentClient, models: currentModels });
+            currentModels = [];
           }
-
-          var isModel = /\b(NEW ATEGO|AROCS|ACTROS|ACCELO|ATEGO|O\s*500|BUS)\b/i.test(token) || /\d{4}/.test(token);
-
-          if (!isModel && token.length >= 3) {
-            if (currentClient && currentModels.length >= 0) {
-              clientBlocks.push({ client: currentClient, models: currentModels });
-              currentModels = [];
-            }
-            currentClient = cleanLegalName(token);
-          } else if (isModel) {
-            var formattedModel = token.toUpperCase().trim();
-            if (currentClient && !currentModels.includes(formattedModel)) {
-              currentModels.push(formattedModel);
-            }
-          }
-        });
+          currentClient = parsedClient;
+        }
       });
 
       if (currentClient) {
@@ -1259,20 +1263,11 @@ var addInConstructor = function (geotabApi, state, callback) {
         clientBlocks.forEach(function(b) {
           var clientName = b.client || 'CLIENTE';
           out += "UNIDADES DE " + clientName + "\n\n";
+          out += "Para Camiones\n\n";
           out += "BD: DIVEMOTOR\n";
-          out += "GRUPO CLIENTE : " + clientName + "\n";
+          out += "GRUPO CLIENTE :" + clientName + "\n";
           out += "GRUPO TIPO DE MOTOR - DIVEMOTOR:\n";
-          
-          if (b.models.length > 0) {
-            b.models.forEach(function(m) {
-              var modelUpper = m.toUpperCase();
-              var simpleModel = modelUpper.split(' ')[0] || 'MODELO';
-              out += "*PARA " + simpleModel + " : " + modelUpper + "_" + clientName + "\n";
-            });
-          } else {
-            out += "*PARA [MODELO] : [MODELO]_" + clientName + "\n";
-          }
-          out += "\n";
+          out += "*PARA [MODELO] : [MODELO]_" + clientName + "\n\n";
         });
 
         out += "Para buses\n\n";
