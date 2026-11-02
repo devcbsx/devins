@@ -144,39 +144,71 @@
   </div>
 </div>
 
-<!-- MODAL PARA VALIDAR / MODIFICAR DIAGNÓSTICOS DE REPORTES CREATOR -->
+<!-- MODAL PARA VALIDAR / MODIFICAR DIAGNÓSTICOS DE REPORTES CREATOR (3 PASOS INTEGRADOS) -->
 <div id="edit-diagnostics-modal" style="position: fixed; top:0; left:0; width:100vw; height:100vh; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(6px); z-index: 9999; display: none; justify-content: center; align-items: center; padding: 20px;">
-  <div style="background: #ffffff; padding: 32px; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); width: 100%; max-width: 720px; max-height: 90vh; overflow-y: auto; border: 1px solid #e2e8f0;">
+  <div style="background: #ffffff; padding: 32px; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); width: 100%; max-width: 850px; max-height: 90vh; overflow-y: auto; border: 1px solid #e2e8f0;">
+    <!-- Encabezado Modal -->
     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px; margin-bottom: 20px;">
-      <h2 style="margin:0; font-size: 18px; color: #0f172a; font-weight: 700; display: flex; align-items: center; gap: 8px;">🔧 VALIDAR Y MODIFICAR DIAGNÓSTICOS DE REPORTE</h2>
+      <h2 style="margin:0; font-size: 18px; color: #0f172a; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+        <span>🔧</span> VALIDAR Y MODIFICAR DIAGNÓSTICOS DE REPORTE
+      </h2>
       <button id="btn-close-edit-diags-modal" type="button" class="cgps-btn cgps-btn-outline" style="font-size: 12px; padding: 6px 14px;">✕ Cerrar</button>
     </div>
 
-    <div style="display: flex; flex-direction: column; gap: 16px; font-size: 13px;">
-      <div>
-        <label style="font-weight: 600; color: #0f172a; display: block; margin-bottom: 6px;">1. Seleccionar Reporte Existente:</label>
-        <select id="edit-diag-select-report" class="cgps-input" style="width: 100%; height: 38px; font-weight: 600;">
-          <option value="">-- Seleccione un reporte buscado previamente --</option>
-        </select>
-      </div>
-
-      <div>
-        <label style="font-weight: 600; color: #0f172a; display: block; margin-bottom: 6px;">2. Diagnósticos Actuales Asignados:</label>
-        <div id="edit-diag-current-list" style="max-height: 140px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; background: #f8fafc; display: flex; flex-wrap: wrap; gap: 6px;">
-          <span style="color: #64748b; font-size: 12px; font-style: italic;">Seleccione un reporte de la lista para cargar sus diagnósticos...</span>
+    <!-- Contenido en 3 Pasos -->
+    <div style="display: flex; flex-direction: column; gap: 20px; font-size: 13px;">
+      
+      <!-- Paso 1 -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start;">
+        <div>
+          <label style="font-weight: 700; color: #0f172a; display: block; margin-bottom: 8px; font-size: 14px;">1. Reporte a modificar</label>
+          <select id="edit-diag-select-report" class="cgps-input" style="width: 100%; height: 40px; font-weight: 600;">
+            <option value="">-- Busque reportes primero para cargarlos aquí --</option>
+          </select>
+        </div>
+        <div>
+          <div style="font-weight: 700; color: #0f172a; margin-bottom: 8px; font-size: 13px;">Diagnósticos Actuales Asignados:</div>
+          <div id="edit-diag-current-list" style="min-height: 42px; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; background: #f8fafc; display: flex; flex-wrap: wrap; gap: 6px; align-items: center;">
+            <span style="color: #64748b; font-size: 12px; font-style: italic;">Seleccione un reporte de la lista para cargar sus diagnósticos...</span>
+          </div>
         </div>
       </div>
 
-      <div>
-        <label style="font-weight: 600; color: #0f172a; display: block; margin-bottom: 6px;">3. Añadir / Modificar Diagnósticos (Separados por comas o líneas):</label>
-        <textarea id="edit-diag-input-text" class="cgps-textarea" rows="6" placeholder="Ingrese nombres o IDs de diagnósticos..." style="width: 100%; font-family: 'JetBrains Mono', monospace; font-size: 12px;"></textarea>
+      <!-- Paso 2 -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start;">
+        <div>
+          <label style="font-weight: 700; color: #0f172a; display: block; margin-bottom: 8px; font-size: 14px;">2. Reporte a comparar</label>
+          <select id="edit-diag-select-compare" class="cgps-input" style="width: 100%; height: 40px; font-weight: 600;">
+            <option value="">-- Busque reportes primero para cargarlos aquí --</option>
+          </select>
+        </div>
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <strong style="color: #0f172a; font-size: 13px;">Diagnósticos Actuales Asignados:</strong>
+            <button id="btn-copy-compare-diags" type="button" class="cgps-btn cgps-btn-secondary" style="font-size: 11px; padding: 4px 10px;">📋 Copiar</button>
+          </div>
+          <div id="edit-diag-compare-list" style="min-height: 42px; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; background: #f8fafc; display: flex; flex-wrap: wrap; gap: 6px; align-items: center;">
+            <span style="color: #64748b; font-size: 12px; font-style: italic;">Seleccione un reporte de la lista para cargar sus diagnósticos...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Paso 3 -->
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <label style="font-weight: 700; color: #0f172a; font-size: 14px;">
+          3. Añadir / Modificar Diagnósticos al reporte a modificar <span style="font-weight: normal; font-size: 12px; color: #64748b;">(Separados por comas o líneas):</span>
+        </label>
+        <textarea id="edit-diag-input-text" class="cgps-textarea" rows="4" placeholder="Ingrese nombres o IDs de diagnósticos..." style="width: 100%; font-family: 'JetBrains Mono', monospace; font-size: 12px; resize: vertical;"></textarea>
       </div>
 
       <div id="edit-diag-status" style="font-size: 12px; font-weight: 700; min-height: 20px;"></div>
     </div>
 
+    <!-- Pie del Modal -->
     <div style="text-align: right; margin-top: 24px; border-top: 1px solid #e2e8f0; padding-top: 16px; display: flex; justify-content: flex-end; gap: 10px;">
-      <button id="btn-save-diagnostics" type="button" class="cgps-btn cgps-btn-primary" style="font-size: 13px; font-weight: 700; padding: 10px 20px;">💾 Guardar Diagnósticos en Geotab</button>
+      <button id="btn-save-diagnostics" type="button" class="cgps-btn cgps-btn-primary" style="font-size: 13px; font-weight: 700; padding: 10px 20px;">
+        💾 Guardar Diagnósticos en Geotab
+      </button>
     </div>
   </div>
 </div>
@@ -2203,36 +2235,39 @@ ENTRADAS
     }
   }
 
-  // APARTADO 5: FUNCIONALIDAD PARA EL BOTÓN "VALIDAR / MODIFICAR DIAGNÓSTICOS"
+  // APARTADO 5: FUNCIONALIDAD PARA EL BOTÓN "VALIDAR / MODIFICAR DIAGNÓSTICOS" (FLUJO EN 3 PASOS)
   function openEditDiagnosticsModal() {
-    var sel = $('edit-diag-select-report');
-    sel.innerHTML = '<option value="">-- Seleccione un reporte --</option>';
+    var selMod = $('edit-diag-select-report');
+    var selComp = $('edit-diag-select-compare');
+
+    selMod.innerHTML = '<option value="">-- Busque reportes primero para cargarlos aquí --</option>';
+    selComp.innerHTML = '<option value="">-- Busque reportes primero para cargarlos aquí --</option>';
+
     $('edit-diag-current-list').innerHTML = '<span style="color: #64748b; font-size: 12px; font-style: italic;">Seleccione un reporte de la lista para cargar sus diagnósticos...</span>';
+    $('edit-diag-compare-list').innerHTML = '<span style="color: #64748b; font-size: 12px; font-style: italic;">Seleccione un reporte de la lista para cargar sus diagnósticos...</span>';
     $('edit-diag-input-text').value = '';
     $('edit-diag-status').textContent = '';
 
-    if (!currentReportRows || currentReportRows.length === 0) {
-      sel.innerHTML = '<option value="">-- Busque reportes primero para cargarlos aquí --</option>';
-    } else {
+    if (currentReportRows && currentReportRows.length > 0) {
+      var optsHtml = '<option value="">-- Seleccione un reporte --</option>';
       currentReportRows.forEach(function(s) {
-        var opt = document.createElement('option');
-        opt.value = s.id;
-        opt.textContent = (s._resolvedName || s.name || s.id) + " (" + s.id + ")";
-        sel.appendChild(opt);
+        optsHtml += '<option value="' + htmlEsc(s.id) + '">' + htmlEsc(s._resolvedName || s.name || s.id) + '</option>';
       });
+      selMod.innerHTML = optsHtml;
+      selComp.innerHTML = optsHtml;
     }
 
     $('edit-diagnostics-modal').style.display = 'flex';
   }
 
-  function handleEditDiagSelectReport() {
-    var repId = $('edit-diag-select-report').value;
-    var container = $('edit-diag-current-list');
-    var inputArea = $('edit-diag-input-text');
+  function handleEditDiagSelectReport(tipo) {
+    var isMod = tipo === 'modificar';
+    var selectElem = isMod ? $('edit-diag-select-report') : $('edit-diag-select-compare');
+    var container = isMod ? $('edit-diag-current-list') : $('edit-diag-compare-list');
+    var repId = selectElem.value;
 
     if (!repId) {
       container.innerHTML = '<span style="color: #64748b; font-size: 12px; font-style: italic;">Seleccione un reporte de la lista para cargar sus diagnósticos...</span>';
-      inputArea.value = '';
       return;
     }
 
@@ -2243,13 +2278,38 @@ ENTRADAS
 
     if (currentDiags.length === 0) {
       container.innerHTML = '<span style="color: #f59e0b; font-size: 12px; font-weight: 600;">Este reporte no tiene diagnósticos asignados actualmente.</span>';
-      inputArea.value = '';
     } else {
       var tagsHtml = currentDiags.map(function(d) {
-        return '<span style="background: #e0f2fe; color: #0369a1; padding: 4px 8px; border-radius: 6px; border: 1px solid #bae6fd; font-size: 11px; font-weight: 600;">' + htmlEsc(d) + '</span>';
+        return '<span style="background: #e0f2fe; color: #0369a1; padding: 3px 8px; border-radius: 6px; border: 1px solid #bae6fd; font-size: 11px; font-weight: 600;">' + htmlEsc(d) + '</span>';
       }).join('');
       container.innerHTML = tagsHtml;
-      inputArea.value = currentDiags.join(', ');
+    }
+
+    if (isMod && currentDiags.length > 0) {
+      $('edit-diag-input-text').value = currentDiags.join(', ');
+    }
+  }
+
+  function copyCompareDiagnosticsToInput() {
+    var compId = $('edit-diag-select-compare').value;
+    if (!compId) {
+      alert("Seleccione un reporte a comparar para copiar sus diagnósticos.");
+      return;
+    }
+
+    var compareReport = currentReportRows.find(function(r) { return r.id === compId; });
+    if (compareReport && compareReport._diags && compareReport._diags.length > 0) {
+      var currentVal = $('edit-diag-input-text').value.trim();
+      var newDiagsText = compareReport._diags.join(', ');
+
+      if (currentVal.length > 0) {
+        $('edit-diag-input-text').value = currentVal + ', ' + newDiagsText;
+      } else {
+        $('edit-diag-input-text').value = newDiagsText;
+      }
+      setMsg("📋 Diagnósticos copiados al cuadro del Paso 3.");
+    } else {
+      alert("El reporte a comparar seleccionado no contiene diagnósticos.");
     }
   }
 
@@ -2260,7 +2320,7 @@ ENTRADAS
 
     if (!repId) {
       statusDiv.style.color = "#ef4444";
-      statusDiv.textContent = "Seleccione un reporte para modificar sus diagnósticos.";
+      statusDiv.textContent = "Debe seleccionar un reporte a modificar en el Paso 1 antes de guardar.";
       return;
     }
 
@@ -3126,12 +3186,15 @@ ENTRADAS
   $('btn-apply-prefix-preset').addEventListener('click', applyNamePrefixPreset);
   $('btn-submit-create-report').addEventListener('click', createAndSubmitReport);
 
-  // BOTÓN Y MODAL DE VALIDAR / MODIFICAR DIAGNÓSTICOS (AL COSTADO DEL ENCABEZADO)
+  // BOTÓN Y MODAL DE VALIDAR / MODIFICAR DIAGNÓSTICOS EN 3 PASOS
   $('reports-btn-open-edit-diags-modal').addEventListener('click', openEditDiagnosticsModal);
   $('btn-close-edit-diags-modal').addEventListener('click', function() {
     $('edit-diagnostics-modal').style.display = 'none';
   });
-  $('edit-diag-select-report').addEventListener('change', handleEditDiagSelectReport);
+  
+  $('edit-diag-select-report').addEventListener('change', function() { handleEditDiagSelectReport('modificar'); });
+  $('edit-diag-select-compare').addEventListener('change', function() { handleEditDiagSelectReport('comparar'); });
+  $('btn-copy-compare-diags').addEventListener('click', copyCompareDiagnosticsToInput);
   $('btn-save-diagnostics').addEventListener('click', saveDiagnosticsToReport);
 
   // EVENTOS MODAL VISUALIZACIÓN Y COPIA
