@@ -515,8 +515,10 @@
       </div>
     </div>
 
-    <!-- KPIs Rápidos / DASHBOARD TECH (2 FILAS DE 5 COLUMNAS EN VALIDACIÓN) -->
+    <!-- KPIs Rápidos / DASHBOARD TECH (EXACTAMENTE 10 FILTROS POR FILA) -->
     <div id="sec-kpi-container" class="cgps-kpi-grid" style="margin-top: 12px;">
+      
+      <!-- PRIMERA FILA (10 FILTROS) -->
       <div class="cgps-card kpi-btn-card" id="kpi-card-sn-vin" title="Filtrar con serial y VIN">
         <div class="cgps-kpi-title">CON SERIAL + VIN</div>
         <div class="cgps-kpi-value" id="kpi-sn-vin" style="color: #0284c7;">0</div>
@@ -533,36 +535,47 @@
         <div class="cgps-kpi-title" id="kpi-title-2">SELECCIONADOS</div>
         <div class="cgps-kpi-value" id="kpi-val-2" style="color: #6366f1;">0</div>
       </div>
-
       <div class="cgps-card kpi-btn-card" id="kpi-card-4" style="display: none;" title="Filtrar completos">
         <div class="cgps-kpi-title">PARÁMETROS 5/5</div>
         <div class="cgps-kpi-value" id="kpi-val-4" style="color: #10b981;">0</div>
       </div>
-
-      <!-- SEGUNDA FILA DASHBOARD DE VALIDACIÓN -->
       <div class="cgps-card kpi-btn-card" id="kpi-card-less5" style="display: none;" title="Filtrar unidades con menos de 5 parámetros">
         <div class="cgps-kpi-title">PARÁMETROS &lt; 5</div>
         <div class="cgps-kpi-value" id="kpi-val-less5" style="color: #ef4444;">0</div>
       </div>
-
       <div class="cgps-card kpi-btn-card" id="kpi-card-noanualidad" style="display: none;" title="Filtrar unidades sin anualidad">
         <div class="cgps-kpi-title">SIN ANUALIDAD</div>
         <div class="cgps-kpi-value" id="kpi-val-noanualidad" style="color: #d97706;">0</div>
       </div>
-
       <div class="cgps-card kpi-btn-card" id="kpi-card-noestado" style="display: none;" title="Filtrar unidades sin Estado/Prov.">
         <div class="cgps-kpi-title">SIN ESTADO/PROV.</div>
         <div class="cgps-kpi-value" id="kpi-val-noestado" style="color: #ea580c;">0</div>
       </div>
-
       <div class="cgps-card kpi-btn-card" id="kpi-card-noruc" style="display: none;" title="Filtrar unidades sin RUC">
         <div class="cgps-kpi-title">SIN RUC</div>
         <div class="cgps-kpi-value" id="kpi-val-noruc" style="color: #dc2626;">0</div>
       </div>
-
       <div class="cgps-card kpi-btn-card" id="kpi-card-norazon" style="display: none;" title="Filtrar unidades sin Razón Social">
         <div class="cgps-kpi-title">SIN RAZÓN SOCIAL</div>
         <div class="cgps-kpi-value" id="kpi-val-norazon" style="color: #b91c1c;">0</div>
+      </div>
+
+      <!-- SEGUNDA FILA (FILTROS DE TIPO DE VEHÍCULO + VACÍOS DE RELLENO SI APLICA) -->
+      <div class="cgps-card kpi-btn-card" id="kpi-card-type-remolcadores" style="display: none;" title="Filtrar remolcadores">
+        <div class="cgps-kpi-title">REMOLCADORES</div>
+        <div class="cgps-kpi-value" id="kpi-val-remolcadores" style="color: #0284c7;">0</div>
+      </div>
+      <div class="cgps-card kpi-btn-card" id="kpi-card-type-volquetes" style="display: none;" title="Filtrar volquetes">
+        <div class="cgps-kpi-title">VOLQUETES</div>
+        <div class="cgps-kpi-value" id="kpi-val-volquetes" style="color: #8b5cf6;">0</div>
+      </div>
+      <div class="cgps-card kpi-btn-card" id="kpi-card-type-sintipo" style="display: none;" title="Filtrar unidades sin tipo de vehículo">
+        <div class="cgps-kpi-title">SIN TIPO</div>
+        <div class="cgps-kpi-value" id="kpi-val-sintipo" style="color: #06b6d4;">0</div>
+      </div>
+      <div class="cgps-card kpi-btn-card" id="kpi-card-type-otrostipos" style="display: none;" title="Filtrar otros tipos de vehículo">
+        <div class="cgps-kpi-title">OTROS TIPOS</div>
+        <div class="cgps-kpi-value" id="kpi-val-otrostipos" style="color: #10b981;">0</div>
       </div>
     </div>
 
@@ -740,15 +753,27 @@
     .cgps-btn-outline { background-color: transparent; color: #475569; border: 1px solid #cbd5e1; }
     .cgps-btn-outline:hover { background-color: #f1f5f9; color: #0f172a; }
     
-    /* KPI METRICS CARDS */
-    .cgps-kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; }
-    .cgps-card { background: #ffffff !important; border-radius: 12px; padding: 14px 16px; border: 1px solid #e2e8f0; width: 100%; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
+    /* KPI METRICS CARDS — CONFIGURACIÓN HASTA 10 POR FILA */
+    .cgps-kpi-grid { 
+      display: grid; 
+      grid-template-columns: repeat(10, 1fr); 
+      gap: 10px; 
+      width: 100%; 
+    }
+    @media (max-width: 1400px) {
+      .cgps-kpi-grid { grid-template-columns: repeat(5, 1fr); }
+    }
+    @media (max-width: 768px) {
+      .cgps-kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .cgps-card { background: #ffffff !important; border-radius: 12px; padding: 12px 14px; border: 1px solid #e2e8f0; width: 100%; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
     .kpi-btn-card { cursor: pointer !important; transition: all 0.2s !important; user-select: none; text-align: left; }
     .kpi-btn-card:hover { border-color: #38bdf8 !important; background-color: #f0f9ff !important; }
     .kpi-btn-card.kpi-active { border: 2px solid #0284c7 !important; background-color: #f0f9ff !important; box-shadow: 0 4px 6px -1px rgba(2, 132, 199, 0.1) !important; }
     
     .cgps-kpi-title { font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .cgps-kpi-value { font-size: 22px; font-weight: 800; color: #0f172a; line-height: 1; letter-spacing: -0.5px; }
+    .cgps-kpi-value { font-size: 20px; font-weight: 800; color: #0f172a; line-height: 1; letter-spacing: -0.5px; }
     
     .certi-two-cols-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; }
 
@@ -841,6 +866,7 @@ var addInConstructor = function (geotabApi, state, callback) {
   var activeUnitFilter = 'all'; 
   var activeParamFilter = 'all';
   var activeFieldMissingFilter = 'all'; 
+  var activeVehicleTypeFilter = 'all'; 
 
   var activeDateRange = null;
   var databaseName = "divemotor";
@@ -1150,10 +1176,16 @@ var addInConstructor = function (geotabApi, state, callback) {
       $('kpi-card-noruc').style.display = 'none';
       $('kpi-card-norazon').style.display = 'none';
 
+      $('kpi-card-type-remolcadores').style.display = 'none';
+      $('kpi-card-type-volquetes').style.display = 'none';
+      $('kpi-card-type-sintipo').style.display = 'none';
+      $('kpi-card-type-otrostipos').style.display = 'none';
+
       document.querySelector('.cgps-kpi-grid').style.gridTemplateColumns = 'repeat(4, 1fr)';
     } else if (activeModule === 'valid') {
       var countFull = 0, countLess5 = 0;
       var cNoAnualidad = 0, cNoEstado = 0, cNoRuc = 0, cNoRazon = 0;
+      var cRemolcadores = 0, cVolquetes = 0, cSinTipo = 0, cOtrosTipos = 0;
 
       rowsToCount.forEach(function (r) {
         if (r.paramCount === 5) countFull++;
@@ -1163,6 +1195,17 @@ var addInConstructor = function (geotabApi, state, callback) {
         if (!r.estadoProvincia || r.estadoProvincia.trim() === '' || r.estadoProvincia.trim() === 'Sin Estado') cNoEstado++;
         if (!r.ruc || r.ruc.trim() === '' || r.ruc.trim() === 'Sin RUC') cNoRuc++;
         if (!r.razon || r.razon.trim() === '' || r.razon.trim() === 'Sin Razón Social') cNoRazon++;
+
+        var tv = normalizeStr(r.tipoVehiculo);
+        if (!tv || tv === 'sin tipo' || tv === 'sin tipo vehiculo') {
+          cSinTipo++;
+        } else if (tv.indexOf('remolcador') >= 0 || tv.indexOf('tractor') >= 0) {
+          cRemolcadores++;
+        } else if (tv.indexOf('volquete') >= 0) {
+          cVolquetes++;
+        } else {
+          cOtrosTipos++;
+        }
       });
 
       $('kpi-title-2').textContent = "SELECCIONADOS";
@@ -1176,6 +1219,11 @@ var addInConstructor = function (geotabApi, state, callback) {
       $('kpi-val-noruc').textContent = cNoRuc;
       $('kpi-val-norazon').textContent = cNoRazon;
 
+      $('kpi-val-remolcadores').textContent = cRemolcadores;
+      $('kpi-val-volquetes').textContent = cVolquetes;
+      $('kpi-val-sintipo').textContent = cSinTipo;
+      $('kpi-val-otrostipos').textContent = cOtrosTipos;
+
       $('kpi-card-4').style.display = 'block';
       $('kpi-card-less5').style.display = 'block';
 
@@ -1184,17 +1232,26 @@ var addInConstructor = function (geotabApi, state, callback) {
       $('kpi-card-noruc').style.display = 'block';
       $('kpi-card-norazon').style.display = 'block';
 
-      // EXACTAMENTE 5 COLUMNAS X 2 FILAS EN VALIDACIÓN GPS
-      document.querySelector('.cgps-kpi-grid').style.gridTemplateColumns = 'repeat(5, 1fr)';
+      $('kpi-card-type-remolcadores').style.display = 'block';
+      $('kpi-card-type-volquetes').style.display = 'block';
+      $('kpi-card-type-sintipo').style.display = 'block';
+      $('kpi-card-type-otrostipos').style.display = 'block';
+
+      // 10 COLUMNAS EXACTAS POR FILA EN MÓDULO DE VALIDACIÓN
+      document.querySelector('.cgps-kpi-grid').style.gridTemplateColumns = 'repeat(10, 1fr)';
     }
   }
 
   function highlightKpiCards() {
-    ['kpi-card-sn-vin', 'kpi-card-novin', 'kpi-card-nosn', 'kpi-card-2', 'kpi-card-4', 'kpi-card-less5', 'kpi-card-noanualidad', 'kpi-card-noestado', 'kpi-card-noruc', 'kpi-card-norazon'].forEach(function(id) {
+    [
+      'kpi-card-sn-vin', 'kpi-card-novin', 'kpi-card-nosn', 'kpi-card-2', 'kpi-card-4', 
+      'kpi-card-less5', 'kpi-card-noanualidad', 'kpi-card-noestado', 'kpi-card-noruc', 'kpi-card-norazon',
+      'kpi-card-type-remolcadores', 'kpi-card-type-volquetes', 'kpi-card-type-sintipo', 'kpi-card-type-otrostipos'
+    ].forEach(function(id) {
       if ($(id)) $(id).classList.remove('kpi-active');
     });
 
-    if (activeUnitFilter === 'all' && activeParamFilter === 'all' && activeFieldMissingFilter === 'all') {
+    if (activeUnitFilter === 'all' && activeParamFilter === 'all' && activeFieldMissingFilter === 'all' && activeVehicleTypeFilter === 'all') {
       if ($('kpi-card-sn-vin')) $('kpi-card-sn-vin').classList.add('kpi-active');
     } else {
       if (activeUnitFilter === 'snVin' && $('kpi-card-sn-vin')) $('kpi-card-sn-vin').classList.add('kpi-active');
@@ -1209,6 +1266,11 @@ var addInConstructor = function (geotabApi, state, callback) {
       if (activeFieldMissingFilter === 'noestado' && $('kpi-card-noestado')) $('kpi-card-noestado').classList.add('kpi-active');
       if (activeFieldMissingFilter === 'noruc' && $('kpi-card-noruc')) $('kpi-card-noruc').classList.add('kpi-active');
       if (activeFieldMissingFilter === 'norazon' && $('kpi-card-norazon')) $('kpi-card-norazon').classList.add('kpi-active');
+
+      if (activeVehicleTypeFilter === 'remolcadores' && $('kpi-card-type-remolcadores')) $('kpi-card-type-remolcadores').classList.add('kpi-active');
+      if (activeVehicleTypeFilter === 'volquetes' && $('kpi-card-type-volquetes')) $('kpi-card-type-volquetes').classList.add('kpi-active');
+      if (activeVehicleTypeFilter === 'sintipo' && $('kpi-card-type-sintipo')) $('kpi-card-type-sintipo').classList.add('kpi-active');
+      if (activeVehicleTypeFilter === 'otrostipos' && $('kpi-card-type-otrostipos')) $('kpi-card-type-otrostipos').classList.add('kpi-active');
     }
   }
 
@@ -2408,6 +2470,7 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
     activeUnitFilter = 'all';
     activeParamFilter = 'all';
     activeFieldMissingFilter = 'all';
+    activeVehicleTypeFilter = 'all';
     activeDateRange = null;
     selected = {};
     activeBulkTokens = [];
@@ -2545,7 +2608,7 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
     } else if (activeModule === 'master') {
       head.innerHTML = '<tr><th style="width: 36px; text-align: center;"></th><th style="width: 180px;">PLACA</th><th style="width: 140px;">BASE DE DATOS</th><th style="width: 200px;">VIN</th><th style="width: 160px;"># SERIE</th><th style="width: 120px;">Instalación</th></tr>';
     } else {
-      // TABLA DE VALIDACIÓN (SIN LA COLUMNA DE FECHA DE INSTALACIÓN)
+      // TABLA DE VALIDACIÓN
       head.innerHTML = '<tr>' +
         '<th style="width: 36px; text-align: center;"></th>' +
         '<th style="width: 150px;">Nombre del Activo</th>' +
@@ -2586,6 +2649,12 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
       if (activeFieldMissingFilter === 'noestado' && !emptyVal(r.estadoProvincia)) return false;
       if (activeFieldMissingFilter === 'noruc' && !emptyVal(r.ruc)) return false;
       if (activeFieldMissingFilter === 'norazon' && !emptyVal(r.razon)) return false;
+
+      var tv = normalizeStr(r.tipoVehiculo);
+      if (activeVehicleTypeFilter === 'remolcadores' && tv.indexOf('remolcador') < 0 && tv.indexOf('tractor') < 0) return false;
+      if (activeVehicleTypeFilter === 'volquetes' && tv.indexOf('volquete') < 0) return false;
+      if (activeVehicleTypeFilter === 'sintipo' && tv && tv !== 'sin tipo' && tv !== 'sin tipo vehiculo') return false;
+      if (activeVehicleTypeFilter === 'otrostipos' && (!tv || tv === 'sin tipo' || tv === 'sin tipo vehiculo' || tv.indexOf('remolcador') >= 0 || tv.indexOf('tractor') >= 0 || tv.indexOf('volquete') >= 0)) return false;
     }
 
     if (activeDateRange) {
@@ -2648,7 +2717,7 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
         var badgeClass = r.paramCount === 5 ? 'badge-full' : (r.paramCount === 0 ? 'badge-empty' : 'badge-partial');
         var badgeLabel = r.paramCount + '/5 ' + (r.paramCount === 5 ? 'OK' : 'Incompleto');
 
-        // COLUMNAS RENDEREADAS EN VALIDACIÓN (SIN FECHA DE INSTALACIÓN)
+        // COLUMNAS EN VALIDACIÓN
         html += '<tr>' +
           '<td style="text-align:center;"><input type="checkbox" data-id="' + htmlEsc(r.id) + '"' + (isSel ? ' checked' : '') + '></td>' +
           '<td><b style="color:#0f172a;">' + htmlEsc(r.nombreActivo) + '</b></td>' +
@@ -3048,7 +3117,7 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
     });
   });
 
-  // EVENTOS KPI DASHBOARD (FILA 1 Y FILA 2 DE VALIDACIÓN)
+  // EVENTOS KPI DASHBOARD
   $('kpi-card-sn-vin').addEventListener('click', function() { activeUnitFilter = (activeUnitFilter === 'snVin') ? 'all' : 'snVin'; renderList(); });
   $('kpi-card-novin').addEventListener('click', function() { activeUnitFilter = (activeUnitFilter === 'noVin') ? 'all' : 'noVin'; renderList(); });
   $('kpi-card-nosn').addEventListener('click', function() { activeUnitFilter = (activeUnitFilter === 'noSn') ? 'all' : 'noSn'; renderList(); });
@@ -3061,6 +3130,11 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
   $('kpi-card-noestado').addEventListener('click', function() { activeFieldMissingFilter = (activeFieldMissingFilter === 'noestado') ? 'all' : 'noestado'; renderList(); });
   $('kpi-card-noruc').addEventListener('click', function() { activeFieldMissingFilter = (activeFieldMissingFilter === 'noruc') ? 'all' : 'noruc'; renderList(); });
   $('kpi-card-norazon').addEventListener('click', function() { activeFieldMissingFilter = (activeFieldMissingFilter === 'norazon') ? 'all' : 'norazon'; renderList(); });
+
+  $('kpi-card-type-remolcadores').addEventListener('click', function() { activeVehicleTypeFilter = (activeVehicleTypeFilter === 'remolcadores') ? 'all' : 'remolcadores'; renderList(); });
+  $('kpi-card-type-volquetes').addEventListener('click', function() { activeVehicleTypeFilter = (activeVehicleTypeFilter === 'volquetes') ? 'all' : 'volquetes'; renderList(); });
+  $('kpi-card-type-sintipo').addEventListener('click', function() { activeVehicleTypeFilter = (activeVehicleTypeFilter === 'sintipo') ? 'all' : 'sintipo'; renderList(); });
+  $('kpi-card-type-otrostipos').addEventListener('click', function() { activeVehicleTypeFilter = (activeVehicleTypeFilter === 'otrostipos') ? 'all' : 'otrostipos'; renderList(); });
 
   // NAVEGACIÓN ENTRE MÓDULOS
   $('btn-mod-certi').addEventListener('click', function() { switchView('certi'); });
