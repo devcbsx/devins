@@ -1073,6 +1073,65 @@ var addInConstructor = function (geotabApi, state, callback) {
     $('cgps-mass-value-input').placeholder = labelText + '...';
   }
 
+  // INYECCIÓN DE LOS 5 PARÁMETROS OBLIGATORIOS A LAS UNIDADES SELECCIONADAS
+  async function injectRequiredParameters() {
+    var selectedIds = Object.keys(selected).filter(function (k) { return selected[k]; });
+    
+    if (selectedIds.length === 0) {
+      setMsg("Seleccione al menos una unidad para inyectar los 5 parámetros.", true);
+      return;
+    }
+
+    setMsg("Inyectando 5 parámetros a " + selectedIds.length + " unidad(es)...");
+
+    var calls = [];
+
+    selectedIds.forEach(function (id) {
+      var row = all.find(function (r) { return r.id === id; });
+      if (!row || !row.rawDevice) return;
+
+      var device = row.rawDevice;
+      var currentParams = Array.isArray(device.customParameters) ? device.customParameters.slice() : [];
+      
+      REQUIRED_PARAMS.forEach(function (req) {
+        var exists = currentParams.some(function (cp) { return Number(cp.offset) === req.offset; });
+        if (!exists) {
+          currentParams.push({
+            offset: req.offset,
+            bytes: req.bytes,
+            isEnabled: true
+          });
+        } else {
+          currentParams = currentParams.map(function (cp) {
+            if (Number(cp.offset) === req.offset) {
+              cp.bytes = req.bytes;
+              cp.isEnabled = true;
+            }
+            return cp;
+          });
+        }
+      });
+
+      device.customParameters = currentParams;
+
+      calls.push(['Set', {
+        typeName: 'Device',
+        entity: device
+      }]);
+    });
+
+    try {
+      await callMulti(api, calls);
+      setMsg("✅ Se completaron los 5 parámetros en " + selectedIds.length + " unidad(es). Recargando datos...");
+      setTimeout(function () {
+        load();
+      }, 1500);
+    } catch (err) {
+      console.error("Error al inyectar parámetros:", err);
+      setMsg("Error al inyectar parámetros: " + (err.message || err), true);
+    }
+  }
+
   // CARGA AUTOMÁTICA DE TODOS LOS GRUPOS (CLIENTES + TIPO DE MOTOR)
   function initAutoReportGroups() {
     showLoading("Cargando clientes y tipos de motor...", 50);
@@ -2272,6 +2331,9 @@ var addInConstructor = function (geotabApi, state, callback) {
   
   $('cgps-btn-bulk-std').addEventListener('click', function() { applyBulkFilter($('cgps-bulk-input-std').value); });
   $('cgps-btn-bulk-clear-std').addEventListener('click', function() { $('cgps-bulk-input-std').value = ''; applyBulkFilter(''); });
+
+  // INYECCIÓN DE 5 PARÁMETROS
+  $('cgps-btn-inject-params').addEventListener('click', injectRequiredParameters);
 
   // EVENTOS DEL MÓDULO REPORTES POR CLIENTE
   $('reports-search-input').addEventListener('keyup', function() {
