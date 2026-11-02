@@ -1054,12 +1054,19 @@ var addInConstructor = function (geotabApi, state, callback) {
 
   function updateMassSelectVisibility() {
     var validOpts = document.querySelectorAll('.opt-valid-only');
+    var btnInject = $('cgps-btn-inject-params');
+
     if (activeModule === 'valid') {
       validOpts.forEach(function(opt) { opt.style.display = 'block'; });
-      $('cgps-btn-inject-params').style.display = 'inline-block';
+      if (btnInject) {
+        btnInject.style.display = 'inline-block';
+        btnInject.style.visibility = 'visible';
+      }
     } else {
       validOpts.forEach(function(opt) { opt.style.display = 'none'; });
-      $('cgps-btn-inject-params').style.display = 'none';
+      if (btnInject) {
+        btnInject.style.display = 'none';
+      }
       if (['nombreActivo', 'placa', 'estadoProvincia', 'anualidad', 'tipoVehiculo'].includes($('cgps-mass-field-select').value)) {
         $('cgps-mass-field-select').value = 'razon';
       }
@@ -1094,21 +1101,16 @@ var addInConstructor = function (geotabApi, state, callback) {
       var currentParams = Array.isArray(device.customParameters) ? device.customParameters.slice() : [];
       
       REQUIRED_PARAMS.forEach(function (req) {
-        var exists = currentParams.some(function (cp) { return Number(cp.offset) === req.offset; });
-        if (!exists) {
+        var idx = currentParams.findIndex(function (cp) { return Number(cp.offset) === req.offset; });
+        if (idx < 0) {
           currentParams.push({
             offset: req.offset,
             bytes: req.bytes,
             isEnabled: true
           });
         } else {
-          currentParams = currentParams.map(function (cp) {
-            if (Number(cp.offset) === req.offset) {
-              cp.bytes = req.bytes;
-              cp.isEnabled = true;
-            }
-            return cp;
-          });
+          currentParams[idx].bytes = req.bytes;
+          currentParams[idx].isEnabled = true;
         }
       });
 
@@ -1131,6 +1133,15 @@ var addInConstructor = function (geotabApi, state, callback) {
       setMsg("Error al inyectar parámetros: " + (err.message || err), true);
     }
   }
+
+  // DELEGACIÓN GLOBAL DE EVENTOS PARA CAPTURAR EL CLIC DEL BOTÓN EN CUALQUIER ESTADO DEL DOM
+  document.addEventListener('click', function (e) {
+    var target = e.target;
+    if (target && (target.id === 'cgps-btn-inject-params' || target.closest('#cgps-btn-inject-params'))) {
+      e.preventDefault();
+      injectRequiredParameters();
+    }
+  });
 
   // CARGA AUTOMÁTICA DE TODOS LOS GRUPOS (CLIENTES + TIPO DE MOTOR)
   function initAutoReportGroups() {
@@ -2331,9 +2342,6 @@ var addInConstructor = function (geotabApi, state, callback) {
   
   $('cgps-btn-bulk-std').addEventListener('click', function() { applyBulkFilter($('cgps-bulk-input-std').value); });
   $('cgps-btn-bulk-clear-std').addEventListener('click', function() { $('cgps-bulk-input-std').value = ''; applyBulkFilter(''); });
-
-  // INYECCIÓN DE 5 PARÁMETROS
-  $('cgps-btn-inject-params').addEventListener('click', injectRequiredParameters);
 
   // EVENTOS DEL MÓDULO REPORTES POR CLIENTE
   $('reports-search-input').addEventListener('keyup', function() {
