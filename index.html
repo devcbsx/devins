@@ -1859,10 +1859,10 @@ var addInConstructor = function (geotabApi, state, callback) {
     $('create-report-modal').style.display = 'flex';
   }
 
+  // FUNCIÓN CORREGIDA DE CLONACIÓN PARA EVITAR EXCEPCIONES JSON EN LA API DE GEOTAB
   async function createAndSubmitReport() {
     var sourceSchedId = $('create-rep-source-schedule').value;
     var repName = $('create-rep-name').value.trim();
-    var diagText = $('create-rep-diagnostics').value.trim();
     var statusDiv = $('create-rep-status');
 
     var selectedDestCheckboxes = document.querySelectorAll('.chk-dest-group:checked');
@@ -1898,54 +1898,27 @@ var addInConstructor = function (geotabApi, state, callback) {
     statusDiv.style.color = "#0284c7";
     statusDiv.textContent = "Clonando plantilla y registrando reporte en Geotab...";
 
-    var diagList = [];
-    if (diagText) {
-      var rawTokens = diagText.split(/[\n\r,]+/).map(function(t){ return t.trim(); }).filter(Boolean);
-      var addedIds = new Set();
-
-      rawTokens.forEach(function(token) {
-        var foundId = null;
-        
-        if (diagById[token]) {
-          foundId = token;
-        } else {
-          Object.keys(diagById).forEach(function(dKey) {
-            if (diagById[dKey] === token) foundId = dKey;
-          });
-        }
-
-        if (!foundId && token.length > 2) {
-          foundId = token;
-        }
-
-        if (foundId && !addedIds.has(foundId)) {
-          addedIds.add(foundId);
-          diagList.push({ id: foundId });
-        }
-      });
-    }
-
-    if (diagList.length === 0 && sourceSched.arguments && sourceSched.arguments.diagnostics) {
-      diagList = sourceSched.arguments.diagnostics.map(function(d){ return { id: d.id }; });
-    }
-
-    var rulesList = [];
-    if (sourceSched.arguments && Array.isArray(sourceSched.arguments.rules)) {
-      rulesList = sourceSched.arguments.rules.map(function(r) { return { id: r.id }; });
-    }
-
     try {
-      var newSchedule = {
-        name: repName,
-        isActive: true,
-        template: { id: sourceSched.template.id },
-        groups: destGroupsList,
-        arguments: {
-          rules: rulesList,
-          diagnostics: diagList
-        }
-      };
+      // 1. Realizar una copia profunda limpia del objeto origen para preservar la estructura completa de Geotab
+      var newSchedule = JSON.parse(JSON.stringify(sourceSched));
 
+      // 2. Eliminar identificadores y metadatos propios de la entidad antigua
+      delete newSchedule.id;
+      delete newSchedule.version;
+      delete newSchedule.lastUpdated;
+      delete newSchedule.lastModifiedUser;
+      delete newSchedule._resolvedName;
+      delete newSchedule._rules;
+      delete newSchedule._diags;
+      delete newSchedule._lastMs;
+      delete newSchedule._userName;
+
+      // 3. Asignar los valores requeridos
+      newSchedule.name = repName;
+      newSchedule.groups = destGroupsList;
+      newSchedule.isActive = true;
+
+      // 4. Enviar a la API de Geotab
       var res = await callApi(api, 'Add', {
         typeName: 'CustomReportSchedule',
         entity: newSchedule
@@ -1993,7 +1966,6 @@ var addInConstructor = function (geotabApi, state, callback) {
     setMsg("Texto legal generado para " + selList.length + " vehículo(s).");
   }
 
-  // FUNCIÓN PARA GENERAR EL WORD SEGÚN EL FORMATO ANEXO N°01 DE LA IMAGEN
   function downloadWordDoc() {
     var selList = all.filter(function(r) { return selected[r.id]; });
     
