@@ -1153,7 +1153,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     }
   });
 
-  // LÓGICA OPTIMIZADA DEL MÓDULO ACTIVACIONES DE UNIDADES
+  // LÓGICA OPTIMIZADA Y ACTUALIZADA DEL MÓDULO ACTIVACIONES DE UNIDADES
   function processActivationsText() {
     var raw = ($('act-input-text').value || '').trim();
     var badge = $('act-detected-badge');
@@ -1167,11 +1167,15 @@ var addInConstructor = function (geotabApi, state, callback) {
 
     var upper = raw.toUpperCase();
     
-    // Evaluar si indica o no activación inmediata
+    // 1. Detección explícita de afirmación ("SI ES ACT. INMEDIATA", "SI ES ACTIVACION INMEDIATA", etc.)
+    var hasSiInmediata = /SI\s+ES\s+(ACT\.|ACTIVACI[OÓ]N)\s+INMEDIATA/i.test(raw) || upper.indexOf("SI ES ACT. INMEDIATA") >= 0;
+    
+    // 2. Detección general de banderas
     var hasNoIndica = upper.indexOf("NO INDICA") >= 0;
     var hasActInmediata = upper.indexOf("ACT. INMEDIATA") >= 0 || upper.indexOf("ACTIVACION INMEDIATA") >= 0 || upper.indexOf("ACTIVACIÓN INMEDIATA") >= 0;
     
-    var isImmediate = hasActInmediata && !hasNoIndica;
+    // Si contiene "SI ES ACT. INMEDIATA", se fuerza como verdadero. Si no, se evalúa que tenga "ACT. INMEDIATA" y NO tenga "NO INDICA".
+    var isImmediate = hasSiInmediata || (hasActInmediata && !hasNoIndica);
 
     var out = "Buen día estimados,\n\n";
 
@@ -1215,28 +1219,22 @@ var addInConstructor = function (geotabApi, state, callback) {
         var t = token.trim();
         if (!t) return;
 
-        // Ignorar banderas de estado
-        if (/^(NO INDICA|ACT\.\s*INMEDIATA|ACTIVACION INMEDIATA|ACTIVACIÓN INMEDIATA|PENDIENTE)/i.test(t)) {
+        // Ignorar banderas de estado e indicaciones
+        if (/^(SI|NO|SI\s+ES|NO\s+INDICA|ACT\.\s*INMEDIATA|ACTIVACION\s+INMEDIATA|ACTIVACIÓN\s+INMEDIATA|PENDIENTE)/i.test(t)) {
           return;
         }
 
         // Detectar si es VIN / Chasis (17 caracteres alfanuméricos)
         var isVin = /^[A-Z0-9]{17}$/i.test(t);
-
-        if (isVin) {
-          return;
-        }
+        if (isVin) return;
 
         var isStock = /^STOCK$/i.test(t);
-
         if (isStock) {
-          if (!currentClient) {
-            currentClient = "STOCK";
-          }
+          if (!currentClient) currentClient = "STOCK";
           return;
         }
 
-        // Si no es VIN ni bandera de estado, es una Razón Social / Cliente
+        // Si no es VIN ni bandera, procesar como Razón Social / Cliente
         var parsedClient = cleanLegalName(t);
         if (parsedClient && parsedClient.length >= 3) {
           if (currentClient) {
