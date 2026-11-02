@@ -1153,7 +1153,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     }
   });
 
-  // LÓGICA DE EXTRACCIÓN PURA DE RAZONES SOCIALES Y VINS (CON DETECCIÓN ESTRICTA DE INMEDIATEZ)
+  // LÓGICA DE EXTRACCIÓN PURA DE RAZONES SOCIALES Y VINS (LÓGICA CORREGIDA Y ROBUSTA)
   function processActivationsText() {
     var raw = ($('act-input-text').value || '').trim();
     var badge = $('act-detected-badge');
@@ -1167,13 +1167,18 @@ var addInConstructor = function (geotabApi, state, callback) {
 
     var upper = raw.toUpperCase();
     
-    // DETECCIÓN ESTRICTA DE ACTIVACIÓN INMEDIATA:
-    // Requiere la presencia explícita de "SI ES" antes de "ACT INMEDIATA" o "ACTIVACION INMEDIATA"
-    // y descarta automáticamente si contiene "NO INDICA".
-    var hasSiEs = /SI\s+ES\s+(ACT\.|ACTIVACI[OÓ]N)\s+INMEDIATA/i.test(upper);
+    // DETECCIÓN FLEXIBLE Y PRECISA:
+    // 1. Detectar si contiene negación explícita "NO INDICA"
     var hasNoIndica = upper.indexOf("NO INDICA") >= 0;
+
+    // 2. Detectar si contiene cualquier término o frase de activación inmediata
+    var hasActInmediata = upper.indexOf("ACT INMEDIATA") >= 0 || 
+                          upper.indexOf("ACT. INMEDIATA") >= 0 || 
+                          upper.indexOf("ACTIVACION INMEDIATA") >= 0 || 
+                          upper.indexOf("ACTIVACIÓN INMEDIATA") >= 0;
     
-    var isImmediate = hasSiEs && !hasNoIndica;
+    // Es activación inmediata si tiene la afirmación Y NO contiene "NO INDICA"
+    var isImmediate = hasActInmediata && !hasNoIndica;
 
     var out = "Buen día estimados,\n\n";
 
@@ -1217,7 +1222,7 @@ var addInConstructor = function (geotabApi, state, callback) {
         if (!t) return;
 
         // Descartar frases e indicadores de estado arbitrarios
-        if (/^(OBSERVACIONES|SI|NO|SI\s+ES|NO\s+INDICA|ACT\.\s*INMEDIATA|ACTIVACION\s+INMEDIATA|ACTIVACIÓN\s+INMEDIATA|PENDIENTE)/i.test(t)) {
+        if (/^(OBSERVACIONES|SI|NO|SI\s+ES|NO\s+INDICA|ACT\.\s*INMEDIATA|ACT\s+INMEDIATA|ACTIVACION\s+INMEDIATA|ACTIVACIÓN\s+INMEDIATA|PENDIENTE)/i.test(t)) {
           return;
         }
 
@@ -2300,7 +2305,7 @@ var addInConstructor = function (geotabApi, state, callback) {
 
         part = part.replace(/^[A-Z0-9]{17}\s*/i, '').replace(/\s*[A-Z0-9]{17}$/i, '').trim();
 
-        if (/^(OBSERVACIONES|NO\s+INDICA|ACT\.\s*INMEDIATA|PENDIENTE)/i.test(part) || part.length < 3) {
+        if (/^(OBSERVACIONES|NO\s+INDICA|ACT\.\s*INMEDIATA|ACT\s+INMEDIATA|PENDIENTE)/i.test(part) || part.length < 3) {
           continue;
         }
 
