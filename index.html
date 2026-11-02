@@ -515,7 +515,7 @@
       </div>
     </div>
 
-    <!-- KPIs Rápidos / DASHBOARD TECH -->
+    <!-- KPIs Rápidos / DASHBOARD TECH (2 FILAS DE 5 COLUMNAS EN VALIDACIÓN) -->
     <div id="sec-kpi-container" class="cgps-kpi-grid" style="margin-top: 12px;">
       <div class="cgps-card kpi-btn-card" id="kpi-card-sn-vin" title="Filtrar con serial y VIN">
         <div class="cgps-kpi-title">CON SERIAL + VIN</div>
@@ -538,26 +538,31 @@
         <div class="cgps-kpi-title">PARÁMETROS 5/5</div>
         <div class="cgps-kpi-value" id="kpi-val-4" style="color: #10b981;">0</div>
       </div>
+
+      <!-- SEGUNDA FILA DASHBOARD DE VALIDACIÓN -->
       <div class="cgps-card kpi-btn-card" id="kpi-card-less5" style="display: none;" title="Filtrar unidades con menos de 5 parámetros">
         <div class="cgps-kpi-title">PARÁMETROS &lt; 5</div>
         <div class="cgps-kpi-value" id="kpi-val-less5" style="color: #ef4444;">0</div>
       </div>
 
-      <div class="cgps-card kpi-btn-card" id="kpi-card-remol" style="display: none;" title="Filtrar Remolcadores">
-        <div class="cgps-kpi-title">REMOLCADORES</div>
-        <div class="cgps-kpi-value" id="kpi-val-remol" style="color: #3b82f6;">0</div>
+      <div class="cgps-card kpi-btn-card" id="kpi-card-noanualidad" style="display: none;" title="Filtrar unidades sin anualidad">
+        <div class="cgps-kpi-title">SIN ANUALIDAD</div>
+        <div class="cgps-kpi-value" id="kpi-val-noanualidad" style="color: #d97706;">0</div>
       </div>
-      <div class="cgps-card kpi-btn-card" id="kpi-card-volq" style="display: none;" title="Filtrar Volquetes">
-        <div class="cgps-kpi-title">VOLQUETES</div>
-        <div class="cgps-kpi-value" id="kpi-val-volq" style="color: #8b5cf6;">0</div>
+
+      <div class="cgps-card kpi-btn-card" id="kpi-card-noestado" style="display: none;" title="Filtrar unidades sin Estado/Prov.">
+        <div class="cgps-kpi-title">SIN ESTADO/PROV.</div>
+        <div class="cgps-kpi-value" id="kpi-val-noestado" style="color: #ea580c;">0</div>
       </div>
-      <div class="cgps-card kpi-btn-card" id="kpi-card-sintipo" style="display: none;" title="Filtrar Sin Tipo">
-        <div class="cgps-kpi-title">SIN TIPO</div>
-        <div class="cgps-kpi-value" id="kpi-val-sintipo" style="color: #94a3b8;">0</div>
+
+      <div class="cgps-card kpi-btn-card" id="kpi-card-noruc" style="display: none;" title="Filtrar unidades sin RUC">
+        <div class="cgps-kpi-title">SIN RUC</div>
+        <div class="cgps-kpi-value" id="kpi-val-noruc" style="color: #dc2626;">0</div>
       </div>
-      <div class="cgps-card kpi-btn-card" id="kpi-card-otros" style="display: none;" title="Filtrar Otros Tipos">
-        <div class="cgps-kpi-title">OTROS TIPOS</div>
-        <div class="cgps-kpi-value" id="kpi-val-otros" style="color: #14b8a6;">0</div>
+
+      <div class="cgps-card kpi-btn-card" id="kpi-card-norazon" style="display: none;" title="Filtrar unidades sin Razón Social">
+        <div class="cgps-kpi-title">SIN RAZÓN SOCIAL</div>
+        <div class="cgps-kpi-value" id="kpi-val-norazon" style="color: #b91c1c;">0</div>
       </div>
     </div>
 
@@ -639,7 +644,7 @@
         <table class="cgps-table">
           <thead id="cgps-table-head"></thead>
           <tbody id="cgps-listbody">
-            <tr><td colspan="13" style="text-align:center; padding: 24px; color: #64748b;">Cargando activos…</td></tr>
+            <tr><td colspan="12" style="text-align:center; padding: 24px; color: #64748b;">Cargando activos…</td></tr>
           </tbody>
         </table>
       </div>
@@ -835,7 +840,7 @@ var addInConstructor = function (geotabApi, state, callback) {
   
   var activeUnitFilter = 'all'; 
   var activeParamFilter = 'all';
-  var activeTypeFilter = 'all';
+  var activeFieldMissingFilter = 'all'; 
 
   var activeDateRange = null;
   var databaseName = "divemotor";
@@ -1140,30 +1145,24 @@ var addInConstructor = function (geotabApi, state, callback) {
       $('kpi-card-4').style.display = 'none';
       $('kpi-card-less5').style.display = 'none';
       
-      $('kpi-card-remol').style.display = 'none';
-      $('kpi-card-volq').style.display = 'none';
-      $('kpi-card-sintipo').style.display = 'none';
-      $('kpi-card-otros').style.display = 'none';
+      $('kpi-card-noanualidad').style.display = 'none';
+      $('kpi-card-noestado').style.display = 'none';
+      $('kpi-card-noruc').style.display = 'none';
+      $('kpi-card-norazon').style.display = 'none';
 
       document.querySelector('.cgps-kpi-grid').style.gridTemplateColumns = 'repeat(4, 1fr)';
     } else if (activeModule === 'valid') {
       var countFull = 0, countLess5 = 0;
-      var cRemol = 0, cVolq = 0, cSinTipo = 0, cOtros = 0;
+      var cNoAnualidad = 0, cNoEstado = 0, cNoRuc = 0, cNoRazon = 0;
 
       rowsToCount.forEach(function (r) {
         if (r.paramCount === 5) countFull++;
         else countLess5++;
 
-        var t = (r.tipoVehiculo || '').toUpperCase().trim();
-        if (t.indexOf('REMOLCADOR') >= 0 || t.indexOf('TRACTO') >= 0) {
-          cRemol++;
-        } else if (t.indexOf('VOLQUETE') >= 0 || t.indexOf('DUMP') >= 0) {
-          cVolq++;
-        } else if (!t || t === 'SIN TIPO' || t === '-') {
-          cSinTipo++;
-        } else {
-          cOtros++;
-        }
+        if (!r.anualidad || r.anualidad.trim() === '' || r.anualidad.trim() === '-') cNoAnualidad++;
+        if (!r.estadoProvincia || r.estadoProvincia.trim() === '' || r.estadoProvincia.trim() === 'Sin Estado') cNoEstado++;
+        if (!r.ruc || r.ruc.trim() === '' || r.ruc.trim() === 'Sin RUC') cNoRuc++;
+        if (!r.razon || r.razon.trim() === '' || r.razon.trim() === 'Sin Razón Social') cNoRazon++;
       });
 
       $('kpi-title-2').textContent = "SELECCIONADOS";
@@ -1172,29 +1171,30 @@ var addInConstructor = function (geotabApi, state, callback) {
       $('kpi-val-4').textContent = countFull;
       $('kpi-val-less5').textContent = countLess5;
 
-      $('kpi-val-remol').textContent = cRemol;
-      $('kpi-val-volq').textContent = cVolq;
-      $('kpi-val-sintipo').textContent = cSinTipo;
-      $('kpi-val-otros').textContent = cOtros;
+      $('kpi-val-noanualidad').textContent = cNoAnualidad;
+      $('kpi-val-noestado').textContent = cNoEstado;
+      $('kpi-val-noruc').textContent = cNoRuc;
+      $('kpi-val-norazon').textContent = cNoRazon;
 
       $('kpi-card-4').style.display = 'block';
       $('kpi-card-less5').style.display = 'block';
 
-      $('kpi-card-remol').style.display = 'block';
-      $('kpi-card-volq').style.display = 'block';
-      $('kpi-card-sintipo').style.display = 'block';
-      $('kpi-card-otros').style.display = 'block';
+      $('kpi-card-noanualidad').style.display = 'block';
+      $('kpi-card-noestado').style.display = 'block';
+      $('kpi-card-noruc').style.display = 'block';
+      $('kpi-card-norazon').style.display = 'block';
 
+      // EXACTAMENTE 5 COLUMNAS X 2 FILAS EN VALIDACIÓN GPS
       document.querySelector('.cgps-kpi-grid').style.gridTemplateColumns = 'repeat(5, 1fr)';
     }
   }
 
   function highlightKpiCards() {
-    ['kpi-card-sn-vin', 'kpi-card-novin', 'kpi-card-nosn', 'kpi-card-2', 'kpi-card-4', 'kpi-card-less5', 'kpi-card-remol', 'kpi-card-volq', 'kpi-card-sintipo', 'kpi-card-otros'].forEach(function(id) {
+    ['kpi-card-sn-vin', 'kpi-card-novin', 'kpi-card-nosn', 'kpi-card-2', 'kpi-card-4', 'kpi-card-less5', 'kpi-card-noanualidad', 'kpi-card-noestado', 'kpi-card-noruc', 'kpi-card-norazon'].forEach(function(id) {
       if ($(id)) $(id).classList.remove('kpi-active');
     });
 
-    if (activeUnitFilter === 'all' && activeParamFilter === 'all' && activeTypeFilter === 'all') {
+    if (activeUnitFilter === 'all' && activeParamFilter === 'all' && activeFieldMissingFilter === 'all') {
       if ($('kpi-card-sn-vin')) $('kpi-card-sn-vin').classList.add('kpi-active');
     } else {
       if (activeUnitFilter === 'snVin' && $('kpi-card-sn-vin')) $('kpi-card-sn-vin').classList.add('kpi-active');
@@ -1205,10 +1205,10 @@ var addInConstructor = function (geotabApi, state, callback) {
       if (activeParamFilter === 'full' && $('kpi-card-4')) $('kpi-card-4').classList.add('kpi-active');
       if (activeParamFilter === 'less5' && $('kpi-card-less5')) $('kpi-card-less5').classList.add('kpi-active');
 
-      if (activeTypeFilter === 'remol' && $('kpi-card-remol')) $('kpi-card-remol').classList.add('kpi-active');
-      if (activeTypeFilter === 'volq' && $('kpi-card-volq')) $('kpi-card-volq').classList.add('kpi-active');
-      if (activeTypeFilter === 'sintipo' && $('kpi-card-sintipo')) $('kpi-card-sintipo').classList.add('kpi-active');
-      if (activeTypeFilter === 'otros' && $('kpi-card-otros')) $('kpi-card-otros').classList.add('kpi-active');
+      if (activeFieldMissingFilter === 'noanualidad' && $('kpi-card-noanualidad')) $('kpi-card-noanualidad').classList.add('kpi-active');
+      if (activeFieldMissingFilter === 'noestado' && $('kpi-card-noestado')) $('kpi-card-noestado').classList.add('kpi-active');
+      if (activeFieldMissingFilter === 'noruc' && $('kpi-card-noruc')) $('kpi-card-noruc').classList.add('kpi-active');
+      if (activeFieldMissingFilter === 'norazon' && $('kpi-card-norazon')) $('kpi-card-norazon').classList.add('kpi-active');
     }
   }
 
@@ -1474,7 +1474,7 @@ USO DE LA DESCRIPCIÓN
 - Corroborar el tipo de impacto y el lado dañado con las fallas de telemetría (sensor ABS del eje delantero derecho/izquierdo, refrigerante, turbo, ventilador).
 - Mencionar las fotos solo en el texto (análisis, comentarios, recomendaciones). NO incrustar imágenes ni crear sección de evidencia fotográfica.
 - Si hay placas de mercancías peligrosas, recomendar verificar la carga.
-- Si el relato contradice la telemetría (hora, velocidad, tipo de impacto), indicarlo expresamente.
+- Si el relato contradice la telemetría (hora, velocidad, tipo de impacto), indicarlo expressamente.
 - No inventar calles, ciudades ni conductores: usar solo coordenadas y datos de la base.
 
 REGLAS DE EFICIENCIA
@@ -2048,7 +2048,6 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
     $('create-report-modal').style.display = 'flex';
   }
 
-  // ESTRATEGIA EN DOS PASOS (ADD SIN VARIABLES + SET CON DIAGNÓSTICOS)
   async function createAndSubmitReport() {
     var sourceSchedId = $('create-rep-source-schedule').value;
     var repName = $('create-rep-name').value.trim();
@@ -2088,7 +2087,6 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
     statusDiv.textContent = "Paso 1/2: Registrando reporte base en Geotab (entidad limpia)...";
 
     try {
-      // 1. Construir entidad base aislada (mínima) para el 'Add'
       var newSchedule = {
         name: repName,
         destination: sourceSched.destination || "NormalReport",
@@ -2105,7 +2103,6 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
         }
       };
 
-      // PASO 1: Ejecutar Add sin variables complejas
       var createdResult = await callApi(api, 'Add', {
         typeName: 'CustomReportSchedule',
         entity: newSchedule
@@ -2116,7 +2113,6 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
       statusDiv.style.color = "#0284c7";
       statusDiv.textContent = "Paso 2/2: Asignando diagnósticos al reporte (ID: " + newReportId + ")...";
 
-      // PASO 2: Obtener la entidad recién creada para asignarle los diagnósticos requeridos vía 'Set'
       var fetchCreated = await callApi(api, 'Get', {
         typeName: 'CustomReportSchedule',
         search: { id: newReportId }
@@ -2411,7 +2407,7 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
     activeModule = mod;
     activeUnitFilter = 'all';
     activeParamFilter = 'all';
-    activeTypeFilter = 'all';
+    activeFieldMissingFilter = 'all';
     activeDateRange = null;
     selected = {};
     activeBulkTokens = [];
@@ -2549,20 +2545,20 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
     } else if (activeModule === 'master') {
       head.innerHTML = '<tr><th style="width: 36px; text-align: center;"></th><th style="width: 180px;">PLACA</th><th style="width: 140px;">BASE DE DATOS</th><th style="width: 200px;">VIN</th><th style="width: 160px;"># SERIE</th><th style="width: 120px;">Instalación</th></tr>';
     } else {
+      // TABLA DE VALIDACIÓN (SIN LA COLUMNA DE FECHA DE INSTALACIÓN)
       head.innerHTML = '<tr>' +
         '<th style="width: 36px; text-align: center;"></th>' +
-        '<th style="width: 140px;">Nombre del Activo</th>' +
-        '<th style="width: 100px;">Placa</th>' +
-        '<th style="width: 100px;">Activado Desde</th>' +
-        '<th style="width: 110px;">Fecha Instalación</th>' +
-        '<th style="width: 150px;">VIN</th>' +
+        '<th style="width: 150px;">Nombre del Activo</th>' +
+        '<th style="width: 110px;">Placa</th>' +
+        '<th style="width: 110px;">Activado Desde</th>' +
+        '<th style="width: 160px;">VIN</th>' +
         '<th style="width: 110px;">Parámetros (5)</th>' +
         '<th style="width: 140px;">Grupos</th>' +
-        '<th style="width: 110px;">Estado/Prov.</th>' +
-        '<th style="width: 100px;">RUC</th>' +
+        '<th style="width: 120px;">Estado/Prov.</th>' +
+        '<th style="width: 110px;">RUC</th>' +
         '<th style="width: 180px;">Razón Social</th>' +
-        '<th style="width: 80px;">Anualidad</th>' +
-        '<th style="width: 100px;">Tipo Vehículo</th>' +
+        '<th style="width: 90px;">Anualidad</th>' +
+        '<th style="width: 110px;">Tipo Vehículo</th>' +
         '</tr>';
     }
   }
@@ -2584,11 +2580,12 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
       if (activeParamFilter === 'full' && r.paramCount !== 5) return false;
       if (activeParamFilter === 'less5' && r.paramCount === 5) return false;
 
-      var t = (r.tipoVehiculo || '').toUpperCase().trim();
-      if (activeTypeFilter === 'remol' && (t.indexOf('REMOLCADOR') < 0 && t.indexOf('TRACTO') < 0)) return false;
-      if (activeTypeFilter === 'volq' && (t.indexOf('VOLQUETE') < 0 && t.indexOf('DUMP') < 0)) return false;
-      if (activeTypeFilter === 'sintipo' && (t && t !== 'SIN TIPO' && t !== '-')) return false;
-      if (activeTypeFilter === 'otros' && (!t || t === 'SIN TIPO' || t === '-' || t.indexOf('REMOLCADOR') >= 0 || t.indexOf('TRACTO') >= 0 || t.indexOf('VOLQUETE') >= 0 || t.indexOf('DUMP') >= 0)) return false;
+      var emptyVal = function(v) { return !v || v.trim() === '' || v.trim() === '-' || v.trim() === 'Sin Estado' || v.trim() === 'Sin RUC' || v.trim() === 'Sin Razón Social'; };
+
+      if (activeFieldMissingFilter === 'noanualidad' && !emptyVal(r.anualidad)) return false;
+      if (activeFieldMissingFilter === 'noestado' && !emptyVal(r.estadoProvincia)) return false;
+      if (activeFieldMissingFilter === 'noruc' && !emptyVal(r.ruc)) return false;
+      if (activeFieldMissingFilter === 'norazon' && !emptyVal(r.razon)) return false;
     }
 
     if (activeDateRange) {
@@ -2651,11 +2648,11 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
         var badgeClass = r.paramCount === 5 ? 'badge-full' : (r.paramCount === 0 ? 'badge-empty' : 'badge-partial');
         var badgeLabel = r.paramCount + '/5 ' + (r.paramCount === 5 ? 'OK' : 'Incompleto');
 
+        // COLUMNAS RENDEREADAS EN VALIDACIÓN (SIN FECHA DE INSTALACIÓN)
         html += '<tr>' +
           '<td style="text-align:center;"><input type="checkbox" data-id="' + htmlEsc(r.id) + '"' + (isSel ? ' checked' : '') + '></td>' +
           '<td><b style="color:#0f172a;">' + htmlEsc(r.nombreActivo) + '</b></td>' +
           '<td>' + htmlEsc(r.placa) + '</td>' +
-          '<td>' + htmlEsc(r.desde) + '</td>' +
           '<td>' + htmlEsc(r.desde) + '</td>' +
           '<td style="font-family:monospace;">' + htmlEsc(r.vin) + '</td>' +
           '<td><span class="badge-param ' + badgeClass + '" title="Posee ' + r.paramCount + ' de 5 parámetros">' + badgeLabel + '</span></td>' +
@@ -2670,7 +2667,7 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
     });
 
     if ($('cgps-listbody')) {
-      $('cgps-listbody').innerHTML = html || '<tr><td colspan="13" style="text-align:center; padding: 24px; color: #64748b;">Sin resultados coincidentes para la combinación de filtros aplicada</td></tr>';
+      $('cgps-listbody').innerHTML = html || '<tr><td colspan="12" style="text-align:center; padding: 24px; color: #64748b;">Sin resultados coincidentes para la combinación de filtros aplicada</td></tr>';
     }
     updateKPIs();
     highlightKpiCards();
@@ -3051,7 +3048,7 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
     });
   });
 
-  // EVENTOS KPI DASHBOARD
+  // EVENTOS KPI DASHBOARD (FILA 1 Y FILA 2 DE VALIDACIÓN)
   $('kpi-card-sn-vin').addEventListener('click', function() { activeUnitFilter = (activeUnitFilter === 'snVin') ? 'all' : 'snVin'; renderList(); });
   $('kpi-card-novin').addEventListener('click', function() { activeUnitFilter = (activeUnitFilter === 'noVin') ? 'all' : 'noVin'; renderList(); });
   $('kpi-card-nosn').addEventListener('click', function() { activeUnitFilter = (activeUnitFilter === 'noSn') ? 'all' : 'noSn'; renderList(); });
@@ -3060,10 +3057,10 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
   $('kpi-card-4').addEventListener('click', function() { activeParamFilter = (activeParamFilter === 'full') ? 'all' : 'full'; renderList(); });
   $('kpi-card-less5').addEventListener('click', function() { activeParamFilter = (activeParamFilter === 'less5') ? 'all' : 'less5'; renderList(); });
 
-  $('kpi-card-remol').addEventListener('click', function() { activeTypeFilter = (activeTypeFilter === 'remol') ? 'all' : 'remol'; renderList(); });
-  $('kpi-card-volq').addEventListener('click', function() { activeTypeFilter = (activeTypeFilter === 'volq') ? 'all' : 'volq'; renderList(); });
-  $('kpi-card-sintipo').addEventListener('click', function() { activeTypeFilter = (activeTypeFilter === 'sintipo') ? 'all' : 'sintipo'; renderList(); });
-  $('kpi-card-otros').addEventListener('click', function() { activeTypeFilter = (activeTypeFilter === 'otros') ? 'all' : 'otros'; renderList(); });
+  $('kpi-card-noanualidad').addEventListener('click', function() { activeFieldMissingFilter = (activeFieldMissingFilter === 'noanualidad') ? 'all' : 'noanualidad'; renderList(); });
+  $('kpi-card-noestado').addEventListener('click', function() { activeFieldMissingFilter = (activeFieldMissingFilter === 'noestado') ? 'all' : 'noestado'; renderList(); });
+  $('kpi-card-noruc').addEventListener('click', function() { activeFieldMissingFilter = (activeFieldMissingFilter === 'noruc') ? 'all' : 'noruc'; renderList(); });
+  $('kpi-card-norazon').addEventListener('click', function() { activeFieldMissingFilter = (activeFieldMissingFilter === 'norazon') ? 'all' : 'norazon'; renderList(); });
 
   // NAVEGACIÓN ENTRE MÓDULOS
   $('btn-mod-certi').addEventListener('click', function() { switchView('certi'); });
