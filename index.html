@@ -1574,7 +1574,8 @@ var addInConstructor = function (geotabApi, state, callback) {
       return (diagById[d.id] || d.id); 
     });
 
-    $('create-rep-diagnostics').value = diags.join(', ');
+    sourceDiagOriginalText = diags.join(', ');
+    $('create-rep-diagnostics').value = sourceDiagOriginalText;
   }
 
   function applyNamePrefixPreset() {
@@ -1608,9 +1609,10 @@ var addInConstructor = function (geotabApi, state, callback) {
     $('create-report-modal').style.display = 'flex';
   }
 
-  // ===== CLONACIÓN CORREGIDA (evita "Error dealing with JSON data") =====
+  // ===== CLONACIÓN CORREGIDA v2 (variantes + diagnósticos por ID) =====
   var SCHEDULE_GROUP_KEYS = ['groups', 'scopeGroups', 'includeAllChildrenGroups', 'includeDirectChildrenOnlyGroups'];
-  var SCHEDULE_READONLY_KEYS = ['id', 'lastModifiedUser', 'lastUpdated', 'lastModifiedDateTime', 'version', 'dateTime'];
+  var SCHEDULE_READONLY_KEYS = ['id', 'lastModifiedUser', 'lastUpdated', 'lastModifiedDateTime', 'version', 'dateTime', 'lastRun', 'nextRun', 'lastRunDate', 'nextRunDate'];
+  var sourceDiagOriginalText = '';
 
   function stripNulls(obj) {
     if (Array.isArray(obj)) {
@@ -1621,6 +1623,22 @@ var addInConstructor = function (geotabApi, state, callback) {
       Object.keys(obj).forEach(function (k) {
         if (obj[k] === null || obj[k] === undefined) return;
         out[k] = stripNulls(obj[k]);
+      });
+      return out;
+    }
+    return obj;
+  }
+
+  // Elimina también cadenas vacías, arreglos vacíos y objetos vacíos
+  function pruneEmpty(obj) {
+    if (Array.isArray(obj)) return obj.map(pruneEmpty);
+    if (obj && typeof obj === 'object') {
+      var out = {};
+      Object.keys(obj).forEach(function (k) {
+        var v = pruneEmpty(obj[k]);
+        var isEmptyObj = v && typeof v === 'object' && !Array.isArray(v) && Object.keys(v).length === 0;
+        if (v === '' || (Array.isArray(v) && v.length === 0) || isEmptyObj) return;
+        out[k] = v;
       });
       return out;
     }
@@ -1638,40 +1656,56 @@ var addInConstructor = function (geotabApi, state, callback) {
     return replaced;
   }
 
-  function buildClonedSchedule(src, repName, destGroups, diagList, includeName) {
-    // Clon profundo y limpio (sin referencias a objetos mutados por la UI)
+  // mode 1: clon completo con nombre
+  // mode 2: clon sin campos vacíos, con nombre
+  // mode 3: mínimo (plantilla + grupos + reglas + diagnósticos), con nombre
+  // mode 4: mínimo sin nombre
+  function buildClonedSchedule(src, repName, destGroups, diagList, mode) {
     var n = JSON.parse(JSON.stringify(src));
 
-    // Quitar propiedades internas (_resolvedName, _rules, _diags, etc.)
-    Object.keys(n).forEach(function (k) {
-      if (k.charAt(0) === '_') delete n[k];
-    });
-    // Quitar campos de solo lectura
+    Object.keys(n).forEach(function (k) { if (k.charAt(0) === '_') delete n[k]; });
     SCHEDULE_READONLY_KEYS.forEach(function (k) { delete n[k]; });
 
-    if (includeName) n.name = repName; else delete n.name;
+    var rootKey = 'scopeGroups';
+    for (var i = 0; i < SCHEDULE_GROUP_KEYS.length; i++) {
+      var kk = SCHEDULE_GROUP_KEYS[i];
+      if (Array.isArray(src[kk]) && src[kk].length > 0) { rootKey = kk; break; }
+    }
+    var destRefs = destGroups.map(function (g) { return { id: g.id }; });
+    var srcArgs = src.arguments || {};
+    var rules = (srcArgs.rules || []).filter(function (r) { return r && r.id; }).map(function (r) { return { id: r.id }; });
 
-    // Grupos en la raíz
-    var rootReplaced = replaceGroupsIn(n, destGroups);
-    if (!rootReplaced) {
-      n.scopeGroups = destGroups.map(function (g) { return { id: g.id }; });
+    if (mode >= 3) {
+      var m = { isActive: true, arguments: { rules: rules, diagnostics: diagList } };
+      if (n.template && n.template.id) m.template = { id: n.template.id };
+      if (mode === 3) m.name = repName;
+      m[rootKey] = destRefs;
+      return stripNulls(m);
     }
 
-    // Argumentos: conservar TODO y cambiar solo lo necesario
+    n.name = repName;
+    replaceGroupsIn(n, destGroups);
+    if (!SCHEDULE_GROUP_KEYS.some(function (k) { return Array.isArray(n[k]) && n[k].length > 0; })) {
+      n[rootKey] = destRefs;
+    }
+
     n.arguments = n.arguments || {};
-    Object.keys(n.arguments).forEach(function (k) {
-      if (k.charAt(0) === '_') delete n.arguments[k];
-    });
+    Object.keys(n.arguments).forEach(function (k) { if (k.charAt(0) === '_') delete n.arguments[k]; });
     replaceGroupsIn(n.arguments, destGroups);
     n.arguments.diagnostics = diagList;
-
-    // También reemplazar nombre dentro de arguments si el origen lo traía
-    if (includeName && Object.prototype.hasOwnProperty.call(n.arguments, 'name')) {
-      n.arguments.name = repName;
-    }
+    if (Object.prototype.hasOwnProperty.call(n.arguments, 'name')) n.arguments.name = repName;
 
     n.isActive = true;
-    return stripNulls(n);
+    n = stripNulls(n);
+    return mode === 2 ? pruneEmpty(n) : n;
+  }
+
+  function normDiagText(t) { return String(t || '').replace(/\s+/g, ' ').trim(); }
+
+  function errToText(err) {
+    if (!err) return 'Error desconocido';
+    if (typeof err === 'string') return err;
+    return err.message || (err.data && err.data.message) || (err.name ? String(err.name) : '') || JSON.stringify(err);
   }
 
   async function createAndSubmitReport() {
@@ -1679,6 +1713,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     var repName = $('create-rep-name').value.trim();
     var diagText = $('create-rep-diagnostics').value.trim();
     var statusDiv = $('create-rep-status');
+    statusDiv.style.whiteSpace = 'pre-wrap';
 
     var selectedDestCheckboxes = document.querySelectorAll('.chk-dest-group:checked');
     var destGroupsList = Array.from(selectedDestCheckboxes).map(function (cb) { return { id: cb.value }; });
@@ -1698,53 +1733,51 @@ var addInConstructor = function (geotabApi, state, callback) {
     statusDiv.style.color = "#0284c7";
     statusDiv.textContent = "Clonando plantilla y registrando reporte en Geotab...";
 
-    // Diagnósticos: solo IDs válidos
+    // ----- Diagnósticos -----
+    // Si el texto no fue editado, se usan los IDs originales tal cual (varios diagnósticos comparten nombre).
     var sourceDiags = (sourceSched.arguments && sourceSched.arguments.diagnostics) ? sourceSched.arguments.diagnostics : [];
+    var sourceDiagIds = sourceDiags.filter(function (d) { return d && d.id; }).map(function (d) { return d.id; });
     var diagList = [];
 
-    if (diagText) {
+    if (!diagText || normDiagText(diagText) === normDiagText(sourceDiagOriginalText)) {
+      diagList = sourceDiagIds.map(function (id) { return { id: id }; });
+    } else {
       var tokens = diagText.split(/[\n\r,]+/).map(function (t) { return t.trim(); }).filter(Boolean);
       var added = new Set();
-
       tokens.forEach(function (token) {
-        var foundId = null;
-        var orig = sourceDiags.find(function (sd) { return sd.id === token; });
-        if (orig) {
-          foundId = orig.id;
+        var pick = null;
+        if (diagById[token] !== undefined || sourceDiagIds.indexOf(token) >= 0) {
+          pick = token; // el usuario escribió un ID
         } else {
-          Object.keys(diagById).forEach(function (dKey) {
-            if (dKey === token || diagById[dKey] === token) foundId = dKey;
-          });
+          var fromSource = sourceDiagIds.filter(function (id) { return diagById[id] === token && !added.has(id); });
+          if (fromSource.length) {
+            pick = fromSource[0];
+          } else {
+            var anyIds = Object.keys(diagById).filter(function (id) { return diagById[id] === token && !added.has(id); });
+            if (anyIds.length) pick = anyIds[0];
+          }
         }
-        if (foundId && !added.has(foundId)) {
-          added.add(foundId);
-          diagList.push({ id: foundId });
-        }
+        if (pick && !added.has(pick)) { added.add(pick); diagList.push({ id: pick }); }
       });
-
-      if (diagList.length === 0 && sourceDiags.length > 0) {
-        diagList = sourceDiags.filter(function (d) { return d && d.id; }).map(function (d) { return { id: d.id }; });
+      if (diagList.length === 0) {
+        diagList = sourceDiagIds.map(function (id) { return { id: id }; });
       }
-    } else {
-      diagList = sourceDiags.filter(function (d) { return d && d.id; }).map(function (d) { return { id: d.id }; });
     }
 
-    // Intento 1: con nombre. Intento 2: sin nombre (por si el esquema no lo acepta)
-    var attempts = [true, false];
-    var lastErr = null;
+    // ----- Intentos con variantes -----
+    var modes = [1, 2, 3, 4];
+    var errors = [];
 
-    for (var i = 0; i < attempts.length; i++) {
+    for (var i = 0; i < modes.length; i++) {
+      var entity = null;
       try {
-        var entity = buildClonedSchedule(sourceSched, repName, destGroupsList, diagList, attempts[i]);
-        console.log("Entidad a crear (intento " + (i + 1) + "):", JSON.stringify(entity));
+        entity = buildClonedSchedule(sourceSched, repName, destGroupsList, diagList, modes[i]);
+        console.log("Entidad a crear (variante " + modes[i] + "):", JSON.stringify(entity));
 
-        await callApi(api, 'Add', {
-          typeName: 'CustomReportSchedule',
-          entity: entity
-        });
+        await callApi(api, 'Add', { typeName: 'CustomReportSchedule', entity: entity });
 
         statusDiv.style.color = "#16a34a";
-        statusDiv.textContent = "✅ ¡Reporte clonado y registrado con éxito en Geotab!";
+        statusDiv.textContent = "✅ ¡Reporte clonado y registrado con éxito en Geotab! (variante " + modes[i] + ")";
 
         setTimeout(function () {
           $('create-report-modal').style.display = 'none';
@@ -1753,13 +1786,14 @@ var addInConstructor = function (geotabApi, state, callback) {
         }, 1200);
         return;
       } catch (err) {
-        lastErr = err;
-        console.error("Error al crear reporte (intento " + (i + 1) + "):", err);
+        errors.push("Variante " + modes[i] + ": " + errToText(err));
+        console.error("Error al crear reporte (variante " + modes[i] + "):", err);
+        window.__lastCloneEntity = entity;
       }
     }
 
-    var msg = lastErr && (lastErr.message || (lastErr.data && lastErr.data.message) || JSON.stringify(lastErr)) || 'Error desconocido';
-    fail("Error al clonar reporte: " + msg);
+    console.log("Origen sin procesar:", JSON.stringify(sourceSched));
+    fail("No se pudo clonar el reporte.\n" + errors.join("\n") + "\n(Detalle en la consola F12)");
   }
 
   function generateLegalText() {
