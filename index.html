@@ -251,7 +251,45 @@
 
     <!-- Módulo Auditoría de Grupos -->
     <div id="sec-audit" style="display: none;">
-      <div class="cgps-card" style="margin-top: 12px;">
+      <!-- APARTADO DE CREACIÓN DE GRUPOS -->
+      <div class="cgps-card" style="margin-top: 12px; background: #ffffff; border: 1px solid #bae6fd;">
+        <div style="font-size: 12px; font-weight: 800; color: #0369a1; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">
+          <span>📁</span> CREAR NUEVO GRUPO EN EL ÁRBOLES DE GEOTAB
+        </div>
+        
+        <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+          <!-- Tipo 1: Cliente Nuevo -->
+          <div style="flex: 1; min-width: 300px; background: #f0f9ff; padding: 14px; border-radius: 8px; border: 1px solid #e0f2fe;">
+            <div style="font-size: 11px; font-weight: 700; color: #0284c7; margin-bottom: 6px; text-transform: uppercase;">1. Opción: Cliente Nuevo</div>
+            <p style="font-size: 11px; color: #64748b; margin: 0 0 8px 0;">Crea automáticamente el grupo en <b>CLIENTES (b278A)</b> y en <b>DIVEMOTOR (b27A8)</b>.</p>
+            <div style="display: flex; gap: 8px;">
+              <input type="text" id="audit-new-client-name" class="cgps-input" placeholder="Nombre de la Razón Social..." style="flex: 1; height: 38px;">
+              <button id="audit-btn-create-client" type="button" class="cgps-btn cgps-btn-primary" style="height: 38px; font-weight: 700;">➕ Crear Cliente Nuevo</button>
+            </div>
+          </div>
+
+          <!-- Tipo 2: En General -->
+          <div style="flex: 1; min-width: 300px; background: #f8fafc; padding: 14px; border-radius: 8px; border: 1px solid #e2e8f0;">
+            <div style="font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 6px; text-transform: uppercase;">2. Opción: En General</div>
+            <p style="font-size: 11px; color: #64748b; margin: 0 0 8px 0;">Permite elegir cualquier grupo padre existente en el árbol.</p>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <div style="display: flex; gap: 8px;">
+                <input type="text" id="audit-gen-parent-search" class="cgps-input" placeholder="🔍 Filtrar grupo padre..." style="width: 180px; height: 36px;">
+                <select id="audit-gen-parent-select" class="cgps-input" style="flex: 1; height: 36px; font-size: 11px; font-weight: 600;">
+                  <option value="">-- Seleccione Grupo Padre --</option>
+                </select>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <input type="text" id="audit-gen-group-name" class="cgps-input" placeholder="Nombre del nuevo grupo..." style="flex: 1; height: 38px;">
+                <button id="audit-btn-create-general" type="button" class="cgps-btn cgps-btn-secondary" style="height: 38px; font-weight: 700;">📁 Crear Grupo General</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="audit-create-status" style="font-size: 12px; font-weight: 700; margin-top: 10px; min-height: 18px;"></div>
+      </div>
+
+      <div class="cgps-card" style="margin-top: 16px;">
         <div style="font-size: 12px; font-weight: 700; margin-bottom: 8px; color: #0f172a;">PEGADO DE LISTA PARA AUDITORÍA DE GRUPOS</div>
         <div style="display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap;">
           <textarea id="cgps-audit-input" class="cgps-textarea" placeholder="Pegue aquí las observaciones o clientes en bloque..." rows="6" style="flex: 1; min-width: 300px; font-family: 'JetBrains Mono', monospace; font-size: 12px;"></textarea>
@@ -1224,7 +1262,6 @@ var addInConstructor = function (geotabApi, state, callback) {
     }
 
     var upper = raw.toUpperCase();
-    
     var hasNoIndica = upper.indexOf("NO INDICA") >= 0;
 
     var hasActInmediata = upper.indexOf("ACT INMEDIATA") >= 0 || 
@@ -1899,10 +1936,8 @@ var addInConstructor = function (geotabApi, state, callback) {
     statusDiv.textContent = "Clonando plantilla y registrando reporte en Geotab...";
 
     try {
-      // 1. Realizar una copia profunda limpia del objeto origen para preservar la estructura completa de Geotab
       var newSchedule = JSON.parse(JSON.stringify(sourceSched));
 
-      // 2. Eliminar identificadores y metadatos propios de la entidad antigua
       delete newSchedule.id;
       delete newSchedule.version;
       delete newSchedule.lastUpdated;
@@ -1913,12 +1948,10 @@ var addInConstructor = function (geotabApi, state, callback) {
       delete newSchedule._lastMs;
       delete newSchedule._userName;
 
-      // 3. Asignar los valores requeridos
       newSchedule.name = repName;
       newSchedule.groups = destGroupsList;
       newSchedule.isActive = true;
 
-      // 4. Enviar a la API de Geotab
       var res = await callApi(api, 'Add', {
         typeName: 'CustomReportSchedule',
         entity: newSchedule
@@ -1938,6 +1971,112 @@ var addInConstructor = function (geotabApi, state, callback) {
       var errorMsg = err.message || (err.error && err.error.message) || JSON.stringify(err);
       statusDiv.style.color = "#ef4444";
       statusDiv.textContent = "Error al clonar reporte: " + errorMsg;
+    }
+  }
+
+  // --- LÓGICA DE CREACIÓN DE GRUPOS EN AUDITORÍA ---
+  function populateGeneralParentGroupsDropdown() {
+    var sel = $('audit-gen-parent-select');
+    var query = ($('audit-gen-parent-search').value || '').toLowerCase().trim();
+    if (!sel) return;
+
+    sel.innerHTML = '<option value="">-- Seleccione Grupo Padre --</option>';
+
+    var allGroupsList = Object.keys(groupsById).map(function(k) { return groupsById[k]; });
+    allGroupsList.sort(function(a, b) {
+      return (a.name || '').localeCompare(b.name || '', 'es');
+    });
+
+    allGroupsList.forEach(function(g) {
+      if (!g || !g.id || !g.name) return;
+      if (!query || g.name.toLowerCase().indexOf(query) >= 0 || g.id.toLowerCase().indexOf(query) >= 0) {
+        var opt = document.createElement('option');
+        opt.value = g.id;
+        opt.textContent = g.name + " (" + g.id + ")";
+        sel.appendChild(opt);
+      }
+    });
+  }
+
+  async function createNewClientGroup() {
+    var name = $('audit-new-client-name').value.trim();
+    var statusDiv = $('audit-create-status');
+
+    if (!name) {
+      statusDiv.style.color = "#ef4444";
+      statusDiv.textContent = "Por favor ingrese la Razón Social del cliente.";
+      return;
+    }
+
+    statusDiv.style.color = "#0284c7";
+    statusDiv.textContent = "Creando cliente en CLIENTES (b278A) y DIVEMOTOR (b27A8)...";
+
+    try {
+      var calls = [
+        ['Add', { typeName: 'Group', entity: { name: name, parent: { id: 'b278A' } } }],
+        ['Add', { typeName: 'Group', entity: { name: name, parent: { id: 'b27A8' } } }]
+      ];
+
+      await callMulti(api, calls);
+      statusDiv.style.color = "#10b981";
+      statusDiv.textContent = "✅ ¡Cliente '" + name + "' creado con éxito en ambos grupos padre!";
+      $('audit-new-client-name').value = '';
+
+      setTimeout(function() {
+        load();
+      }, 1000);
+
+    } catch (err) {
+      console.error("Error creando cliente nuevo:", err);
+      statusDiv.style.color = "#ef4444";
+      statusDiv.textContent = "Error al crear cliente: " + (err.message || JSON.stringify(err));
+    }
+  }
+
+  async function createGeneralGroup() {
+    var parentId = $('audit-gen-parent-select').value;
+    var name = $('audit-gen-group-name').value.trim();
+    var statusDiv = $('audit-create-status');
+
+    if (!parentId) {
+      statusDiv.style.color = "#ef4444";
+      statusDiv.textContent = "Por favor seleccione el grupo padre de la lista.";
+      return;
+    }
+
+    if (!name) {
+      statusDiv.style.color = "#ef4444";
+      statusDiv.textContent = "Por favor ingrese el nombre para el nuevo grupo.";
+      return;
+    }
+
+    var parentGroupObj = groupsById[parentId];
+    var parentName = parentGroupObj ? parentGroupObj.name : parentId;
+
+    statusDiv.style.color = "#0284c7";
+    statusDiv.textContent = "Creando grupo '" + name + "' bajo el padre '" + parentName + "'...";
+
+    try {
+      await callApi(api, 'Add', {
+        typeName: 'Group',
+        entity: {
+          name: name,
+          parent: { id: parentId }
+        }
+      });
+
+      statusDiv.style.color = "#10b981";
+      statusDiv.textContent = "✅ Grupo '" + name + "' creado con éxito bajo '" + parentName + "'";
+      $('audit-gen-group-name').value = '';
+
+      setTimeout(function() {
+        load();
+      }, 1000);
+
+    } catch (err) {
+      console.error("Error creando grupo general:", err);
+      statusDiv.style.color = "#ef4444";
+      statusDiv.textContent = "Error al crear grupo: " + (err.message || JSON.stringify(err));
     }
   }
 
@@ -2154,6 +2293,8 @@ var addInConstructor = function (geotabApi, state, callback) {
         $('sec-bulk-container').style.display = 'none';
         $('sec-controls-container').style.display = 'none';
         $('sec-table-container').style.display = 'none';
+
+        populateGeneralParentGroupsDropdown();
       } else if (mod === 'reports') {
         $('testn-mod-title').textContent = 'Reportes por Cliente';
         $('hdr-actions-reports').style.display = 'flex';
@@ -2492,6 +2633,7 @@ var addInConstructor = function (geotabApi, state, callback) {
 
         rebuildRows();
         renderList();
+        populateGeneralParentGroupsDropdown();
 
         setMsg(all.length + ' activos y ' + Object.keys(groupsById).length + ' grupos sincronizados correctamente.');
 
@@ -2511,6 +2653,11 @@ var addInConstructor = function (geotabApi, state, callback) {
   // RECARGA Y SINCRONIZACIÓN
   $('testn-btn-refresh-hub').addEventListener('click', function() { load(); });
   $('testn-btn-refresh-mod').addEventListener('click', function() { load(); });
+
+  // EVENTOS AUDITORÍA DE GRUPOS — CREACIÓN
+  $('audit-btn-create-client').addEventListener('click', createNewClientGroup);
+  $('audit-btn-create-general').addEventListener('click', createGeneralGroup);
+  $('audit-gen-parent-search').addEventListener('keyup', populateGeneralParentGroupsDropdown);
 
   // EVENTOS MASTER SWITCH
   $('master-btn-excel').addEventListener('click', exportMasterExcel);
