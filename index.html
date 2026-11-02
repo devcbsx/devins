@@ -88,7 +88,7 @@
   </div>
 </div>
 
-<!-- MODAL PARA CLONAR Y CREAR REPORTE DESDE OTRO CLIENTE -->
+<!-- MODAL PARA CLONAR Y CREAR REPORTE (SIN SECCIÓN DE DIAGNÓSTICOS) -->
 <div id="create-report-modal" style="position: fixed; top:0; left:0; width:100vw; height:100vh; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(6px); z-index: 9999; display: none; justify-content: center; align-items: center; padding: 20px;">
   <div style="background: #ffffff; padding: 32px; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); width: 100%; max-width: 680px; max-height: 90vh; overflow-y: auto; border: 1px solid #e2e8f0;">
     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px; margin-bottom: 20px;">
@@ -135,16 +135,48 @@
         </div>
       </div>
 
-      <div>
-        <label style="font-weight: 600; color: #0f172a; display: block; margin-bottom: 6px;">5. Diagnósticos Copiados / Editables (Separados por comas o líneas):</label>
-        <textarea id="create-rep-diagnostics" class="cgps-textarea" rows="4" placeholder="Cargando diagnósticos del reporte origen..." style="width: 100%; font-family: 'JetBrains Mono', monospace; font-size: 12px;"></textarea>
-      </div>
-
       <div id="create-rep-status" style="font-size: 12px; font-weight: 700; min-height: 20px;"></div>
     </div>
 
     <div style="text-align: right; margin-top: 24px; border-top: 1px solid #e2e8f0; padding-top: 16px; display: flex; justify-content: flex-end; gap: 10px;">
-      <button id="btn-submit-create-report" type="button" class="cgps-btn cgps-btn-primary" style="font-size: 13px; font-weight: 700; padding: 10px 20px;">💾 Copiar y Crear Reporte</button>
+      <button id="btn-submit-create-report" type="button" class="cgps-btn cgps-btn-primary" style="font-size: 13px; font-weight: 700; padding: 10px 20px;">💾 Crear Reporte (Sin Diagnósticos)</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PARA VALIDAR / MODIFICAR DIAGNÓSTICOS DE REPORTES CREATOR -->
+<div id="edit-diagnostics-modal" style="position: fixed; top:0; left:0; width:100vw; height:100vh; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(6px); z-index: 9999; display: none; justify-content: center; align-items: center; padding: 20px;">
+  <div style="background: #ffffff; padding: 32px; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); width: 100%; max-width: 720px; max-height: 90vh; overflow-y: auto; border: 1px solid #e2e8f0;">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px; margin-bottom: 20px;">
+      <h2 style="margin:0; font-size: 18px; color: #0f172a; font-weight: 700; display: flex; align-items: center; gap: 8px;">🔧 VALIDAR Y MODIFICAR DIAGNÓSTICOS DE REPORTE</h2>
+      <button id="btn-close-edit-diags-modal" type="button" class="cgps-btn cgps-btn-outline" style="font-size: 12px; padding: 6px 14px;">✕ Cerrar</button>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 16px; font-size: 13px;">
+      <div>
+        <label style="font-weight: 600; color: #0f172a; display: block; margin-bottom: 6px;">1. Seleccionar Reporte Existente:</label>
+        <select id="edit-diag-select-report" class="cgps-input" style="width: 100%; height: 38px; font-weight: 600;">
+          <option value="">-- Seleccione un reporte buscado previamente --</option>
+        </select>
+      </div>
+
+      <div>
+        <label style="font-weight: 600; color: #0f172a; display: block; margin-bottom: 6px;">2. Diagnósticos Actuales Asignados:</label>
+        <div id="edit-diag-current-list" style="max-height: 140px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; background: #f8fafc; display: flex; flex-wrap: wrap; gap: 6px;">
+          <span style="color: #64748b; font-size: 12px; font-style: italic;">Seleccione un reporte de la lista para cargar sus diagnósticos...</span>
+        </div>
+      </div>
+
+      <div>
+        <label style="font-weight: 600; color: #0f172a; display: block; margin-bottom: 6px;">3. Añadir / Modificar Diagnósticos (Separados por comas o líneas):</label>
+        <textarea id="edit-diag-input-text" class="cgps-textarea" rows="6" placeholder="Ingrese nombres o IDs de diagnósticos..." style="width: 100%; font-family: 'JetBrains Mono', monospace; font-size: 12px;"></textarea>
+      </div>
+
+      <div id="edit-diag-status" style="font-size: 12px; font-weight: 700; min-height: 20px;"></div>
+    </div>
+
+    <div style="text-align: right; margin-top: 24px; border-top: 1px solid #e2e8f0; padding-top: 16px; display: flex; justify-content: flex-end; gap: 10px;">
+      <button id="btn-save-diagnostics" type="button" class="cgps-btn cgps-btn-primary" style="font-size: 13px; font-weight: 700; padding: 10px 20px;">💾 Guardar Diagnósticos en Geotab</button>
     </div>
   </div>
 </div>
@@ -230,8 +262,10 @@
         <button id="master-btn-excel" type="button" class="cgps-btn cgps-btn-white" style="font-weight:700;">📊 Exportar XLSX</button>
       </div>
 
+      <!-- BOTONES EN EL ENCABEZADO DE REPORTES POR CLIENTE -->
       <div id="hdr-actions-reports" style="display: none; gap: 8px;">
         <button id="reports-btn-open-create-modal" type="button" class="cgps-btn cgps-btn-white" style="font-weight:700;">➕ Copiar Reporte de Cliente</button>
+        <button id="reports-btn-open-edit-diags-modal" type="button" class="cgps-btn cgps-btn-secondary" style="font-weight:700;">🔧 Validar / Modificar Diagnósticos</button>
       </div>
     </div>
 
@@ -515,10 +549,8 @@
       </div>
     </div>
 
-    <!-- KPIs Rápidos / DASHBOARD TECH (EXACTAMENTE 10 FILTROS POR FILA) -->
+    <!-- KPIs Rápidos / DASHBOARD TECH -->
     <div id="sec-kpi-container" class="cgps-kpi-grid" style="margin-top: 12px;">
-      
-      <!-- PRIMERA FILA (10 FILTROS) -->
       <div class="cgps-card kpi-btn-card" id="kpi-card-sn-vin" title="Filtrar con serial y VIN">
         <div class="cgps-kpi-title">CON SERIAL + VIN</div>
         <div class="cgps-kpi-value" id="kpi-sn-vin" style="color: #0284c7;">0</div>
@@ -560,7 +592,6 @@
         <div class="cgps-kpi-value" id="kpi-val-norazon" style="color: #b91c1c;">0</div>
       </div>
 
-      <!-- SEGUNDA FILA (FILTROS DE TIPO DE VEHÍCULO) -->
       <div class="cgps-card kpi-btn-card" id="kpi-card-type-remolcadores" style="display: none;" title="Filtrar remolcadores">
         <div class="cgps-kpi-title">REMOLCADORES</div>
         <div class="cgps-kpi-value" id="kpi-val-remolcadores" style="color: #0284c7;">0</div>
@@ -696,7 +727,6 @@
     }
     .cgps-wrapper { width: 100% !important; max-width: 100% !important; margin: 0 auto; }
     
-    /* TECH HERO BANNER */
     .cgps-hero { 
       background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important; 
       color: #ffffff !important; 
@@ -712,7 +742,6 @@
       border: 1px solid #334155;
     }
     
-    /* TECH DASHBOARD CARDS */
     .testn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; width: 100%; margin-top: 12px; }
     @media (max-width: 900px) { .testn-grid { grid-template-columns: repeat(2, 1fr); } }
     
@@ -741,7 +770,6 @@
     .testn-card h2 { font-size: 15px !important; color: #0f172a !important; font-weight: 700 !important; margin: 0 0 6px 0 !important; text-transform: uppercase !important; letter-spacing: 0.5px; }
     .testn-card p { font-size: 12px !important; color: #64748b !important; margin: 0 !important; line-height: 1.4 !important; }
 
-    /* TECH BUTTONS */
     .cgps-btn { padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; white-space: nowrap; transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
     .cgps-btn:disabled { opacity: 0.5; cursor: not-allowed !important; }
     .cgps-btn-primary { background: linear-gradient(135deg, #0284c7, #0369a1) !important; color: #ffffff !important; box-shadow: 0 2px 4px rgba(2, 132, 199, 0.2); }
@@ -753,7 +781,6 @@
     .cgps-btn-outline { background-color: transparent; color: #475569; border: 1px solid #cbd5e1; }
     .cgps-btn-outline:hover { background-color: #f1f5f9; color: #0f172a; }
     
-    /* KPI METRICS CARDS — CONFIGURACIÓN HASTA 10 POR FILA */
     .cgps-kpi-grid { 
       display: grid; 
       grid-template-columns: repeat(10, 1fr); 
@@ -777,13 +804,11 @@
     
     .certi-two-cols-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; }
 
-    /* INPUTS TECH */
     .cgps-controls-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; width: 100%; }
     .cgps-input, .cgps-textarea { padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12px; outline: none; background-color: #ffffff; transition: border 0.2s, box-shadow 0.2s; font-family: inherit; }
     .cgps-input:focus, .cgps-textarea:focus { border-color: #0284c7 !important; box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15) !important; }
     .cgps-input:disabled { background-color: #f1f5f9 !important; cursor: not-allowed !important; color: #94a3b8 !important; }
     
-    /* TABLA PROFESIONAL */
     .cgps-table-container { background-color: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; width: 100%; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
     .cgps-table-scroll { max-height: 480px; overflow-y: auto; width: 100%; }
     
@@ -1224,20 +1249,6 @@ var addInConstructor = function (geotabApi, state, callback) {
       $('kpi-val-sintipo').textContent = cSinTipo;
       $('kpi-val-otrostipos').textContent = cOtrosTipos;
 
-      $('kpi-card-4').style.display = 'block';
-      $('kpi-card-less5').style.display = 'block';
-
-      $('kpi-card-noanualidad').style.display = 'block';
-      $('kpi-card-noestado').style.display = 'block';
-      $('kpi-card-noruc').style.display = 'block';
-      $('kpi-card-norazon').style.display = 'block';
-
-      $('kpi-card-type-remolcadores').style.display = 'block';
-      $('kpi-card-type-volquetes').style.display = 'block';
-      $('kpi-card-type-sintipo').style.display = 'block';
-      $('kpi-card-type-otrostipos').style.display = 'block';
-
-      // 10 COLUMNAS EXACTAS POR FILA EN MÓDULO DE VALIDACIÓN
       document.querySelector('.cgps-kpi-grid').style.gridTemplateColumns = 'repeat(10, 1fr)';
     }
   }
@@ -1590,8 +1601,8 @@ var addInConstructor = function (geotabApi, state, callback) {
     var modelo = ($('flash-input-modelo').value || '').trim() || '[...]';
     var baseGeotab = ($('flash-input-base').value || '').trim() || 'divemotor';
     var ventana = ($('flash-input-ventana').value || '').trim() || '[dd/mm/aaaa hh:mm–hh:mm]';
-    var relato = ($('flash-input-relato').value || '').trim() || '[relato del cliente: dónde, hora aproximada, con qué o quién colisionó, en qué lado del vehículo fue la colisión, quién conducía, heridos o carga peligrosa]';
-    var fotos = ($('flash-input-fotos').value || '').trim() || '[detalles de fotos: qué muestra, qué parte y lado de la unidad, si trae hora o ubicación]';
+    var relato = ($('flash-input-relato').value || '').trim() || '[relato del cliente]';
+    var fotos = ($('flash-input-fotos').value || '').trim() || '[detalles de fotos]';
 
     var fullPrompt = `ROL
 Analista experto en telemetría e investigación de siniestros viales (Geotab / Divemotor Connect).
@@ -1602,69 +1613,7 @@ ENTRADAS
 - Placa: ${placa} · VIN: ${vin} · Modelo: ${modelo}
 - Fecha y ventana (hora local, UTC-5 Lima): ${ventana}
 - Descripción del suceso de acuerdo a imágenes y adjuntos: ${relato}
-  Detalle de fotos: ${fotos}
-
-USO DE LA DESCRIPCIÓN
-- Corroborar el tipo de impacto y el lado dañado con las fallas de telemetría (sensor ABS del eje delantero derecho/izquierdo, refrigerante, turbo, ventilador).
-- Mencionar las fotos solo en el texto (análisis, comentarios, recomendaciones). NO incrustar imágenes ni crear sección de evidencia fotográfica.
-- Si hay placas de mercancías peligrosas, recomendar verificar la carga.
-- Si el relato contradice la telemetría (hora, velocidad, tipo de impacto), indicarlo expressamente.
-- No inventar calles, ciudades ni conductores: usar solo coordenadas y datos de la base.
-
-REGLAS DE EFICIENCIA
-1. Convertir la ventana a UTC (Lima + 5 h) y usar SIEMPRE ventanas mínimas.
-2. Usar propertySelector para pedir solo los campos necesarios.
-3. NO usar AskDataAgent (devuelve datos irrelevantes) ni GetCountOf sobre StatusData.
-4. NO consultar ExceptionEvent de toda la ventana: solo los 3 min alrededor del pico.
-5. Resolver nombres (Diagnostic, Rule, Group) solo para los IDs que aparezcan en la ventana del evento.
-6. Hacer todos los cálculos (validación GPS, interpolación, coordenadas SVG, conversión a G) en UNA sola ejecución de Python y generar el HTML desde un script.
-7. Entregar el HTML como archivo (present_files), no pegado en el chat, salvo que se pida el código.
-
-FLUJO DE CONSULTAS (en este orden)
-1. Device por licensePlate → id, VIN, serie, zona horaria. Group del dispositivo → nombre del cliente.
-2. Trip de la ventana → inicio, fin, distancia, velocidad máx., punto de parada.
-3. FaultData de la ventana (dateTime, diagnostic, failureMode, faultState, lámparas): agrupar por instante; los fallos en cluster pegados al pico son la firma del impacto.
-4. LogRecord (dateTime, speed, lat, lon) de los últimos 7 min antes de la detención.
-5. Pico: StatusData DiagnosticAccelerationForwardBrakingId en 2–3 min alrededor de la detención; con el instante del pico, repetir con DiagnosticAccelerationSideToSideId y DiagnosticAccelerationUpDownId en ±3 s.
-6. StatusData DiagnosticEngineSpeedId (RPM) de −15 s a +10 s. Probar DiagnosticAcceleratorPedalPositionId (si viene vacío, indicar "no reporta").
-7. ExceptionEvent ±3 min del pico: reglas disparadas (frenada brusca con umbral en g) y si se disparó alguna regla de colisión (si no, anotarlo).
-8. GetPostedRoadSpeedsForDevice en la ventana → límite de vía (referencial).
-9. Historial de 3 meses del FaultData de cualquier falla NUEVA (p. ej. refrigerante SPN 111) → confirmar primera vez.
-10. Trips de las 48 h siguientes: reubicación, remolque o reanudación de operación.
-
-CONVERSIONES Y CRITERIOS
-- Aceleraciones en m/s²; G = valor / 9.80665. G vertical = (valor − línea base previa ≈ 9.48) / 9.80665.
-- Eje longitudinal negativo = desaceleración (impacto frontal típico).
-- Severidad: leve < 0.5 G · moderada 0.5–2 G · severa > 2 G.
-- Hora del impacto = instante del pico longitudinal; velocidad al impacto = interpolación lineal entre registros GPS vecinos (marcar con "~").
-- Todo en hora de Lima (UTC−5) en el informe.
-- Dictamen: "Colisión confirmada / Evento probable / Sin evidencia suficiente" + confianza Alta/Media/Baja. Alta solo con pico alto + fallas en cluster + detención + (video, airbag o EDR). Sin esos datos, Media. La foto o el relato refuerzan el dictamen pero no reemplazan la telemetría.
-
-VALIDACIÓN GPS (obligatoria, un bloque de Python)
-- Por cada par de registros: distancia (haversine) / Δt = velocidad implícita; comparar con el promedio de velocidades reportadas → error medio y máximo en km/h.
-- Distancia acumulada GPS vs velocidad integrada (relación ≈ 1.00).
-- Último registro vs stopPoint del Trip (metros).
-- Rumbo de los últimos 20 s y distancia entre impacto interpolado y parada.
-- Veredicto "GPS consistente" si error medio < 2 km/h y relación de distancias entre 0.98 y 1.02.
-
-ESTRUCTURA DEL INFORME (HTML + CSS embebido, A4 imprimible, @media print, sin scripts ni imágenes externas)
-Paleta: azul marino #0b2545, gris #5b6573, rojo #c62828, ámbar #e0a100, morado #5a1e9a.
-Página 1: cabecera "DIVEMOTOR Connect"; título "Informe de evento de colisión"; cliente; placa · modelo · VIN · fecha; ubicación (solo coordenadas); chips (dictamen, severidad, alerta posterior); cuadro rojo "HORA DEL IMPACTO" arriba a la derecha (columna de texto con min-width:0 para que no se corte); 4 KPIs (velocidad previa, G máx., velocidad al impacto, tipo de impacto); vista superior con zona de impacto + gráfico polar de G; esquema SVG de trayectoria de los últimos 47 s (puntos GPS reales, escala 100 m, norte, enlace a Google Maps); gráfico SVG velocidad + RPM de −12 s a +10 s con franja de desaceleración fuerte; gráfico SVG de G longitudinal/lateral con umbral 0.5 G y pico rotulado; "Análisis del evento" (5 viñetas) y "Línea de tiempo".
-Página 2: tabla segundo a segundo (−12 s a +10 s: hora, Δ, velocidad, RPM, G long/lat/vert, evento) y tabla en milisegundos del impacto (resultante = √(long² + lat²) en el mismo instante), nota de unidades.
-Página 3: tabla de fallas (hora, origen, código/alerta, estado), comentarios finales, recomendaciones, "Cómo se elaboró" (detección, datos usados, limitaciones) y cuadro verde "Validación GPS".
-
-COHERENCIA CON EL DAÑO
-- Falla de sensor ABS/rueda del eje 1 derecho/izquierdo → cruzar con el lado dañado de la foto o el relato.
-- Falla nueva de refrigerante, turbo o ventilador a segundos o minutos del pico → posible daño del frontal.
-
-LIMITACIONES A DECLARAR SIEMPRE
-Sin pedal/marcha/luces si no se reportan; sin airbag/EDR; velocidad interpolada; códigos propietarios ("Unknown Diagnostic 5210xx") y FMI sin decodificar; mapa esquemático sin calles; reglas de colisión de la cuenta que no se dispararon → revisar umbrales.
-
-RECOMENDACIONES TÍPICAS
-Inspección de taller del frontal y del sensor afectado; identificar al conductor si no hay ID; verificar la carga si hay rombos de mercancías peligrosas; revisar umbrales de reglas de colisión; atender fallas preexistentes (p. ej. DEF vacío); solicitar datos de ECU/EDR/video.
-
-SALIDA
-Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza, hora y coordenadas del impacto, veredicto GPS y hallazgos clave. Nada más.`;
+  Detalle de fotos: ${fotos}`;
 
     $('flash-output-prompt').value = fullPrompt;
     setMsg("Prompt MCP de Flash Report generado con éxito.");
@@ -2142,13 +2091,6 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
 
     $('create-rep-name-prefix-preset').value = prefix;
     $('create-rep-name').value = prefix + razonSocialName;
-
-    var a = selectedSched.arguments || {};
-    var diags = (a.diagnostics || []).map(function(d){ 
-      return (diagById[d.id] || (typeof d === 'string' ? d : d.id)); 
-    });
-
-    $('create-rep-diagnostics').value = diags.join(', ');
   }
 
   function applyNamePrefixPreset() {
@@ -2172,7 +2114,6 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
 
   function openCreateReportModal() {
     $('create-rep-name').value = "";
-    $('create-rep-diagnostics').value = "";
     $('create-rep-status').textContent = "";
     $('create-rep-source-search').value = "";
     $('create-rep-dest-search').value = "";
@@ -2182,6 +2123,7 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
     $('create-report-modal').style.display = 'flex';
   }
 
+  // CREACIÓN DE REPORTE SIN DIAGNÓSTICOS
   async function createAndSubmitReport() {
     var sourceSchedId = $('create-rep-source-schedule').value;
     var repName = $('create-rep-name').value.trim();
@@ -2218,7 +2160,7 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
     }
 
     statusDiv.style.color = "#0284c7";
-    statusDiv.textContent = "Paso 1/2: Registrando reporte base en Geotab (entidad limpia)...";
+    statusDiv.textContent = "Registrando reporte limpio sin diagnósticos en Geotab...";
 
     try {
       var newSchedule = {
@@ -2244,45 +2186,8 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
 
       var newReportId = typeof createdResult === 'string' ? createdResult : (createdResult && createdResult.id ? createdResult.id : createdResult);
 
-      statusDiv.style.color = "#0284c7";
-      statusDiv.textContent = "Paso 2/2: Asignando diagnósticos al reporte (ID: " + newReportId + ")...";
-
-      var fetchCreated = await callApi(api, 'Get', {
-        typeName: 'CustomReportSchedule',
-        search: { id: newReportId }
-      });
-
-      if (fetchCreated && fetchCreated[0]) {
-        var createdEntity = fetchCreated[0];
-        
-        var rawDiagInput = $('create-rep-diagnostics').value;
-        var parsedDiagnostics = [];
-
-        if (rawDiagInput && rawDiagInput.trim()) {
-          var tokens = rawDiagInput.split(/[\n\r,]+/).map(function(t){ return t.trim(); }).filter(Boolean);
-          parsedDiagnostics = tokens.map(function(t) {
-            var diagKey = Object.keys(diagById).find(function(k){ return diagById[k] === t; }) || t;
-            return { id: diagKey };
-          });
-        } else if (sourceSched.arguments && Array.isArray(sourceSched.arguments.diagnostics)) {
-          parsedDiagnostics = sourceSched.arguments.diagnostics.map(function(d) {
-            return typeof d === 'string' ? { id: d } : { id: d.id };
-          });
-        }
-
-        if (parsedDiagnostics.length > 0) {
-          if (!createdEntity.arguments) createdEntity.arguments = {};
-          createdEntity.arguments.diagnostics = parsedDiagnostics;
-
-          await callApi(api, 'Set', {
-            typeName: 'CustomReportSchedule',
-            entity: createdEntity
-          });
-        }
-      }
-
       statusDiv.style.color = "#10b981";
-      statusDiv.textContent = "✅ ¡Reporte clonado y configurado con éxito en Geotab!";
+      statusDiv.textContent = "✅ ¡Reporte clonado y generado sin diagnósticos con éxito! (ID: " + newReportId + ")";
       
       setTimeout(function() {
         $('create-report-modal').style.display = 'none';
@@ -2291,10 +2196,123 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
       }, 1200);
 
     } catch (err) {
-      console.error("Error al procesar la clonación en 2 pasos:", err);
+      console.error("Error al procesar la clonación:", err);
       var errorMsg = err.message || (err.error && err.error.message) || JSON.stringify(err);
       statusDiv.style.color = "#ef4444";
       statusDiv.textContent = "Error al clonar reporte: " + errorMsg;
+    }
+  }
+
+  // APARTADO 5: FUNCIONALIDAD PARA EL BOTÓN "VALIDAR / MODIFICAR DIAGNÓSTICOS"
+  function openEditDiagnosticsModal() {
+    var sel = $('edit-diag-select-report');
+    sel.innerHTML = '<option value="">-- Seleccione un reporte --</option>';
+    $('edit-diag-current-list').innerHTML = '<span style="color: #64748b; font-size: 12px; font-style: italic;">Seleccione un reporte de la lista para cargar sus diagnósticos...</span>';
+    $('edit-diag-input-text').value = '';
+    $('edit-diag-status').textContent = '';
+
+    if (!currentReportRows || currentReportRows.length === 0) {
+      sel.innerHTML = '<option value="">-- Busque reportes primero para cargarlos aquí --</option>';
+    } else {
+      currentReportRows.forEach(function(s) {
+        var opt = document.createElement('option');
+        opt.value = s.id;
+        opt.textContent = (s._resolvedName || s.name || s.id) + " (" + s.id + ")";
+        sel.appendChild(opt);
+      });
+    }
+
+    $('edit-diagnostics-modal').style.display = 'flex';
+  }
+
+  function handleEditDiagSelectReport() {
+    var repId = $('edit-diag-select-report').value;
+    var container = $('edit-diag-current-list');
+    var inputArea = $('edit-diag-input-text');
+
+    if (!repId) {
+      container.innerHTML = '<span style="color: #64748b; font-size: 12px; font-style: italic;">Seleccione un reporte de la lista para cargar sus diagnósticos...</span>';
+      inputArea.value = '';
+      return;
+    }
+
+    var selectedReport = currentReportRows.find(function(r) { return r.id === repId; });
+    if (!selectedReport) return;
+
+    var currentDiags = selectedReport._diags || [];
+
+    if (currentDiags.length === 0) {
+      container.innerHTML = '<span style="color: #f59e0b; font-size: 12px; font-weight: 600;">Este reporte no tiene diagnósticos asignados actualmente.</span>';
+      inputArea.value = '';
+    } else {
+      var tagsHtml = currentDiags.map(function(d) {
+        return '<span style="background: #e0f2fe; color: #0369a1; padding: 4px 8px; border-radius: 6px; border: 1px solid #bae6fd; font-size: 11px; font-weight: 600;">' + htmlEsc(d) + '</span>';
+      }).join('');
+      container.innerHTML = tagsHtml;
+      inputArea.value = currentDiags.join(', ');
+    }
+  }
+
+  async function saveDiagnosticsToReport() {
+    var repId = $('edit-diag-select-report').value;
+    var statusDiv = $('edit-diag-status');
+    var rawInput = $('edit-diag-input-text').value.trim();
+
+    if (!repId) {
+      statusDiv.style.color = "#ef4444";
+      statusDiv.textContent = "Seleccione un reporte para modificar sus diagnósticos.";
+      return;
+    }
+
+    statusDiv.style.color = "#0284c7";
+    statusDiv.textContent = "Consultando reporte en Geotab...";
+
+    try {
+      var fetchRes = await callApi(api, 'Get', {
+        typeName: 'CustomReportSchedule',
+        search: { id: repId }
+      });
+
+      if (!fetchRes || !fetchRes[0]) {
+        statusDiv.style.color = "#ef4444";
+        statusDiv.textContent = "No se pudo recuperar la entidad del reporte desde Geotab.";
+        return;
+      }
+
+      var entity = fetchRes[0];
+      if (!entity.arguments) entity.arguments = {};
+
+      var newDiagsArray = [];
+      if (rawInput) {
+        var tokens = rawInput.split(/[\n\r,]+/).map(function(t) { return t.trim(); }).filter(Boolean);
+        newDiagsArray = tokens.map(function(t) {
+          var diagKey = Object.keys(diagById).find(function(k) { return diagById[k] === t; }) || t;
+          return { id: diagKey };
+        });
+      }
+
+      entity.arguments.diagnostics = newDiagsArray;
+
+      statusDiv.textContent = "Guardando diagnósticos actualizados...";
+
+      await callApi(api, 'Set', {
+        typeName: 'CustomReportSchedule',
+        entity: entity
+      });
+
+      statusDiv.style.color = "#10b981";
+      statusDiv.textContent = "✅ ¡Diagnósticos actualizados correctamente en Geotab!";
+
+      setTimeout(function() {
+        $('edit-diagnostics-modal').style.display = 'none';
+        rawSchedules = [];
+        handleReportGroupChange();
+      }, 1200);
+
+    } catch (err) {
+      console.error("Error al actualizar diagnósticos:", err);
+      statusDiv.style.color = "#ef4444";
+      statusDiv.textContent = "Error al guardar diagnósticos: " + (err.message || JSON.stringify(err));
     }
   }
 
@@ -2489,7 +2507,6 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
     var a = document.createElement('a');
     a.href = url;
     
-    // FORMATO DE NOMBRE SOLICITADO: CERTIFICADO GPS - RAZON SOCIAL - FECHA
     a.download = 'CERTIFICADO GPS - ' + razonEmpresa + ' - ' + fechaStr + '.doc';
     document.body.appendChild(a);
     a.click();
@@ -2687,7 +2704,6 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
     } else if (activeModule === 'master') {
       head.innerHTML = '<tr><th style="width: 36px; text-align: center;"></th><th style="width: 180px;">PLACA</th><th style="width: 140px;">BASE DE DATOS</th><th style="width: 200px;">VIN</th><th style="width: 160px;"># SERIE</th><th style="width: 120px;">Instalación</th></tr>';
     } else {
-      // TABLA DE VALIDACIÓN
       head.innerHTML = '<tr>' +
         '<th style="width: 36px; text-align: center;"></th>' +
         '<th style="width: 150px;">Nombre del Activo</th>' +
@@ -2796,7 +2812,6 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
         var badgeClass = r.paramCount === 5 ? 'badge-full' : (r.paramCount === 0 ? 'badge-empty' : 'badge-partial');
         var badgeLabel = r.paramCount + '/5 ' + (r.paramCount === 5 ? 'OK' : 'Incompleto');
 
-        // COLUMNAS EN VALIDACIÓN
         html += '<tr>' +
           '<td style="text-align:center;"><input type="checkbox" data-id="' + htmlEsc(r.id) + '"' + (isSel ? ' checked' : '') + '></td>' +
           '<td><b style="color:#0f172a;">' + htmlEsc(r.nombreActivo) + '</b></td>' +
@@ -3011,14 +3026,14 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
     });
   }
 
-  // BOTÓN DE GUARDAR MASIVO HABILITADO
+  // GUARDAR SELECCIONADOS
   $('cgps-btn-apply-mass-unified').addEventListener('click', applyMassUpdateUnified);
 
   // RECARGA Y SINCRONIZACIÓN
   $('testn-btn-refresh-hub').addEventListener('click', function() { load(); });
   $('testn-btn-refresh-mod').addEventListener('click', function() { load(); });
 
-  // EVENTOS AUDITORÍA DE GRUPOS — CREACIÓN
+  // EVENTOS AUDITORÍA DE GRUPOS
   $('audit-btn-create-client').addEventListener('click', createNewClientGroup);
   $('audit-btn-create-general').addEventListener('click', createGeneralGroup);
   $('audit-gen-parent-search').addEventListener('keyup', populateGeneralParentGroupsDropdown);
@@ -3064,7 +3079,7 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
     setMsg('Filtros de fecha restablecidos.');
   });
 
-  // FILTRADO MASIVO DE ACTIVOS
+  // FILTRADO MASIVO
   $('cgps-btn-bulk').addEventListener('click', function() { applyBulkFilter($('cgps-bulk-input').value); });
   $('cgps-btn-bulk-clear').addEventListener('click', function() { $('cgps-bulk-input').value = ''; applyBulkFilter(''); });
   
@@ -3111,7 +3126,15 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
   $('btn-apply-prefix-preset').addEventListener('click', applyNamePrefixPreset);
   $('btn-submit-create-report').addEventListener('click', createAndSubmitReport);
 
-  // EVENTOS MODAL VISUAL Y COPIA
+  // BOTÓN Y MODAL DE VALIDAR / MODIFICAR DIAGNÓSTICOS (AL COSTADO DEL ENCABEZADO)
+  $('reports-btn-open-edit-diags-modal').addEventListener('click', openEditDiagnosticsModal);
+  $('btn-close-edit-diags-modal').addEventListener('click', function() {
+    $('edit-diagnostics-modal').style.display = 'none';
+  });
+  $('edit-diag-select-report').addEventListener('change', handleEditDiagSelectReport);
+  $('btn-save-diagnostics').addEventListener('click', saveDiagnosticsToReport);
+
+  // EVENTOS MODAL VISUALIZACIÓN Y COPIA
   $('btn-close-prev-modal').addEventListener('click', function() {
     $('report-preview-modal').style.display = 'none';
   });
