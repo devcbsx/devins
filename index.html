@@ -2,210 +2,194 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<!-- Evitar caché -->
+<!-- Etiquetas META para evitar el almacenamiento en caché -->
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
 
-<title>Control Z — Fleet & Tech Intelligence</title>
-
-<!-- Tipografía Profesional Google Fonts -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-
-<!-- Librería SheetJS -->
+<title>Control Z</title>
+<!-- Librería SheetJS para exportación a Excel .xlsx -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
 
 <!-- MODAL DE LOGIN PERMANENTE -->
-<div id="testn-login-overlay" style="position: fixed; top:0; left:0; width:100vw; height:100vh; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); z-index: 99999; display: flex; justify-content: center; align-items: center;">
-  <div style="background: #ffffff; padding: 40px 32px; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1); width: 100%; max-width: 380px; text-align: center; border: 1px solid #e2e8f0;">
-    <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #0ea5e9, #6366f1); border-radius: 12px; margin: 0 auto 16px auto; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 20px;">Z</div>
-    <div style="font-size: 11px; font-weight: 800; color: #0284c7; letter-spacing: 1.5px; margin-bottom: 6px; text-transform: uppercase;">Control Z Engine</div>
-    <h2 style="margin: 0 0 8px 0; font-size: 20px; color: #0f172a; font-weight: 700; letter-spacing: -0.5px;">Acceso al Módulo</h2>
-    <p style="font-size: 13px; color: #64748b; margin-bottom: 24px;">Ingrese su credencial de seguridad para continuar:</p>
-    <input type="password" id="testn-pass-input" placeholder="••••••••" style="width: 100%; padding: 12px 16px; border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 14px; text-align: center; margin-bottom: 12px; outline: none; transition: border 0.2s, box-shadow 0.2s;">
-    <div id="testn-login-err" style="color: #ef4444; font-size: 12px; font-weight: 600; min-height: 20px; margin-bottom: 12px;"></div>
-    <button id="testn-btn-login" type="button" class="cgps-btn cgps-btn-primary" style="width: 100%; padding: 12px; font-size: 14px; font-weight: 700; border-radius: 8px;">Iniciar Sesión</button>
+<div id="testn-login-overlay" style="position: fixed; top:0; left:0; width:100vw; height:100vh; background-color: rgba(15, 23, 42, 0.85); z-index: 99999; display: flex; justify-content: center; align-items: center;">
+  <div style="background: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); width: 100%; max-width: 360px; text-align: center;">
+    <div style="font-size: 11px; font-weight: 700; color: #1b4e85; letter-spacing: 0.5px; margin-bottom: 4px;">SISTEMA CONTROL Z</div>
+    <h2 style="margin: 0 0 15px 0; font-size: 18px; color: #1e293b;">Acceso al Módulo</h2>
+    <p style="font-size: 12px; color: #64748b; margin-bottom: 20px;">Ingrese la clave de seguridad para continuar:</p>
+    <input type="password" id="testn-pass-input" placeholder="Contraseña" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; text-align: center; margin-bottom: 12px; outline: none;">
+    <div id="testn-login-err" style="color: #dc2626; font-size: 12px; font-weight: 600; min-height: 18px; margin-bottom: 10px;"></div>
+    <button id="testn-btn-login" type="button" style="width: 100%; padding: 10px; background-color: #1b4e85; color: #fff; border: none; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer;">Ingresar</button>
   </div>
 </div>
 
 <!-- MODAL VISTA PREVIA / DETALLE DEL REPORTE -->
-<div id="report-preview-modal" style="position: fixed; top:0; left:0; width:100vw; height:100vh; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(6px); z-index: 9999; display: none; justify-content: center; align-items: center; padding: 20px;">
-  <div style="background: #ffffff; padding: 32px; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); width: 100%; max-width: 760px; max-height: 90vh; overflow-y: auto; border: 1px solid #e2e8f0;">
-    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px; margin-bottom: 20px;">
+<div id="report-preview-modal" style="position: fixed; top:0; left:0; width:100vw; height:100vh; background-color: rgba(15, 23, 42, 0.75); z-index: 9999; display: none; justify-content: center; align-items: center; padding: 20px;">
+  <div style="background: #ffffff; padding: 24px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); width: 100%; max-width: 750px; max-height: 90vh; overflow-y: auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 16px;">
       <div>
-        <h2 id="modal-prev-title" style="margin:0; font-size: 18px; color: #0f172a; font-weight: 700;">CONFIGURACIÓN DEL REPORTE</h2>
-        <span id="modal-prev-id" style="font-size: 12px; color: #64748b; font-weight: 600; font-family: 'JetBrains Mono', monospace;"></span>
+        <h2 id="modal-prev-title" style="margin:0; font-size: 17px; color: #1b4e85;">CONFIGURACIÓN DEL REPORTE</h2>
+        <span id="modal-prev-id" style="font-size: 11px; color: #64748b; font-weight: 600;"></span>
       </div>
-      <button id="btn-close-prev-modal" type="button" class="cgps-btn cgps-btn-outline" style="font-size: 12px; padding: 6px 14px;">✕ Cerrar</button>
+      <button id="btn-close-prev-modal" type="button" class="cgps-btn cgps-btn-outline" style="font-size: 13px; padding: 4px 10px;">✕ Cerrar</button>
     </div>
 
-    <div style="display: flex; gap: 20px; border-bottom: 1px solid #e2e8f0; margin-bottom: 20px; font-size: 13px; font-weight: 700; color: #0284c7;">
-      <span style="border-bottom: 2px solid #0284c7; padding-bottom: 8px; cursor: pointer;">Vista de reporte</span>
-      <span style="color: #94a3b8; padding-bottom: 8px;">Programación de envío</span>
+    <div style="display: flex; gap: 15px; border-bottom: 1px solid #cbd5e1; margin-bottom: 15px; font-size: 12px; font-weight: 700; color: #1b4e85;">
+      <span style="border-bottom: 2px solid #1b4e85; padding-bottom: 6px; cursor: pointer;">Vista de reporte</span>
+      <span style="color: #94a3b8; padding-bottom: 6px;">Programación de envío</span>
     </div>
 
-    <div style="display: flex; flex-direction: column; gap: 16px; font-size: 13px; color: #334155;">
+    <div style="display: flex; flex-direction: column; gap: 12px; font-size: 12px; color: #334155;">
       <div>
-        <b style="color: #0f172a; font-weight: 600; display: block; margin-bottom: 6px;">Quién puede ver este reporte (Grupos):</b>
-        <div id="modal-prev-groups" style="display: flex; flex-wrap: wrap; gap: 6px;"></div>
+        <b style="color: #1b4e85;">Quién puede ver este reporte (Grupos):</b>
+        <div id="modal-prev-groups" style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px;"></div>
       </div>
 
       <div id="box-prev-audit">
-        <b style="color: #0f172a; font-weight: 600;">Última modificación:</b>
-        <span id="modal-prev-audit" style="margin-left: 6px; color: #64748b;"></span>
+        <b style="color: #1b4e85;">Última modificación:</b>
+        <span id="modal-prev-audit" style="margin-left: 6px;"></span>
       </div>
 
       <div id="box-prev-rules">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-          <b style="color: #0f172a; font-weight: 600;">Normas del evento:</b>
-          <button id="btn-copy-rules" type="button" class="cgps-btn cgps-btn-secondary" style="font-size: 11px; padding: 4px 10px;">📋 Copiar Normas</button>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <b style="color: #1b4e85;">Normas del evento:</b>
+          <button id="btn-copy-rules" type="button" class="cgps-btn cgps-btn-secondary" style="font-size: 10px; padding: 2px 8px;">📋 Copiar Normas</button>
         </div>
-        <div id="modal-prev-rules" style="display: flex; flex-wrap: wrap; gap: 6px; max-height: 150px; overflow: auto; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;"></div>
+        <div id="modal-prev-rules" style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; max-height: 150px; overflow: auto;"></div>
       </div>
 
       <div id="box-prev-diags">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-          <b style="color: #0f172a; font-weight: 600;">Diagnósticos:</b>
-          <button id="btn-copy-diags" type="button" class="cgps-btn cgps-btn-secondary" style="font-size: 11px; padding: 4px 10px;">📋 Copiar Diagnósticos</button>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <b style="color: #1b4e85;">Diagnósticos:</b>
+          <button id="btn-copy-diags" type="button" class="cgps-btn cgps-btn-secondary" style="font-size: 10px; padding: 2px 8px;">📋 Copiar Diagnósticos</button>
         </div>
-        <div id="modal-prev-diags" style="display: flex; flex-wrap: wrap; gap: 6px; max-height: 150px; overflow: auto; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;"></div>
+        <div id="modal-prev-diags" style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; max-height: 150px; overflow: auto;"></div>
       </div>
 
       <div id="box-prev-template">
-        <b style="color: #0f172a; font-weight: 600;">Plantilla Asociada:</b>
-        <div id="modal-prev-template-id" style="background: #f1f5f9; padding: 10px 14px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #0f172a; margin-top: 6px; border: 1px solid #cbd5e1;"></div>
+        <b style="color: #1b4e85;">Plantilla Asociada:</b>
+        <div id="modal-prev-template-id" style="background: #f8fafc; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; margin-top: 4px; font-family: monospace;"></div>
       </div>
     </div>
 
-    <div style="text-align: right; margin-top: 24px; border-top: 1px solid #e2e8f0; padding-top: 16px; display: flex; justify-content: flex-end; gap: 10px;">
-      <a id="modal-btn-open-geotab" href="#" target="_blank" rel="noopener" class="cgps-btn cgps-btn-primary" style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">🔗 Abrir y modificar reporte en MyGeotab</a>
+    <div style="text-align: right; margin-top: 20px; border-top: 1px solid #e2e8f0; padding-top: 12px; display: flex; justify-content: flex-end; gap: 10px;">
+      <a id="modal-btn-open-geotab" href="#" target="_blank" rel="noopener" class="cgps-btn cgps-btn-secondary" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">🔗 Abrir y modificar reporte en MyGeotab</a>
     </div>
   </div>
 </div>
 
 <!-- MODAL PARA CLONAR Y CREAR REPORTE DESDE OTRO CLIENTE -->
-<div id="create-report-modal" style="position: fixed; top:0; left:0; width:100vw; height:100vh; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(6px); z-index: 9999; display: none; justify-content: center; align-items: center; padding: 20px;">
-  <div style="background: #ffffff; padding: 32px; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); width: 100%; max-width: 680px; max-height: 90vh; overflow-y: auto; border: 1px solid #e2e8f0;">
-    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px; margin-bottom: 20px;">
-      <h2 style="margin:0; font-size: 18px; color: #0f172a; font-weight: 700; display: flex; align-items: center; gap: 8px;">📋 CLONAR Y CREAR REPORTE</h2>
-      <button id="btn-close-create-modal" type="button" class="cgps-btn cgps-btn-outline" style="font-size: 12px; padding: 6px 14px;">✕ Cancelar</button>
+<div id="create-report-modal" style="position: fixed; top:0; left:0; width:100vw; height:100vh; background-color: rgba(15, 23, 42, 0.75); z-index: 9999; display: none; justify-content: center; align-items: center; padding: 20px;">
+  <div style="background: #ffffff; padding: 24px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); width: 100%; max-width: 680px; max-height: 90vh; overflow-y: auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 16px;">
+      <h2 style="margin:0; font-size: 17px; color: #1b4e85;">📋 CLONAR Y CREAR REPORTE DESDE OTRO CLIENTE</h2>
+      <button id="btn-close-create-modal" type="button" class="cgps-btn cgps-btn-outline" style="font-size: 13px; padding: 4px 10px;">✕ Cancelar</button>
     </div>
 
-    <div style="display: flex; flex-direction: column; gap: 16px; font-size: 13px;">
+    <div style="display: flex; flex-direction: column; gap: 14px; font-size: 12px;">
+      
+      <!-- PASO 1: SELECCIÓN DE CATEGORÍA BASE ORIGEN -->
       <div>
-        <label style="font-weight: 600; color: #0f172a; display: block; margin-bottom: 6px;">1. Filtrar Razón Social Origen (Cliente / Tipo Motor):</label>
-        <div style="display: flex; gap: 8px;">
-          <input type="text" id="create-rep-source-search" class="cgps-input" placeholder="🔍 Filtrar cliente..." style="width: 240px; height: 38px;">
-          <select id="create-rep-source-group" class="cgps-input" style="flex: 1; height: 38px; font-weight: 600;">
+        <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">1. Categoría Base Origen:</label>
+        <select id="create-rep-parent-cat" class="cgps-input" style="width: 100%; height: 36px; font-weight: 700; color: #1b4e85;">
+          <option value="b278A">CLIENTES (b278A)</option>
+          <option value="b27A7">TIPO DE MOTOR (b27A7)</option>
+        </select>
+      </div>
+
+      <!-- PASO 2: FILTRO PALABRA CLAVE Y SELECCIÓN DE RAZÓN SOCIAL ORIGEN -->
+      <div>
+        <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">2. Filtrar Razón Social Origen (Cliente):</label>
+        <div style="display: flex; gap: 6px;">
+          <input type="text" id="create-rep-source-search" class="cgps-input" placeholder="🔍 Escriba palabra clave para buscar..." style="width: 240px; height: 36px;">
+          <select id="create-rep-source-group" class="cgps-input" style="flex: 1; height: 36px; font-weight: 600;">
             <option value="">-- Seleccione Cliente Origen --</option>
           </select>
         </div>
       </div>
 
+      <!-- PASO 3: SELECCIÓN DEL REPORTE BASE POR NOMBRE -->
       <div>
-        <label style="font-weight: 600; color: #0f172a; display: block; margin-bottom: 6px;">2. Seleccionar Reporte Base a Clonar:</label>
-        <select id="create-rep-source-schedule" class="cgps-input" style="width: 100%; height: 38px; font-weight: 600;" disabled>
+        <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">3. Seleccionar Reporte Base a Clonar:</label>
+        <select id="create-rep-source-schedule" class="cgps-input" style="width: 100%; height: 36px; font-weight: 600;" disabled>
           <option value="">-- Primero seleccione la razón social origen --</option>
         </select>
       </div>
 
+      <!-- PASO 4: NOMBRE Y FORMATO DEL NUEVO REPORTE -->
       <div>
-        <label style="font-weight: 600; color: #0f172a; display: block; margin-bottom: 6px;">3. Nombre del Nuevo Reporte (Formato + Razón Social):</label>
-        <div style="display: flex; gap: 8px; margin-bottom: 8px;">
-          <select id="create-rep-name-prefix-preset" class="cgps-input" style="flex: 1; height: 38px; font-weight: 600; color: #0f172a;">
+        <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">4. Nombre del Nuevo Reporte (Formato + Razón Social):</label>
+        <div style="display: flex; gap: 8px; margin-bottom: 6px;">
+          <select id="create-rep-name-prefix-preset" class="cgps-input" style="width: 340px; height: 36px; font-weight: 700; color: #1b4e85;">
             <option value="Monitoreo de flota y rendimiento de combustible - ">Monitoreo de flota y rendimiento de combustible - </option>
             <option value="Eventos de seguridad - ">Eventos de seguridad - </option>
             <option value="Rangos Operacionales - ">Rangos Operacionales - </option>
           </select>
-          <button id="btn-apply-prefix-preset" type="button" class="cgps-btn cgps-btn-secondary" style="height: 38px;">Aplicar Formato</button>
+          <button id="btn-apply-prefix-preset" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px;">Aplicar Formato</button>
         </div>
-        <input type="text" id="create-rep-name" class="cgps-input" placeholder="Nombre autogenerado o editable" style="width: 100%; height: 38px; font-weight: 600;">
+        <input type="text" id="create-rep-name" class="cgps-input" placeholder="Nombre autogenerado o editable" style="width: 100%; height: 36px; font-weight: 600;">
       </div>
 
+      <!-- PASO 5: ASIGNACIÓN MÚLTIPLE DE GRUPOS DESTINO -->
       <div>
-        <label style="font-weight: 600; color: #0f172a; display: block; margin-bottom: 6px;">4. Asignar Grupos Destino (Múltiple Selección):</label>
-        <input type="text" id="create-rep-dest-search" class="cgps-input" placeholder="🔍 Filtrar cliente..." style="width: 100%; height: 36px; margin-bottom: 8px;">
-        <div id="create-rep-dest-groups-list" style="max-height: 140px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; background: #f8fafc; display: flex; flex-direction: column; gap: 8px;">
-          <span style="color: #64748b; font-size: 12px;">Cargando lista de grupos destino...</span>
+        <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">5. Asignar Grupos Destino (Múltiple Selección en Clientes / Tipo Motor):</label>
+        <input type="text" id="create-rep-dest-search" class="cgps-input" placeholder="🔍 Filtrar grupos destino..." style="width: 100%; height: 34px; margin-bottom: 6px;">
+        <div id="create-rep-dest-groups-list" style="max-height: 140px; overflow-y: auto; border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px; background: #f8fafc; display: flex; flex-direction: column; gap: 6px;">
+          <span style="color: #64748b; font-size: 11px;">Cargando lista de grupos destino...</span>
         </div>
       </div>
 
+      <!-- PASO 6: DIAGNÓSTICOS COPIADOS DEL ORIGEN -->
       <div>
-        <label style="font-weight: 600; color: #0f172a; display: block; margin-bottom: 6px;">5. Diagnósticos Copiados / Editables (Separados por comas o líneas):</label>
-        <textarea id="create-rep-diagnostics" class="cgps-textarea" rows="4" placeholder="Cargando diagnósticos del reporte origen..." style="width: 100%; font-family: 'JetBrains Mono', monospace; font-size: 12px;"></textarea>
+        <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">6. Diagnósticos Copiados / Editables (Separados por comas o líneas):</label>
+        <textarea id="create-rep-diagnostics" class="cgps-textarea" rows="4" placeholder="Cargando diagnósticos del reporte origen..." style="width: 100%;"></textarea>
       </div>
 
-      <div id="create-rep-status" style="font-size: 12px; font-weight: 700; min-height: 20px;"></div>
+      <div id="create-rep-status" style="font-size: 12px; font-weight: 700; min-height: 18px;"></div>
     </div>
 
-    <div style="text-align: right; margin-top: 24px; border-top: 1px solid #e2e8f0; padding-top: 16px; display: flex; justify-content: flex-end; gap: 10px;">
-      <button id="btn-submit-create-report" type="button" class="cgps-btn cgps-btn-primary" style="font-size: 13px; font-weight: 700; padding: 10px 20px;">💾 Copiar y Crear Reporte</button>
+    <div style="text-align: right; margin-top: 20px; border-top: 1px solid #e2e8f0; padding-top: 12px; display: flex; justify-content: flex-end; gap: 10px;">
+      <button id="btn-submit-create-report" type="button" class="cgps-btn" style="background-color: #1b4e85; color: #fff; font-size: 13px; font-weight: 700; padding: 8px 16px;">💾 Copiar y Crear Reporte</button>
     </div>
   </div>
 </div>
 
 <div class="cgps-wrapper" id="cgps-root" style="display: none;">
 
-  <!-- VISTA 1: MENU DE TARJETAS / DASHBOARD TECH -->
+  <!-- VISTA 1: MENU DE TARJETAS / DASHBOARD -->
   <div id="testn-hub-view">
-    <div class="cgps-hero" style="margin-bottom: 24px;">
-      <div style="display: flex; align-items: center; gap: 14px;">
-        <div style="width: 40px; height: 40px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 18px; color: #38bdf8;">Z</div>
-        <div>
-          <h1 style="margin: 0; font-size: 20px; font-weight: 700; letter-spacing: -0.5px;">CONTROL Z — TECH FLEET HUB</h1>
-          <p style="margin: 2px 0 0 0; font-size: 12px; color: #94a3b8; font-weight: 500;">Plataforma de gestión de parámetros, certificados y activaciones GPS</p>
-        </div>
+    <div class="cgps-hero" style="margin-bottom: 20px;">
+      <div>
+        <h1>CONTROL Z - DASHBOARD GPS</h1>
       </div>
-      <button id="testn-btn-refresh-hub" type="button" class="cgps-btn cgps-btn-white" style="font-weight:700;">🔄 Sincronizar Geotab</button>
+      <button id="testn-btn-refresh-hub" type="button" class="cgps-btn cgps-btn-white" style="font-weight:700;">🔄 Recargar Datos Geotab</button>
     </div>
 
-    <div class="testn-grid">
+    <div class="testn-grid" style="grid-template-columns: repeat(3, 1fr);">
       <div class="testn-card" id="btn-mod-certi">
-        <div class="testn-card-icon">📜</div>
         <h2>CERTI GPS</h2>
-        <p>Generación automatizada de cartas y solicitudes legales</p>
       </div>
 
       <div class="testn-card" id="btn-mod-valid">
-        <div class="testn-card-icon">⚡</div>
         <h2>VALIDACIÓN DE VARIABLES</h2>
-        <p>Auditoría e inyección de los 5 parámetros obligatorios</p>
       </div>
 
       <div class="testn-card" id="btn-mod-master">
-        <div class="testn-card-icon">🎛️</div>
         <h2>MASTER SWITCH</h2>
-        <p>Control de fechas de instalación y exportación a Excel</p>
       </div>
 
       <div class="testn-card" id="btn-mod-audit">
-        <div class="testn-card-icon">🔍</div>
         <h2>AUDITORÍA DE GRUPOS</h2>
-        <p>Validación de árbol de grupos vs razones sociales</p>
       </div>
 
       <div class="testn-card" id="btn-mod-reports">
-        <div class="testn-card-icon">📊</div>
         <h2>REPORTES POR CLIENTE</h2>
-        <p>Gestión y clonación masiva de programaciones</p>
       </div>
 
       <div class="testn-card" id="btn-mod-activations">
-        <div class="testn-card-icon">🚀</div>
         <h2>ACTIVACIONES DE UNIDADES</h2>
-        <p>Procesamiento inteligente de formato de respuesta</p>
-      </div>
-
-      <!-- MÓDULO: FLASH REPORT (MCP) -->
-      <div class="testn-card" id="btn-mod-flash" style="border-color: #38bdf8 !important;">
-        <div class="testn-card-icon">💥</div>
-        <h2>FLASH REPORT (MCP)</h2>
-        <p>Generador de Prompts para Investigación de Siniestros e IA MCP</p>
       </div>
     </div>
   </div>
@@ -213,21 +197,23 @@
   <!-- VISTA 2: CONTENEDOR DE MODULOS OPERATIVOS -->
   <div id="testn-module-view" style="display: none;">
     
-    <div class="cgps-hero" style="margin-bottom: 16px;">
-      <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
-        <button id="testn-btn-back" type="button" class="cgps-btn cgps-btn-secondary" style="font-size: 13px;">← Volver al Hub</button>
-        <h1 id="testn-mod-title" style="font-size: 18px; margin: 0; text-transform: uppercase; letter-spacing: -0.3px;">MÓDULO</h1>
-        <button id="testn-btn-refresh-mod" type="button" class="cgps-btn cgps-btn-white" style="font-weight: 700; font-size: 12px;">🔄 Sincronizar</button>
+    <!-- ENCABEZADO UNIFICADO DENTRO DE LA BARRA AZUL (HERO BAR) -->
+    <div class="cgps-hero" style="margin-bottom: 10px;">
+      <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+        <button id="testn-btn-back" type="button" class="cgps-btn cgps-btn-secondary" style="font-size: 13px;">← Volver</button>
+        <h1 id="testn-mod-title" style="font-size: 18px; margin: 0; text-transform: uppercase;">MÓDULO</h1>
+        <button id="testn-btn-refresh-mod" type="button" class="cgps-btn cgps-btn-white" style="font-weight: 700; font-size: 12px;">🔄 Sincronizar Datos</button>
       </div>
 
+      <!-- BOTONES DE ACCIÓN ESPECÍFICOS SEGÚN MÓDULO -->
       <div id="hdr-actions-certi" style="display: none; gap: 8px;">
-        <button id="cgps-btn-doc" type="button" class="cgps-btn cgps-btn-white">📄 Generar Word (ANEXO N°01)</button>
+        <button id="cgps-btn-doc" type="button" class="cgps-btn cgps-btn-white">Generar Word</button>
         <button id="cgps-btn-mail" type="button" class="cgps-btn cgps-btn-secondary">Generar Texto Legal</button>
-        <button id="cgps-btn-view" type="button" class="cgps-btn cgps-btn-outline" style="color:#fff; border-color:rgba(255,255,255,0.3);">Visualizar Tabla</button>
+        <button id="cgps-btn-view" type="button" class="cgps-btn cgps-btn-outline" style="color:#fff; border-color:#fff;">Visualizar Tabla</button>
       </div>
 
       <div id="hdr-actions-master" style="display: none; gap: 8px;">
-        <button id="master-btn-excel" type="button" class="cgps-btn cgps-btn-white" style="font-weight:700;">📊 Exportar XLSX</button>
+        <button id="master-btn-excel" type="button" class="cgps-btn cgps-btn-white" style="font-weight:700;">📊 Descargar Excel .xlsx</button>
       </div>
 
       <div id="hdr-actions-reports" style="display: none; gap: 8px;">
@@ -235,81 +221,42 @@
       </div>
     </div>
 
-    <!-- Módulo Master Switch -->
+    <!-- Módulo Master Switch (Controles de Fecha) -->
     <div id="sec-master" style="display: none;">
-      <div class="cgps-card" style="margin-top: 12px; background: #ffffff;">
-        <div style="font-size: 11px; font-weight: 800; color: #0284c7; margin-bottom: 10px; text-transform: uppercase; letter-spacing:1px;">FILTRAR POR FECHA DE INSTALACIÓN</div>
+      <div class="cgps-card" style="margin-top: 10px; background-color: #ffffff !important; border: 1px solid #94a3b8 !important;">
+        <div style="font-size: 11px; font-weight: 700; color: #1b4e85; margin-bottom: 8px; text-transform: uppercase; letter-spacing:0.5px;">FILTRAR POR FECHA DE INSTALACIÓN:</div>
         <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-          <button id="master-btn-week" type="button" class="cgps-btn cgps-btn-secondary" style="height: 38px;">📅 Esta Semana al Corte</button>
-          <div style="height: 24px; width: 1px; background-color: #e2e8f0;"></div>
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 12px; font-weight: 600; color: #64748b;">Desde:</span>
-            <input type="date" id="master-date-from" class="cgps-input" style="height: 38px;">
+          <button id="master-btn-week" type="button" class="cgps-btn cgps-btn-secondary" style="height: 34px;">📅 Esta Semana al Corte</button>
+          <div style="height: 24px; width: 1px; background-color: #cbd5e1;"></div>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="font-size: 12px; font-weight: 600; color: #475569;">Desde:</span>
+            <input type="date" id="master-date-from" class="cgps-input" style="padding: 4px 8px; height: 34px; border: 1px solid #cbd5e1; border-radius: 4px;">
           </div>
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 12px; font-weight: 600; color: #64748b;">Hasta:</span>
-            <input type="date" id="master-date-to" class="cgps-input" style="height: 38px;">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="font-size: 12px; font-weight: 600; color: #475569;">Hasta:</span>
+            <input type="date" id="master-date-to" class="cgps-input" style="padding: 4px 8px; height: 34px; border: 1px solid #cbd5e1; border-radius: 4px;">
           </div>
-          <button id="master-btn-custom-range" type="button" class="cgps-btn cgps-btn-secondary" style="height: 38px;">Aplicar Rango</button>
-          <button id="master-btn-reset-dates" type="button" class="cgps-btn cgps-btn-outline" style="height: 38px;">Mostrar Todos</button>
+          <button id="master-btn-custom-range" type="button" class="cgps-btn cgps-btn-secondary" style="height: 34px;">Aplicar Rango</button>
+          <button id="master-btn-reset-dates" type="button" class="cgps-btn cgps-btn-outline" style="height: 34px;">Mostrar Todos</button>
         </div>
       </div>
     </div>
 
     <!-- Módulo Auditoría de Grupos -->
     <div id="sec-audit" style="display: none;">
-      <!-- APARTADO DE CREACIÓN DE GRUPOS -->
-      <div class="cgps-card" style="margin-top: 12px; background: #ffffff; border: 1px solid #bae6fd;">
-        <div style="font-size: 12px; font-weight: 800; color: #0369a1; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">
-          <span>📁</span> CREAR NUEVO GRUPO EN EL ÁRBOLES DE GEOTAB
-        </div>
-        
-        <div style="display: flex; gap: 16px; flex-wrap: wrap;">
-          <!-- Tipo 1: Cliente Nuevo -->
-          <div style="flex: 1; min-width: 320px; background: #f0f9ff; padding: 14px; border-radius: 8px; border: 1px solid #e0f2fe;">
-            <div style="font-size: 11px; font-weight: 700; color: #0284c7; margin-bottom: 6px; text-transform: uppercase;">1. Opción: Cliente Nuevo</div>
-            <p style="font-size: 11px; color: #64748b; margin: 0 0 10px 0;">Crea automáticamente el cliente en <b>CLIENTES (b278A)</b> y en <b>DIVEMOTOR (b27A8)</b> con el formato <code>MODELO_CLIENTE</code>.</p>
-            
-            <div style="display: flex; flex-direction: column; gap: 8px;">
-              <input type="text" id="audit-new-client-name" class="cgps-input" placeholder="Nombre de la Razón Social..." style="width: 100%; height: 38px;">
-              <input type="text" id="audit-new-client-vehicle-type" class="cgps-input" placeholder="Tipo de vehículo (ej: AROCS 551)..." style="width: 100%; height: 38px;">
-              <button id="audit-btn-create-client" type="button" class="cgps-btn cgps-btn-primary" style="height: 38px; font-weight: 700; width: 100%; margin-top: 2px;">➕ Crear Cliente Nuevo</button>
-            </div>
-          </div>
-
-          <!-- Tipo 2: En General -->
-          <div style="flex: 1; min-width: 320px; background: #f8fafc; padding: 14px; border-radius: 8px; border: 1px solid #e2e8f0;">
-            <div style="font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 6px; text-transform: uppercase;">2. Opción: En General</div>
-            <p style="font-size: 11px; color: #64748b; margin: 0 0 10px 0;">Permite elegir cualquier grupo padre existente en el árbol de Geotab.</p>
-            
-            <div style="display: flex; flex-direction: column; gap: 8px;">
-              <div style="display: flex; gap: 8px;">
-                <input type="text" id="audit-gen-parent-search" class="cgps-input" placeholder="🔍 Filtrar grupo padre..." style="width: 140px; height: 38px;">
-                <select id="audit-gen-parent-select" class="cgps-input" style="flex: 1; height: 38px; font-size: 11px; font-weight: 600;">
-                  <option value="">-- Seleccione Grupo Padre --</option>
-                </select>
-              </div>
-              <input type="text" id="audit-gen-group-name" class="cgps-input" placeholder="Nombre del nuevo grupo..." style="width: 100%; height: 38px;">
-              <button id="audit-btn-create-general" type="button" class="cgps-btn cgps-btn-secondary" style="height: 38px; font-weight: 700; width: 100%; margin-top: 2px;">📁 Crear Grupo General</button>
-            </div>
-          </div>
-        </div>
-        <div id="audit-create-status" style="font-size: 12px; font-weight: 700; margin-top: 12px; min-height: 18px;"></div>
-      </div>
-
-      <div class="cgps-card" style="margin-top: 16px;">
-        <div style="font-size: 12px; font-weight: 700; margin-bottom: 8px; color: #0f172a;">PEGADO DE LISTA PARA AUDITORÍA DE GRUPOS</div>
-        <div style="display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap;">
-          <textarea id="cgps-audit-input" class="cgps-textarea" placeholder="Pegue aquí las observaciones o clientes en bloque..." rows="6" style="flex: 1; min-width: 300px; font-family: 'JetBrains Mono', monospace; font-size: 12px;"></textarea>
+      <div class="cgps-card" style="margin-top: 10px;">
+        <div style="font-size: 12px; font-weight: 700; margin-bottom: 6px; color: #1b4e85;">PEGADO DE LISTA PARA AUDITORÍA DE GRUPOS</div>
+        <div style="display: flex; gap: 10px; align-items: flex-start; flex-wrap: wrap;">
+          <textarea id="cgps-audit-input" class="cgps-textarea" placeholder="Pegue aquí las observaciones o clientes en bloque..." rows="6" style="flex: 1; min-width: 300px;"></textarea>
           <div style="display: flex; flex-direction: column; gap: 8px;">
-            <button id="cgps-btn-exec-audit" type="button" class="cgps-btn cgps-btn-primary" style="height: 40px; font-size: 13px;">🔍 Auditar Grupos</button>
+            <button id="cgps-btn-exec-audit" type="button" class="cgps-btn cgps-btn-secondary" style="height: 38px;">🔍 Auditar Grupos</button>
             <button id="cgps-btn-clear-audit" type="button" class="cgps-btn cgps-btn-outline">Limpiar Texto</button>
           </div>
         </div>
       </div>
 
-      <div id="cgps-audit-results-card" class="cgps-card" style="margin-top: 16px; display: none;">
-        <div style="font-size: 13px; font-weight: 700; color: #0f172a; margin-bottom: 12px;">RESULTADOS DE LA AUDITORÍA DE GRUPOS</div>
+      <div id="cgps-audit-results-card" class="cgps-card" style="margin-top: 10px; display: none;">
+        <div style="font-size: 13px; font-weight: 700; color: #1b4e85; margin-bottom: 10px;">RESULTADOS DE LA AUDITORÍA DE GRUPOS</div>
         <div class="cgps-table-scroll" style="max-height: 400px;">
           <table class="cgps-table">
             <thead>
@@ -328,86 +275,105 @@
 
     <!-- Módulo Reportes por Cliente -->
     <div id="sec-reports" style="display: none;">
-      <div class="cgps-card" style="margin-top: 12px;">
+      <div class="cgps-card" style="margin-top: 10px;">
         <div style="display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap;">
-          <div style="display: flex; flex-direction: column; gap: 6px; flex: 1;">
-            <label style="font-size: 13px; font-weight: 700; color: #0f172a;">Búsqueda de clientes o tipo de vehículo</label>
-            <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
-              <input type="text" id="reports-search-input" class="cgps-input" placeholder="🔍 Filtrar cliente..." style="width: 240px; height: 38px;">
-              <button id="reports-btn-select-all-subgroups" type="button" class="cgps-btn cgps-btn-outline" style="height: 38px; font-size: 12px;">Marcar Todos</button>
-              <button id="reports-btn-deselect-all-subgroups" type="button" class="cgps-btn cgps-btn-outline" style="height: 38px; font-size: 12px;">Desmarcar</button>
-              
-              <button id="reports-btn-search" type="button" class="cgps-btn cgps-btn-primary" style="height: 38px; padding: 0 20px; margin-left: auto;">Buscar reportes</button>
-            </div>
-
-            <div id="reports-subgroups-checklist" style="max-height: 140px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; background: #f8fafc; display: flex; flex-direction: column; gap: 6px;">
-              <span style="color: #64748b; font-size: 12px; font-style: italic;">Cargando lista de clientes y tipos de motor...</span>
-            </div>
-
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px;">
-              <span id="reports-selected-groups-count" style="font-size: 12px; font-weight: 700; color: #0284c7;">0 subgrupos seleccionados</span>
-              <span id="reports-unit-count" style="font-size: 12px; font-weight: 700; color: #10b981;">0 activo(s) en grupo(s)</span>
+          
+          <!-- SECCIÓN 1: SELECCIÓN DE GRUPO PRINCIPAL + BOTÓN "BUSCAR GRUPOS" -->
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <label style="font-size: 13px; font-weight: 700; color: #1e293b;">1 Selección de grupo principal</label>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <select id="reports-parent-filter" class="cgps-input" style="width: 220px; height: 36px; font-weight: 700; color: #1b4e85;">
+                <option value="b278A">CLIENTES (b278A)</option>
+                <option value="b27A7">TIPO DE MOTOR (b27A7)</option>
+              </select>
+              <button id="reports-btn-fetch-groups" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px; padding: 0 16px; font-weight: 700; background-color: #3b6591; color: #fff;">Buscar grupos</button>
             </div>
           </div>
+
+          <!-- LÍNEA DIVISORA VERTICAL -->
+          <div style="width: 2px; height: 50px; background-color: #000000; margin: 0 4px; align-self: center;"></div>
+
+          <!-- SECCIÓN 2: BÚSQUEDA DE CLIENTES O TIPO DE VEHÍCULO -->
+          <div style="display: flex; flex-direction: column; gap: 4px; flex: 1;">
+            <label style="font-size: 13px; font-weight: 700; color: #1e293b;">2 Búsqueda de clientes o tipo de vehiculo</label>
+            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+              
+              <!-- 1. SELECTOR DE SUBGRUPOS DETECTADOS -->
+              <select id="reports-group-select" class="cgps-input" style="width: 260px; height: 36px; font-weight: 700; color: #1b4e85;" disabled>
+                <option value="">-- Clic en "Buscar grupos" primero --</option>
+              </select>
+
+              <!-- 2. INPUT DE TEXTO DE BÚSQUEDA / FILTRO -->
+              <input type="text" id="reports-search-input" class="cgps-input" placeholder="waraya..." style="width: 180px; height: 36px; font-size: 13px; background-color: #f1f5f9;" disabled>
+
+              <!-- 3. BOTÓN BUSCAR REPORTES -->
+              <button id="reports-btn-search" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px; padding: 0 16px; font-weight: 700; background-color: #3b6591; color: #fff;" disabled>Buscar reportes</button>
+              
+              <span id="reports-unit-count" style="font-size: 13px; font-weight: 700; color: #0284c7; margin-left: auto;">0 activos en este grupo</span>
+            </div>
+          </div>
+
         </div>
 
-        <div id="reports-loading-bar-box" style="display: none; margin-top: 16px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-            <span id="reports-loading-text" style="font-size: 12px; font-weight: 700; color: #0284c7;">Consultando base de datos...</span>
+        <!-- BARRA DE CARGA VISUAL -->
+        <div id="reports-loading-bar-box" style="display: none; margin-top: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <span id="reports-loading-text" style="font-size: 11px; font-weight: 700; color: #0284c7;">Consultando base de datos y programaciones...</span>
             <span id="reports-loading-spinner" class="cgps-spinner"></span>
           </div>
           <div style="width: 100%; height: 6px; background-color: #e2e8f0; border-radius: 3px; overflow: hidden;">
-            <div id="reports-loading-progress" style="width: 30%; height: 100%; background: linear-gradient(90deg, #0284c7, #6366f1); border-radius: 3px; transition: width 0.3s ease;"></div>
+            <div id="reports-loading-progress" style="width: 30%; height: 100%; background-color: #1b4e85; border-radius: 3px; transition: width 0.3s ease;"></div>
           </div>
         </div>
       </div>
 
-      <div id="sec-reports-validation-summary" class="testn-grid" style="grid-template-columns: repeat(3, 1fr); margin-top: 12px; display: none;">
-        <div id="card-val-rep-1" class="cgps-card" style="padding: 14px; border-left: 4px solid #94a3b8;">
-          <div style="font-size: 11px; font-weight: 700; color: #64748b; letter-spacing: 0.5px;">1. MONITOREO Y COMBUSTIBLE</div>
+      <!-- TARJETAS DE RESUMEN / ESTATUS DE REPORTES BÁSICOS -->
+      <div id="sec-reports-validation-summary" class="testn-grid" style="grid-template-columns: repeat(3, 1fr); margin-top: 10px; display: none;">
+        <div id="card-val-rep-1" class="cgps-card" style="padding: 12px; border-left: 4px solid #94a3b8;">
+          <div style="font-size: 11px; font-weight: 700; color: #64748b;">1. MONITOREO Y COMBUSTIBLE</div>
           <div id="st-val-rep-1" style="font-size: 13px; font-weight: 700; margin-top: 4px; color: #64748b;">Analizando...</div>
         </div>
 
-        <div id="card-val-rep-2" class="cgps-card" style="padding: 14px; border-left: 4px solid #94a3b8;">
-          <div style="font-size: 11px; font-weight: 700; color: #64748b; letter-spacing: 0.5px;">2. RANGOS OPERACIONALES</div>
+        <div id="card-val-rep-2" class="cgps-card" style="padding: 12px; border-left: 4px solid #94a3b8;">
+          <div style="font-size: 11px; font-weight: 700; color: #64748b;">2. RANGOS OPERACIONALES</div>
           <div id="st-val-rep-2" style="font-size: 13px; font-weight: 700; margin-top: 4px; color: #64748b;">Analizando...</div>
         </div>
 
-        <div id="card-val-rep-3" class="cgps-card" style="padding: 14px; border-left: 4px solid #94a3b8;">
-          <div style="font-size: 11px; font-weight: 700; color: #64748b; letter-spacing: 0.5px;">3. EVENTOS DE SEGURIDAD</div>
+        <div id="card-val-rep-3" class="cgps-card" style="padding: 12px; border-left: 4px solid #94a3b8;">
+          <div style="font-size: 11px; font-weight: 700; color: #64748b;">3. EVENTOS DE SEGURIDAD</div>
           <div id="st-val-rep-3" style="font-size: 13px; font-weight: 700; margin-top: 4px; color: #64748b;">Analizando...</div>
         </div>
       </div>
 
-      <div id="sec-reports-dashboard" class="cgps-card" style="margin-top: 12px; display: none;">
-        <div style="font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 12px;">DASHBOARD DE REPORTES (AUDITORÍA)</div>
+      <div id="sec-reports-dashboard" class="cgps-card" style="margin-top: 10px; display: none;">
+        <div style="font-size: 12px; font-weight: 700; color: #1b4e85; margin-bottom: 8px;">DASHBOARD DE REPORTES (AUDITORÍA)</div>
         <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: stretch;">
-          <div class="cgps-card" style="width: 160px; flex: 0 0 160px; padding: 12px 16px; border-left: 4px solid #10b981; min-width: 140px;">
+          <div class="cgps-card" style="width: 160px; flex: 0 0 160px; padding: 10px 16px; border-left: 4px solid #16a34a; min-width: 140px;">
             <div style="font-size: 11px; font-weight: 700; color: #64748b;">REPORTES ACTIVOS</div>
-            <div id="rep-dash-active" style="font-size: 26px; font-weight: 800; color: #10b981;">0</div>
+            <div id="rep-dash-active" style="font-size: 26px; font-weight: 800; color: #16a34a;">0</div>
           </div>
-          <div class="cgps-card" style="width: 160px; flex: 0 0 160px; padding: 12px 16px; border-left: 4px solid #ef4444; min-width: 140px;">
+          <div class="cgps-card" style="width: 160px; flex: 0 0 160px; padding: 10px 16px; border-left: 4px solid #dc2626; min-width: 140px;">
             <div style="font-size: 11px; font-weight: 700; color: #64748b;">INACTIVOS</div>
-            <div id="rep-dash-inactive" style="font-size: 26px; font-weight: 800; color: #ef4444;">0</div>
+            <div id="rep-dash-inactive" style="font-size: 26px; font-weight: 800; color: #dc2626;">0</div>
           </div>
-          <div class="cgps-card" style="width: 160px; flex: 0 0 160px; padding: 12px 16px; border-left: 4px solid #0284c7; min-width: 140px;">
+          <div class="cgps-card" style="width: 160px; flex: 0 0 160px; padding: 10px 16px; border-left: 4px solid #1b4e85; min-width: 140px;">
             <div style="font-size: 11px; font-weight: 700; color: #64748b;">TOTAL (FILTRADO)</div>
-            <div id="rep-dash-total" style="font-size: 26px; font-weight: 800; color: #0284c7;">0</div>
+            <div id="rep-dash-total" style="font-size: 26px; font-weight: 800; color: #1b4e85;">0</div>
           </div>
           <div style="display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; margin-left: auto;">
-            <label style="font-size: 11px; font-weight: 700; color: #64748b;">Buscar palabra clave<br><input type="text" id="rep-filter-keyword" class="cgps-input" placeholder="🔍 Buscar..." style="height: 36px; width: 170px;"></label>
-            <label style="font-size: 11px; font-weight: 700; color: #64748b;">Desde<br><input type="date" id="rep-filter-from" class="cgps-input" style="height: 36px;"></label>
+            <label style="font-size: 11px; font-weight: 700; color: #64748b;">Buscar por palabra clave<br><input type="text" id="rep-filter-keyword" class="cgps-input" placeholder="🔍 Buscar reporte..." style="height: 36px; width: 180px;"></label>
+            <label style="font-size: 11px; font-weight: 700; color: #64748b;">Modificado desde<br><input type="date" id="rep-filter-from" class="cgps-input" style="height: 36px;"></label>
             <label style="font-size: 11px; font-weight: 700; color: #64748b;">Hasta<br><input type="date" id="rep-filter-to" class="cgps-input" style="height: 36px;"></label>
-            <label style="font-size: 11px; font-weight: 700; color: #64748b;">Usuario<br><select id="rep-filter-user" class="cgps-input" style="height: 36px; min-width: 160px;"><option value="">Todos</option></select></label>
-            <button id="rep-filter-clear" type="button" class="cgps-btn cgps-btn-outline" style="height: 36px;">Limpiar</button>
+            <label style="font-size: 11px; font-weight: 700; color: #64748b;">Último usuario<br><select id="rep-filter-user" class="cgps-input" style="height: 36px; min-width: 180px;"><option value="">Todos</option></select></label>
+            <button id="rep-filter-clear" type="button" class="cgps-btn cgps-btn-white" style="border: 1px solid #cbd5e1; height: 36px;">Limpiar</button>
           </div>
         </div>
       </div>
 
-      <div id="sec-reports-table-card" class="cgps-card" style="margin-top: 12px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
-          <div style="font-size: 13px; font-weight: 700; color: #0f172a;">PROGRAMACIONES DE REPORTE ASOCIADAS</div>
-          <span id="reports-count-badge" style="font-size: 12px; font-weight: 700; background-color: #e0f2fe; color: #0369a1; padding: 4px 12px; border-radius: 20px;">0 reportes encontrados</span>
+      <div id="sec-reports-table-card" class="cgps-card" style="margin-top: 10px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
+          <div style="font-size: 13px; font-weight: 700; color: #1b4e85;">PROGRAMACIONES DE REPORTE ASOCIADAS</div>
+          <span id="reports-count-badge" style="font-size: 12px; font-weight: 700; background-color: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 12px;">0 reportes encontrados</span>
         </div>
         <div class="cgps-table-scroll">
           <table class="cgps-table">
@@ -422,7 +388,7 @@
             </thead>
             <tbody id="reports-listbody">
               <tr>
-                <td colspan="5" style="text-align: center; color: #64748b; padding: 24px;">Seleccione uno o más clientes / grupos y presione "Buscar reportes".</td>
+                <td colspan="5" style="text-align: center; color: #64748b; padding: 16px;">Seleccione un grupo principal, haga clic en "Buscar grupos", seleccione uno y presione "Buscar reportes".</td>
               </tr>
             </tbody>
           </table>
@@ -430,105 +396,23 @@
       </div>
     </div>
 
-    <!-- MÓDULO: ACTIVACIONES DE UNIDADES -->
+    <!-- MÓDULO: ACTIVACIONES DE UNIDADES (EN BLANCO) -->
     <div id="sec-activations" style="display: none;">
-      <div class="certi-two-cols-grid" style="margin-top: 12px;">
-        <div class="cgps-card" style="margin: 0;">
-          <div style="font-size: 12px; font-weight: 700; margin-bottom: 8px; color: #0f172a;">PEGAR SOLICITUD DE ACTIVACIÓN</div>
-          <textarea id="act-input-text" class="cgps-textarea" placeholder="Pegue aquí el texto de las Observaciones..." rows="14" style="width: 100%; font-size: 12px; font-family: 'JetBrains Mono', monospace;"></textarea>
-          <div style="display: flex; gap: 8px; margin-top: 12px;">
-            <button id="act-btn-process" type="button" class="cgps-btn cgps-btn-primary" style="flex: 1; font-weight: 700; height: 38px;">⚡ Procesar y Generar Formato</button>
-            <button id="act-btn-clear" type="button" class="cgps-btn cgps-btn-outline" style="height: 38px;">Limpiar</button>
-          </div>
-        </div>
-
-        <div class="cgps-card" style="margin: 0; background: #ffffff;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <span style="font-size: 12px; font-weight: 700; color: #0f172a;">FORMATO DE RESPUESTA</span>
-              <span id="act-detected-badge" class="badge-param badge-full" style="display: none;">ACTIVACIÓN INMEDIATA</span>
-            </div>
-            <button id="act-btn-copy" type="button" class="cgps-btn cgps-btn-secondary" style="padding: 4px 12px; font-size: 12px;">📋 Copiar Formato</button>
-          </div>
-          <textarea id="act-output-text" class="cgps-textarea" rows="14" style="width: 100%; font-family: 'JetBrains Mono', monospace; font-size: 12px; background-color: #f8fafc;" placeholder="El formato procesado aparecerá aquí listo para copiar..."></textarea>
-        </div>
+      <div class="cgps-card" style="margin-top: 10px; padding: 30px; text-align: center;">
+        <h3 style="color: #1b4e85; margin: 0 0 8px 0;">Módulo en Desarrollo</h3>
+        <p style="color: #64748b; font-size: 13px; margin: 0;">Esta sección está preparada para incorporar el flujo de activaciones de unidades.</p>
       </div>
     </div>
 
-    <!-- MÓDULO: FLASH REPORT (GENERADOR DE PROMPT MCP) -->
-    <div id="sec-flash" style="display: none;">
-      <div class="certi-two-cols-grid" style="margin-top: 12px;">
-        <!-- COLUMNA IZQUIERDA: CAMPOS DE ENTRADA MANUALES -->
-        <div class="cgps-card" style="margin: 0;">
-          <div style="font-size: 12px; font-weight: 800; color: #0284c7; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">
-            <span>📋</span> PARÁMETROS MANUALES DEL SINIESTRO
-          </div>
-
-          <div style="display: flex; flex-direction: column; gap: 10px;">
-            <div style="display: flex; gap: 8px;">
-              <div style="flex: 1;">
-                <label style="font-size: 11px; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">Placa del Vehículo:</label>
-                <input type="text" id="flash-input-placa" class="cgps-input" placeholder="Ej: ABC-123" style="width: 100%; height: 36px; text-transform: uppercase;">
-              </div>
-              <div style="flex: 1;">
-                <label style="font-size: 11px; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">VIN:</label>
-                <input type="text" id="flash-input-vin" class="cgps-input" placeholder="VIN (17 caracteres)..." style="width: 100%; height: 36px; text-transform: uppercase;">
-              </div>
-            </div>
-
-            <div style="display: flex; gap: 8px;">
-              <div style="flex: 1;">
-                <label style="font-size: 11px; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">Modelo del Vehículo:</label>
-                <input type="text" id="flash-input-modelo" class="cgps-input" placeholder="Ej: AROCS 3342 / Atego" style="width: 100%; height: 36px;">
-              </div>
-              <div style="flex: 1;">
-                <label style="font-size: 11px; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">Base MyGeotab:</label>
-                <input type="text" id="flash-input-base" class="cgps-input" value="divemotor" style="width: 100%; height: 36px; font-weight: 600;">
-              </div>
-            </div>
-
-            <div>
-              <label style="font-size: 11px; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">Fecha y Ventana (Hora local UTC-5 Lima):</label>
-              <input type="text" id="flash-input-ventana" class="cgps-input" placeholder="Ej: 15/10/2026 14:00–15:30" style="width: 100%; height: 36px;">
-            </div>
-
-            <div>
-              <label style="font-size: 11px; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">Relato del Cliente / Descripción del Suceso:</label>
-              <textarea id="flash-input-relato" class="cgps-textarea" rows="4" placeholder="Dónde ocurrió, hora aproximada, con qué/quién colisionó, lado dañado, quién conducía, heridos o carga peligrosa..." style="width: 100%; font-size: 11px;"></textarea>
-            </div>
-
-            <div>
-              <label style="font-size: 11px; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">Detalle de Fotografías Adjuntas:</label>
-              <textarea id="flash-input-fotos" class="cgps-textarea" rows="3" placeholder="Para cada foto: qué muestra, parte/lado de la unidad, si incluye fecha/hora o coordenadas..." style="width: 100%; font-size: 11px;"></textarea>
-            </div>
-
-            <div style="display: flex; gap: 8px; margin-top: 4px;">
-              <button id="flash-btn-generate" type="button" class="cgps-btn cgps-btn-primary" style="flex: 1; height: 38px; font-weight: 700;">⚡ Generar Prompt MCP</button>
-              <button id="flash-btn-clear" type="button" class="cgps-btn cgps-btn-outline" style="height: 38px;">Limpiar Campos</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- COLUMNA DERECHA: PROMPT FINAL COMPLETO PARA COPIAR -->
-        <div class="cgps-card" style="margin: 0; background: #ffffff;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-            <span style="font-size: 12px; font-weight: 700; color: #0f172a;">PROMPT COMPLETO LISTO PARA IA / MCP</span>
-            <button id="flash-btn-copy" type="button" class="cgps-btn cgps-btn-secondary" style="padding: 4px 12px; font-size: 11px;">📋 Copiar Prompt MCP</button>
-          </div>
-          <textarea id="flash-output-prompt" class="cgps-textarea" rows="23" style="width: 100%; font-family: 'JetBrains Mono', monospace; font-size: 11px; background-color: #f8fafc;" placeholder="Haga clic en 'Generar Prompt MCP' para obtener la instrucción lista para copiar..."></textarea>
-        </div>
-      </div>
-    </div>
-
-    <!-- KPIs Rápidos / DASHBOARD TECH -->
-    <div id="sec-kpi-container" class="cgps-kpi-grid" style="margin-top: 12px;">
+    <!-- KPIs Rápidos / DASHBOARD -->
+    <div id="sec-kpi-container" class="cgps-kpi-grid" style="margin-top: 10px;">
       <div class="cgps-card kpi-btn-card" id="kpi-card-sn-vin" title="Filtrar con serial y VIN">
-        <div class="cgps-kpi-title">CON SERIAL + VIN</div>
+        <div class="cgps-kpi-title">UNIDADES CON SERIAL + VIN</div>
         <div class="cgps-kpi-value" id="kpi-sn-vin" style="color: #0284c7;">0</div>
       </div>
       <div class="cgps-card kpi-btn-card" id="kpi-card-novin" title="Filtrar sin VIN">
         <div class="cgps-kpi-title">SIN VIN</div>
-        <div class="cgps-kpi-value" id="kpi-no-vin" style="color: #f59e0b;">0</div>
+        <div class="cgps-kpi-value" id="kpi-no-vin" style="color: #d97706;">0</div>
       </div>
       <div class="cgps-card kpi-btn-card" id="kpi-card-nosn" title="Filtrar sin serial">
         <div class="cgps-kpi-title">SIN SERIAL</div>
@@ -536,25 +420,25 @@
       </div>
       <div class="cgps-card kpi-btn-card" id="kpi-card-2" title="Filtrar seleccionados">
         <div class="cgps-kpi-title" id="kpi-title-2">SELECCIONADOS</div>
-        <div class="cgps-kpi-value" id="kpi-val-2" style="color: #6366f1;">0</div>
+        <div class="cgps-kpi-value" id="kpi-val-2">0</div>
       </div>
 
       <div class="cgps-card kpi-btn-card" id="kpi-card-4" style="display: none;" title="Filtrar completos">
         <div class="cgps-kpi-title">PARÁMETROS 5/5</div>
-        <div class="cgps-kpi-value" id="kpi-val-4" style="color: #10b981;">0</div>
+        <div class="cgps-kpi-value" id="kpi-val-4" style="color: #16a34a;">0</div>
       </div>
       <div class="cgps-card kpi-btn-card" id="kpi-card-less5" style="display: none;" title="Filtrar unidades con menos de 5 parámetros">
         <div class="cgps-kpi-title">PARÁMETROS &lt; 5</div>
-        <div class="cgps-kpi-value" id="kpi-val-less5" style="color: #ef4444;">0</div>
+        <div class="cgps-kpi-value" id="kpi-val-less5" style="color: #dc2626;">0</div>
       </div>
 
       <div class="cgps-card kpi-btn-card" id="kpi-card-remol" style="display: none;" title="Filtrar Remolcadores">
         <div class="cgps-kpi-title">REMOLCADORES</div>
-        <div class="cgps-kpi-value" id="kpi-val-remol" style="color: #3b82f6;">0</div>
+        <div class="cgps-kpi-value" id="kpi-val-remol" style="color: #2563eb;">0</div>
       </div>
       <div class="cgps-card kpi-btn-card" id="kpi-card-volq" style="display: none;" title="Filtrar Volquetes">
         <div class="cgps-kpi-title">VOLQUETES</div>
-        <div class="cgps-kpi-value" id="kpi-val-volq" style="color: #8b5cf6;">0</div>
+        <div class="cgps-kpi-value" id="kpi-val-volq" style="color: #7c3aed;">0</div>
       </div>
       <div class="cgps-card kpi-btn-card" id="kpi-card-sintipo" style="display: none;" title="Filtrar Sin Tipo">
         <div class="cgps-kpi-title">SIN TIPO</div>
@@ -562,46 +446,46 @@
       </div>
       <div class="cgps-card kpi-btn-card" id="kpi-card-otros" style="display: none;" title="Filtrar Otros Tipos">
         <div class="cgps-kpi-title">OTROS TIPOS</div>
-        <div class="cgps-kpi-value" id="kpi-val-otros" style="color: #14b8a6;">0</div>
+        <div class="cgps-kpi-value" id="kpi-val-otros" style="color: #0d9488;">0</div>
       </div>
     </div>
 
-    <div id="sec-certi-combined-box" class="certi-two-cols-grid" style="margin-top: 12px; display: none;">
+    <div id="sec-certi-combined-box" class="certi-two-cols-grid" style="margin-top: 10px; display: none;">
       <div class="cgps-card" style="margin: 0;">
-        <div style="font-size: 12px; font-weight: 700; margin-bottom: 8px; color: #0f172a;">SELECCIÓN MASIVA DE ACTIVOS</div>
+        <div style="font-size: 12px; font-weight: 700; margin-bottom: 6px; color: #1b4e85;">SELECCIÓN MASIVA DE ACTIVOS</div>
         <div style="display: flex; gap: 8px; align-items: flex-start;">
-          <textarea id="cgps-bulk-input" class="cgps-textarea" placeholder="Pegue nombres, placas, VINs o series..." rows="5" style="flex: 1; min-width: 150px; font-family: 'JetBrains Mono', monospace; font-size: 12px;"></textarea>
+          <textarea id="cgps-bulk-input" class="cgps-textarea" placeholder="Pegue aquí la lista de nombres de activos, placas, VINs o series..." rows="5" style="flex: 1; min-width: 150px;"></textarea>
           <div style="display: flex; flex-direction: column; gap: 6px;">
             <button id="cgps-btn-bulk" type="button" class="cgps-btn cgps-btn-secondary">Filtrar Masivo</button>
-            <button id="cgps-btn-bulk-clear" type="button" class="cgps-btn cgps-btn-outline">Limpiar</button>
+            <button id="cgps-btn-bulk-clear" type="button" class="cgps-btn cgps-btn-outline">Limpiar Pegado</button>
           </div>
         </div>
       </div>
 
-      <div class="cgps-card" style="margin: 0; background: #ffffff;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-          <span style="font-size: 12px; font-weight: 700; color: #0f172a;">TEXTO SOLICITUD ÁREA LEGAL</span>
+      <div class="cgps-card" style="margin: 0; background-color: #ffffff !important;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <span style="font-size: 12px; font-weight: 700; color: #1b4e85;">TEXTO SOLICITUD ÁREA LEGAL</span>
           <button id="cgps-btn-copy-legal" type="button" class="cgps-btn cgps-btn-secondary" style="padding: 4px 10px; font-size: 11px;">Copiar Texto</button>
         </div>
-        <textarea id="cgps-legal-text" class="cgps-textarea" rows="5" style="width: 100%; font-family: 'JetBrains Mono', monospace; font-size: 12px; background-color: #f8fafc;" placeholder="Haga clic en 'Generar Texto Legal'..."></textarea>
+        <textarea id="cgps-legal-text" class="cgps-textarea" rows="5" style="width: 100%; font-family: sans-serif; font-size: 11px; background-color: #f8fafc;" placeholder="Haga clic en 'Generar Texto Legal' para estructurar la solicitud..."></textarea>
       </div>
     </div>
 
-    <div id="sec-bulk-container" class="cgps-card" style="margin-top: 12px;">
-      <div style="font-size: 12px; font-weight: 700; margin-bottom: 8px; color: #0f172a;">SELECCIÓN MASIVA DE ACTIVOS</div>
+    <div id="sec-bulk-container" class="cgps-card" style="margin-top: 10px;">
+      <div style="font-size: 12px; font-weight: 700; margin-bottom: 6px; color: #1b4e85;">SELECCIÓN MASIVA DE ACTIVOS</div>
       <div style="display: flex; gap: 10px; align-items: flex-start; flex-wrap: wrap;">
-        <textarea id="cgps-bulk-input-std" class="cgps-textarea" placeholder="Pegue la lista de nombres de activos, placas, VINs o series..." rows="3" style="flex: 1; min-width: 250px; font-family: 'JetBrains Mono', monospace; font-size: 12px;"></textarea>
+        <textarea id="cgps-bulk-input-std" class="cgps-textarea" placeholder="Pegue aquí la lista de nombres de activos, placas, VINs o series..." rows="3" style="flex: 1; min-width: 250px;"></textarea>
         <div style="display: flex; flex-direction: column; gap: 6px;">
           <button id="cgps-btn-bulk-std" type="button" class="cgps-btn cgps-btn-secondary">Filtrar Masivo</button>
-          <button id="cgps-btn-bulk-clear-std" type="button" class="cgps-btn cgps-btn-outline">Limpiar</button>
+          <button id="cgps-btn-bulk-clear-std" type="button" class="cgps-btn cgps-btn-outline">Limpiar Pegado</button>
         </div>
       </div>
     </div>
 
-    <!-- CONTROLES UNIFICADOS BARRA TECH -->
-    <div id="sec-controls-container" class="cgps-card" style="margin-top: 12px;">
+    <!-- CONTROLES UNIFICADOS EN UNA FILA CONTINUA -->
+    <div id="sec-controls-container" class="cgps-card" style="margin-top: 10px;">
       <div class="cgps-controls-row" style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; width: 100%;">
-        <select id="cgps-filter-field" class="cgps-input" style="width: 160px; font-weight: 600; color: #0284c7; background-color: #f0f9ff; border-color: #bae6fd;">
+        <select id="cgps-filter-field" class="cgps-input" style="width: 150px; font-weight: 600; color: #1b4e85; background-color: #f8fafc;">
           <option value="all">[ Todos los campos ]</option>
           <option value="nombreActivo">Nombre del Activo</option>
           <option value="placa">Placa</option>
@@ -615,12 +499,12 @@
           <option value="grupos">Grupos</option>
         </select>
         
-        <input type="text" id="cgps-filter" class="cgps-input" placeholder="🔍 Buscar activo..." style="width: 180px;">
+        <input type="text" id="cgps-filter" class="cgps-input" placeholder="Buscar..." style="width: 180px;">
         
         <button id="cgps-sel-vis" type="button" class="cgps-btn cgps-btn-outline">Seleccionar visibles</button>
-        <button id="cgps-sel-none" type="button" class="cgps-btn cgps-btn-outline">Limpiar</button>
+        <button id="cgps-sel-none" type="button" class="cgps-btn cgps-btn-outline">Limpiar selección</button>
         
-        <select id="cgps-mass-field-select" class="cgps-input" style="width: 160px; font-weight: 600; color: #0f172a;">
+        <select id="cgps-mass-field-select" class="cgps-input" style="width: 150px; font-weight: 600; color: #0f172a; background-color: #ffffff;">
           <option value="razon">Razón Social</option>
           <option value="ruc">RUC</option>
           <option value="nombreActivo" class="opt-valid-only">Nombre del Activo</option>
@@ -630,28 +514,28 @@
           <option value="tipoVehiculo" class="opt-valid-only">Tipo Vehículo</option>
         </select>
         
-        <input type="text" id="cgps-mass-value-input" class="cgps-input" placeholder="Nuevo valor..." style="width: 180px;">
+        <input type="text" id="cgps-mass-value-input" class="cgps-input" placeholder="Ingrese el nuevo valor..." style="width: 180px;">
         
-        <button id="cgps-btn-apply-mass-unified" type="button" class="cgps-btn cgps-btn-primary" style="font-weight: 700;">Guardar seleccionados</button>
+        <button id="cgps-btn-apply-mass-unified" type="button" class="cgps-btn" style="background-color: #0284c7; color: #ffffff; font-weight: 700;">Guardar seleccionados</button>
         
-        <button id="cgps-btn-inject-params" type="button" class="cgps-btn" style="background: linear-gradient(135deg, #10b981, #059669); color: #fff; font-weight: 700; display: none;">🛡️ Completar 5 Parámetros</button>
+        <button id="cgps-btn-inject-params" type="button" class="cgps-btn" style="background-color: #15803d; color: #fff; font-weight: 700; display: none;">🛡️ Completar 5 Parámetros</button>
       </div>
     </div>
 
-    <!-- TABLA PROFESIONAL TECH -->
-    <div id="sec-table-container" class="cgps-table-container" style="margin-top: 12px;">
+    <!-- Tabla -->
+    <div id="sec-table-container" class="cgps-table-container" style="margin-top: 10px;">
       <div class="cgps-table-scroll">
         <table class="cgps-table">
           <thead id="cgps-table-head"></thead>
           <tbody id="cgps-listbody">
-            <tr><td colspan="13" style="text-align:center; padding: 24px; color: #64748b;">Cargando activos…</td></tr>
+            <tr><td colspan="13" style="text-align:center; padding: 16px; color: #64748b;">Cargando activos…</td></tr>
           </tbody>
         </table>
       </div>
     </div>
 
-    <div id="cgps-msg" class="cgps-msg" style="margin-top: 12px;"></div>
-    <div id="cgps-preview" class="cgps-card" style="display: none; margin-top: 12px;"></div>
+    <div id="cgps-msg" class="cgps-msg" style="margin-top: 10px;"></div>
+    <div id="cgps-preview" class="cgps-card" style="display: none; margin-top: 10px;"></div>
   </div>
 
 </div>
@@ -664,7 +548,7 @@
   var isCopiloto = ref.indexOf("copiloto.app") >= 0;
 
   if (!isIframe && !isGeotab && !isCopiloto) {
-    document.body.innerHTML = "<div style='display:flex; justify-content:center; align-items:center; height:100vh; background-color:#0f172a; font-family:sans-serif;'><div style='text-align:center; padding:40px; background:#1e293b; border-radius:16px; border:1px solid #334155; color:white;'><h3 style='color:#ef4444; margin:0 0 10px 0;'>Acceso Restringido</h3><p style='color:#94a3b8; font-size:14px; margin:0;'>Este módulo requiere un entorno Geotab autorizado.</p></div></div>";
+    document.body.innerHTML = "<div style='display:flex; justify-content:center; align-items:center; height:100vh; background-color:#f4f7fc;'><div style='text-align:center; padding:30px; background:#fff; border-radius:10px; border:1px solid #cbd5e1;'><h3 style='color:#b91c1c;'>Acceso Restringido</h3><p style='color:#64748b; font-size:13px;'>Este módulo solo puede ser ejecutado dentro de las plataformas autorizadas.</p></div></div>";
     throw new Error("Acceso denegado fuera de entorno autorizado.");
   }
 })();
@@ -674,115 +558,80 @@
     * { box-sizing: border-box !important; }
     html, body {
       margin: 0 !important;
-      padding: 16px !important;
+      padding: 12px !important;
       width: 100% !important;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-      background-color: #f8fafc !important;
-      color: #0f172a !important;
-      -webkit-font-smoothing: antialiased;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+      background-color: #f4f7fc !important;
+      color: #1e293b !important;
     }
     .cgps-wrapper { width: 100% !important; max-width: 100% !important; margin: 0 auto; }
+    .cgps-hero { background-color: #1b4e85 !important; color: #ffffff !important; padding: 12px 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.06); width: 100%; flex-wrap: wrap; gap: 10px; }
+    .cgps-hero h1 { margin: 0; font-size: 18px; font-weight: 700; color: #ffffff !important; }
     
-    /* TECH HERO BANNER */
-    .cgps-hero { 
-      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important; 
-      color: #ffffff !important; 
-      padding: 16px 24px; 
-      border-radius: 12px; 
-      display: flex; 
-      justify-content: space-between; 
-      align-items: center; 
-      box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.1), 0 4px 6px -4px rgba(15, 23, 42, 0.1); 
-      width: 100%; 
-      flex-wrap: wrap; 
-      gap: 12px; 
-      border: 1px solid #334155;
-    }
-    
-    /* TECH DASHBOARD CARDS */
-    .testn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; width: 100%; margin-top: 12px; }
-    @media (max-width: 900px) { .testn-grid { grid-template-columns: repeat(2, 1fr); } }
-    
+    .testn-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; width: 100%; margin-top: 10px; }
     .testn-card {
       background: #ffffff !important;
-      border: 1px solid #e2e8f0 !important;
+      border: 2px solid #cbd5e1 !important;
       border-radius: 12px !important;
-      padding: 24px 20px !important;
-      text-align: left !important;
+      padding: 30px 22px !important;
+      text-align: center !important;
       cursor: pointer !important;
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      transition: all 0.2s ease !important;
       display: flex !important;
       flex-direction: column !important;
-      justify-content: space-between !important;
-      min-height: 140px !important;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
-      position: relative;
-      overflow: hidden;
+      align-items: center !important;
+      justify-content: center !important;
+      min-height: 150px !important;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.04) !important;
     }
-    .testn-card:hover { 
-      border-color: #0284c7 !important; 
-      transform: translateY(-4px) !important; 
-      box-shadow: 0 12px 20px -5px rgba(2, 132, 199, 0.15) !important; 
-    }
-    .testn-card-icon { font-size: 24px; margin-bottom: 12px; }
-    .testn-card h2 { font-size: 15px !important; color: #0f172a !important; font-weight: 700 !important; margin: 0 0 6px 0 !important; text-transform: uppercase !important; letter-spacing: 0.5px; }
-    .testn-card p { font-size: 12px !important; color: #64748b !important; margin: 0 !important; line-height: 1.4 !important; }
-
-    /* TECH BUTTONS */
-    .cgps-btn { padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; white-space: nowrap; transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+    .testn-card:hover { border-color: #1b4e85 !important; transform: translateY(-3px) !important; box-shadow: 0 8px 16px rgba(27, 78, 133, 0.12) !important; }
+    .testn-card h2 { font-size: 17px !important; color: #1b4e85 !important; font-weight: 700 !important; margin: 0 0 8px 0 !important; text-transform: uppercase !important; }
+    
+    .cgps-btn { padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; white-space: nowrap; transition: all 0.2s; }
     .cgps-btn:disabled { opacity: 0.5; cursor: not-allowed !important; }
-    .cgps-btn-primary { background: linear-gradient(135deg, #0284c7, #0369a1) !important; color: #ffffff !important; box-shadow: 0 2px 4px rgba(2, 132, 199, 0.2); }
-    .cgps-btn-primary:hover { background: linear-gradient(135deg, #0369a1, #075985) !important; }
-    .cgps-btn-white { background-color: #ffffff !important; color: #0f172a !important; border: 1px solid #e2e8f0; }
-    .cgps-btn-white:hover { background-color: #f8fafc !important; border-color: #cbd5e1; }
-    .cgps-btn-secondary { background-color: #334155 !important; color: #ffffff !important; }
-    .cgps-btn-secondary:hover { background-color: #1e293b !important; }
-    .cgps-btn-outline { background-color: transparent; color: #475569; border: 1px solid #cbd5e1; }
-    .cgps-btn-outline:hover { background-color: #f1f5f9; color: #0f172a; }
+    .cgps-btn-white { background-color: #ffffff !important; color: #1b4e85 !important; }
+    .cgps-btn-secondary { background-color: #4277a8 !important; color: #ffffff !important; }
+    .cgps-btn-outline { background-color: transparent; color: #1b4e85; border: 1px solid #1b4e85; }
     
-    /* KPI METRICS CARDS */
-    .cgps-kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; }
-    .cgps-card { background: #ffffff !important; border-radius: 12px; padding: 14px 16px; border: 1px solid #e2e8f0; width: 100%; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
-    .kpi-btn-card { cursor: pointer !important; transition: all 0.2s !important; user-select: none; text-align: left; }
-    .kpi-btn-card:hover { border-color: #38bdf8 !important; background-color: #f0f9ff !important; }
-    .kpi-btn-card.kpi-active { border: 2px solid #0284c7 !important; background-color: #f0f9ff !important; box-shadow: 0 4px 6px -1px rgba(2, 132, 199, 0.1) !important; }
+    .cgps-kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; width: 100%; }
+    .cgps-card { background: #ffffff !important; border-radius: 8px; padding: 8px 10px; border: 1px solid #cbd5e1; width: 100%; }
+    .kpi-btn-card { cursor: pointer !important; transition: all 0.2s !important; user-select: none; padding: 8px; text-align: center; }
+    .kpi-btn-card:hover { border-color: #1b4e85 !important; background-color: #f8fafc !important; }
+    .kpi-btn-card.kpi-active { border: 2px solid #1b4e85 !important; background-color: #eff6ff !important; box-shadow: 0 2px 6px rgba(27,78,133,0.15) !important; }
     
-    .cgps-kpi-title { font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .cgps-kpi-value { font-size: 22px; font-weight: 800; color: #0f172a; line-height: 1; letter-spacing: -0.5px; }
+    .cgps-kpi-title { font-size: 9px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cgps-kpi-value { font-size: 18px; font-weight: 700; color: #1e293b; line-height: 1.1; }
     
-    .certi-two-cols-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; }
+    .certi-two-cols-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
 
-    /* INPUTS TECH */
     .cgps-controls-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; width: 100%; }
-    .cgps-input, .cgps-textarea { padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12px; outline: none; background-color: #ffffff; transition: border 0.2s, box-shadow 0.2s; font-family: inherit; }
-    .cgps-input:focus, .cgps-textarea:focus { border-color: #0284c7 !important; box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15) !important; }
+    .cgps-input, .cgps-textarea { padding: 5px 8px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px; outline: none; background-color: #ffffff; }
     .cgps-input:disabled { background-color: #f1f5f9 !important; cursor: not-allowed !important; color: #94a3b8 !important; }
-    
-    /* TABLA PROFESIONAL */
-    .cgps-table-container { background-color: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; width: 100%; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
-    .cgps-table-scroll { max-height: 480px; overflow-y: auto; width: 100%; }
+    .cgps-textarea { font-family: monospace; resize: vertical; }
+    .cgps-table-container { background-color: #ffffff; border-radius: 8px; border: 1px solid #cbd5e1; overflow: hidden; width: 100%; }
+    .cgps-table-scroll { max-height: 440px; overflow-y: auto; width: 100%; }
     
     .cgps-table { width: 100%; border-collapse: collapse; font-size: 12px; table-layout: fixed; }
-    .cgps-table th { background-color: #f8fafc; color: #475569; font-weight: 700; text-align: left; padding: 10px 14px; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-transform: uppercase; font-size: 10px; letter-spacing: 0.5px; }
-    .cgps-table td { padding: 10px 14px; border-bottom: 1px solid #f1f5f9; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .cgps-table tbody tr:hover { background-color: #f8fafc; }
-    .cgps-msg { min-height: 20px; font-size: 12px; font-weight: 600; color: #10b981; }
-    .cgps-msg.cgps-err { color: #ef4444; }
+    .cgps-table th { background-color: #f8fafc; color: #64748b; font-weight: 600; text-align: left; padding: 8px 10px; border-bottom: 1px solid #cbd5e1; position: sticky; top: 0; z-index: 2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .cgps-table td { padding: 6px 10px; border-bottom: 1px solid #e2e8f0; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .cgps-table tbody tr:hover { background-color: #f1f5f9; }
+    .cgps-msg { min-height: 18px; font-size: 12px; font-weight: 600; color: #15803d; }
+    .cgps-msg.cgps-err { color: #b91c1c; }
 
-    .badge-param { padding: 4px 8px; border-radius: 6px; font-weight: 700; font-size: 10px; display: inline-block; letter-spacing: 0.3px; }
+    .badge-param { padding: 3px 6px; border-radius: 4px; font-weight: 700; font-size: 11px; display: inline-block; }
     .badge-full { background-color: #dcfce7; color: #15803d; border: 1px solid #86efac; }
     .badge-partial { background-color: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
     .badge-empty { background-color: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
 
-    .badge-audit-ok { background-color: #dcfce7; color: #15803d; padding: 4px 8px; border-radius: 6px; font-weight: 700; border: 1px solid #86efac; display: inline-block; }
-    .badge-audit-warn { background-color: #fee2e2; color: #b91c1c; padding: 4px 8px; border-radius: 6px; font-weight: 700; border: 1px solid #fca5a5; display: inline-block; }
+    .badge-audit-ok { background-color: #dcfce7; color: #15803d; padding: 3px 8px; border-radius: 4px; font-weight: 700; border: 1px solid #86efac; display: inline-block; }
+    .badge-audit-warn { background-color: #fee2e2; color: #b91c1c; padding: 3px 8px; border-radius: 4px; font-weight: 700; border: 1px solid #fca5a5; display: inline-block; }
 
     .cgps-spinner {
       display: inline-block;
       width: 14px;
       height: 14px;
       border: 2px solid #cbd5e1;
-      border-top-color: #0284c7;
+      border-top-color: #1b4e85;
       border-radius: 50%;
       animation: cgps-spin 0.8s linear infinite;
     }
@@ -1234,19 +1083,12 @@ var addInConstructor = function (geotabApi, state, callback) {
 
   function updateMassSelectVisibility() {
     var validOpts = document.querySelectorAll('.opt-valid-only');
-    var btnInject = $('cgps-btn-inject-params');
-
     if (activeModule === 'valid') {
       validOpts.forEach(function(opt) { opt.style.display = 'block'; });
-      if (btnInject) {
-        btnInject.style.display = 'inline-flex';
-        btnInject.style.visibility = 'visible';
-      }
+      $('cgps-btn-inject-params').style.display = 'inline-block';
     } else {
       validOpts.forEach(function(opt) { opt.style.display = 'none'; });
-      if (btnInject) {
-        btnInject.style.display = 'none';
-      }
+      $('cgps-btn-inject-params').style.display = 'none';
       if (['nombreActivo', 'placa', 'estadoProvincia', 'anualidad', 'tipoVehiculo'].includes($('cgps-mass-field-select').value)) {
         $('cgps-mass-field-select').value = 'razon';
       }
@@ -1260,371 +1102,77 @@ var addInConstructor = function (geotabApi, state, callback) {
     $('cgps-mass-value-input').placeholder = labelText + '...';
   }
 
-  // INYECCIÓN DE LOS 5 PARÁMETROS OBLIGATORIOS
-  async function injectRequiredParameters() {
-    var selectedIds = Object.keys(selected).filter(function (k) { return selected[k]; });
-    
-    if (selectedIds.length === 0) {
-      setMsg("Seleccione al menos una unidad para inyectar los 5 parámetros.", true);
+  function fetchAndPopulateSubGroups() {
+    var parentGid = $('reports-parent-filter').value;
+    var groupSel = $('reports-group-select');
+    var inputSearch = $('reports-search-input');
+    var btnSearch = $('reports-btn-search');
+
+    if (!parentGid) {
+      alert("Por favor, seleccione un grupo principal.");
       return;
     }
 
-    setMsg("Inyectando 5 parámetros a " + selectedIds.length + " unidad(es)...");
+    showLoading("Extrayendo subgrupos del árbol principal...", 50);
 
-    var calls = [];
+    setTimeout(function() {
+      fetchedSubGroups = getGroupsUnderParent(parentGid);
 
-    selectedIds.forEach(function (id) {
-      var row = all.find(function (r) { return r.id === id; });
-      if (!row || !row.rawDevice) return;
+      groupSel.disabled = false;
+      inputSearch.disabled = false;
+      btnSearch.disabled = false;
+      inputSearch.style.backgroundColor = '#ffffff';
 
-      var device = row.rawDevice;
-      var currentParams = Array.isArray(device.customParameters) ? device.customParameters.slice() : [];
-      
-      REQUIRED_PARAMS.forEach(function (req) {
-        var idx = currentParams.findIndex(function (cp) { return Number(cp.offset) === req.offset; });
-        if (idx < 0) {
-          currentParams.push({
-            offset: req.offset,
-            bytes: req.bytes,
-            isEnabled: true
-          });
-        } else {
-          currentParams[idx].bytes = req.bytes;
-          currentParams[idx].isEnabled = true;
-        }
-      });
-
-      device.customParameters = currentParams;
-
-      calls.push(['Set', {
-        typeName: 'Device',
-        entity: device
-      }]);
-    });
-
-    try {
-      await callMulti(api, calls);
-      setMsg("✅ Se completaron los 5 parámetros en " + selectedIds.length + " unidad(es). Recargando datos...");
-      setTimeout(function () {
-        load();
-      }, 1500);
-    } catch (err) {
-      console.error("Error al inyectar parámetros:", err);
-      setMsg("Error al inyectar parámetros: " + (err.message || err), true);
-    }
+      filterReportGroupsOptions();
+      hideLoading();
+      setMsg("Se cargaron " + fetchedSubGroups.length + " subgrupos listos para consultar.");
+    }, 150);
   }
 
-  document.addEventListener('click', function (e) {
-    var target = e.target;
-    if (target && (target.id === 'cgps-btn-inject-params' || target.closest('#cgps-btn-inject-params'))) {
-      e.preventDefault();
-      injectRequiredParameters();
-    }
-  });
+  function filterReportGroupsOptions() {
+    var groupSel = $('reports-group-select');
+    var inputSearch = $('reports-search-input');
+    var query = (inputSearch.value || '').toLowerCase().trim();
 
-  // LÓGICA DE EXTRACCIÓN Y DETECCIÓN DE ACTIVACIÓN INMEDIATA
-  function processActivationsText() {
-    var raw = ($('act-input-text').value || '').trim();
-    var badge = $('act-detected-badge');
-    
-    if (!raw) {
-      setMsg("Ingrese o pegue el texto de solicitud a procesar.", true);
-      $('act-output-text').value = '';
-      if (badge) badge.style.display = 'none';
-      return;
-    }
+    if (!fetchedSubGroups || fetchedSubGroups.length === 0) return;
 
-    var upper = raw.toUpperCase();
-    var hasNoIndica = upper.indexOf("NO INDICA") >= 0;
+    var currentVal = groupSel.value;
+    groupSel.innerHTML = '<option value="">-- Seleccione el grupo a analizar (' + fetchedSubGroups.length + ' subgrupos) --</option>';
 
-    var hasActInmediata = upper.indexOf("ACT INMEDIATA") >= 0 || 
-                          upper.indexOf("ACT. INMEDIATA") >= 0 || 
-                          upper.indexOf("ACTIVACION INMEDIATA") >= 0 || 
-                          upper.indexOf("ACTIVACIÓN INMEDIATA") >= 0;
-    
-    var isImmediate = hasActInmediata && !hasNoIndica;
-
-    var out = "Buen día estimados,\n\n";
-
-    if (!isImmediate) {
-      if (badge) {
-        badge.textContent = "NO REQUIERE ACTIVACIÓN INMEDIATA";
-        badge.className = "badge-param badge-partial";
-        badge.style.display = "inline-block";
-      }
-
-      out += "Dado que no indica que es una activación inmediata envío lo solicitado:\n\n";
-      out += "Para Camiones\n\n";
-      out += "BD: DIVEMOTOR\n";
-      out += "GRUPO: Unidades sin asignar\n\n";
-      out += "Para BUSES\n\n";
-      out += "BD: divemotor_buses\n";
-      out += "GRUPO: Unidades sin asignar\n\n";
-      out += "Saludos cordiales,";
-    } else {
-      if (badge) {
-        badge.textContent = "ACTIVACIÓN INMEDIATA DETECTADA";
-        badge.className = "badge-param badge-full";
-        badge.style.display = "inline-block";
-      }
-
-      out += "Al ser una activación inmediata considerar lo siguiente para los grupos:\n\n";
-
-      var cleanBody = raw.replace(/^(\d+[\.\,-]|\s*)*OBSERVACIONES\s*:\s*/i, '').trim();
-
-      var tokens = cleanBody.split(/[\r\n]+/).reduce(function(acc, line) {
-        return acc.concat(line.split(/\s+-\s+/));
-      }, []);
-
-      var clientBlocks = [];
-      var currentClient = null;
-
-      tokens.forEach(function(token) {
-        var t = token.trim();
-        if (!t) return;
-
-        if (/^(OBSERVACIONES|SI|NO|SI\s+ES|NO\s+INDICA|ACT\.\s*INMEDIATA|ACT\s+INMEDIATA|ACTIVACION\s+INMEDIATA|ACTIVACIÓN\s+INMEDIATA|PENDIENTE)/i.test(t)) {
-          return;
-        }
-
-        var isVin = /^[A-Z0-9]{17}$/i.test(t);
-        if (isVin) return;
-
-        var isStock = /^STOCK$/i.test(t);
-        if (isStock) {
-          if (!currentClient) currentClient = "STOCK";
-          return;
-        }
-
-        var parsedClient = cleanLegalName(t);
-        if (parsedClient && parsedClient.length >= 3) {
-          if (currentClient !== parsedClient) {
-            if (currentClient && !clientBlocks.some(function(b){ return b.client === currentClient; })) {
-              clientBlocks.push({ client: currentClient });
-            }
-            currentClient = parsedClient;
-          }
-        }
-      });
-
-      if (currentClient && !clientBlocks.some(function(b){ return b.client === currentClient; })) {
-        clientBlocks.push({ client: currentClient });
-      }
-
-      if (clientBlocks.length === 0) {
-        out += "UNIDADES DE [CLIENTE]\n\n";
-        out += "Para Camiones\n\n";
-        out += "BD: DIVEMOTOR\n";
-        out += "GRUPO CLIENTE : [NOMBRE CLIENTE]\n";
-        out += "GRUPO TIPO DE MOTOR - DIVEMOTOR:\n";
-        out += "*PARA [MODELO] : [MODELO]_[NOMBRE CLIENTE]\n\n";
-        out += "Para buses\n\n";
-      } else {
-        clientBlocks.forEach(function(b) {
-          var clientName = b.client || 'CLIENTE';
-          out += "UNIDADES DE " + clientName + "\n\n";
-          out += "Para Camiones\n\n";
-          out += "BD: DIVEMOTOR\n";
-          out += "GRUPO CLIENTE :" + clientName + "\n";
-          out += "GRUPO TIPO DE MOTOR - DIVEMOTOR:\n";
-          out += "*PARA [MODELO] : [MODELO]_" + clientName + "\n\n";
-        });
-
-        out += "Para buses\n\n";
-      }
-
-      out += "Saludos cordiales,";
-    }
-
-    $('act-output-text').value = out;
-    setMsg("Formatos procesados correctamente.");
-  }
-
-  $('act-btn-process').addEventListener('click', processActivationsText);
-  $('act-btn-clear').addEventListener('click', function() {
-    $('act-input-text').value = '';
-    $('act-output-text').value = '';
-    if ($('act-detected-badge')) $('act-detected-badge').style.display = 'none';
-    setMsg("Texto de activaciones limpiado.");
-  });
-  
-  $('act-btn-copy').addEventListener('click', function() {
-    var outElem = $('act-output-text');
-    if (!outElem.value) return;
-    outElem.select();
-    navigator.clipboard.writeText(outElem.value).then(function() {
-      setMsg("📋 Formato de activación copiado al portapapeles.");
-    });
-  });
-
-  // LÓGICA DE GENERACIÓN DE PROMPT FLASH REPORT (MCP)
-  function generateFlashReportPrompt() {
-    var placa = ($('flash-input-placa').value || '').trim().toUpperCase() || '[XXX-000]';
-    var vin = ($('flash-input-vin').value || '').trim().toUpperCase() || '[...]';
-    var modelo = ($('flash-input-modelo').value || '').trim() || '[...]';
-    var baseGeotab = ($('flash-input-base').value || '').trim() || 'divemotor';
-    var ventana = ($('flash-input-ventana').value || '').trim() || '[dd/mm/aaaa hh:mm–hh:mm]';
-    var relato = ($('flash-input-relato').value || '').trim() || '[relato del cliente: dónde, hora aproximada, con qué o quién colisionó, en qué lado del vehículo fue la colisión, quién conducía, heridos o carga peligrosa]';
-    var fotos = ($('flash-input-fotos').value || '').trim() || '[detalles de fotos: qué muestra, qué parte y lado de la unidad, si trae hora o ubicación]';
-
-    var fullPrompt = `ROL
-Analista experto en telemetría e investigación de siniestros viales (Geotab / Divemotor Connect).
-Objetivo: validar si hubo colisión en la unidad indicada y entregar un informe HTML de 3 páginas con la estructura y el diseño descritos abajo.
-
-ENTRADAS
-- Base MyGeotab: [${baseGeotab}]
-- Placa: ${placa} · VIN: ${vin} · Modelo: ${modelo}
-- Fecha y ventana (hora local, UTC-5 Lima): ${ventana}
-- Descripción del suceso de acuerdo a imágenes y adjuntos: ${relato}
-  Detalle de fotos: ${fotos}
-
-USO DE LA DESCRIPCIÓN
-- Corroborar el tipo de impacto y el lado dañado con las fallas de telemetría (sensor ABS del eje delantero derecho/izquierdo, refrigerante, turbo, ventilador).
-- Mencionar las fotos solo en el texto (análisis, comentarios, recomendaciones). NO incrustar imágenes ni crear sección de evidencia fotográfica.
-- Si hay placas de mercancías peligrosas, recomendar verificar la carga.
-- Si el relato contradice la telemetría (hora, velocidad, tipo de impacto), indicarlo expresamente.
-- No inventar calles, ciudades ni conductores: usar solo coordenadas y datos de la base.
-
-REGLAS DE EFICIENCIA
-1. Convertir la ventana a UTC (Lima + 5 h) y usar SIEMPRE ventanas mínimas.
-2. Usar propertySelector para pedir solo los campos necesarios.
-3. NO usar AskDataAgent (devuelve datos irrelevantes) ni GetCountOf sobre StatusData.
-4. NO consultar ExceptionEvent de toda la ventana: solo los 3 min alrededor del pico.
-5. Resolver nombres (Diagnostic, Rule, Group) solo para los IDs que aparezcan en la ventana del evento.
-6. Hacer todos los cálculos (validación GPS, interpolación, coordenadas SVG, conversión a G) en UNA sola ejecución de Python y generar el HTML desde un script.
-7. Entregar el HTML como archivo (present_files), no pegado en el chat, salvo que se pida el código.
-
-FLUJO DE CONSULTAS (en este orden)
-1. Device por licensePlate → id, VIN, serie, zona horaria. Group del dispositivo → nombre del cliente.
-2. Trip de la ventana → inicio, fin, distancia, velocidad máx., punto de parada.
-3. FaultData de la ventana (dateTime, diagnostic, failureMode, faultState, lámparas): agrupar por instante; los fallos en cluster pegados al pico son la firma del impacto.
-4. LogRecord (dateTime, speed, lat, lon) de los últimos 7 min antes de la detención.
-5. Pico: StatusData DiagnosticAccelerationForwardBrakingId en 2–3 min alrededor de la detención; con el instante del pico, repetir con DiagnosticAccelerationSideToSideId y DiagnosticAccelerationUpDownId en ±3 s.
-6. StatusData DiagnosticEngineSpeedId (RPM) de −15 s a +10 s. Probar DiagnosticAcceleratorPedalPositionId (si viene vacío, indicar "no reporta").
-7. ExceptionEvent ±3 min del pico: reglas disparadas (frenada brusca con umbral en g) y si se disparó alguna regla de colisión (si no, anotarlo).
-8. GetPostedRoadSpeedsForDevice en la ventana → límite de vía (referencial).
-9. Historial de 3 meses del FaultData de cualquier falla NUEVA (p. ej. refrigerante SPN 111) → confirmar primera vez.
-10. Trips de las 48 h siguientes: reubicación, remolque o reanudación de operación.
-
-CONVERSIONES Y CRITERIOS
-- Aceleraciones en m/s²; G = valor / 9.80665. G vertical = (valor − línea base previa ≈ 9.48) / 9.80665.
-- Eje longitudinal negativo = desaceleración (impacto frontal típico).
-- Severidad: leve < 0.5 G · moderada 0.5–2 G · severa > 2 G.
-- Hora del impacto = instante del pico longitudinal; velocidad al impacto = interpolación lineal entre registros GPS vecinos (marcar con "~").
-- Todo en hora de Lima (UTC−5) en el informe.
-- Dictamen: "Colisión confirmada / Evento probable / Sin evidencia suficiente" + confianza Alta/Media/Baja. Alta solo con pico alto + fallas en cluster + detención + (video, airbag o EDR). Sin esos datos, Media. La foto o el relato refuerzan el dictamen pero no reemplazan la telemetría.
-
-VALIDACIÓN GPS (obligatoria, un bloque de Python)
-- Por cada par de registros: distancia (haversine) / Δt = velocidad implícita; comparar con el promedio de velocidades reportadas → error medio y máximo en km/h.
-- Distancia acumulada GPS vs velocidad integrada (relación ≈ 1.00).
-- Último registro vs stopPoint del Trip (metros).
-- Rumbo de los últimos 20 s y distancia entre impacto interpolado y parada.
-- Veredicto "GPS consistente" si error medio < 2 km/h y relación de distancias entre 0.98 y 1.02.
-
-ESTRUCTURA DEL INFORME (HTML + CSS embebido, A4 imprimible, @media print, sin scripts ni imágenes externas)
-Paleta: azul marino #0b2545, gris #5b6573, rojo #c62828, ámbar #e0a100, morado #5a1e9a.
-Página 1: cabecera "DIVEMOTOR Connect"; título "Informe de evento de colisión"; cliente; placa · modelo · VIN · fecha; ubicación (solo coordenadas); chips (dictamen, severidad, alerta posterior); cuadro rojo "HORA DEL IMPACTO" arriba a la derecha (columna de texto con min-width:0 para que no se corte); 4 KPIs (velocidad previa, G máx., velocidad al impacto, tipo de impacto); vista superior con zona de impacto + gráfico polar de G; esquema SVG de trayectoria de los últimos 47 s (puntos GPS reales, escala 100 m, norte, enlace a Google Maps); gráfico SVG velocidad + RPM de −12 s a +10 s con franja de desaceleración fuerte; gráfico SVG de G longitudinal/lateral con umbral 0.5 G y pico rotulado; "Análisis del evento" (5 viñetas) y "Línea de tiempo".
-Página 2: tabla segundo a segundo (−12 s a +10 s: hora, Δ, velocidad, RPM, G long/lat/vert, evento) y tabla en milisegundos del impacto (resultante = √(long² + lat²) en el mismo instante), nota de unidades.
-Página 3: tabla de fallas (hora, origen, código/alerta, estado), comentarios finales, recomendaciones, "Cómo se elaboró" (detección, datos usados, limitaciones) y cuadro verde "Validación GPS".
-
-COHERENCIA CON EL DAÑO
-- Falla de sensor ABS/rueda del eje 1 derecho/izquierdo → cruzar con el lado dañado de la foto o el relato.
-- Falla nueva de refrigerante, turbo o ventilador a segundos o minutos del pico → posible daño del frontal.
-
-LIMITACIONES A DECLARAR SIEMPRE
-Sin pedal/marcha/luces si no se reportan; sin airbag/EDR; velocidad interpolada; códigos propietarios ("Unknown Diagnostic 5210xx") y FMI sin decodificar; mapa esquemático sin calles; reglas de colisión de la cuenta que no se dispararon → revisar umbrales.
-
-RECOMENDACIONES TÍPICAS
-Inspección de taller del frontal y del sensor afectado; identificar al conductor si no hay ID; verificar la carga si hay rombos de mercancías peligrosas; revisar umbrales de reglas de colisión; atender fallas preexistentes (p. ej. DEF vacío); solicitar datos de ECU/EDR/video.
-
-SALIDA
-Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza, hora y coordenadas del impacto, veredicto GPS y hallazgos clave. Nada más.`;
-
-    $('flash-output-prompt').value = fullPrompt;
-    setMsg("Prompt MCP de Flash Report generado con éxito.");
-  }
-
-  function initAutoReportGroups() {
-    showLoading("Cargando clientes y tipos de motor...", 50);
-
-    var clientSubgroups = getGroupsUnderParent('b278A');
-    var motorSubgroups = getGroupsUnderParent('b27A7');
-
-    var combinedMap = {};
-    clientSubgroups.concat(motorSubgroups).forEach(function(g) {
-      combinedMap[g.id] = g;
-    });
-
-    fetchedSubGroups = Object.keys(combinedMap).map(function(k) { return combinedMap[k]; });
-    fetchedSubGroups.sort(function(a, b) {
-      return (a.name || '').localeCompare(b.name || '', 'es');
-    });
-
-    renderSubGroupsChecklist();
-    hideLoading();
-    setMsg("Se cargaron " + fetchedSubGroups.length + " grupos (Clientes y Tipo de Motor) listos para selección.");
-  }
-
-  function renderSubGroupsChecklist() {
-    var container = $('reports-subgroups-checklist');
-    var query = ($('reports-search-input').value || '').toLowerCase().trim();
-
-    if (!fetchedSubGroups || fetchedSubGroups.length === 0) {
-      container.innerHTML = '<span style="color: #64748b; font-size: 11px;">No se encontraron grupos.</span>';
-      return;
-    }
-
-    var html = '';
-
-    fetchedSubGroups.forEach(function(g) {
+    var matchCount = 0;
+    for (var i = 0; i < fetchedSubGroups.length; i++) {
+      var g = fetchedSubGroups[i];
       if (!query || g.name.toLowerCase().indexOf(query) >= 0) {
-        html += '<label style="display: flex; align-items: center; gap: 6px; font-size: 11px; cursor: pointer; border-bottom: 1px dashed #e2e8f0; padding-bottom: 4px;">' +
-          '<input type="checkbox" class="chk-report-subgroup" value="' + htmlEsc(g.id) + '" onchange="window.updateReportSelectedSubgroupsCount()">' +
-          '<span style="font-weight: 600; color: #0f172a;">' + htmlEsc(g.name) + '</span>' +
-          '<span style="color: #64748b; font-size: 10px; font-family: monospace;">(' + htmlEsc(g.id) + ')</span>' +
-          '</label>';
+        var opt = document.createElement('option');
+        opt.value = g.id;
+        opt.textContent = g.name;
+        groupSel.appendChild(opt);
+        matchCount++;
       }
-    });
+    }
 
-    container.innerHTML = html || '<span style="color:#64748b; font-size:11px;">Sin coincidencia de búsqueda.</span>';
-    updateReportSelectedSubgroupsCount();
+    if (currentVal) groupSel.value = currentVal;
   }
 
-  window.updateReportSelectedSubgroupsCount = function() {
-    var selectedCbs = document.querySelectorAll('.chk-report-subgroup:checked');
-    $('reports-selected-groups-count').textContent = selectedCbs.length + " subgrupo(s) seleccionado(s)";
-
-    var units = getUnitsForSelectedReportGroups();
-    $('reports-unit-count').textContent = units.length + " activo(s) en grupo(s) seleccionado(s)";
-  };
-
-  function getSelectedSubGroupIds() {
-    var selectedCbs = document.querySelectorAll('.chk-report-subgroup:checked');
-    return Array.from(selectedCbs).map(function(cb) { return cb.value; });
-  }
-
-  function getUnitsForSelectedReportGroups() {
-    var gids = getSelectedSubGroupIds();
-    if (gids.length === 0) return [];
+  function getUnitsForSelectedReportGroup() {
+    var gid = $('reports-group-select').value;
+    if (!gid) return [];
 
     return getActiveRowsForModule().filter(function(r) {
-      return r.rawGroupIds && r.rawGroupIds.some(function(id) { return gids.includes(id); });
+      return r.rawGroupIds && r.rawGroupIds.includes(gid);
     });
   }
 
-  async function contarReportesDeGrupos(groupIdsArray, incluirSubgrupos) {
-    let objetivo = new Set(groupIdsArray);
+  async function contarReportesDeGrupo(groupId, incluirSubgrupos) {
+    let objetivo = new Set([groupId]);
 
     if (incluirSubgrupos) {
-      for (let i = 0; i < groupIdsArray.length; i++) {
-        var gId = groupIdsArray[i];
-        try {
-          const resG = await callApi(api, 'Get', { typeName: 'Group', search: { id: gId } });
-          const recoger = (n) => (n.children || []).forEach(c => { objetivo.add(c.id); recoger(c); });
-          if (resG && resG[0]) recoger(resG[0]);
-        } catch (e) {
-          console.warn("No se pudieron cargar subgrupos recursivos:", e);
-        }
+      try {
+        const resG = await callApi(api, 'Get', { typeName: 'Group', search: { id: groupId } });
+        const recoger = (n) => (n.children || []).forEach(c => { objetivo.add(c.id); recoger(c); });
+        if (resG && resG[0]) recoger(resG[0]);
+      } catch (e) {
+        console.warn("No se pudieron cargar subgrupos recursivos:", e);
       }
     }
 
@@ -1640,15 +1188,18 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
   }
 
   async function handleReportGroupChange() {
-    var selectedGids = getSelectedSubGroupIds();
+    var gid = $('reports-group-select').value;
 
-    if (selectedGids.length === 0) {
-      alert("Por favor, seleccione al menos un grupo con el check para buscar sus reportes.");
+    if (!gid) {
+      alert("Por favor, seleccione un grupo de la lista para buscar sus reportes.");
       return;
     }
 
-    showLoading("Consultando programaciones...", 40);
-    setMsg("Filtrando programaciones para los grupos marcados...");
+    var units = getUnitsForSelectedReportGroup();
+    $('reports-unit-count').textContent = units.length + " activo(s) en este grupo";
+
+    showLoading("Consultando programaciones de reporte para el grupo seleccionado...", 40);
+    setMsg("Filtrando programaciones para la razón social seleccionada...");
 
     try {
       if (!rawSchedules || rawSchedules.length === 0) {
@@ -1657,13 +1208,13 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
         rawSchedules = scheds || [];
       }
 
-      showLoading("Procesando coincidencia de grupos...", 80);
-      const soloGrupo = await contarReportesDeGrupos(selectedGids, false);
-      const grupoConSub = await contarReportesDeGrupos(selectedGids, true);
+      showLoading("Procesando coincidencia de grupos y subgrupos...", 80);
+      const soloGrupo = await contarReportesDeGrupo(gid, false);
+      const grupoConSub = await contarReportesDeGrupo(gid, true);
 
-      $('reports-count-badge').textContent = `${soloGrupo.total} sólo este/estos grupos | ${grupoConSub.total} total (con descendientes)`;
+      $('reports-count-badge').textContent = `${soloGrupo.total} sólo este grupo | ${grupoConSub.total} total (con subgrupos)`;
 
-      await renderClientSchedulesTable(grupoConSub.reportes);
+      await renderClientSchedulesTable(grupoConSub.reportes, gid);
     } catch (err) {
       console.error("Error consultando reportes del grupo:", err);
       setMsg("Error consultando reportes del grupo.", true);
@@ -1715,14 +1266,14 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
       return;
     }
     var txt = list.join(', ');
-    container.innerHTML = '<span style="color:#0f172a; font-size:12px; line-height:1.4;">' + htmlEsc(txt) + '</span>';
+    container.innerHTML = '<span style="color:#1e293b; font-size:12px; line-height:1.4;">' + htmlEsc(txt) + '</span>';
   }
 
-  async function renderClientSchedulesTable(schedulesList) {
+  async function renderClientSchedulesTable(schedulesList, selectedGroupId) {
     var tbody = $('reports-listbody');
 
     if (!schedulesList.length) {
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #ef4444; padding: 24px;">No se encontraron programaciones de reporte asignadas a los grupos seleccionados.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #b91c1c; padding: 16px;">No se encontraron programaciones de reporte asignadas al grupo o subgrupos seleccionados.</td></tr>';
       
       $('sec-reports-validation-summary').style.display = 'grid';
       updateValidationCard('card-val-rep-1', 'st-val-rep-1', '1. MONITOREO Y COMBUSTIBLE', false);
@@ -1734,7 +1285,7 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
       return;
     }
 
-    showLoading('Resolviendo datos de plantillas...', 85);
+    showLoading('Resolviendo plantillas, normas, diagnósticos y usuarios...', 85);
     var tplIds = [], ruleIds = [], diagIds = [], userIds = [];
     schedulesList.forEach(function (s) {
       if (s.template && s.template.id) tplIds.push(s.template.id);
@@ -1819,7 +1370,7 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
   function renderReportRows(list) {
     var tbody = $('reports-listbody');
     if (!list.length) {
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #64748b; padding: 24px;">Ningún reporte coincide con los filtros especificados.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #64748b; padding: 16px;">Ningún reporte coincide con los filtros especificados.</td></tr>';
       return;
     }
     tbody.innerHTML = list.map(function (s) {
@@ -1828,11 +1379,11 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
         .filter(function (v, i, self) { return self.indexOf(v) === i; }).join(', ') || 'Sin grupo explícito';
 
       return '<tr>' +
-        '<td><b style="color:#0284c7;">' + htmlEsc(s._resolvedName) + '</b></td>' +
+        '<td><b style="color:#1b4e85;">' + htmlEsc(s._resolvedName) + '</b></td>' +
         '<td style="white-space:normal; word-break:break-word; font-size:11px;">' + htmlEsc(groupsText) + '</td>' +
         '<td style="font-size:11px; white-space:normal;">' + htmlEsc(fmtDateTime(s.lastUpdated)) + '</td>' +
         '<td style="font-size:11px; white-space:normal; word-break:break-all;">' + htmlEsc(s._userName) + '</td>' +
-        '<td style="text-align:center;"><button type="button" class="cgps-btn cgps-btn-outline btn-view-report" data-id="' + htmlEsc(s.id) + '" style="padding: 4px 10px; font-size:11px;">👁️ Ver</button></td>' +
+        '<td style="text-align:center;"><button type="button" class="cgps-btn cgps-btn-outline btn-view-report" data-id="' + htmlEsc(s.id) + '" style="padding: 4px 8px; font-size:11px;">👁️ Ver</button></td>' +
         '</tr>';
     }).join('');
   }
@@ -1851,22 +1402,22 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
     var st = $(statusId);
     if (!card || !st) return;
     if (isOk) {
-      card.style.borderLeftColor = '#10b981';
+      card.style.borderLeftColor = '#16a34a';
       card.style.backgroundColor = '#f0fdf4';
       st.textContent = '✅ CONFIGURADO';
-      st.style.color = '#10b981';
+      st.style.color = '#16a34a';
     } else {
-      card.style.borderLeftColor = '#ef4444';
+      card.style.borderLeftColor = '#dc2626';
       card.style.backgroundColor = '#fef2f2';
       st.textContent = '⚠️ PENDIENTE / NO DETECTADO';
-      st.style.color = '#ef4444';
+      st.style.color = '#dc2626';
     }
   }
 
   function openReportPreviewModal(s) {
     currentSelectedReportObj = s;
     $('modal-prev-title').textContent = "PROGRAMACIÓN: " + (s._resolvedName || s.name || "Sin nombre");
-    $('modal-prev-id').textContent = "ID: " + (s.id || "N/A");
+    $('modal-prev-id').textContent = "ID PROGRAMACIÓN: " + (s.id || "N/A");
 
     var gContainer = $('modal-prev-groups');
     gContainer.innerHTML = '';
@@ -1879,12 +1430,12 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
     ];
 
     if (allAssignedGroups.length === 0) {
-      gContainer.innerHTML = '<span style="background:#e2e8f0; padding:4px 10px; border-radius:6px; font-size:12px;">Sin grupos asociados</span>';
+      gContainer.innerHTML = '<span style="background:#e2e8f0; padding:3px 8px; border-radius:4px;">Sin grupos asociados</span>';
     } else {
       allAssignedGroups.forEach(function(g) {
         var gName = groupsById[g.id] ? groupsById[g.id].name : g.id;
         var tag = document.createElement('span');
-        tag.style.cssText = 'background:#f0f9ff; color:#0369a1; padding:4px 10px; border-radius:6px; border:1px solid #bae6fd; font-weight:600; font-size:12px;';
+        tag.style.cssText = 'background:#eff6ff; color:#1b4e85; padding:3px 8px; border-radius:4px; border:1px solid #bfdbfe; font-weight:600;';
         tag.textContent = gName;
         gContainer.appendChild(tag);
       });
@@ -1902,21 +1453,17 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
   }
 
   function populateSourceGroupsDropdown() {
+    var parentGid = $('create-rep-parent-cat').value;
     var query = ($('create-rep-source-search').value || '').toLowerCase().trim();
     var sel = $('create-rep-source-group');
     if (!sel) return;
 
     sel.innerHTML = '<option value="">-- Seleccione Cliente Origen --</option>';
 
-    var subGroups = getGroupsUnderParent('b278A').concat(getGroupsUnderParent('b27A7'));
+    var subGroups = getGroupsUnderParent(parentGid);
 
-    var uniqueMap = {};
-    subGroups.forEach(function(g) { uniqueMap[g.id] = g; });
-    var allCombined = Object.keys(uniqueMap).map(function(k) { return uniqueMap[k]; });
-    allCombined.sort(function(a, b) { return (a.name || '').localeCompare(b.name || '', 'es'); });
-
-    for (var i = 0; i < allCombined.length; i++) {
-      var g = allCombined[i];
+    for (var i = 0; i < subGroups.length; i++) {
+      var g = subGroups[i];
       if (!query || g.name.toLowerCase().indexOf(query) >= 0) {
         var opt = document.createElement('option');
         opt.value = g.id;
@@ -1932,23 +1479,18 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
     if (!container) return;
 
     var allDestGroups = getGroupsUnderParent('b278A').concat(getGroupsUnderParent('b27A7'));
-    var uniqueMap = {};
-    allDestGroups.forEach(function(g) { uniqueMap[g.id] = g; });
-    var allCombined = Object.keys(uniqueMap).map(function(k) { return uniqueMap[k]; });
-    allCombined.sort(function(a, b) { return (a.name || '').localeCompare(b.name || '', 'es'); });
-
     var html = '';
 
-    allCombined.forEach(function(g) {
+    allDestGroups.forEach(function(g) {
       if (!query || g.name.toLowerCase().indexOf(query) >= 0) {
-        html += '<label style="display: flex; align-items: center; gap: 8px; font-size: 12px; cursor: pointer;">' +
+        html += '<label style="display: flex; align-items: center; gap: 6px; font-size: 11px; cursor: pointer;">' +
           '<input type="checkbox" class="chk-dest-group" value="' + htmlEsc(g.id) + '"> ' +
-          '<span style="font-weight:600; color:#0f172a;">' + htmlEsc(g.name) + '</span> <span style="color:#64748b; font-family:monospace;">(' + htmlEsc(g.id) + ')</span>' +
+          '<span>' + htmlEsc(g.name) + ' (' + htmlEsc(g.id) + ')</span>' +
           '</label>';
       }
     });
 
-    container.innerHTML = html || '<span style="color:#64748b; font-size:12px;">No se encontraron grupos destino coincidentes.</span>';
+    container.innerHTML = html || '<span style="color:#64748b; font-size:11px;">No se encontraron grupos destino coincidentes.</span>';
   }
 
   async function handleSourceGroupChange() {
@@ -1963,7 +1505,12 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
     }
 
     try {
-      var resObj = await contarReportesDeGrupos([sourceGid], true);
+      if (!rawSchedules || rawSchedules.length === 0) {
+        var scheds = await callApi(api, 'Get', { typeName: 'CustomReportSchedule' });
+        rawSchedules = scheds || [];
+      }
+
+      var resObj = await contarReportesDeGrupo(sourceGid, true);
       sourceGroupSchedules = resObj.reportes;
 
       if (!sourceGroupSchedules || sourceGroupSchedules.length === 0) {
@@ -1971,11 +1518,16 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
         return;
       }
 
-      var tplIds = [];
+      var tplIds = [], diagIds = [];
       sourceGroupSchedules.forEach(function(s) {
         if (s.template && s.template.id) tplIds.push(s.template.id);
+        var a = s.arguments || {};
+        (a.diagnostics || []).forEach(function (d) { if (d && d.id) diagIds.push(d.id); });
       });
-      await resolveNames('ReportTemplate', tplIds, templateNamesById);
+      await Promise.all([
+        resolveNames('ReportTemplate', tplIds, templateNamesById),
+        resolveNames('Diagnostic', diagIds, diagById)
+      ]);
 
       scheduleSel.innerHTML = '<option value="">-- Seleccione el reporte a clonar --</option>';
       sourceGroupSchedules.forEach(function(s) {
@@ -2022,7 +1574,8 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
       return (diagById[d.id] || d.id); 
     });
 
-    $('create-rep-diagnostics').value = diags.join(', ');
+    sourceDiagOriginalText = diags.join(', ');
+    $('create-rep-diagnostics').value = sourceDiagOriginalText;
   }
 
   function applyNamePrefixPreset() {
@@ -2056,194 +1609,307 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
     $('create-report-modal').style.display = 'flex';
   }
 
+  // ===== CLONACIÓN v3: plantilla nueva (nombre) + programación nueva (grupos/diagnósticos) =====
+  // En Geotab el nombre del reporte vive en la PLANTILLA (ReportTemplate), no en la programación.
+  var SCHEDULE_GROUP_KEYS = ['groups', 'scopeGroups', 'includeAllChildrenGroups', 'includeDirectChildrenOnlyGroups'];
+  var SCHEDULE_READONLY_KEYS = ['id', 'name', 'scopeGroupFilter', 'lastModifiedUser', 'lastUpdated', 'lastModifiedDateTime', 'version', 'dateTime', 'lastRun', 'nextRun', 'lastRunDate', 'nextRunDate'];
+  var TEMPLATE_READONLY_KEYS = ['id', 'lastModifiedUser', 'lastModifiedDateTime', 'lastUpdated', 'version', 'dateTime'];
+  var sourceDiagOriginalText = '';
+
+  function stripNulls(obj) {
+    if (Array.isArray(obj)) {
+      return obj.map(stripNulls);
+    }
+    if (obj && typeof obj === 'object') {
+      var out = {};
+      Object.keys(obj).forEach(function (k) {
+        if (obj[k] === null || obj[k] === undefined) return;
+        out[k] = stripNulls(obj[k]);
+      });
+      return out;
+    }
+    return obj;
+  }
+
+  // Elimina también cadenas vacías, arreglos vacíos y objetos vacíos
+  function pruneEmpty(obj) {
+    if (Array.isArray(obj)) return obj.map(pruneEmpty);
+    if (obj && typeof obj === 'object') {
+      var out = {};
+      Object.keys(obj).forEach(function (k) {
+        var v = pruneEmpty(obj[k]);
+        var isEmptyObj = v && typeof v === 'object' && !Array.isArray(v) && Object.keys(v).length === 0;
+        if (v === '' || (Array.isArray(v) && v.length === 0) || isEmptyObj) return;
+        out[k] = v;
+      });
+      return out;
+    }
+    return obj;
+  }
+
+  function replaceGroupsIn(target, destGroups) {
+    var replaced = false;
+    SCHEDULE_GROUP_KEYS.forEach(function (k) {
+      if (Array.isArray(target[k]) && target[k].length > 0) {
+        target[k] = destGroups.map(function (g) { return { id: g.id }; });
+        replaced = true;
+      }
+    });
+    return replaced;
+  }
+
+  // opt.keepGroups : conserva "groups" con los grupos destino
+  // opt.keepFilter : conserva el scopeGroupFilter del origen
+  // opt.dropDates  : elimina arguments.fromUtc / toUtc (0001-01-01)
+  // opt.prune      : elimina campos vacíos
+  // opt.scopeOnly  : coloca los grupos destino en scopeGroups
+  function buildClonedSchedule(src, tplId, destGroups, diagList, opt) {
+    opt = opt || {};
+    var n = JSON.parse(JSON.stringify(src));
+
+    Object.keys(n).forEach(function (k) { if (k.charAt(0) === '_') delete n[k]; });
+    SCHEDULE_READONLY_KEYS.forEach(function (k) { delete n[k]; });
+
+    n.template = { id: tplId };
+    var destRefs = destGroups.map(function (g) { return { id: g.id }; });
+
+    if (opt.scopeOnly) {
+      n.includeAllChildrenGroups = [];
+      n.includeDirectChildrenOnlyGroups = [];
+      n.scopeGroups = destRefs.slice();
+    } else {
+      var hadAny = false;
+      ['scopeGroups', 'includeAllChildrenGroups', 'includeDirectChildrenOnlyGroups'].forEach(function (k) {
+        if (Array.isArray(n[k]) && n[k].length > 0) { n[k] = destRefs.slice(); hadAny = true; }
+      });
+      if (!hadAny) n.includeAllChildrenGroups = destRefs.slice();
+    }
+
+    if (opt.keepGroups) n.groups = destRefs.slice(); else delete n.groups;
+    if (opt.keepFilter && src.scopeGroupFilter) n.scopeGroupFilter = JSON.parse(JSON.stringify(src.scopeGroupFilter));
+
+    n.arguments = n.arguments || {};
+    Object.keys(n.arguments).forEach(function (k) { if (k.charAt(0) === '_') delete n.arguments[k]; });
+    replaceGroupsIn(n.arguments, destGroups);
+    n.arguments.diagnostics = diagList;
+    if (opt.dropDates) { delete n.arguments.fromUtc; delete n.arguments.toUtc; }
+
+    n.isActive = true;
+    n = stripNulls(n);
+    return opt.prune ? pruneEmpty(n) : n;
+  }
+
+  // ----- Panel de depuración copiable -----
+  var cloneDebug = [];
+  function dbg(t) { cloneDebug.push(String(t)); }
+  function safeJson(o) { try { return JSON.stringify(o); } catch (e) { return String(o); } }
+  function errDetail(e) {
+    var d = errToText(e);
+    try { if (e && e.data) d += ' | data=' + safeJson(e.data); } catch (x) {}
+    return d;
+  }
+  function hideDebug() { var ta = $('create-rep-debug'); if (ta) ta.style.display = 'none'; cloneDebug = []; }
+  function showDebug() {
+    var ta = $('create-rep-debug');
+    if (!ta) {
+      ta = document.createElement('textarea');
+      ta.id = 'create-rep-debug';
+      ta.className = 'cgps-textarea';
+      ta.rows = 8;
+      ta.readOnly = true;
+      ta.style.cssText = 'width:100%; font-size:10px; margin-top:6px;';
+      $('create-rep-status').insertAdjacentElement('afterend', ta);
+    }
+    ta.value = cloneDebug.join('\n\n');
+    ta.style.display = 'block';
+  }
+
+  function normDiagText(t) { return String(t || '').replace(/\s+/g, ' ').trim(); }
+
+  function errToText(err) {
+    if (!err) return 'Error desconocido';
+    if (typeof err === 'string') return err;
+    return err.message || (err.data && err.data.message) || (err.name ? String(err.name) : '') || JSON.stringify(err);
+  }
+
+  function idFromAddResult(r) {
+    if (!r) return null;
+    if (typeof r === 'string') return r;
+    if (Array.isArray(r)) return idFromAddResult(r[0]);
+    return r.id || null;
+  }
+
+  // Clona la plantilla origen con un nuevo nombre y devuelve el ID de la nueva plantilla
+  async function cloneReportTemplate(srcTplId, newName) {
+    var res = await callApi(api, 'Get', {
+      typeName: 'ReportTemplate',
+      search: { id: srcTplId, includeBinaryData: true }
+    });
+    var tpl = res && res[0];
+    if (!tpl) throw new Error('No se pudo leer la plantilla origen (' + srcTplId + ').');
+
+    dbg('PLANTILLA ORIGEN ' + srcTplId + ' claves: ' + Object.keys(tpl).join(', ') + ' | binaryData: ' + (tpl.binaryData ? String(tpl.binaryData).length : 0) + ' caracteres');
+    var full = JSON.parse(JSON.stringify(tpl));
+    TEMPLATE_READONLY_KEYS.forEach(function (k) { delete full[k]; });
+    full.name = newName;
+    full = stripNulls(full);
+
+    var minimal = { name: newName };
+    ['binaryData', 'reportDataSource', 'reportTemplateType', 'comments', 'comment', 'reportDataSourceType'].forEach(function (k) {
+      if (tpl[k] !== undefined && tpl[k] !== null) minimal[k] = tpl[k];
+    });
+
+    var variants = [full, minimal];
+    var errs = [];
+    for (var i = 0; i < variants.length; i++) {
+      try {
+        console.log('Plantilla a crear (variante ' + (i + 1) + '), claves:', Object.keys(variants[i]).join(', '));
+        var added = await callApi(api, 'Add', { typeName: 'ReportTemplate', entity: variants[i] });
+        var newId = idFromAddResult(added);
+        if (newId) {
+          dbg('PLANTILLA NUEVA creada: ' + newId + ' (variante ' + (i + 1) + ')');
+          return newId;
+        }
+        errs.push('Variante ' + (i + 1) + ': Geotab no devolvió el ID.');
+      } catch (e) {
+        errs.push('Variante ' + (i + 1) + ': ' + errToText(e));
+        console.error('Error creando plantilla (variante ' + (i + 1) + '):', e);
+      }
+    }
+    throw new Error('No se pudo crear la plantilla nueva. ' + errs.join(' | '));
+  }
+
   async function createAndSubmitReport() {
     var sourceSchedId = $('create-rep-source-schedule').value;
     var repName = $('create-rep-name').value.trim();
+    var diagText = $('create-rep-diagnostics').value.trim();
     var statusDiv = $('create-rep-status');
+    statusDiv.style.whiteSpace = 'pre-wrap';
+    hideDebug();
 
     var selectedDestCheckboxes = document.querySelectorAll('.chk-dest-group:checked');
-    var destGroupsList = Array.from(selectedDestCheckboxes).map(function(cb) { 
-      return { id: cb.value }; 
-    });
+    var destGroupsList = Array.from(selectedDestCheckboxes).map(function (cb) { return { id: cb.value }; });
 
-    if (!sourceSchedId) {
-      statusDiv.style.color = "#ef4444";
-      statusDiv.textContent = "Seleccione un reporte origen para clonar.";
-      return;
+    function fail(msg) {
+      statusDiv.style.color = "#dc2626";
+      statusDiv.textContent = msg;
     }
 
-    if (!repName) {
-      statusDiv.style.color = "#ef4444";
-      statusDiv.textContent = "Ingrese un nombre para el reporte.";
-      return;
-    }
+    if (!sourceSchedId) return fail("Seleccione un reporte origen para clonar.");
+    if (!repName) return fail("Ingrese un nombre para el reporte.");
+    if (destGroupsList.length === 0) return fail("Seleccione al menos un grupo destino.");
 
-    if (destGroupsList.length === 0) {
-      statusDiv.style.color = "#ef4444";
-      statusDiv.textContent = "Seleccione al menos un grupo destino.";
-      return;
-    }
+    var sourceSched = sourceGroupSchedules.find(function (s) { return s.id === sourceSchedId; });
+    if (!sourceSched) return fail("No se encontró la configuración del reporte origen.");
+    if (!sourceSched.template || !sourceSched.template.id) return fail("El reporte origen no tiene plantilla asociada.");
 
-    var sourceSched = sourceGroupSchedules.find(function(s){ return s.id === sourceSchedId; });
-    if (!sourceSched) {
-      statusDiv.style.color = "#ef4444";
-      statusDiv.textContent = "No se encontró la configuración del reporte origen.";
-      return;
-    }
+    // ----- Diagnósticos -----
+    // Si el texto no fue editado, se usan los IDs originales tal cual (varios diagnósticos comparten nombre).
+    var sourceDiags = (sourceSched.arguments && sourceSched.arguments.diagnostics) ? sourceSched.arguments.diagnostics : [];
+    var sourceDiagIds = sourceDiags.filter(function (d) { return d && d.id; }).map(function (d) { return d.id; });
+    var diagList = [];
 
-    statusDiv.style.color = "#0284c7";
-    statusDiv.textContent = "Clonando plantilla y registrando reporte en Geotab...";
-
-    try {
-      var newSchedule = JSON.parse(JSON.stringify(sourceSched));
-
-      delete newSchedule.id;
-      delete newSchedule.version;
-      delete newSchedule.lastUpdated;
-      delete newSchedule.lastModifiedUser;
-      delete newSchedule._resolvedName;
-      delete newSchedule._rules;
-      delete newSchedule._diags;
-      delete newSchedule._lastMs;
-      delete newSchedule._userName;
-
-      newSchedule.name = repName;
-      newSchedule.groups = destGroupsList;
-      newSchedule.isActive = true;
-
-      var res = await callApi(api, 'Add', {
-        typeName: 'CustomReportSchedule',
-        entity: newSchedule
-      });
-
-      statusDiv.style.color = "#10b981";
-      statusDiv.textContent = "✅ ¡Reporte clonado y registrado con éxito en Geotab!";
-      
-      setTimeout(function() {
-        $('create-report-modal').style.display = 'none';
-        rawSchedules = [];
-        handleReportGroupChange();
-      }, 1200);
-
-    } catch (err) {
-      console.error("Error detallado al crear reporte:", err);
-      var errorMsg = err.message || (err.error && err.error.message) || JSON.stringify(err);
-      statusDiv.style.color = "#ef4444";
-      statusDiv.textContent = "Error al clonar reporte: " + errorMsg;
-    }
-  }
-
-  // --- LÓGICA DE CREACIÓN DE GRUPOS EN AUDITORÍA ---
-  function populateGeneralParentGroupsDropdown() {
-    var sel = $('audit-gen-parent-select');
-    var query = ($('audit-gen-parent-search').value || '').toLowerCase().trim();
-    if (!sel) return;
-
-    sel.innerHTML = '<option value="">-- Seleccione Grupo Padre --</option>';
-
-    var allGroupsList = Object.keys(groupsById).map(function(k) { return groupsById[k]; });
-    allGroupsList.sort(function(a, b) {
-      return (a.name || '').localeCompare(b.name || '', 'es');
-    });
-
-    allGroupsList.forEach(function(g) {
-      if (!g || !g.id || !g.name) return;
-      if (!query || g.name.toLowerCase().indexOf(query) >= 0 || g.id.toLowerCase().indexOf(query) >= 0) {
-        var opt = document.createElement('option');
-        opt.value = g.id;
-        opt.textContent = g.name + " (" + g.id + ")";
-        sel.appendChild(opt);
-      }
-    });
-  }
-
-  async function createNewClientGroup() {
-    var clientName = $('audit-new-client-name').value.trim();
-    var vehicleType = $('audit-new-client-vehicle-type').value.trim();
-    var statusDiv = $('audit-create-status');
-
-    // Validación estricta de ambos campos obligatorios
-    if (!clientName || !vehicleType) {
-      statusDiv.style.color = "#ef4444";
-      statusDiv.textContent = "⚠️ Para crear un cliente nuevo debe completar tanto la 'Razón Social' como el 'Tipo de Vehículo'.";
-      return;
-    }
-
-    // Formatear el nombre para DIVEMOTOR (b27A8): MODELO_NOMBRE CLIENTE
-    var divemotorGroupName = vehicleType + "_" + clientName;
-
-    statusDiv.style.color = "#0284c7";
-    statusDiv.textContent = "Creando '" + clientName + "' en CLIENTES (b278A) y '" + divemotorGroupName + "' en DIVEMOTOR (b27A8)...";
-
-    try {
-      var calls = [
-        ['Add', { typeName: 'Group', entity: { name: clientName, parent: { id: 'b278A' } } }],
-        ['Add', { typeName: 'Group', entity: { name: divemotorGroupName, parent: { id: 'b27A8' } } }]
-      ];
-
-      await callMulti(api, calls);
-      statusDiv.style.color = "#10b981";
-      statusDiv.textContent = "✅ ¡Creado correctamente! CLIENTES: '" + clientName + "' | DIVEMOTOR: '" + divemotorGroupName + "'";
-      
-      $('audit-new-client-name').value = '';
-      $('audit-new-client-vehicle-type').value = '';
-
-      setTimeout(function() {
-        load();
-      }, 1200);
-
-    } catch (err) {
-      console.error("Error creando cliente nuevo:", err);
-      statusDiv.style.color = "#ef4444";
-      statusDiv.textContent = "Error al crear cliente: " + (err.message || JSON.stringify(err));
-    }
-  }
-
-  async function createGeneralGroup() {
-    var parentId = $('audit-gen-parent-select').value;
-    var name = $('audit-gen-group-name').value.trim();
-    var statusDiv = $('audit-create-status');
-
-    if (!parentId) {
-      statusDiv.style.color = "#ef4444";
-      statusDiv.textContent = "Por favor seleccione el grupo padre de la lista.";
-      return;
-    }
-
-    if (!name) {
-      statusDiv.style.color = "#ef4444";
-      statusDiv.textContent = "Por favor ingrese el nombre para el nuevo grupo.";
-      return;
-    }
-
-    var parentGroupObj = groupsById[parentId];
-    var parentName = parentGroupObj ? parentGroupObj.name : parentId;
-
-    statusDiv.style.color = "#0284c7";
-    statusDiv.textContent = "Creando grupo '" + name + "' bajo el padre '" + parentName + "'...";
-
-    try {
-      await callApi(api, 'Add', {
-        typeName: 'Group',
-        entity: {
-          name: name,
-          parent: { id: parentId }
+    if (!diagText || normDiagText(diagText) === normDiagText(sourceDiagOriginalText)) {
+      diagList = sourceDiagIds.map(function (id) { return { id: id }; });
+    } else {
+      var tokens = diagText.split(/[\n\r,]+/).map(function (t) { return t.trim(); }).filter(Boolean);
+      var added = new Set();
+      tokens.forEach(function (token) {
+        var pick = null;
+        if (diagById[token] !== undefined || sourceDiagIds.indexOf(token) >= 0) {
+          pick = token;
+        } else {
+          var fromSource = sourceDiagIds.filter(function (id) { return diagById[id] === token && !added.has(id); });
+          if (fromSource.length) {
+            pick = fromSource[0];
+          } else {
+            var anyIds = Object.keys(diagById).filter(function (id) { return diagById[id] === token && !added.has(id); });
+            if (anyIds.length) pick = anyIds[0];
+          }
         }
+        if (pick && !added.has(pick)) { added.add(pick); diagList.push({ id: pick }); }
       });
-
-      statusDiv.style.color = "#10b981";
-      statusDiv.textContent = "✅ Grupo '" + name + "' creado con éxito bajo '" + parentName + "'";
-      $('audit-gen-group-name').value = '';
-
-      setTimeout(function() {
-        load();
-      }, 1000);
-
-    } catch (err) {
-      console.error("Error creando grupo general:", err);
-      statusDiv.style.color = "#ef4444";
-      statusDiv.textContent = "Error al crear grupo: " + (err.message || JSON.stringify(err));
+      if (diagList.length === 0) {
+        diagList = sourceDiagIds.map(function (id) { return { id: id }; });
+      }
     }
+
+    // ----- Paso 1: plantilla nueva con el nombre del reporte -----
+    var newTplId = null;
+    try {
+      statusDiv.style.color = "#0284c7";
+      statusDiv.textContent = "Paso 1/2: creando plantilla \"" + repName + "\"...";
+      newTplId = await cloneReportTemplate(sourceSched.template.id, repName);
+      templateNamesById[newTplId] = repName;
+    } catch (e) {
+      console.error("Fallo al clonar la plantilla:", e);
+      return fail("Error en el paso 1 (plantilla): " + errToText(e) + "\n(Detalle en la consola F12)");
+    }
+
+    // ----- Paso 2: programación apuntando a la plantilla nueva -----
+    var variants = [
+      { label: 'con scopeGroupFilter original', opt: { keepGroups: true, keepFilter: true } },
+      { label: 'sin fechas fromUtc/toUtc', opt: { keepGroups: true, dropDates: true } },
+      { label: 'sin fechas y sin campos vacíos', opt: { keepGroups: true, dropDates: true, prune: true } },
+      { label: 'grupos en scopeGroups', opt: { keepGroups: true, scopeOnly: true } },
+      { label: 'filtro original + sin fechas + sin vacíos', opt: { keepGroups: true, keepFilter: true, dropDates: true, prune: true } },
+      { label: 'sin groups', opt: {} }
+    ];
+    var errors = [];
+
+    for (var i = 0; i < variants.length; i++) {
+      var entity = null;
+      try {
+        statusDiv.style.color = "#0284c7";
+        statusDiv.textContent = "Paso 2/2: registrando la programación (variante " + (i + 1) + "/" + variants.length + ")...";
+        entity = buildClonedSchedule(sourceSched, newTplId, destGroupsList, diagList, variants[i].opt);
+        console.log("Programación a crear (variante " + (i + 1) + "):", JSON.stringify(entity));
+
+        await callApi(api, 'Add', { typeName: 'CustomReportSchedule', entity: entity });
+
+        hideDebug();
+        statusDiv.style.color = "#16a34a";
+        statusDiv.textContent = "✅ ¡Reporte \"" + repName + "\" creado con éxito en Geotab! (variante: " + variants[i].label + ")";
+
+        setTimeout(function () {
+          $('create-report-modal').style.display = 'none';
+          rawSchedules = [];
+          if ($('reports-group-select').value) handleReportGroupChange();
+        }, 1500);
+        return;
+      } catch (err) {
+        errors.push("Variante " + (i + 1) + " (" + variants[i].label + "): " + errToText(err));
+        dbg("VARIANTE " + (i + 1) + " (" + variants[i].label + ")\nENTIDAD: " + safeJson(entity) + "\nERROR: " + errDetail(err));
+        console.error("Error al crear programación (variante " + (i + 1) + "):", err);
+      }
+    }
+
+    // ----- Sonda: ¿falla también con la plantilla ORIGINAL? (si crea algo, se elimina enseguida) -----
+    statusDiv.textContent = "Diagnosticando causa del error...";
+    try {
+      var probeEntity = buildClonedSchedule(sourceSched, sourceSched.template.id, destGroupsList, diagList, { keepGroups: true });
+      var pr = await callApi(api, 'Add', { typeName: 'CustomReportSchedule', entity: probeEntity });
+      var pid = idFromAddResult(pr);
+      dbg("SONDA: con la plantilla ORIGINAL la creación SÍ funciona (id " + pid + ") → el problema está en la plantilla nueva. La programación de prueba se eliminó.");
+      if (pid) {
+        try { await callApi(api, 'Remove', { typeName: 'CustomReportSchedule', entity: { id: pid } }); }
+        catch (re) { dbg("ATENCIÓN: no se pudo eliminar la programación de prueba " + pid + " (revísela en MyGeotab): " + errDetail(re)); }
+      }
+    } catch (pe) {
+      dbg("SONDA: con la plantilla ORIGINAL también falla: " + errDetail(pe) + " → el problema NO es la plantilla nueva (probable permiso o un campo de la programación).");
+    }
+
+    // Limpieza: se elimina la plantilla huérfana
+    try {
+      await callApi(api, 'Remove', { typeName: 'ReportTemplate', entity: { id: newTplId } });
+      delete templateNamesById[newTplId];
+    } catch (e) {
+      dbg("ATENCIÓN: no se pudo eliminar la plantilla huérfana " + newTplId + ": " + errDetail(e));
+    }
+
+    dbg("ORIGEN SIN PROCESAR: " + safeJson(sourceSched));
+    showDebug();
+    fail("No se pudo crear la programación (la plantilla creada fue revertida).\n" + errors.join("\n") + "\nCopie el cuadro de detalle técnico de abajo y envíelo.");
   }
 
   function generateLegalText() {
@@ -2272,62 +1938,23 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
   }
 
   function downloadWordDoc() {
-    var selList = all.filter(function(r) { return selected[r.id]; });
-    
-    if (selList.length === 0) {
-      selList = getActiveRowsForModule().filter(function(r) { return isRowMatchingFilters(r); });
+    var txt = $('cgps-legal-text').value;
+    if (!txt) {
+      generateLegalText();
+      txt = $('cgps-legal-text').value;
     }
+    if (!txt) return;
 
-    if (selList.length === 0) {
-      setMsg("Seleccione o filtre al menos un activo para generar el Word del Certificado.", true);
-      return;
-    }
-
-    var docContent = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">';
-    docContent += '<head><meta charset="utf-8"><style>';
-    docContent += 'body { font-family: Arial, sans-serif; font-size: 11pt; }';
-    docContent += '.title { font-weight: bold; font-size: 12pt; text-align: center; margin-bottom: 12px; }';
-    docContent += 'table { border-collapse: collapse; width: 100%; margin: 0 auto; }';
-    docContent += 'th, td { border: 1px solid #000000; padding: 6px 8px; text-align: center; font-size: 10.5pt; }';
-    docContent += 'th { font-weight: bold; background-color: #ffffff; }';
-    docContent += '</style></head><body>';
-
-    docContent += '<div class="title">ANEXO N°01</div>';
-
-    docContent += '<table>';
-    docContent += '<thead>';
-    docContent += '<tr>';
-    docContent += '<th style="width: 8%;">Nº</th>';
-    docContent += '<th style="width: 32%;">Placa</th>';
-    docContent += '<th style="width: 38%;">VIN</th>';
-    docContent += '<th style="width: 22%;">ACTIVO DESDE</th>';
-    docContent += '</tr>';
-    docContent += '</thead>';
-    docContent += '<tbody>';
-
-    selList.forEach(function(r, index) {
-      docContent += '<tr>';
-      docContent += '<td>' + (index + 1) + '</td>';
-      docContent += '<td>' + htmlEsc(r.placa) + '</td>';
-      docContent += '<td>' + htmlEsc(r.vin) + '</td>';
-      docContent += '<td>' + htmlEsc(r.desde) + '</td>';
-      docContent += '</tr>';
-    });
-
-    docContent += '</tbody></table>';
-    docContent += '</body></html>';
-
-    var blob = new Blob(['\ufeff' + docContent], { type: 'application/msword' });
+    var blob = new Blob(['\ufeff' + txt], { type: 'application/msword' });
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a');
     a.href = url;
-    a.download = 'Anexo_N01_Certificado_GPS_' + fmtDate(new Date().toISOString()).replace(/\//g, '-') + '.doc';
+    a.download = 'Certificado_GPS_' + fmtDate(new Date().toISOString()).replace(/\//g, '-') + '.doc';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    
-    setMsg("📄 Word (ANEXO N°01) generado con éxito para " + selList.length + " vehículo(s).");
+    setMsg("Documento Word generado con éxito.");
   }
 
   function exportMasterExcel() {
@@ -2410,7 +2037,6 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
         $('sec-audit').style.display = 'none';
         $('sec-reports').style.display = 'none';
         $('sec-activations').style.display = 'none';
-        $('sec-flash').style.display = 'none';
         $('sec-kpi-container').style.display = 'grid';
         $('sec-certi-combined-box').style.display = 'grid';
         $('sec-bulk-container').style.display = 'none';
@@ -2425,7 +2051,6 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
         $('sec-audit').style.display = 'none';
         $('sec-reports').style.display = 'none';
         $('sec-activations').style.display = 'none';
-        $('sec-flash').style.display = 'none';
         $('sec-kpi-container').style.display = 'grid';
         $('sec-certi-combined-box').style.display = 'none';
         $('sec-bulk-container').style.display = 'block';
@@ -2442,7 +2067,6 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
         $('sec-audit').style.display = 'none';
         $('sec-reports').style.display = 'none';
         $('sec-activations').style.display = 'none';
-        $('sec-flash').style.display = 'none';
         $('sec-kpi-container').style.display = 'grid';
         $('sec-certi-combined-box').style.display = 'none';
         $('sec-bulk-container').style.display = 'block';
@@ -2456,15 +2080,12 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
         $('sec-master').style.display = 'none';
         $('sec-reports').style.display = 'none';
         $('sec-activations').style.display = 'none';
-        $('sec-flash').style.display = 'none';
         $('sec-audit').style.display = 'block';
         $('sec-kpi-container').style.display = 'none';
         $('sec-certi-combined-box').style.display = 'none';
         $('sec-bulk-container').style.display = 'none';
         $('sec-controls-container').style.display = 'none';
         $('sec-table-container').style.display = 'none';
-
-        populateGeneralParentGroupsDropdown();
       } else if (mod === 'reports') {
         $('testn-mod-title').textContent = 'Reportes por Cliente';
         $('hdr-actions-reports').style.display = 'flex';
@@ -2472,34 +2093,18 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
         $('sec-master').style.display = 'none';
         $('sec-audit').style.display = 'none';
         $('sec-activations').style.display = 'none';
-        $('sec-flash').style.display = 'none';
         $('sec-reports').style.display = 'block';
         $('sec-kpi-container').style.display = 'none';
         $('sec-certi-combined-box').style.display = 'none';
         $('sec-bulk-container').style.display = 'none';
         $('sec-controls-container').style.display = 'none';
         $('sec-table-container').style.display = 'none';
-
-        initAutoReportGroups();
       } else if (mod === 'activations') {
         $('testn-mod-title').textContent = 'Activaciones de Unidades';
         $('sec-master').style.display = 'none';
         $('sec-audit').style.display = 'none';
         $('sec-reports').style.display = 'none';
-        $('sec-flash').style.display = 'none';
         $('sec-activations').style.display = 'block';
-        $('sec-kpi-container').style.display = 'none';
-        $('sec-certi-combined-box').style.display = 'none';
-        $('sec-bulk-container').style.display = 'none';
-        $('sec-controls-container').style.display = 'none';
-        $('sec-table-container').style.display = 'none';
-      } else if (mod === 'flash') {
-        $('testn-mod-title').textContent = 'Flash Report (Generador Prompt MCP)';
-        $('sec-master').style.display = 'none';
-        $('sec-audit').style.display = 'none';
-        $('sec-reports').style.display = 'none';
-        $('sec-activations').style.display = 'none';
-        $('sec-flash').style.display = 'block';
         $('sec-kpi-container').style.display = 'none';
         $('sec-certi-combined-box').style.display = 'none';
         $('sec-bulk-container').style.display = 'none';
@@ -2599,8 +2204,8 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
       if (activeModule === 'certi') {
         html += '<tr>' +
           '<td style="text-align:center;"><input type="checkbox" data-id="' + htmlEsc(r.id) + '"' + (isSel ? ' checked' : '') + '></td>' +
-          '<td><b style="color:#0f172a;">' + htmlEsc(r.placa) + '</b></td>' +
-          '<td style="font-family:monospace;">' + htmlEsc(r.vin) + '</td>' +
+          '<td>' + htmlEsc(r.placa) + '</td>' +
+          '<td>' + htmlEsc(r.vin) + '</td>' +
           '<td>' + htmlEsc(r.desde) + '</td>' +
           '<td>' + htmlEsc(r.razon || 'Sin Razón Social') + '</td>' +
           '<td>' + htmlEsc(r.ruc || 'Sin RUC') + '</td>' +
@@ -2609,10 +2214,10 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
       } else if (activeModule === 'master') {
         html += '<tr>' +
           '<td style="text-align:center;"><input type="checkbox" data-id="' + htmlEsc(r.id) + '"' + (isSel ? ' checked' : '') + '></td>' +
-          '<td><b style="color:#0f172a;">' + htmlEsc(r.placa) + '</b></td>' +
+          '<td>' + htmlEsc(r.placa) + '</td>' +
           '<td>' + htmlEsc(databaseName) + '</td>' +
-          '<td style="font-family:monospace;">' + htmlEsc(r.vin) + '</td>' +
-          '<td style="font-family:monospace;">' + htmlEsc(r.serialNumber) + '</td>' +
+          '<td>' + htmlEsc(r.vin) + '</td>' +
+          '<td>' + htmlEsc(r.serialNumber) + '</td>' +
           '<td>' + htmlEsc(r.desde) + '</td>' +
           '</tr>';
       } else {
@@ -2621,11 +2226,11 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
 
         html += '<tr>' +
           '<td style="text-align:center;"><input type="checkbox" data-id="' + htmlEsc(r.id) + '"' + (isSel ? ' checked' : '') + '></td>' +
-          '<td><b style="color:#0f172a;">' + htmlEsc(r.nombreActivo) + '</b></td>' +
+          '<td>' + htmlEsc(r.nombreActivo) + '</td>' +
           '<td>' + htmlEsc(r.placa) + '</td>' +
           '<td>' + htmlEsc(r.desde) + '</td>' +
           '<td>' + htmlEsc(r.desde) + '</td>' +
-          '<td style="font-family:monospace;">' + htmlEsc(r.vin) + '</td>' +
+          '<td>' + htmlEsc(r.vin) + '</td>' +
           '<td><span class="badge-param ' + badgeClass + '" title="Posee ' + r.paramCount + ' de 5 parámetros">' + badgeLabel + '</span></td>' +
           '<td>' + htmlEsc(r.grupos || 'Sin Grupo') + '</td>' +
           '<td>' + htmlEsc(r.estadoProvincia || 'Sin Estado') + '</td>' +
@@ -2638,7 +2243,7 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
     });
 
     if ($('cgps-listbody')) {
-      $('cgps-listbody').innerHTML = html || '<tr><td colspan="13" style="text-align:center; padding: 24px; color: #64748b;">Sin resultados coincidentes para la combinación de filtros aplicada</td></tr>';
+      $('cgps-listbody').innerHTML = html || '<tr><td colspan="13" style="text-align:center; padding: 14px; color: #64748b;">Sin resultados coincidentes para la combinación de filtros aplicada</td></tr>';
     }
     updateKPIs();
     highlightKpiCards();
@@ -2647,7 +2252,7 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
   function cleanLegalName(str) {
     if (!str) return '';
     return str.toUpperCase()
-      .replace(/^(\d+[\.\,-]|\s*)*OBSERVACIONES\s*:\s*/i, '')
+      .replace(/^OBSERVACIONES\s*:\s*/i, '')
       .replace(/\b[A-Z0-9]{17}\b/gi, '') 
       .replace(/\b(S\.?\s*A\.?\s*C\.?|S\.?\s*A\.?|E\.?\s*I\.?\s*R\.?\s*L\.?|S\.?\s*R\.?\s*L\.?|SOCIEDAD\s+ANONIMA\s+CERRADA|SOCIEDAD\s+ANONIMA|CERRADA)\b/g, '')
       .replace(/_/g, ' ') 
@@ -2681,7 +2286,7 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
     var lines = rawText.split(/[\n\r]+/);
     
     lines.forEach(function(line) {
-      var lineClean = line.replace(/^(\d+[\.\,-]|\s*)*OBSERVACIONES\s*:\s*/i, '').trim();
+      var lineClean = line.replace(/^OBSERVACIONES\s*:\s*/i, '').trim();
       if (!lineClean) return;
 
       var subParts = lineClean.split(/\s*-\s*/);
@@ -2690,7 +2295,7 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
 
         part = part.replace(/^[A-Z0-9]{17}\s*/i, '').replace(/\s*[A-Z0-9]{17}$/i, '').trim();
 
-        if (/^(OBSERVACIONES|NO\s+INDICA|ACT\.\s*INMEDIATA|ACT\s+INMEDIATA|PENDIENTE)/i.test(part) || part.length < 3) {
+        if (/^NO\s+INDICA/i.test(part) || /^ACT\.\s*INMEDIATA/i.test(part) || /^PENDIENTE/i.test(part) || part.length < 3) {
           continue;
         }
 
@@ -2774,7 +2379,7 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
     return sessionP.then(function(session) {
       var currentUser = session && (session.userName || session.user);
       if (!currentUser || String(currentUser).toLowerCase() !== USUARIO_PERMITIDO.toLowerCase()) {
-        document.body.innerHTML = "<div style='display:flex; justify-content:center; align-items:center; height:100vh; background-color:#0f172a; font-family:sans-serif;'><div style='text-align:center; padding:40px; background:#1e293b; border-radius:16px; border:1px solid #334155; color:white;'><h3 style='color:#ef4444; margin:0 0 10px 0;'>Acceso Denegado</h3><p style='color:#94a3b8; font-size:14px; margin:0;'>Este módulo está restringido exclusivamente para la cuenta autorizada.</p></div></div>";
+        document.body.innerHTML = "<div style='display:flex; justify-content:center; align-items:center; height:100vh; background-color:#f4f7fc;'><div style='text-align:center; padding:30px; background:#fff; border-radius:10px; border:1px solid #cbd5e1;'><h3 style='color:#b91c1c;'>Acceso Denegado</h3><p style='color:#64748b; font-size:13px;'>Este módulo está restringido exclusivamente para la cuenta autorizada.</p></div></div>";
         throw new Error("Usuario no autorizado para ejecutar esta extensión.");
       }
 
@@ -2817,7 +2422,6 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
 
         rebuildRows();
         renderList();
-        populateGeneralParentGroupsDropdown();
 
         setMsg(all.length + ' activos y ' + Object.keys(groupsById).length + ' grupos sincronizados correctamente.');
 
@@ -2838,12 +2442,7 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
   $('testn-btn-refresh-hub').addEventListener('click', function() { load(); });
   $('testn-btn-refresh-mod').addEventListener('click', function() { load(); });
 
-  // EVENTOS AUDITORÍA DE GRUPOS — CREACIÓN
-  $('audit-btn-create-client').addEventListener('click', createNewClientGroup);
-  $('audit-btn-create-general').addEventListener('click', createGeneralGroup);
-  $('audit-gen-parent-search').addEventListener('keyup', populateGeneralParentGroupsDropdown);
-
-  // EVENTOS MASTER SWITCH
+  // EVENTOS DEL MÓDULO MASTER SWITCH
   $('master-btn-excel').addEventListener('click', exportMasterExcel);
 
   $('master-btn-week').addEventListener('click', function() {
@@ -2891,32 +2490,27 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
   $('cgps-btn-bulk-std').addEventListener('click', function() { applyBulkFilter($('cgps-bulk-input-std').value); });
   $('cgps-btn-bulk-clear-std').addEventListener('click', function() { $('cgps-bulk-input-std').value = ''; applyBulkFilter(''); });
 
-  // EVENTOS REPORTES POR CLIENTE
-  $('reports-search-input').addEventListener('keyup', function() {
-    renderSubGroupsChecklist();
-  });
+  // EVENTOS DEL MÓDULO REPORTES POR CLIENTE
+  $('reports-btn-fetch-groups').addEventListener('click', fetchAndPopulateSubGroups);
 
-  $('reports-btn-select-all-subgroups').addEventListener('click', function() {
-    var cbs = document.querySelectorAll('.chk-report-subgroup');
-    cbs.forEach(function(cb) { cb.checked = true; });
-    window.updateReportSelectedSubgroupsCount();
-  });
-
-  $('reports-btn-deselect-all-subgroups').addEventListener('click', function() {
-    var cbs = document.querySelectorAll('.chk-report-subgroup');
-    cbs.forEach(function(cb) { cb.checked = false; });
-    window.updateReportSelectedSubgroupsCount();
+  $('reports-search-input').addEventListener('keyup', function(e) {
+    filterReportGroupsOptions();
+    if (e.key === 'Enter') {
+      handleReportGroupChange();
+    }
   });
 
   $('reports-btn-search').addEventListener('click', function() {
     handleReportGroupChange();
   });
 
-  // CREACIÓN DE REPORTES
+  // EVENTOS DEL MODAL DE CREACIÓN DE REPORTES
   $('reports-btn-open-create-modal').addEventListener('click', openCreateReportModal);
   $('btn-close-create-modal').addEventListener('click', function() {
     $('create-report-modal').style.display = 'none';
   });
+
+  $('create-rep-parent-cat').addEventListener('change', populateSourceGroupsDropdown);
 
   $('create-rep-source-search').addEventListener('keyup', function() {
     populateSourceGroupsDropdown();
@@ -2929,6 +2523,7 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
   $('create-rep-source-group').addEventListener('change', handleSourceGroupChange);
   $('create-rep-source-schedule').addEventListener('change', handleSourceScheduleChange);
   $('btn-apply-prefix-preset').addEventListener('click', applyNamePrefixPreset);
+
   $('btn-submit-create-report').addEventListener('click', createAndSubmitReport);
 
   // EVENTOS MODAL VISUAL Y COPIA
@@ -2959,7 +2554,7 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
     if (found) openReportPreviewModal(found);
   });
 
-  // FILTROS DE REPORTES
+  // FILTROS DE REPORTES Y PALABRA CLAVE
   $('rep-filter-from').addEventListener('change', applyReportFilters);
   $('rep-filter-to').addEventListener('change', applyReportFilters);
   $('rep-filter-user').addEventListener('change', applyReportFilters);
@@ -2973,7 +2568,7 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
     applyReportFilters();
   });
 
-  // AUDITORÍA DE GRUPOS
+  // EVENTOS AUDITORÍA DE GRUPOS
   $('cgps-btn-exec-audit').addEventListener('click', executeGroupAudit);
   $('cgps-btn-clear-audit').addEventListener('click', function() {
     $('cgps-audit-input').value = '';
@@ -2994,28 +2589,6 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
     txtElem.select();
     navigator.clipboard.writeText(txtElem.value).then(function() {
       setMsg('📋 Texto legal copiado al portapapeles.');
-    });
-  });
-
-  // EVENTOS FLASH REPORT (MCP)
-  $('btn-mod-flash').addEventListener('click', function() { switchView('flash'); });
-  $('flash-btn-generate').addEventListener('click', generateFlashReportPrompt);
-  $('flash-btn-clear').addEventListener('click', function() {
-    $('flash-input-placa').value = '';
-    $('flash-input-vin').value = '';
-    $('flash-input-modelo').value = '';
-    $('flash-input-ventana').value = '';
-    $('flash-input-relato').value = '';
-    $('flash-input-fotos').value = '';
-    $('flash-output-prompt').value = '';
-    setMsg('Campos de Flash Report limpiados.');
-  });
-  $('flash-btn-copy').addEventListener('click', function() {
-    var outElem = $('flash-output-prompt');
-    if (!outElem.value) return;
-    outElem.select();
-    navigator.clipboard.writeText(outElem.value).then(function() {
-      setMsg('📋 Prompt MCP copiado al portapapeles.');
     });
   });
 
@@ -3042,7 +2615,7 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
   $('btn-mod-activations').addEventListener('click', function() { switchView('activations'); });
   $('testn-btn-back').addEventListener('click', function() { switchView('hub'); });
 
-  // BÚSQUEDA Y SELECTOR DE CAMPO
+  // BÚSQUEDA Y SELECTOR DE CAMPO EN TABLA
   var filterTimer = null;
   $('cgps-filter').addEventListener('input', function () { clearTimeout(filterTimer); filterTimer = setTimeout(renderList, 200); });
   $('cgps-filter-field').addEventListener('change', renderList);
