@@ -258,14 +258,12 @@
 
     <!-- Módulo Auditoría de Grupos -->
     <div id="sec-audit" style="display: none;">
-      <!-- APARTADO DE CREACIÓN DE GRUPOS -->
       <div class="cgps-card" style="margin-top: 12px; background: #ffffff; border: 1px solid #bae6fd;">
         <div style="font-size: 12px; font-weight: 800; color: #0369a1; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">
           <span>📁</span> CREAR NUEVO GRUPO EN EL ÁRBOLES DE GEOTAB
         </div>
         
         <div style="display: flex; gap: 16px; flex-wrap: wrap;">
-          <!-- Tipo 1: Cliente Nuevo -->
           <div style="flex: 1; min-width: 320px; background: #f0f9ff; padding: 14px; border-radius: 8px; border: 1px solid #e0f2fe;">
             <div style="font-size: 11px; font-weight: 700; color: #0284c7; margin-bottom: 6px; text-transform: uppercase;">1. Opción: Cliente Nuevo</div>
             <p style="font-size: 11px; color: #64748b; margin: 0 0 10px 0;">Crea automáticamente el cliente en <b>CLIENTES (b278A)</b> y en <b>DIVEMOTOR (b27A8)</b> con el formato <code>MODELO_CLIENTE</code>.</p>
@@ -277,7 +275,6 @@
             </div>
           </div>
 
-          <!-- Tipo 2: En General -->
           <div style="flex: 1; min-width: 320px; background: #f8fafc; padding: 14px; border-radius: 8px; border: 1px solid #e2e8f0;">
             <div style="font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 6px; text-transform: uppercase;">2. Opción: En General</div>
             <p style="font-size: 11px; color: #64748b; margin: 0 0 10px 0;">Permite elegir cualquier grupo padre existente en el árbol de Geotab.</p>
@@ -458,7 +455,6 @@
     <!-- MÓDULO: FLASH REPORT (GENERADOR DE PROMPT MCP) -->
     <div id="sec-flash" style="display: none;">
       <div class="certi-two-cols-grid" style="margin-top: 12px;">
-        <!-- COLUMNA IZQUIERDA: CAMPOS DE ENTRADA MANUALES -->
         <div class="cgps-card" style="margin: 0;">
           <div style="font-size: 12px; font-weight: 800; color: #0284c7; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">
             <span>📋</span> PARÁMETROS MANUALES DEL SINIESTRO
@@ -509,7 +505,6 @@
           </div>
         </div>
 
-        <!-- COLUMNA DERECHA: PROMPT FINAL COMPLETO PARA COPIAR -->
         <div class="cgps-card" style="margin: 0; background: #ffffff;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
             <span style="font-size: 12px; font-weight: 700; color: #0f172a;">PROMPT COMPLETO LISTO PARA IA / MCP</span>
@@ -1260,7 +1255,6 @@ var addInConstructor = function (geotabApi, state, callback) {
     $('cgps-mass-value-input').placeholder = labelText + '...';
   }
 
-  // INYECCIÓN DE LOS 5 PARÁMETROS OBLIGATORIOS
   async function injectRequiredParameters() {
     var selectedIds = Object.keys(selected).filter(function (k) { return selected[k]; });
     
@@ -1322,7 +1316,6 @@ var addInConstructor = function (geotabApi, state, callback) {
     }
   });
 
-  // LÓGICA DE EXTRACCIÓN Y DETECCIÓN DE ACTIVACIÓN INMEDIATA
   function processActivationsText() {
     var raw = ($('act-input-text').value || '').trim();
     var badge = $('act-detected-badge');
@@ -1457,7 +1450,6 @@ var addInConstructor = function (geotabApi, state, callback) {
     });
   });
 
-  // LÓGICA DE GENERACIÓN DE PROMPT FLASH REPORT (MCP)
   function generateFlashReportPrompt() {
     var placa = ($('flash-input-placa').value || '').trim().toUpperCase() || '[XXX-000]';
     var vin = ($('flash-input-vin').value || '').trim().toUpperCase() || '[...]';
@@ -2056,7 +2048,7 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
     $('create-report-modal').style.display = 'flex';
   }
 
-  // FUNCIÓN DE CLONACIÓN CORREGIDA Y SANITIZADA (SOPORTA SDK DE GEOTAB)
+  // ESTRATEGIA EN DOS PASOS (ADD SIN VARIABLES + SET CON DIAGNÓSTICOS)
   async function createAndSubmitReport() {
     var sourceSchedId = $('create-rep-source-schedule').value;
     var repName = $('create-rep-name').value.trim();
@@ -2093,57 +2085,74 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
     }
 
     statusDiv.style.color = "#0284c7";
-    statusDiv.textContent = "Clonando plantilla y registrando reporte en Geotab...";
+    statusDiv.textContent = "Paso 1/2: Registrando reporte base en Geotab (entidad limpia)...";
 
     try {
-      var newSchedule = JSON.parse(JSON.stringify(sourceSched));
-
-      // 1. Limpieza estricta de propiedades del sistema (no permitidas en Add)
-      delete newSchedule.id;
-      delete newSchedule.version;
-      delete newSchedule.lastUpdated;
-      delete newSchedule.lastRun;
-      delete newSchedule.lastModifiedUser;
-      delete newSchedule.scopeGroupFilter;
-      delete newSchedule.recipientUsers;
-      delete newSchedule._resolvedName;
-      delete newSchedule._rules;
-      delete newSchedule._diags;
-      delete newSchedule._lastMs;
-      delete newSchedule._userName;
-
-      // 2. Asignación de datos dinámicos solicitados por la interfaz
-      newSchedule.name = repName;
-      newSchedule.groups = destGroupsList;
-      newSchedule.includeAllChildrenGroups = destGroupsList;
-      newSchedule.scopeGroups = [];
-      newSchedule.includeDirectChildrenOnlyGroups = [];
-      newSchedule.isActive = true;
-
-      // 3. Sanitización profunda de arguments.diagnostics (Causa principal de la excepción no definida)
-      if (newSchedule.arguments) {
-        var rawDiagInput = $('create-rep-diagnostics').value;
-        if (rawDiagInput && rawDiagInput.trim()) {
-          var tokens = rawDiagInput.split(/[\n\r,]+/).map(function(t){ return t.trim(); }).filter(Boolean);
-          newSchedule.arguments.diagnostics = tokens.map(function(t) {
-            // Si el token coincide con un id conocido de diagnóstico, lo usa, sino usa el id original
-            var diagKey = Object.keys(diagById).find(function(k){ return diagById[k] === t; }) || t;
-            return { id: diagKey };
-          });
-        } else if (Array.isArray(newSchedule.arguments.diagnostics)) {
-          newSchedule.arguments.diagnostics = newSchedule.arguments.diagnostics.map(function(d) {
-            return typeof d === 'string' ? { id: d } : { id: d.id };
-          });
+      // 1. Construir entidad base aislada (mínima) para el 'Add'
+      var newSchedule = {
+        name: repName,
+        destination: sourceSched.destination || "NormalReport",
+        frequency: sourceSched.frequency || "Daily",
+        period: sourceSched.period || "Today",
+        isActive: true,
+        template: { id: sourceSched.template ? sourceSched.template.id : "b114D" },
+        groups: destGroupsList,
+        includeAllChildrenGroups: destGroupsList,
+        arguments: {
+          entityType: (sourceSched.arguments && sourceSched.arguments.entityType) || "Device",
+          redirectSendReportTrue: false,
+          reportArgumentType: (sourceSched.arguments && sourceSched.arguments.reportArgumentType) || "EngineStatusStatus"
         }
-      }
+      };
 
-      var res = await callApi(api, 'Add', {
+      // PASO 1: Ejecutar Add sin variables complejas
+      var createdResult = await callApi(api, 'Add', {
         typeName: 'CustomReportSchedule',
         entity: newSchedule
       });
 
+      var newReportId = typeof createdResult === 'string' ? createdResult : (createdResult && createdResult.id ? createdResult.id : createdResult);
+
+      statusDiv.style.color = "#0284c7";
+      statusDiv.textContent = "Paso 2/2: Asignando diagnósticos al reporte (ID: " + newReportId + ")...";
+
+      // PASO 2: Obtener la entidad recién creada para asignarle los diagnósticos requeridos vía 'Set'
+      var fetchCreated = await callApi(api, 'Get', {
+        typeName: 'CustomReportSchedule',
+        search: { id: newReportId }
+      });
+
+      if (fetchCreated && fetchCreated[0]) {
+        var createdEntity = fetchCreated[0];
+        
+        var rawDiagInput = $('create-rep-diagnostics').value;
+        var parsedDiagnostics = [];
+
+        if (rawDiagInput && rawDiagInput.trim()) {
+          var tokens = rawDiagInput.split(/[\n\r,]+/).map(function(t){ return t.trim(); }).filter(Boolean);
+          parsedDiagnostics = tokens.map(function(t) {
+            var diagKey = Object.keys(diagById).find(function(k){ return diagById[k] === t; }) || t;
+            return { id: diagKey };
+          });
+        } else if (sourceSched.arguments && Array.isArray(sourceSched.arguments.diagnostics)) {
+          parsedDiagnostics = sourceSched.arguments.diagnostics.map(function(d) {
+            return typeof d === 'string' ? { id: d } : { id: d.id };
+          });
+        }
+
+        if (parsedDiagnostics.length > 0) {
+          if (!createdEntity.arguments) createdEntity.arguments = {};
+          createdEntity.arguments.diagnostics = parsedDiagnostics;
+
+          await callApi(api, 'Set', {
+            typeName: 'CustomReportSchedule',
+            entity: createdEntity
+          });
+        }
+      }
+
       statusDiv.style.color = "#10b981";
-      statusDiv.textContent = "✅ ¡Reporte clonado y registrado con éxito en Geotab!";
+      statusDiv.textContent = "✅ ¡Reporte clonado y configurado con éxito en Geotab!";
       
       setTimeout(function() {
         $('create-report-modal').style.display = 'none';
@@ -2152,14 +2161,13 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
       }, 1200);
 
     } catch (err) {
-      console.error("Error detallado al crear reporte:", err);
+      console.error("Error al procesar la clonación en 2 pasos:", err);
       var errorMsg = err.message || (err.error && err.error.message) || JSON.stringify(err);
       statusDiv.style.color = "#ef4444";
       statusDiv.textContent = "Error al clonar reporte: " + errorMsg;
     }
   }
 
-  // --- LÓGICA DE CREACIÓN DE GRUPOS EN AUDITORÍA ---
   function populateGeneralParentGroupsDropdown() {
     var sel = $('audit-gen-parent-select');
     var query = ($('audit-gen-parent-search').value || '').toLowerCase().trim();
