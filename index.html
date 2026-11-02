@@ -214,7 +214,7 @@
       </div>
 
       <div id="hdr-actions-certi" style="display: none; gap: 8px;">
-        <button id="cgps-btn-doc" type="button" class="cgps-btn cgps-btn-white">Generar Word</button>
+        <button id="cgps-btn-doc" type="button" class="cgps-btn cgps-btn-white">📄 Generar Word (ANEXO N°01)</button>
         <button id="cgps-btn-mail" type="button" class="cgps-btn cgps-btn-secondary">Generar Texto Legal</button>
         <button id="cgps-btn-view" type="button" class="cgps-btn cgps-btn-outline" style="color:#fff; border-color:rgba(255,255,255,0.3);">Visualizar Tabla</button>
       </div>
@@ -1211,7 +1211,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     }
   });
 
-  // LÓGICA DE EXTRACCIÓN Y DETECCIÓN DE ACTIVACIÓN INMEDIATA (AJUSTADA Y ROBUSTA)
+  // LÓGICA DE EXTRACCIÓN Y DETECCIÓN DE ACTIVACIÓN INMEDIATA
   function processActivationsText() {
     var raw = ($('act-input-text').value || '').trim();
     var badge = $('act-detected-badge');
@@ -1225,7 +1225,6 @@ var addInConstructor = function (geotabApi, state, callback) {
 
     var upper = raw.toUpperCase();
     
-    // DETECCIÓN FLEXIBLE Y PRECISA:
     var hasNoIndica = upper.indexOf("NO INDICA") >= 0;
 
     var hasActInmediata = upper.indexOf("ACT INMEDIATA") >= 0 || 
@@ -1994,24 +1993,64 @@ var addInConstructor = function (geotabApi, state, callback) {
     setMsg("Texto legal generado para " + selList.length + " vehículo(s).");
   }
 
+  // FUNCIÓN PARA GENERAR EL WORD SEGÚN EL FORMATO ANEXO N°01 DE LA IMAGEN
   function downloadWordDoc() {
-    var txt = $('cgps-legal-text').value;
-    if (!txt) {
-      generateLegalText();
-      txt = $('cgps-legal-text').value;
+    var selList = all.filter(function(r) { return selected[r.id]; });
+    
+    if (selList.length === 0) {
+      selList = getActiveRowsForModule().filter(function(r) { return isRowMatchingFilters(r); });
     }
-    if (!txt) return;
 
-    var blob = new Blob(['\ufeff' + txt], { type: 'application/msword' });
+    if (selList.length === 0) {
+      setMsg("Seleccione o filtre al menos un activo para generar el Word del Certificado.", true);
+      return;
+    }
+
+    var docContent = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">';
+    docContent += '<head><meta charset="utf-8"><style>';
+    docContent += 'body { font-family: Arial, sans-serif; font-size: 11pt; }';
+    docContent += '.title { font-weight: bold; font-size: 12pt; text-align: center; margin-bottom: 12px; }';
+    docContent += 'table { border-collapse: collapse; width: 100%; margin: 0 auto; }';
+    docContent += 'th, td { border: 1px solid #000000; padding: 6px 8px; text-align: center; font-size: 10.5pt; }';
+    docContent += 'th { font-weight: bold; background-color: #ffffff; }';
+    docContent += '</style></head><body>';
+
+    docContent += '<div class="title">ANEXO N°01</div>';
+
+    docContent += '<table>';
+    docContent += '<thead>';
+    docContent += '<tr>';
+    docContent += '<th style="width: 8%;">Nº</th>';
+    docContent += '<th style="width: 32%;">Placa</th>';
+    docContent += '<th style="width: 38%;">VIN</th>';
+    docContent += '<th style="width: 22%;">ACTIVO DESDE</th>';
+    docContent += '</tr>';
+    docContent += '</thead>';
+    docContent += '<tbody>';
+
+    selList.forEach(function(r, index) {
+      docContent += '<tr>';
+      docContent += '<td>' + (index + 1) + '</td>';
+      docContent += '<td>' + htmlEsc(r.placa) + '</td>';
+      docContent += '<td>' + htmlEsc(r.vin) + '</td>';
+      docContent += '<td>' + htmlEsc(r.desde) + '</td>';
+      docContent += '</tr>';
+    });
+
+    docContent += '</tbody></table>';
+    docContent += '</body></html>';
+
+    var blob = new Blob(['\ufeff' + docContent], { type: 'application/msword' });
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a');
     a.href = url;
-    a.download = 'Certificado_GPS_' + fmtDate(new Date().toISOString()).replace(/\//g, '-') + '.doc';
+    a.download = 'Anexo_N01_Certificado_GPS_' + fmtDate(new Date().toISOString()).replace(/\//g, '-') + '.doc';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    setMsg("Documento Word generado con éxito.");
+    
+    setMsg("📄 Word (ANEXO N°01) generado con éxito para " + selList.length + " vehículo(s).");
   }
 
   function exportMasterExcel() {
