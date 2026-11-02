@@ -100,7 +100,7 @@
       <div>
         <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">2. Filtrar Razón Social Origen (Cliente):</label>
         <div style="display: flex; gap: 6px;">
-          <input type="text" id="create-rep-source-search" class="cgps-input" placeholder="🔍 Escriba palabra clave para buscar..." style="width: 240px; height: 36px;">
+          <input type="text" id="create-rep-source-search" class="cgps-input" placeholder="🔍 Filtrar cliente..." style="width: 240px; height: 36px;">
           <select id="create-rep-source-group" class="cgps-input" style="flex: 1; height: 36px; font-weight: 600;">
             <option value="">-- Seleccione Cliente Origen --</option>
           </select>
@@ -129,7 +129,7 @@
 
       <div>
         <label style="font-weight: 700; color: #1b4e85; display: block; margin-bottom: 4px;">5. Asignar Grupos Destino (Múltiple Selección en Clientes / Tipo Motor):</label>
-        <input type="text" id="create-rep-dest-search" class="cgps-input" placeholder="🔍 Filtrar grupos destino..." style="width: 100%; height: 34px; margin-bottom: 6px;">
+        <input type="text" id="create-rep-dest-search" class="cgps-input" placeholder="🔍 Filtrar cliente..." style="width: 100%; height: 34px; margin-bottom: 6px;">
         <div id="create-rep-dest-groups-list" style="max-height: 140px; overflow-y: auto; border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px; background: #f8fafc; display: flex; flex-direction: column; gap: 6px;">
           <span style="color: #64748b; font-size: 11px;">Cargando lista de grupos destino...</span>
         </div>
@@ -284,11 +284,11 @@
           <!-- LÍNEA DIVISORA VERTICAL -->
           <div style="width: 2px; height: 50px; background-color: #000000; margin: 0 4px; align-self: center;"></div>
 
-          <!-- SECCIÓN 2: CHECKLIST DE SUBGRUPOS DETECTADOS -->
+          <!-- SECCIÓN 2: BÚSQUEDA DE CLIENTES Y SELECCIÓN MÚLTIPLE DE SUBGRUPOS -->
           <div style="display: flex; flex-direction: column; gap: 4px; flex: 1;">
-            <label style="font-size: 13px; font-weight: 700; color: #1e293b;">2 Búsqueda y Selección Múltiple de Subgrupos</label>
+            <label style="font-size: 13px; font-weight: 700; color: #1e293b;">2 Búsqueda de clientes o tipo de vehículo</label>
             <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 6px;">
-              <input type="text" id="reports-search-input" class="cgps-input" placeholder="🔍 Filtrar subgrupos..." style="width: 200px; height: 34px; font-size: 12px;" disabled>
+              <input type="text" id="reports-search-input" class="cgps-input" placeholder="Filtrar cliente..." style="width: 200px; height: 34px; font-size: 12px;" disabled>
               <button id="reports-btn-select-all-subgroups" type="button" class="cgps-btn cgps-btn-outline" style="height: 34px; padding: 0 10px; font-size: 11px;" disabled>Marcar Todos</button>
               <button id="reports-btn-deselect-all-subgroups" type="button" class="cgps-btn cgps-btn-outline" style="height: 34px; padding: 0 10px; font-size: 11px;" disabled>Desmarcar</button>
               
@@ -1135,11 +1135,9 @@ var addInConstructor = function (geotabApi, state, callback) {
     }
 
     var html = '';
-    var matchCount = 0;
 
     fetchedSubGroups.forEach(function(g) {
       if (!query || g.name.toLowerCase().indexOf(query) >= 0) {
-        matchCount++;
         html += '<label style="display: flex; align-items: center; gap: 6px; font-size: 11px; cursor: pointer; border-bottom: 1px dashed #e2e8f0; padding-bottom: 2px;">' +
           '<input type="checkbox" class="chk-report-subgroup" value="' + htmlEsc(g.id) + '" onchange="window.updateReportSelectedSubgroupsCount()">' +
           '<span style="font-weight: 600; color: #1b4e85;">' + htmlEsc(g.name) + '</span>' +
@@ -2293,7 +2291,7 @@ var addInConstructor = function (geotabApi, state, callback) {
   $('cgps-btn-bulk-std').addEventListener('click', function() { applyBulkFilter($('cgps-bulk-input-std').value); });
   $('cgps-btn-bulk-clear-std').addEventListener('click', function() { $('cgps-bulk-input-std').value = ''; applyBulkFilter(''); });
 
-  // EVENTOS DEL MÓDULO REPORTES POR CLIENTE (NUEVAS CASILLAS Y SELECCIÓN MÚLTIPLE)
+  // EVENTOS DEL MÓDULO REPORTES POR CLIENTE
   $('reports-btn-fetch-groups').addEventListener('click', fetchAndPopulateSubGroups);
 
   $('reports-search-input').addEventListener('keyup', function() {
