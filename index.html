@@ -560,7 +560,7 @@
         <div class="cgps-kpi-value" id="kpi-val-norazon" style="color: #b91c1c;">0</div>
       </div>
 
-      <!-- SEGUNDA FILA (FILTROS DE TIPO DE VEHÍCULO + VACÍOS DE RELLENO SI APLICA) -->
+      <!-- SEGUNDA FILA (FILTROS DE TIPO DE VEHÍCULO) -->
       <div class="cgps-card kpi-btn-card" id="kpi-card-type-remolcadores" style="display: none;" title="Filtrar remolcadores">
         <div class="cgps-kpi-title">REMOLCADORES</div>
         <div class="cgps-kpi-value" id="kpi-val-remolcadores" style="color: #0284c7;">0</div>
@@ -1315,6 +1315,78 @@ var addInConstructor = function (geotabApi, state, callback) {
     var selectedOpt = $('cgps-mass-field-select').options[$('cgps-mass-field-select').selectedIndex];
     var labelText = selectedOpt ? selectedOpt.text : 'valor';
     $('cgps-mass-value-input').placeholder = labelText + '...';
+  }
+
+  async function applyMassUpdateUnified() {
+    var selectedIds = Object.keys(selected).filter(function (k) { return selected[k]; });
+    var field = $('cgps-mass-field-select').value;
+    var val = ($('cgps-mass-value-input').value || '').trim();
+
+    if (selectedIds.length === 0) {
+      setMsg("Seleccione al menos una unidad para guardar los cambios.", true);
+      return;
+    }
+
+    if (!val) {
+      setMsg("Ingrese un valor para el campo seleccionado.", true);
+      return;
+    }
+
+    setMsg("Guardando cambios en " + selectedIds.length + " unidad(es)...");
+
+    var calls = [];
+
+    selectedIds.forEach(function (id) {
+      var row = all.find(function (r) { return r.id === id; });
+      if (!row || !row.rawDevice) return;
+
+      var device = row.rawDevice;
+      if (!device.customProperties) device.customProperties = [];
+
+      var targetPropName = "";
+      if (field === 'razon') targetPropName = "Razón Social";
+      else if (field === 'ruc') targetPropName = "RUC";
+      else if (field === 'anualidad') targetPropName = "Anualidad";
+      else if (field === 'tipoVehiculo') targetPropName = "Tipo de Vehiculo";
+      else if (field === 'estadoProvincia') {
+        device.licenseState = val;
+      } else if (field === 'placa') {
+        device.licensePlate = val;
+      } else if (field === 'nombreActivo') {
+        device.name = val;
+      }
+
+      if (targetPropName) {
+        var propItem = device.customProperties.find(function (cp) {
+          return cp && cp.property && new RegExp('^' + targetPropName + '$', 'i').test(cp.property.name);
+        });
+
+        if (propItem) {
+          propItem.value = val;
+        } else {
+          device.customProperties.push({
+            property: { name: targetPropName },
+            value: val
+          });
+        }
+      }
+
+      calls.push(['Set', {
+        typeName: 'Device',
+        entity: device
+      }]);
+    });
+
+    try {
+      await callMulti(api, calls);
+      setMsg("✅ Se guardaron los cambios en " + selectedIds.length + " unidad(es). Recargando datos...");
+      setTimeout(function () {
+        load();
+      }, 1500);
+    } catch (err) {
+      console.error("Error al guardar cambios masivos:", err);
+      setMsg("Error al guardar los cambios: " + (err.message || err), true);
+    }
   }
 
   async function injectRequiredParameters() {
@@ -2344,10 +2416,11 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
     }
 
     var firstRow = selList[0];
-    var razonEmpresa = firstRow.razon || 'ANGELES MINERIA Y CONSTRUCCION S.A.C.';
+    var razonEmpresa = firstRow.razon || 'PESCO RENTAL PERU SAC';
     var rucEmpresa = firstRow.ruc || '20453537537';
 
-    var txt = "Buen dia Area Legal,\n\n";
+    var txt = "CERTIFICADO GPS - " + razonEmpresa + "\n\n";
+    txt += "Buen dia Area Legal,\n\n";
     txt += "Se solicita tu apoyo en la realización del certificado solicitado por el cliente. Considere que debe describir como beneficiaria al cliente DIVEIMPORT. Adjunto información de la(s) unidad(es):\n\n";
     
     txt += "DATOS DE LA EMPRESA\n\n";
@@ -2372,6 +2445,10 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
       setMsg("Seleccione o filtre al menos un activo para generar el Word del Certificado.", true);
       return;
     }
+
+    var firstRow = selList[0];
+    var razonEmpresa = firstRow.razon || 'PESCO RENTAL PERU SAC';
+    var fechaStr = fmtDate(new Date().toISOString()).replace(/\//g, '-');
 
     var docContent = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">';
     docContent += '<head><meta charset="utf-8"><style>';
@@ -2411,7 +2488,9 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a');
     a.href = url;
-    a.download = 'Anexo_N01_Certificado_GPS_' + fmtDate(new Date().toISOString()).replace(/\//g, '-') + '.doc';
+    
+    // FORMATO DE NOMBRE SOLICITADO: CERTIFICADO GPS - RAZON SOCIAL - FECHA
+    a.download = 'CERTIFICADO GPS - ' + razonEmpresa + ' - ' + fechaStr + '.doc';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -2932,6 +3011,9 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
     });
   }
 
+  // BOTÓN DE GUARDAR MASIVO HABILITADO
+  $('cgps-btn-apply-mass-unified').addEventListener('click', applyMassUpdateUnified);
+
   // RECARGA Y SINCRONIZACIÓN
   $('testn-btn-refresh-hub').addEventListener('click', function() { load(); });
   $('testn-btn-refresh-mod').addEventListener('click', function() { load(); });
@@ -3149,6 +3231,7 @@ Archivo informe_${placa}_fecha.html + 5 líneas de resumen: dictamen, confianza,
   var filterTimer = null;
   $('cgps-filter').addEventListener('input', function () { clearTimeout(filterTimer); filterTimer = setTimeout(renderList, 200); });
   $('cgps-filter-field').addEventListener('change', renderList);
+  $('cgps-mass-field-select').addEventListener('change', updateMassInputPlaceholder);
 
   // SELECCIÓN EN TABLA
   $('cgps-listbody').addEventListener('change', function (e) {
