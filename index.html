@@ -1153,7 +1153,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     }
   });
 
-  // LÓGICA OPTIMIZADA DEL MÓDULO ACTIVACIONES DE UNIDADES
+  // LÓGICA DE EXTRACCIÓN PURA DE RAZONES SOCIALES Y VINS (SIN TEXTO SECUNDARIO NI PREFIJOS)
   function processActivationsText() {
     var raw = ($('act-input-text').value || '').trim();
     var badge = $('act-detected-badge');
@@ -1167,10 +1167,8 @@ var addInConstructor = function (geotabApi, state, callback) {
 
     var upper = raw.toUpperCase();
     
-    // 1. Detección explícita de afirmación ("SI ES ACT. INMEDIATA", "SI ES ACTIVACION INMEDIATA", etc.)
+    // 1. Detección de afirmación e inmediatez
     var hasSiInmediata = /SI\s+ES\s+(ACT\.|ACTIVACI[OÓ]N)\s+INMEDIATA/i.test(raw) || upper.indexOf("SI ES ACT. INMEDIATA") >= 0;
-    
-    // 2. Detección general de banderas
     var hasNoIndica = upper.indexOf("NO INDICA") >= 0;
     var hasActInmediata = upper.indexOf("ACT. INMEDIATA") >= 0 || upper.indexOf("ACTIVACION INMEDIATA") >= 0 || upper.indexOf("ACTIVACIÓN INMEDIATA") >= 0;
     
@@ -1202,24 +1200,27 @@ var addInConstructor = function (geotabApi, state, callback) {
 
       out += "Al ser una activación inmediata considerar lo siguiente para los grupos:\n\n";
 
-      var cleanBody = raw.replace(/^Observaciones\s*:\s*/i, '').trim();
+      // Limpieza de encabezados redundantes como "Observaciones:" o números correlativos iniciales
+      var cleanBody = raw.replace(/^(\d+[\.\,-]|\s*)*OBSERVACIONES\s*:\s*/i, '').trim();
 
+      // Separación de tokens por saltos de línea y guiones
       var tokens = cleanBody.split(/[\r\n]+/).reduce(function(acc, line) {
         return acc.concat(line.split(/\s+-\s+/));
       }, []);
 
       var clientBlocks = [];
       var currentClient = null;
-      var currentModels = [];
 
       tokens.forEach(function(token) {
         var t = token.trim();
         if (!t) return;
 
-        if (/^(SI|NO|SI\s+ES|NO\s+INDICA|ACT\.\s*INMEDIATA|ACTIVACION\s+INMEDIATA|ACTIVACIÓN\s+INMEDIATA|PENDIENTE)/i.test(t)) {
+        // Descartar frases e indicadores de estado arbitrarios
+        if (/^(OBSERVACIONES|SI|NO|SI\s+ES|NO\s+INDICA|ACT\.\s*INMEDIATA|ACTIVACION\s+INMEDIATA|ACTIVACIÓN\s+INMEDIATA|PENDIENTE)/i.test(t)) {
           return;
         }
 
+        // Descartar VINs / Chasis de 17 caracteres
         var isVin = /^[A-Z0-9]{17}$/i.test(t);
         if (isVin) return;
 
@@ -1229,18 +1230,20 @@ var addInConstructor = function (geotabApi, state, callback) {
           return;
         }
 
+        // Procesar estrictamente el nombre limpio de la Razón Social / Cliente
         var parsedClient = cleanLegalName(t);
         if (parsedClient && parsedClient.length >= 3) {
-          if (currentClient) {
-            clientBlocks.push({ client: currentClient, models: currentModels });
-            currentModels = [];
+          if (currentClient !== parsedClient) {
+            if (currentClient && !clientBlocks.some(function(b){ return b.client === currentClient; })) {
+              clientBlocks.push({ client: currentClient });
+            }
+            currentClient = parsedClient;
           }
-          currentClient = parsedClient;
         }
       });
 
-      if (currentClient) {
-        clientBlocks.push({ client: currentClient, models: currentModels });
+      if (currentClient && !clientBlocks.some(function(b){ return b.client === currentClient; })) {
+        clientBlocks.push({ client: currentClient });
       }
 
       if (clientBlocks.length === 0) {
@@ -1802,7 +1805,6 @@ var addInConstructor = function (geotabApi, state, callback) {
     $('create-report-modal').style.display = 'flex';
   }
 
-  // CREACIÓN Y CLONACIÓN DE REPORTE CON CORRECCIÓN JsonSerializerException
   async function createAndSubmitReport() {
     var sourceSchedId = $('create-rep-source-schedule').value;
     var repName = $('create-rep-name').value.trim();
@@ -1842,7 +1844,6 @@ var addInConstructor = function (geotabApi, state, callback) {
     statusDiv.style.color = "#0284c7";
     statusDiv.textContent = "Clonando plantilla y registrando reporte en Geotab...";
 
-    // 1. Limpieza estricta de Diagnósticos (evita error de JSON por IDs inválidos)
     var diagList = [];
     if (diagText) {
       var rawTokens = diagText.split(/[\n\r,]+/).map(function(t){ return t.trim(); }).filter(Boolean);
@@ -1874,13 +1875,11 @@ var addInConstructor = function (geotabApi, state, callback) {
       diagList = sourceSched.arguments.diagnostics.map(function(d){ return { id: d.id }; });
     }
 
-    // 2. Limpieza estricta de Reglas
     var rulesList = [];
     if (sourceSched.arguments && Array.isArray(sourceSched.arguments.rules)) {
       rulesList = sourceSched.arguments.rules.map(function(r) { return { id: r.id }; });
     }
 
-    // 3. Payload purificado (solo referencias { id: "..." })
     try {
       var newSchedule = {
         name: repName,
@@ -2257,7 +2256,7 @@ var addInConstructor = function (geotabApi, state, callback) {
   function cleanLegalName(str) {
     if (!str) return '';
     return str.toUpperCase()
-      .replace(/^OBSERVACIONES\s*:\s*/i, '')
+      .replace(/^(\d+[\.\,-]|\s*)*OBSERVACIONES\s*:\s*/i, '')
       .replace(/\b[A-Z0-9]{17}\b/gi, '') 
       .replace(/\b(S\.?\s*A\.?\s*C\.?|S\.?\s*A\.?|E\.?\s*I\.?\s*R\.?\s*L\.?|S\.?\s*R\.?\s*L\.?|SOCIEDAD\s+ANONIMA\s+CERRADA|SOCIEDAD\s+ANONIMA|CERRADA)\b/g, '')
       .replace(/_/g, ' ') 
@@ -2291,7 +2290,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     var lines = rawText.split(/[\n\r]+/);
     
     lines.forEach(function(line) {
-      var lineClean = line.replace(/^OBSERVACIONES\s*:\s*/i, '').trim();
+      var lineClean = line.replace(/^(\d+[\.\,-]|\s*)*OBSERVACIONES\s*:\s*/i, '').trim();
       if (!lineClean) return;
 
       var subParts = lineClean.split(/\s*-\s*/);
@@ -2300,7 +2299,7 @@ var addInConstructor = function (geotabApi, state, callback) {
 
         part = part.replace(/^[A-Z0-9]{17}\s*/i, '').replace(/\s*[A-Z0-9]{17}$/i, '').trim();
 
-        if (/^NO\s+INDICA/i.test(part) || /^ACT\.\s*INMEDIATA/i.test(part) || /^PENDIENTE/i.test(part) || part.length < 3) {
+        if (/^(OBSERVACIONES|NO\s+INDICA|ACT\.\s*INMEDIATA|PENDIENTE)/i.test(part) || part.length < 3) {
           continue;
         }
 
