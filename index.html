@@ -144,7 +144,7 @@
   </div>
 </div>
 
-<!-- MODAL PARA VALIDAR / MODIFICAR DIAGNÓSTICOS DE REPORTES (CON PRECARGA, FILTROS Y LIBRERÍA DE DIAGNÓSTICOS Y NORMAS) -->
+<!-- MODAL PARA VALIDAR / MODIFICAR DIAGNÓSTICOS DE REPORTES (SOLO NOMBRES + CARGA BAJO DEMANDA Y FILTROS) -->
 <div id="edit-diagnostics-modal" style="position: fixed; top:0; left:0; width:100vw; height:100vh; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(6px); z-index: 9999; display: none; justify-content: center; align-items: center; padding: 20px;">
   <div style="background: #ffffff; padding: 32px; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); width: 100%; max-width: 900px; max-height: 92vh; overflow-y: auto; border: 1px solid #e2e8f0;">
     <!-- Encabezado Modal -->
@@ -195,27 +195,35 @@
         </div>
       </div>
 
-      <!-- Paso 3 -->
+      <!-- Paso 3: Carga bajo demanda de Diagnósticos o Normas de Eventos -->
       <div style="background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 12px;">
         <label style="font-weight: 700; color: #0f172a; font-size: 14px;">
-          3. Modificar o Añadir Diagnósticos / Normas al Reporte <span style="font-weight: normal; font-size: 12px; color: #64748b;">(Añada manualmente o seleccione de la lista precargada):</span>
+          3. Modificar o Añadir Diagnósticos / Normas al Reporte
         </label>
 
-        <!-- Biblioteca Precargada de Diagnósticos y Normas de Eventos -->
-        <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; background: #ffffff;">
-          <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 8px;">
-            <b style="color: #0284c7; font-size: 12px; text-transform: uppercase;">📚 Biblioteca Precargada de Diagnósticos y Normas:</b>
-            <input type="text" id="diag-library-search" class="cgps-input" placeholder="🔍 Filtrar diagnóstico o norma..." style="width: 260px; height: 32px; font-size: 11px;">
+        <!-- Selector Tipo + Botón de Carga Bajo Demanda + Filtro Dinámico -->
+        <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; background: #ffffff; display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <b style="color: #0284c7; font-size: 12px; text-transform: uppercase;">Tipo a cargar:</b>
+            <select id="diag-library-type-choice" class="cgps-input" style="width: 190px; height: 34px; font-weight: 700; color: #0f172a;">
+              <option value="Diagnostic">Diagnósticos</option>
+              <option value="Rule">Normas de Eventos</option>
+            </select>
+            <button id="btn-load-library-items" type="button" class="cgps-btn cgps-btn-primary" style="height: 34px; font-size: 12px; font-weight: 700;">
+              ⚡ Cargar Catálogo
+            </button>
+            <input type="text" id="diag-library-search" class="cgps-input" placeholder="🔍 Filtrar por palabra clave..." style="flex: 1; min-width: 200px; height: 34px; font-size: 12px;">
           </div>
+
           <div style="display: flex; gap: 8px; align-items: center;">
             <select id="diag-library-select" class="cgps-input" style="flex: 1; height: 36px; font-size: 12px; font-weight: 600;">
-              <option value="">-- Cargando biblioteca... --</option>
+              <option value="">-- Seleccione un tipo y presione 'Cargar Catálogo' --</option>
             </select>
-            <button id="btn-add-diag-from-library" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px; font-size: 12px;">➕ Añadir seleccionado</button>
+            <button id="btn-add-diag-from-library" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px; font-size: 12px; font-weight: 700;">➕ Añadir seleccionado</button>
           </div>
         </div>
 
-        <textarea id="edit-diag-input-text" class="cgps-textarea" rows="4" placeholder="Ingrese nombres o IDs de diagnósticos separados por coma o salto de línea..." style="width: 100%; font-family: 'JetBrains Mono', monospace; font-size: 12px; resize: vertical;"></textarea>
+        <textarea id="edit-diag-input-text" class="cgps-textarea" rows="4" placeholder="Ingrese nombres de diagnósticos o normas separados por coma o salto de línea..." style="width: 100%; font-family: 'JetBrains Mono', monospace; font-size: 12px; resize: vertical;"></textarea>
       </div>
 
       <div id="edit-diag-status" style="font-size: 12px; font-weight: 700; min-height: 20px;"></div>
@@ -598,7 +606,7 @@
       </div>
     </div>
 
-    <!-- DASHBOARD KPI FLEET RECONSTRUCTED FULL -->
+    <!-- DASHBOARD KPI FLEET RECONSTRUCTED FULL (RESTAURADO SEGÚN CAPTURA DE PANTALLA) -->
     <div id="sec-kpi-container" class="cgps-kpi-grid" style="margin-top: 12px;">
       <div class="cgps-card kpi-btn-card" id="kpi-card-sn-vin" title="Filtrar con serial y VIN">
         <div class="cgps-kpi-title">CON SERIAL + VIN</div>
@@ -935,6 +943,7 @@ var addInConstructor = function (geotabApi, state, callback) {
   var filteredAllowedGroupsList = []; 
   var rawSchedules = [], templateNamesById = {};
   var usersById = {}, rulesById = {}, diagById = {}, currentReportRows = [];
+  var loadedCatalogItems = []; // Almacena ítems cargados dinámicamente en el Paso 3
   var sourceGroupSchedules = [];
   var REPORT_LINK_HASH = '#customReportSchedule,id:';
   var activeBulkTokens = [];
@@ -1719,7 +1728,6 @@ ENTRADAS
         html += '<label style="display: flex; align-items: center; gap: 6px; font-size: 11px; cursor: pointer; border-bottom: 1px dashed #e2e8f0; padding-bottom: 4px;">' +
           '<input type="checkbox" class="chk-report-subgroup" value="' + htmlEsc(g.id) + '" onchange="window.updateReportSelectedSubgroupsCount()">' +
           '<span style="font-weight: 600; color: #0f172a;">' + htmlEsc(g.name) + '</span>' +
-          '<span style="color: #64748b; font-size: 10px; font-family: monospace;">(' + htmlEsc(g.id) + ')</span>' +
           '</label>';
       }
     });
@@ -2058,7 +2066,7 @@ ENTRADAS
       if (!query || g.name.toLowerCase().indexOf(query) >= 0) {
         var opt = document.createElement('option');
         opt.value = g.id;
-        opt.textContent = g.name + " (" + g.id + ")";
+        opt.textContent = g.name;
         sel.appendChild(opt);
       }
     }
@@ -2081,7 +2089,7 @@ ENTRADAS
       if (!query || g.name.toLowerCase().indexOf(query) >= 0) {
         html += '<label style="display: flex; align-items: center; gap: 8px; font-size: 12px; cursor: pointer;">' +
           '<input type="checkbox" class="chk-dest-group" value="' + htmlEsc(g.id) + '"> ' +
-          '<span style="font-weight:600; color:#0f172a;">' + htmlEsc(g.name) + '</span> <span style="color:#64748b; font-family:monospace;">(' + htmlEsc(g.id) + ')</span>' +
+          '<span style="font-weight:600; color:#0f172a;">' + htmlEsc(g.name) + '</span>' +
           '</label>';
       }
     });
@@ -2265,16 +2273,18 @@ ENTRADAS
     }
   }
 
-  // APARTADO 5: FUNCIONALIDAD PARA VALIDAR Y MODIFICAR DIAGNÓSTICOS CON PRECARGA COMPLETA, FILTROS Y BIBLIOTECA
+  // MODAL DE DIAGNÓSTICOS: SOLO MOSTRAR NOMBRES DE REPORTES Y CARGA DE NORMAS/DIAGNÓSTICOS BAJO DEMANDA
   async function openEditDiagnosticsModal() {
     $('edit-diagnostics-modal').style.display = 'flex';
     $('edit-diag-status').style.color = "#0284c7";
-    $('edit-diag-status').textContent = "Precargando reportes, diagnósticos y normas de eventos...";
+    $('edit-diag-status').textContent = "Precargando lista de reportes...";
 
     $('edit-diag-search-mod').value = '';
     $('edit-diag-search-comp').value = '';
     $('diag-library-search').value = '';
     $('edit-diag-input-text').value = '';
+    $('diag-library-select').innerHTML = '<option value="">-- Seleccione un tipo y presione "Cargar Catálogo" --</option>';
+    loadedCatalogItems = [];
 
     try {
       if (!rawSchedules || rawSchedules.length === 0) {
@@ -2294,30 +2304,16 @@ ENTRADAS
       });
 
       populateDiagnosticsReportDropdowns();
-
-      if (Object.keys(diagById).length === 0 || Object.keys(rulesById).length === 0) {
-        var calls = [
-          ['Get', { typeName: 'Diagnostic', resultsLimit: 1000 }],
-          ['Get', { typeName: 'Rule', resultsLimit: 1000 }]
-        ];
-        var res = await callMulti(api, calls);
-        var diags = res[0] || [];
-        var rules = res[1] || [];
-
-        diags.forEach(function(d) { if (d && d.id && d.name) diagById[d.id] = d.name; });
-        rules.forEach(function(r) { if (r && r.id && r.name) rulesById[r.id] = r.name; });
-      }
-
-      populateDiagnosticsLibraryDropdown();
       $('edit-diag-status').textContent = "";
 
     } catch (err) {
-      console.error("Error en la precarga de diagnósticos:", err);
+      console.error("Error en la precarga de reportes:", err);
       $('edit-diag-status').style.color = "#ef4444";
       $('edit-diag-status').textContent = "Error durante la precarga: " + (err.message || err);
     }
   }
 
+  // Muestra ÚNICAMENTE el nombre del reporte sin ID entre paréntesis
   function populateDiagnosticsReportDropdowns() {
     var queryMod = ($('edit-diag-search-mod').value || '').toLowerCase().trim();
     var queryComp = ($('edit-diag-search-comp').value || '').toLowerCase().trim();
@@ -2334,7 +2330,7 @@ ENTRADAS
     rawSchedules.sort(function(a, b) {
       return (a._resolvedName || '').localeCompare(b._resolvedName || '', 'es');
     }).forEach(function(s) {
-      var rName = s._resolvedName || s.name || s.id;
+      var rName = s._resolvedName || s.name || 'Reporte Sin Nombre';
       
       if (!queryMod || rName.toLowerCase().indexOf(queryMod) >= 0) {
         var optM = document.createElement('option');
@@ -2355,33 +2351,73 @@ ENTRADAS
     if (currentValComp) selComp.value = currentValComp;
   }
 
-  function populateDiagnosticsLibraryDropdown() {
+  // CARGA BAJO DEMANDA DE CATÁLOGO (DIAGNÓSTICOS O NORMAS) SEGÚN LA ELECCIÓN DEL USUARIO
+  async function loadCatalogItemsOnDemand() {
+    var typeChoice = $('diag-library-type-choice').value;
+    var statusDiv = $('edit-diag-status');
+
+    statusDiv.style.color = "#0284c7";
+    statusDiv.textContent = "Cargando " + (typeChoice === 'Diagnostic' ? "Diagnósticos" : "Normas de Eventos") + " desde Geotab...";
+
+    try {
+      var results = await callApi(api, 'Get', {
+        typeName: typeChoice,
+        resultsLimit: 2000
+      });
+
+      loadedCatalogItems = [];
+      (results || []).forEach(function(item) {
+        if (item && item.id && item.name) {
+          loadedCatalogItems.push({
+            id: item.id,
+            name: item.name,
+            type: typeChoice === 'Diagnostic' ? 'Diagnóstico' : 'Norma Evento'
+          });
+          if (typeChoice === 'Diagnostic') diagById[item.id] = item.name;
+          if (typeChoice === 'Rule') rulesById[item.id] = item.name;
+        }
+      });
+
+      loadedCatalogItems.sort(function(a, b) { return a.name.localeCompare(b.name, 'es'); });
+
+      filterCatalogItems();
+
+      statusDiv.style.color = "#10b981";
+      statusDiv.textContent = "✅ Carga completa: " + loadedCatalogItems.length + " " + (typeChoice === 'Diagnostic' ? "diagnósticos" : "normas") + " cargados.";
+
+    } catch (err) {
+      console.error("Error al cargar catálogo:", err);
+      statusDiv.style.color = "#ef4444";
+      statusDiv.textContent = "Error al cargar catálogo: " + (err.message || err);
+    }
+  }
+
+  function filterCatalogItems() {
     var sel = $('diag-library-select');
     var query = ($('diag-library-search').value || '').toLowerCase().trim();
     if (!sel) return;
 
-    sel.innerHTML = '<option value="">-- Seleccione un diagnóstico o norma para añadir --</option>';
+    sel.innerHTML = '<option value="">-- Seleccione un elemento para añadir --</option>';
 
-    var items = [];
+    if (!loadedCatalogItems || loadedCatalogItems.length === 0) {
+      sel.innerHTML = '<option value="">-- No hay elementos cargados. Presione "Cargar Catálogo" --</option>';
+      return;
+    }
 
-    Object.keys(diagById).forEach(function(id) {
-      items.push({ id: id, name: diagById[id], type: 'Diagnóstico' });
-    });
-
-    Object.keys(rulesById).forEach(function(id) {
-      items.push({ id: id, name: rulesById[id], type: 'Norma Evento' });
-    });
-
-    items.sort(function(a, b) { return a.name.localeCompare(b.name, 'es'); });
-
-    items.forEach(function(item) {
+    var count = 0;
+    loadedCatalogItems.forEach(function(item) {
       if (!query || item.name.toLowerCase().indexOf(query) >= 0) {
         var opt = document.createElement('option');
         opt.value = item.name;
         opt.textContent = "[" + item.type + "] " + item.name;
         sel.appendChild(opt);
+        count++;
       }
     });
+
+    if (count === 0) {
+      sel.innerHTML = '<option value="">-- Sin coincidencias para la búsqueda --</option>';
+    }
   }
 
   async function handleEditDiagSelectReport(tipo) {
@@ -2473,7 +2509,7 @@ ENTRADAS
   function addSelectedDiagnosticFromLibrary() {
     var selectedVal = $('diag-library-select').value;
     if (!selectedVal) {
-      alert("Seleccione un diagnóstico o norma de la biblioteca primero.");
+      alert("Seleccione un elemento del catálogo primero.");
       return;
     }
 
@@ -2565,7 +2601,7 @@ ENTRADAS
       if (!query || g.name.toLowerCase().indexOf(query) >= 0 || g.id.toLowerCase().indexOf(query) >= 0) {
         var opt = document.createElement('option');
         opt.value = g.id;
-        opt.textContent = g.name + " (" + g.id + ")";
+        opt.textContent = g.name;
         sel.appendChild(opt);
       }
     });
@@ -3356,7 +3392,7 @@ ENTRADAS
   $('btn-apply-prefix-preset').addEventListener('click', applyNamePrefixPreset);
   $('btn-submit-create-report').addEventListener('click', createAndSubmitReport);
 
-  // EVENTOS MODAL MODIFICAR Y VALIDAR DIAGNÓSTICOS CON FILTROS Y BIBLIOTECA
+  // EVENTOS MODAL MODIFICAR Y VALIDAR DIAGNÓSTICOS CON CARGA BAJO DEMANDA
   $('reports-btn-open-edit-diags-modal').addEventListener('click', openEditDiagnosticsModal);
   $('btn-close-edit-diags-modal').addEventListener('click', function() {
     $('edit-diagnostics-modal').style.display = 'none';
@@ -3364,7 +3400,10 @@ ENTRADAS
   
   $('edit-diag-search-mod').addEventListener('keyup', populateDiagnosticsReportDropdowns);
   $('edit-diag-search-comp').addEventListener('keyup', populateDiagnosticsReportDropdowns);
-  $('diag-library-search').addEventListener('keyup', populateDiagnosticsLibraryDropdown);
+
+  // Carga bajo demanda del tipo seleccionado (Diagnóstico o Norma)
+  $('btn-load-library-items').addEventListener('click', loadCatalogItemsOnDemand);
+  $('diag-library-search').addEventListener('keyup', filterCatalogItems);
 
   $('edit-diag-select-report').addEventListener('change', function() { handleEditDiagSelectReport('modificar'); });
   $('edit-diag-select-compare').addEventListener('change', function() { handleEditDiagSelectReport('comparar'); });
