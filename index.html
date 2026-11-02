@@ -1609,9 +1609,11 @@ var addInConstructor = function (geotabApi, state, callback) {
     $('create-report-modal').style.display = 'flex';
   }
 
-  // ===== CLONACIÓN CORREGIDA v2 (variantes + diagnósticos por ID) =====
+  // ===== CLONACIÓN v3: plantilla nueva (nombre) + programación nueva (grupos/diagnósticos) =====
+  // En Geotab el nombre del reporte vive en la PLANTILLA (ReportTemplate), no en la programación.
   var SCHEDULE_GROUP_KEYS = ['groups', 'scopeGroups', 'includeAllChildrenGroups', 'includeDirectChildrenOnlyGroups'];
-  var SCHEDULE_READONLY_KEYS = ['id', 'lastModifiedUser', 'lastUpdated', 'lastModifiedDateTime', 'version', 'dateTime', 'lastRun', 'nextRun', 'lastRunDate', 'nextRunDate'];
+  var SCHEDULE_READONLY_KEYS = ['id', 'name', 'scopeGroupFilter', 'lastModifiedUser', 'lastUpdated', 'lastModifiedDateTime', 'version', 'dateTime', 'lastRun', 'nextRun', 'lastRunDate', 'nextRunDate'];
+  var TEMPLATE_READONLY_KEYS = ['id', 'lastModifiedUser', 'lastModifiedDateTime', 'lastUpdated', 'version', 'dateTime'];
   var sourceDiagOriginalText = '';
 
   function stripNulls(obj) {
@@ -1656,48 +1658,34 @@ var addInConstructor = function (geotabApi, state, callback) {
     return replaced;
   }
 
-  // mode 1: clon completo con nombre
-  // mode 2: clon sin campos vacíos, con nombre
-  // mode 3: mínimo (plantilla + grupos + reglas + diagnósticos), con nombre
-  // mode 4: mínimo sin nombre
-  function buildClonedSchedule(src, repName, destGroups, diagList, mode) {
+  // mode 1: clon completo sin name/scopeGroupFilter/groups
+  // mode 2: igual pero conservando "groups" con los grupos destino
+  // mode 3: igual que 1 sin campos vacíos
+  function buildClonedSchedule(src, newTemplateId, destGroups, diagList, mode) {
     var n = JSON.parse(JSON.stringify(src));
 
     Object.keys(n).forEach(function (k) { if (k.charAt(0) === '_') delete n[k]; });
     SCHEDULE_READONLY_KEYS.forEach(function (k) { delete n[k]; });
 
-    var rootKey = 'scopeGroups';
-    for (var i = 0; i < SCHEDULE_GROUP_KEYS.length; i++) {
-      var kk = SCHEDULE_GROUP_KEYS[i];
-      if (Array.isArray(src[kk]) && src[kk].length > 0) { rootKey = kk; break; }
-    }
+    n.template = { id: newTemplateId };
     var destRefs = destGroups.map(function (g) { return { id: g.id }; });
-    var srcArgs = src.arguments || {};
-    var rules = (srcArgs.rules || []).filter(function (r) { return r && r.id; }).map(function (r) { return { id: r.id }; });
 
-    if (mode >= 3) {
-      var m = { isActive: true, arguments: { rules: rules, diagnostics: diagList } };
-      if (n.template && n.template.id) m.template = { id: n.template.id };
-      if (mode === 3) m.name = repName;
-      m[rootKey] = destRefs;
-      return stripNulls(m);
-    }
+    var hadAny = false;
+    ['scopeGroups', 'includeAllChildrenGroups', 'includeDirectChildrenOnlyGroups'].forEach(function (k) {
+      if (Array.isArray(n[k]) && n[k].length > 0) { n[k] = destRefs.slice(); hadAny = true; }
+    });
+    if (!hadAny) n.includeAllChildrenGroups = destRefs.slice();
 
-    n.name = repName;
-    replaceGroupsIn(n, destGroups);
-    if (!SCHEDULE_GROUP_KEYS.some(function (k) { return Array.isArray(n[k]) && n[k].length > 0; })) {
-      n[rootKey] = destRefs;
-    }
+    if (mode === 2) n.groups = destRefs.slice(); else delete n.groups;
 
     n.arguments = n.arguments || {};
     Object.keys(n.arguments).forEach(function (k) { if (k.charAt(0) === '_') delete n.arguments[k]; });
     replaceGroupsIn(n.arguments, destGroups);
     n.arguments.diagnostics = diagList;
-    if (Object.prototype.hasOwnProperty.call(n.arguments, 'name')) n.arguments.name = repName;
 
     n.isActive = true;
     n = stripNulls(n);
-    return mode === 2 ? pruneEmpty(n) : n;
+    return mode === 3 ? pruneEmpty(n) : n;
   }
 
   function normDiagText(t) { return String(t || '').replace(/\s+/g, ' ').trim(); }
@@ -1706,6 +1694,49 @@ var addInConstructor = function (geotabApi, state, callback) {
     if (!err) return 'Error desconocido';
     if (typeof err === 'string') return err;
     return err.message || (err.data && err.data.message) || (err.name ? String(err.name) : '') || JSON.stringify(err);
+  }
+
+  function idFromAddResult(r) {
+    if (!r) return null;
+    if (typeof r === 'string') return r;
+    if (Array.isArray(r)) return idFromAddResult(r[0]);
+    return r.id || null;
+  }
+
+  // Clona la plantilla origen con un nuevo nombre y devuelve el ID de la nueva plantilla
+  async function cloneReportTemplate(srcTplId, newName) {
+    var res = await callApi(api, 'Get', {
+      typeName: 'ReportTemplate',
+      search: { id: srcTplId, includeBinaryData: true }
+    });
+    var tpl = res && res[0];
+    if (!tpl) throw new Error('No se pudo leer la plantilla origen (' + srcTplId + ').');
+
+    var full = JSON.parse(JSON.stringify(tpl));
+    TEMPLATE_READONLY_KEYS.forEach(function (k) { delete full[k]; });
+    full.name = newName;
+    full = stripNulls(full);
+
+    var minimal = { name: newName };
+    ['binaryData', 'reportDataSource', 'reportTemplateType', 'comments', 'comment', 'reportDataSourceType'].forEach(function (k) {
+      if (tpl[k] !== undefined && tpl[k] !== null) minimal[k] = tpl[k];
+    });
+
+    var variants = [full, minimal];
+    var errs = [];
+    for (var i = 0; i < variants.length; i++) {
+      try {
+        console.log('Plantilla a crear (variante ' + (i + 1) + '), claves:', Object.keys(variants[i]).join(', '));
+        var added = await callApi(api, 'Add', { typeName: 'ReportTemplate', entity: variants[i] });
+        var newId = idFromAddResult(added);
+        if (newId) return newId;
+        errs.push('Variante ' + (i + 1) + ': Geotab no devolvió el ID.');
+      } catch (e) {
+        errs.push('Variante ' + (i + 1) + ': ' + errToText(e));
+        console.error('Error creando plantilla (variante ' + (i + 1) + '):', e);
+      }
+    }
+    throw new Error('No se pudo crear la plantilla nueva. ' + errs.join(' | '));
   }
 
   async function createAndSubmitReport() {
@@ -1729,9 +1760,7 @@ var addInConstructor = function (geotabApi, state, callback) {
 
     var sourceSched = sourceGroupSchedules.find(function (s) { return s.id === sourceSchedId; });
     if (!sourceSched) return fail("No se encontró la configuración del reporte origen.");
-
-    statusDiv.style.color = "#0284c7";
-    statusDiv.textContent = "Clonando plantilla y registrando reporte en Geotab...";
+    if (!sourceSched.template || !sourceSched.template.id) return fail("El reporte origen no tiene plantilla asociada.");
 
     // ----- Diagnósticos -----
     // Si el texto no fue editado, se usan los IDs originales tal cual (varios diagnósticos comparten nombre).
@@ -1747,7 +1776,7 @@ var addInConstructor = function (geotabApi, state, callback) {
       tokens.forEach(function (token) {
         var pick = null;
         if (diagById[token] !== undefined || sourceDiagIds.indexOf(token) >= 0) {
-          pick = token; // el usuario escribió un ID
+          pick = token;
         } else {
           var fromSource = sourceDiagIds.filter(function (id) { return diagById[id] === token && !added.has(id); });
           if (fromSource.length) {
@@ -1764,36 +1793,58 @@ var addInConstructor = function (geotabApi, state, callback) {
       }
     }
 
-    // ----- Intentos con variantes -----
-    var modes = [1, 2, 3, 4];
+    // ----- Paso 1: plantilla nueva con el nombre del reporte -----
+    var newTplId = null;
+    try {
+      statusDiv.style.color = "#0284c7";
+      statusDiv.textContent = "Paso 1/2: creando plantilla \"" + repName + "\"...";
+      newTplId = await cloneReportTemplate(sourceSched.template.id, repName);
+      templateNamesById[newTplId] = repName;
+    } catch (e) {
+      console.error("Fallo al clonar la plantilla:", e);
+      return fail("Error en el paso 1 (plantilla): " + errToText(e) + "\n(Detalle en la consola F12)");
+    }
+
+    // ----- Paso 2: programación apuntando a la plantilla nueva -----
+    var modes = [1, 2, 3];
     var errors = [];
 
     for (var i = 0; i < modes.length; i++) {
       var entity = null;
       try {
-        entity = buildClonedSchedule(sourceSched, repName, destGroupsList, diagList, modes[i]);
-        console.log("Entidad a crear (variante " + modes[i] + "):", JSON.stringify(entity));
+        statusDiv.style.color = "#0284c7";
+        statusDiv.textContent = "Paso 2/2: registrando la programación (variante " + modes[i] + ")...";
+        entity = buildClonedSchedule(sourceSched, newTplId, destGroupsList, diagList, modes[i]);
+        console.log("Programación a crear (variante " + modes[i] + "):", JSON.stringify(entity));
 
         await callApi(api, 'Add', { typeName: 'CustomReportSchedule', entity: entity });
 
         statusDiv.style.color = "#16a34a";
-        statusDiv.textContent = "✅ ¡Reporte clonado y registrado con éxito en Geotab! (variante " + modes[i] + ")";
+        statusDiv.textContent = "✅ ¡Reporte \"" + repName + "\" creado con éxito en Geotab!";
 
         setTimeout(function () {
           $('create-report-modal').style.display = 'none';
           rawSchedules = [];
           if ($('reports-group-select').value) handleReportGroupChange();
-        }, 1200);
+        }, 1500);
         return;
       } catch (err) {
         errors.push("Variante " + modes[i] + ": " + errToText(err));
-        console.error("Error al crear reporte (variante " + modes[i] + "):", err);
+        console.error("Error al crear programación (variante " + modes[i] + "):", err);
         window.__lastCloneEntity = entity;
       }
     }
 
+    // Limpieza: si la programación no se pudo crear, se elimina la plantilla huérfana
+    try {
+      await callApi(api, 'Remove', { typeName: 'ReportTemplate', entity: { id: newTplId } });
+      delete templateNamesById[newTplId];
+    } catch (e) {
+      console.warn("No se pudo eliminar la plantilla huérfana " + newTplId + ":", e);
+    }
+
     console.log("Origen sin procesar:", JSON.stringify(sourceSched));
-    fail("No se pudo clonar el reporte.\n" + errors.join("\n") + "\n(Detalle en la consola F12)");
+    fail("No se pudo crear la programación (la plantilla creada fue revertida).\n" + errors.join("\n") + "\n(Detalle en la consola F12)");
   }
 
   function generateLegalText() {
