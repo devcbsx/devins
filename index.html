@@ -1153,7 +1153,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     }
   });
 
-  // LÓGICA DE EXTRACCIÓN PURA DE RAZONES SOCIALES Y VINS (SIN TEXTO SECUNDARIO NI PREFIJOS)
+  // LÓGICA DE EXTRACCIÓN PURA DE RAZONES SOCIALES Y VINS (CON DETECCIÓN ESTRICTA DE INMEDIATEZ)
   function processActivationsText() {
     var raw = ($('act-input-text').value || '').trim();
     var badge = $('act-detected-badge');
@@ -1167,12 +1167,13 @@ var addInConstructor = function (geotabApi, state, callback) {
 
     var upper = raw.toUpperCase();
     
-    // 1. Detección de afirmación e inmediatez
-    var hasSiInmediata = /SI\s+ES\s+(ACT\.|ACTIVACI[OÓ]N)\s+INMEDIATA/i.test(raw) || upper.indexOf("SI ES ACT. INMEDIATA") >= 0;
+    // DETECCIÓN ESTRICTA DE ACTIVACIÓN INMEDIATA:
+    // Requiere la presencia explícita de "SI ES" antes de "ACT INMEDIATA" o "ACTIVACION INMEDIATA"
+    // y descarta automáticamente si contiene "NO INDICA".
+    var hasSiEs = /SI\s+ES\s+(ACT\.|ACTIVACI[OÓ]N)\s+INMEDIATA/i.test(upper);
     var hasNoIndica = upper.indexOf("NO INDICA") >= 0;
-    var hasActInmediata = upper.indexOf("ACT. INMEDIATA") >= 0 || upper.indexOf("ACTIVACION INMEDIATA") >= 0 || upper.indexOf("ACTIVACIÓN INMEDIATA") >= 0;
     
-    var isImmediate = hasSiInmediata || (hasActInmediata && !hasNoIndica);
+    var isImmediate = hasSiEs && !hasNoIndica;
 
     var out = "Buen día estimados,\n\n";
 
