@@ -88,7 +88,7 @@
   </div>
 </div>
 
-<!-- MODAL PARA CLONAR Y CREAR REPORTE (SIN SECCIÓN DE DIAGNÓSTICOS) -->
+<!-- MODAL PARA CLONAR Y CREAR REPORTE -->
 <div id="create-report-modal" style="position: fixed; top:0; left:0; width:100vw; height:100vh; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(6px); z-index: 9999; display: none; justify-content: center; align-items: center; padding: 20px;">
   <div style="background: #ffffff; padding: 32px; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); width: 100%; max-width: 680px; max-height: 90vh; overflow-y: auto; border: 1px solid #e2e8f0;">
     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px; margin-bottom: 20px;">
@@ -144,9 +144,9 @@
   </div>
 </div>
 
-<!-- MODAL PARA VALIDAR / MODIFICAR DIAGNÓSTICOS DE REPORTES CREATOR (3 PASOS INTEGRADOS) -->
+<!-- MODAL PARA VALIDAR / MODIFICAR DIAGNÓSTICOS DE REPORTES (CON PRECARGA, FILTROS Y LIBRERÍA DE DIAGNÓSTICOS Y NORMAS) -->
 <div id="edit-diagnostics-modal" style="position: fixed; top:0; left:0; width:100vw; height:100vh; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(6px); z-index: 9999; display: none; justify-content: center; align-items: center; padding: 20px;">
-  <div style="background: #ffffff; padding: 32px; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); width: 100%; max-width: 850px; max-height: 90vh; overflow-y: auto; border: 1px solid #e2e8f0;">
+  <div style="background: #ffffff; padding: 32px; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); width: 100%; max-width: 900px; max-height: 92vh; overflow-y: auto; border: 1px solid #e2e8f0;">
     <!-- Encabezado Modal -->
     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px; margin-bottom: 20px;">
       <h2 style="margin:0; font-size: 18px; color: #0f172a; font-weight: 700; display: flex; align-items: center; gap: 8px;">
@@ -159,46 +159,63 @@
     <div style="display: flex; flex-direction: column; gap: 20px; font-size: 13px;">
       
       <!-- Paso 1 -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid #e2e8f0;">
         <div>
-          <label style="font-weight: 700; color: #0f172a; display: block; margin-bottom: 8px; font-size: 14px;">1. Reporte a modificar</label>
-          <select id="edit-diag-select-report" class="cgps-input" style="width: 100%; height: 40px; font-weight: 600;">
-            <option value="">-- Busque reportes primero para cargarlos aquí --</option>
+          <label style="font-weight: 700; color: #0f172a; display: block; margin-bottom: 6px; font-size: 13px;">1. Reporte a modificar</label>
+          <input type="text" id="edit-diag-search-mod" class="cgps-input" placeholder="🔍 Buscar por palabra clave..." style="width: 100%; height: 34px; margin-bottom: 6px; font-size: 12px;">
+          <select id="edit-diag-select-report" class="cgps-input" style="width: 100%; height: 38px; font-weight: 600;">
+            <option value="">-- Cargando reportes precargados... --</option>
           </select>
         </div>
         <div>
           <div style="font-weight: 700; color: #0f172a; margin-bottom: 8px; font-size: 13px;">Diagnósticos Actuales Asignados:</div>
-          <div id="edit-diag-current-list" style="min-height: 42px; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; background: #f8fafc; display: flex; flex-wrap: wrap; gap: 6px; align-items: center;">
-            <span style="color: #64748b; font-size: 12px; font-style: italic;">Seleccione un reporte de la lista para cargar sus diagnósticos...</span>
+          <div id="edit-diag-current-list" style="min-height: 60px; max-height: 100px; overflow-y: auto; border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px; background: #ffffff; display: flex; flex-wrap: wrap; gap: 6px; align-items: center;">
+            <span style="color: #64748b; font-size: 12px; font-style: italic;">Seleccione un reporte para cargar sus diagnósticos...</span>
           </div>
         </div>
       </div>
 
       <!-- Paso 2 -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid #e2e8f0;">
         <div>
-          <label style="font-weight: 700; color: #0f172a; display: block; margin-bottom: 8px; font-size: 14px;">2. Reporte a comparar</label>
-          <select id="edit-diag-select-compare" class="cgps-input" style="width: 100%; height: 40px; font-weight: 600;">
-            <option value="">-- Busque reportes primero para cargarlos aquí --</option>
+          <label style="font-weight: 700; color: #0f172a; display: block; margin-bottom: 6px; font-size: 13px;">2. Reporte a comparar</label>
+          <input type="text" id="edit-diag-search-comp" class="cgps-input" placeholder="🔍 Buscar por palabra clave..." style="width: 100%; height: 34px; margin-bottom: 6px; font-size: 12px;">
+          <select id="edit-diag-select-compare" class="cgps-input" style="width: 100%; height: 38px; font-weight: 600;">
+            <option value="">-- Cargando reportes precargados... --</option>
           </select>
         </div>
         <div>
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
             <strong style="color: #0f172a; font-size: 13px;">Diagnósticos Actuales Asignados:</strong>
-            <button id="btn-copy-compare-diags" type="button" class="cgps-btn cgps-btn-secondary" style="font-size: 11px; padding: 4px 10px;">📋 Copiar</button>
+            <button id="btn-copy-compare-diags" type="button" class="cgps-btn cgps-btn-secondary" style="font-size: 11px; padding: 4px 10px;">📋 Copiar todos</button>
           </div>
-          <div id="edit-diag-compare-list" style="min-height: 42px; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; background: #f8fafc; display: flex; flex-wrap: wrap; gap: 6px; align-items: center;">
-            <span style="color: #64748b; font-size: 12px; font-style: italic;">Seleccione un reporte de la lista para cargar sus diagnósticos...</span>
+          <div id="edit-diag-compare-list" style="min-height: 60px; max-height: 100px; overflow-y: auto; border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px; background: #ffffff; display: flex; flex-wrap: wrap; gap: 6px; align-items: center;">
+            <span style="color: #64748b; font-size: 12px; font-style: italic;">Seleccione un reporte para comparar sus diagnósticos...</span>
           </div>
         </div>
       </div>
 
       <!-- Paso 3 -->
-      <div style="display: flex; flex-direction: column; gap: 8px;">
+      <div style="background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 12px;">
         <label style="font-weight: 700; color: #0f172a; font-size: 14px;">
-          3. Añadir / Modificar Diagnósticos al reporte a modificar <span style="font-weight: normal; font-size: 12px; color: #64748b;">(Separados por comas o líneas):</span>
+          3. Modificar o Añadir Diagnósticos / Normas al Reporte <span style="font-weight: normal; font-size: 12px; color: #64748b;">(Añada manualmente o seleccione de la lista precargada):</span>
         </label>
-        <textarea id="edit-diag-input-text" class="cgps-textarea" rows="4" placeholder="Ingrese nombres o IDs de diagnósticos..." style="width: 100%; font-family: 'JetBrains Mono', monospace; font-size: 12px; resize: vertical;"></textarea>
+
+        <!-- Biblioteca Precargada de Diagnósticos y Normas de Eventos -->
+        <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; background: #ffffff;">
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 8px;">
+            <b style="color: #0284c7; font-size: 12px; text-transform: uppercase;">📚 Biblioteca Precargada de Diagnósticos y Normas:</b>
+            <input type="text" id="diag-library-search" class="cgps-input" placeholder="🔍 Filtrar diagnóstico o norma..." style="width: 260px; height: 32px; font-size: 11px;">
+          </div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <select id="diag-library-select" class="cgps-input" style="flex: 1; height: 36px; font-size: 12px; font-weight: 600;">
+              <option value="">-- Cargando biblioteca... --</option>
+            </select>
+            <button id="btn-add-diag-from-library" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px; font-size: 12px;">➕ Añadir seleccionado</button>
+          </div>
+        </div>
+
+        <textarea id="edit-diag-input-text" class="cgps-textarea" rows="4" placeholder="Ingrese nombres o IDs de diagnósticos separados por coma o salto de línea..." style="width: 100%; font-family: 'JetBrains Mono', monospace; font-size: 12px; resize: vertical;"></textarea>
       </div>
 
       <div id="edit-diag-status" style="font-size: 12px; font-weight: 700; min-height: 20px;"></div>
@@ -581,7 +598,7 @@
       </div>
     </div>
 
-    <!-- KPIs Rápidos / DASHBOARD TECH -->
+    <!-- DASHBOARD KPI FLEET RECONSTRUCTED FULL -->
     <div id="sec-kpi-container" class="cgps-kpi-grid" style="margin-top: 12px;">
       <div class="cgps-card kpi-btn-card" id="kpi-card-sn-vin" title="Filtrar con serial y VIN">
         <div class="cgps-kpi-title">CON SERIAL + VIN</div>
@@ -599,44 +616,47 @@
         <div class="cgps-kpi-title" id="kpi-title-2">SELECCIONADOS</div>
         <div class="cgps-kpi-value" id="kpi-val-2" style="color: #6366f1;">0</div>
       </div>
-      <div class="cgps-card kpi-btn-card" id="kpi-card-4" style="display: none;" title="Filtrar completos">
+
+      <!-- CARDS ESPECÍFICAS DE VALIDACIÓN Y PARÁMETROS -->
+      <div class="cgps-card kpi-btn-card" id="kpi-card-4" title="Filtrar completos (5/5)">
         <div class="cgps-kpi-title">PARÁMETROS 5/5</div>
         <div class="cgps-kpi-value" id="kpi-val-4" style="color: #10b981;">0</div>
       </div>
-      <div class="cgps-card kpi-btn-card" id="kpi-card-less5" style="display: none;" title="Filtrar unidades con menos de 5 parámetros">
+      <div class="cgps-card kpi-btn-card" id="kpi-card-less5" title="Filtrar unidades con menos de 5 parámetros">
         <div class="cgps-kpi-title">PARÁMETROS &lt; 5</div>
         <div class="cgps-kpi-value" id="kpi-val-less5" style="color: #ef4444;">0</div>
       </div>
-      <div class="cgps-card kpi-btn-card" id="kpi-card-noanualidad" style="display: none;" title="Filtrar unidades sin anualidad">
+      <div class="cgps-card kpi-btn-card" id="kpi-card-noanualidad" title="Filtrar unidades sin anualidad">
         <div class="cgps-kpi-title">SIN ANUALIDAD</div>
         <div class="cgps-kpi-value" id="kpi-val-noanualidad" style="color: #d97706;">0</div>
       </div>
-      <div class="cgps-card kpi-btn-card" id="kpi-card-noestado" style="display: none;" title="Filtrar unidades sin Estado/Prov.">
+      <div class="cgps-card kpi-btn-card" id="kpi-card-noestado" title="Filtrar unidades sin Estado/Prov.">
         <div class="cgps-kpi-title">SIN ESTADO/PROV.</div>
         <div class="cgps-kpi-value" id="kpi-val-noestado" style="color: #ea580c;">0</div>
       </div>
-      <div class="cgps-card kpi-btn-card" id="kpi-card-noruc" style="display: none;" title="Filtrar unidades sin RUC">
+      <div class="cgps-card kpi-btn-card" id="kpi-card-noruc" title="Filtrar unidades sin RUC">
         <div class="cgps-kpi-title">SIN RUC</div>
         <div class="cgps-kpi-value" id="kpi-val-noruc" style="color: #dc2626;">0</div>
       </div>
-      <div class="cgps-card kpi-btn-card" id="kpi-card-norazon" style="display: none;" title="Filtrar unidades sin Razón Social">
+      <div class="cgps-card kpi-btn-card" id="kpi-card-norazon" title="Filtrar unidades sin Razón Social">
         <div class="cgps-kpi-title">SIN RAZÓN SOCIAL</div>
         <div class="cgps-kpi-value" id="kpi-val-norazon" style="color: #b91c1c;">0</div>
       </div>
 
-      <div class="cgps-card kpi-btn-card" id="kpi-card-type-remolcadores" style="display: none;" title="Filtrar remolcadores">
+      <!-- SEGUNDA FILA / TARJETAS DE TIPOS DE VEHÍCULO -->
+      <div class="cgps-card kpi-btn-card" id="kpi-card-type-remolcadores" title="Filtrar remolcadores">
         <div class="cgps-kpi-title">REMOLCADORES</div>
         <div class="cgps-kpi-value" id="kpi-val-remolcadores" style="color: #0284c7;">0</div>
       </div>
-      <div class="cgps-card kpi-btn-card" id="kpi-card-type-volquetes" style="display: none;" title="Filtrar volquetes">
+      <div class="cgps-card kpi-btn-card" id="kpi-card-type-volquetes" title="Filtrar volquetes">
         <div class="cgps-kpi-title">VOLQUETES</div>
         <div class="cgps-kpi-value" id="kpi-val-volquetes" style="color: #8b5cf6;">0</div>
       </div>
-      <div class="cgps-card kpi-btn-card" id="kpi-card-type-sintipo" style="display: none;" title="Filtrar unidades sin tipo de vehículo">
+      <div class="cgps-card kpi-btn-card" id="kpi-card-type-sintipo" title="Filtrar unidades sin tipo de vehículo">
         <div class="cgps-kpi-title">SIN TIPO</div>
         <div class="cgps-kpi-value" id="kpi-val-sintipo" style="color: #06b6d4;">0</div>
       </div>
-      <div class="cgps-card kpi-btn-card" id="kpi-card-type-otrostipos" style="display: none;" title="Filtrar otros tipos de vehículo">
+      <div class="cgps-card kpi-btn-card" id="kpi-card-type-otrostipos" title="Filtrar otros tipos de vehículo">
         <div class="cgps-kpi-title">OTROS TIPOS</div>
         <div class="cgps-kpi-value" id="kpi-val-otrostipos" style="color: #10b981;">0</div>
       </div>
@@ -1222,9 +1242,35 @@ var addInConstructor = function (geotabApi, state, callback) {
     $('kpi-no-vin').textContent = countNoVin;
     $('kpi-no-sn').textContent = countNoSn;
 
+    var countFull = 0, countLess5 = 0;
+    var cNoAnualidad = 0, cNoEstado = 0, cNoRuc = 0, cNoRazon = 0;
+    var cRemolcadores = 0, cVolquetes = 0, cSinTipo = 0, cOtrosTipos = 0;
+
+    rowsToCount.forEach(function (r) {
+      if (r.paramCount === 5) countFull++;
+      else countLess5++;
+
+      if (!r.anualidad || r.anualidad.trim() === '' || r.anualidad.trim() === '-') cNoAnualidad++;
+      if (!r.estadoProvincia || r.estadoProvincia.trim() === '' || r.estadoProvincia.trim() === 'Sin Estado') cNoEstado++;
+      if (!r.ruc || r.ruc.trim() === '' || r.ruc.trim() === 'Sin RUC') cNoRuc++;
+      if (!r.razon || r.razon.trim() === '' || r.razon.trim() === 'Sin Razón Social') cNoRazon++;
+
+      var tv = normalizeStr(r.tipoVehiculo);
+      if (!tv || tv === 'sin tipo' || tv === 'sin tipo vehiculo') {
+        cSinTipo++;
+      } else if (tv.indexOf('remolcador') >= 0 || tv.indexOf('tractor') >= 0) {
+        cRemolcadores++;
+      } else if (tv.indexOf('volquete') >= 0) {
+        cVolquetes++;
+      } else {
+        cOtrosTipos++;
+      }
+    });
+
+    $('kpi-title-2').textContent = "SELECCIONADOS";
+    $('kpi-val-2').textContent = selCount;
+
     if (activeModule === 'certi' || activeModule === 'master') {
-      $('kpi-title-2').textContent = "SELECCIONADOS";
-      $('kpi-val-2').textContent = selCount;
       $('kpi-card-4').style.display = 'none';
       $('kpi-card-less5').style.display = 'none';
       
@@ -1240,34 +1286,19 @@ var addInConstructor = function (geotabApi, state, callback) {
 
       document.querySelector('.cgps-kpi-grid').style.gridTemplateColumns = 'repeat(4, 1fr)';
     } else if (activeModule === 'valid') {
-      var countFull = 0, countLess5 = 0;
-      var cNoAnualidad = 0, cNoEstado = 0, cNoRuc = 0, cNoRazon = 0;
-      var cRemolcadores = 0, cVolquetes = 0, cSinTipo = 0, cOtrosTipos = 0;
+      $('kpi-card-4').style.display = 'block';
+      $('kpi-card-less5').style.display = 'block';
 
-      rowsToCount.forEach(function (r) {
-        if (r.paramCount === 5) countFull++;
-        else countLess5++;
+      $('kpi-card-noanualidad').style.display = 'block';
+      $('kpi-card-noestado').style.display = 'block';
+      $('kpi-card-noruc').style.display = 'block';
+      $('kpi-card-norazon').style.display = 'block';
 
-        if (!r.anualidad || r.anualidad.trim() === '' || r.anualidad.trim() === '-') cNoAnualidad++;
-        if (!r.estadoProvincia || r.estadoProvincia.trim() === '' || r.estadoProvincia.trim() === 'Sin Estado') cNoEstado++;
-        if (!r.ruc || r.ruc.trim() === '' || r.ruc.trim() === 'Sin RUC') cNoRuc++;
-        if (!r.razon || r.razon.trim() === '' || r.razon.trim() === 'Sin Razón Social') cNoRazon++;
+      $('kpi-card-type-remolcadores').style.display = 'block';
+      $('kpi-card-type-volquetes').style.display = 'block';
+      $('kpi-card-type-sintipo').style.display = 'block';
+      $('kpi-card-type-otrostipos').style.display = 'block';
 
-        var tv = normalizeStr(r.tipoVehiculo);
-        if (!tv || tv === 'sin tipo' || tv === 'sin tipo vehiculo') {
-          cSinTipo++;
-        } else if (tv.indexOf('remolcador') >= 0 || tv.indexOf('tractor') >= 0) {
-          cRemolcadores++;
-        } else if (tv.indexOf('volquete') >= 0) {
-          cVolquetes++;
-        } else {
-          cOtrosTipos++;
-        }
-      });
-
-      $('kpi-title-2').textContent = "SELECCIONADOS";
-      $('kpi-val-2').textContent = selCount;
-      
       $('kpi-val-4').textContent = countFull;
       $('kpi-val-less5').textContent = countLess5;
 
@@ -2155,7 +2186,6 @@ ENTRADAS
     $('create-report-modal').style.display = 'flex';
   }
 
-  // CREACIÓN DE REPORTE SIN DIAGNÓSTICOS
   async function createAndSubmitReport() {
     var sourceSchedId = $('create-rep-source-schedule').value;
     var repName = $('create-rep-name').value.trim();
@@ -2235,81 +2265,223 @@ ENTRADAS
     }
   }
 
-  // APARTADO 5: FUNCIONALIDAD PARA EL BOTÓN "VALIDAR / MODIFICAR DIAGNÓSTICOS" (FLUJO EN 3 PASOS)
-  function openEditDiagnosticsModal() {
+  // APARTADO 5: FUNCIONALIDAD PARA VALIDAR Y MODIFICAR DIAGNÓSTICOS CON PRECARGA COMPLETA, FILTROS Y BIBLIOTECA
+  async function openEditDiagnosticsModal() {
+    $('edit-diagnostics-modal').style.display = 'flex';
+    $('edit-diag-status').style.color = "#0284c7";
+    $('edit-diag-status').textContent = "Precargando reportes, diagnósticos y normas de eventos...";
+
+    $('edit-diag-search-mod').value = '';
+    $('edit-diag-search-comp').value = '';
+    $('diag-library-search').value = '';
+    $('edit-diag-input-text').value = '';
+
+    try {
+      if (!rawSchedules || rawSchedules.length === 0) {
+        var fetchedSchedules = await callApi(api, 'Get', { typeName: 'CustomReportSchedule' });
+        rawSchedules = fetchedSchedules || [];
+      }
+
+      var tplIds = [];
+      rawSchedules.forEach(function (s) {
+        if (s.template && s.template.id) tplIds.push(s.template.id);
+      });
+      await resolveNames('ReportTemplate', tplIds, templateNamesById);
+
+      rawSchedules.forEach(function (s) {
+        var tplId = s.template ? s.template.id : null;
+        s._resolvedName = s.name || (tplId ? (templateNamesById[tplId] || tplId) : 'Plantilla Desconocida');
+      });
+
+      populateDiagnosticsReportDropdowns();
+
+      if (Object.keys(diagById).length === 0 || Object.keys(rulesById).length === 0) {
+        var calls = [
+          ['Get', { typeName: 'Diagnostic', resultsLimit: 1000 }],
+          ['Get', { typeName: 'Rule', resultsLimit: 1000 }]
+        ];
+        var res = await callMulti(api, calls);
+        var diags = res[0] || [];
+        var rules = res[1] || [];
+
+        diags.forEach(function(d) { if (d && d.id && d.name) diagById[d.id] = d.name; });
+        rules.forEach(function(r) { if (r && r.id && r.name) rulesById[r.id] = r.name; });
+      }
+
+      populateDiagnosticsLibraryDropdown();
+      $('edit-diag-status').textContent = "";
+
+    } catch (err) {
+      console.error("Error en la precarga de diagnósticos:", err);
+      $('edit-diag-status').style.color = "#ef4444";
+      $('edit-diag-status').textContent = "Error durante la precarga: " + (err.message || err);
+    }
+  }
+
+  function populateDiagnosticsReportDropdowns() {
+    var queryMod = ($('edit-diag-search-mod').value || '').toLowerCase().trim();
+    var queryComp = ($('edit-diag-search-comp').value || '').toLowerCase().trim();
+
     var selMod = $('edit-diag-select-report');
     var selComp = $('edit-diag-select-compare');
 
-    selMod.innerHTML = '<option value="">-- Busque reportes primero para cargarlos aquí --</option>';
-    selComp.innerHTML = '<option value="">-- Busque reportes primero para cargarlos aquí --</option>';
+    var currentValMod = selMod.value;
+    var currentValComp = selComp.value;
 
-    $('edit-diag-current-list').innerHTML = '<span style="color: #64748b; font-size: 12px; font-style: italic;">Seleccione un reporte de la lista para cargar sus diagnósticos...</span>';
-    $('edit-diag-compare-list').innerHTML = '<span style="color: #64748b; font-size: 12px; font-style: italic;">Seleccione un reporte de la lista para cargar sus diagnósticos...</span>';
-    $('edit-diag-input-text').value = '';
-    $('edit-diag-status').textContent = '';
+    selMod.innerHTML = '<option value="">-- Seleccione reporte a modificar --</option>';
+    selComp.innerHTML = '<option value="">-- Seleccione reporte a comparar --</option>';
 
-    if (currentReportRows && currentReportRows.length > 0) {
-      var optsHtml = '<option value="">-- Seleccione un reporte --</option>';
-      currentReportRows.forEach(function(s) {
-        optsHtml += '<option value="' + htmlEsc(s.id) + '">' + htmlEsc(s._resolvedName || s.name || s.id) + '</option>';
-      });
-      selMod.innerHTML = optsHtml;
-      selComp.innerHTML = optsHtml;
-    }
+    rawSchedules.sort(function(a, b) {
+      return (a._resolvedName || '').localeCompare(b._resolvedName || '', 'es');
+    }).forEach(function(s) {
+      var rName = s._resolvedName || s.name || s.id;
+      
+      if (!queryMod || rName.toLowerCase().indexOf(queryMod) >= 0) {
+        var optM = document.createElement('option');
+        optM.value = s.id;
+        optM.textContent = rName;
+        selMod.appendChild(optM);
+      }
 
-    $('edit-diagnostics-modal').style.display = 'flex';
+      if (!queryComp || rName.toLowerCase().indexOf(queryComp) >= 0) {
+        var optC = document.createElement('option');
+        optC.value = s.id;
+        optC.textContent = rName;
+        selComp.appendChild(optC);
+      }
+    });
+
+    if (currentValMod) selMod.value = currentValMod;
+    if (currentValComp) selComp.value = currentValComp;
   }
 
-  function handleEditDiagSelectReport(tipo) {
+  function populateDiagnosticsLibraryDropdown() {
+    var sel = $('diag-library-select');
+    var query = ($('diag-library-search').value || '').toLowerCase().trim();
+    if (!sel) return;
+
+    sel.innerHTML = '<option value="">-- Seleccione un diagnóstico o norma para añadir --</option>';
+
+    var items = [];
+
+    Object.keys(diagById).forEach(function(id) {
+      items.push({ id: id, name: diagById[id], type: 'Diagnóstico' });
+    });
+
+    Object.keys(rulesById).forEach(function(id) {
+      items.push({ id: id, name: rulesById[id], type: 'Norma Evento' });
+    });
+
+    items.sort(function(a, b) { return a.name.localeCompare(b.name, 'es'); });
+
+    items.forEach(function(item) {
+      if (!query || item.name.toLowerCase().indexOf(query) >= 0) {
+        var opt = document.createElement('option');
+        opt.value = item.name;
+        opt.textContent = "[" + item.type + "] " + item.name;
+        sel.appendChild(opt);
+      }
+    });
+  }
+
+  async function handleEditDiagSelectReport(tipo) {
     var isMod = tipo === 'modificar';
     var selectElem = isMod ? $('edit-diag-select-report') : $('edit-diag-select-compare');
     var container = isMod ? $('edit-diag-current-list') : $('edit-diag-compare-list');
     var repId = selectElem.value;
 
     if (!repId) {
-      container.innerHTML = '<span style="color: #64748b; font-size: 12px; font-style: italic;">Seleccione un reporte de la lista para cargar sus diagnósticos...</span>';
+      container.innerHTML = '<span style="color: #64748b; font-size: 12px; font-style: italic;">Seleccione un reporte para cargar sus diagnósticos...</span>';
       return;
     }
 
-    var selectedReport = currentReportRows.find(function(r) { return r.id === repId; });
-    if (!selectedReport) return;
+    container.innerHTML = '<span style="color: #0284c7; font-size: 12px;">Cargando diagnósticos...</span>';
 
-    var currentDiags = selectedReport._diags || [];
+    try {
+      var fetchRes = await callApi(api, 'Get', {
+        typeName: 'CustomReportSchedule',
+        search: { id: repId }
+      });
 
-    if (currentDiags.length === 0) {
-      container.innerHTML = '<span style="color: #f59e0b; font-size: 12px; font-weight: 600;">Este reporte no tiene diagnósticos asignados actualmente.</span>';
-    } else {
-      var tagsHtml = currentDiags.map(function(d) {
+      if (!fetchRes || !fetchRes[0]) {
+        container.innerHTML = '<span style="color: #ef4444; font-size: 12px;">No se pudo obtener el reporte de Geotab.</span>';
+        return;
+      }
+
+      var repObj = fetchRes[0];
+      var diagList = (repObj.arguments && repObj.arguments.diagnostics) || [];
+
+      if (diagList.length === 0) {
+        container.innerHTML = '<span style="color: #f59e0b; font-size: 12px; font-weight: 600;">Este reporte no tiene diagnósticos asignados actualmente.</span>';
+        if (isMod) $('edit-diag-input-text').value = '';
+        return;
+      }
+
+      var unresolvedIds = diagList.map(function(d){ return d.id; }).filter(function(id){ return !diagById[id]; });
+      if (unresolvedIds.length > 0) {
+        await resolveNames('Diagnostic', unresolvedIds, diagById);
+      }
+
+      var diagNames = diagList.map(function(d) {
+        return diagById[d.id] || d.id;
+      });
+
+      var tagsHtml = diagNames.map(function(d) {
         return '<span style="background: #e0f2fe; color: #0369a1; padding: 3px 8px; border-radius: 6px; border: 1px solid #bae6fd; font-size: 11px; font-weight: 600;">' + htmlEsc(d) + '</span>';
       }).join('');
+      
       container.innerHTML = tagsHtml;
-    }
 
-    if (isMod && currentDiags.length > 0) {
-      $('edit-diag-input-text').value = currentDiags.join(', ');
+      if (isMod) {
+        $('edit-diag-input-text').value = diagNames.join(', ');
+      }
+
+    } catch (err) {
+      console.error("Error al obtener diagnósticos del reporte:", err);
+      container.innerHTML = '<span style="color: #ef4444; font-size: 12px;">Error al cargar diagnósticos.</span>';
     }
   }
 
   function copyCompareDiagnosticsToInput() {
-    var compId = $('edit-diag-select-compare').value;
-    if (!compId) {
-      alert("Seleccione un reporte a comparar para copiar sus diagnósticos.");
+    var compContainer = $('edit-diag-compare-list');
+    var spans = compContainer.querySelectorAll('span');
+    
+    var diagsToCopy = [];
+    spans.forEach(function(sp) {
+      var txt = sp.textContent.trim();
+      if (txt && !txt.startsWith("Seleccione") && !txt.startsWith("Cargando") && !txt.startsWith("Este reporte") && !txt.startsWith("No se pudo")) {
+        diagsToCopy.push(txt);
+      }
+    });
+
+    if (diagsToCopy.length === 0) {
+      alert("El reporte a comparar seleccionado no contiene diagnósticos válidos.");
       return;
     }
 
-    var compareReport = currentReportRows.find(function(r) { return r.id === compId; });
-    if (compareReport && compareReport._diags && compareReport._diags.length > 0) {
-      var currentVal = $('edit-diag-input-text').value.trim();
-      var newDiagsText = compareReport._diags.join(', ');
+    var currentVal = $('edit-diag-input-text').value.trim();
+    var newDiagsText = diagsToCopy.join(', ');
 
-      if (currentVal.length > 0) {
-        $('edit-diag-input-text').value = currentVal + ', ' + newDiagsText;
-      } else {
-        $('edit-diag-input-text').value = newDiagsText;
-      }
-      setMsg("📋 Diagnósticos copiados al cuadro del Paso 3.");
+    if (currentVal.length > 0) {
+      $('edit-diag-input-text').value = currentVal + ', ' + newDiagsText;
     } else {
-      alert("El reporte a comparar seleccionado no contiene diagnósticos.");
+      $('edit-diag-input-text').value = newDiagsText;
+    }
+    setMsg("📋 Diagnósticos copiados al área de edición.");
+  }
+
+  function addSelectedDiagnosticFromLibrary() {
+    var selectedVal = $('diag-library-select').value;
+    if (!selectedVal) {
+      alert("Seleccione un diagnóstico o norma de la biblioteca primero.");
+      return;
+    }
+
+    var currentVal = $('edit-diag-input-text').value.trim();
+    if (currentVal.length > 0) {
+      $('edit-diag-input-text').value = currentVal + ', ' + selectedVal;
+    } else {
+      $('edit-diag-input-text').value = selectedVal;
     }
   }
 
@@ -2366,7 +2538,7 @@ ENTRADAS
       setTimeout(function() {
         $('edit-diagnostics-modal').style.display = 'none';
         rawSchedules = [];
-        handleReportGroupChange();
+        if (typeof handleReportGroupChange === 'function') handleReportGroupChange();
       }, 1200);
 
     } catch (err) {
@@ -2639,8 +2811,6 @@ ENTRADAS
     if($('hdr-actions-certi')) $('hdr-actions-certi').style.display = 'none';
     if($('hdr-actions-master')) $('hdr-actions-master').style.display = 'none';
     if($('hdr-actions-reports')) $('hdr-actions-reports').style.display = 'none';
-
-    highlightKpiCards();
 
     if (mod === 'hub') {
       $('testn-hub-view').style.display = 'block';
@@ -3186,15 +3356,20 @@ ENTRADAS
   $('btn-apply-prefix-preset').addEventListener('click', applyNamePrefixPreset);
   $('btn-submit-create-report').addEventListener('click', createAndSubmitReport);
 
-  // BOTÓN Y MODAL DE VALIDAR / MODIFICAR DIAGNÓSTICOS EN 3 PASOS
+  // EVENTOS MODAL MODIFICAR Y VALIDAR DIAGNÓSTICOS CON FILTROS Y BIBLIOTECA
   $('reports-btn-open-edit-diags-modal').addEventListener('click', openEditDiagnosticsModal);
   $('btn-close-edit-diags-modal').addEventListener('click', function() {
     $('edit-diagnostics-modal').style.display = 'none';
   });
   
+  $('edit-diag-search-mod').addEventListener('keyup', populateDiagnosticsReportDropdowns);
+  $('edit-diag-search-comp').addEventListener('keyup', populateDiagnosticsReportDropdowns);
+  $('diag-library-search').addEventListener('keyup', populateDiagnosticsLibraryDropdown);
+
   $('edit-diag-select-report').addEventListener('change', function() { handleEditDiagSelectReport('modificar'); });
   $('edit-diag-select-compare').addEventListener('change', function() { handleEditDiagSelectReport('comparar'); });
   $('btn-copy-compare-diags').addEventListener('click', copyCompareDiagnosticsToInput);
+  $('btn-add-diag-from-library').addEventListener('click', addSelectedDiagnosticFromLibrary);
   $('btn-save-diagnostics').addEventListener('click', saveDiagnosticsToReport);
 
   // EVENTOS MODAL VISUALIZACIÓN Y COPIA
