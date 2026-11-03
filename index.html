@@ -33,6 +33,20 @@
   </div>
 </div>
 
+<!-- MODAL CONFIRMACIÓN ANTES DE GUARDAR (NUEVO) -->
+<div id="confirm-save-modal" style="position: fixed; top:0; left:0; width:100vw; height:100vh; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(6px); z-index: 99999; display: none; justify-content: center; align-items: center; padding: 20px;">
+  <div style="background: #ffffff; padding: 28px; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); width: 100%; max-width: 460px; border: 1px solid #e2e8f0;">
+    <h3 style="margin: 0 0 10px 0; font-size: 18px; color: #0f172a; font-weight: 700;">¿Desea aplicar los cambios?</h3>
+    <p style="margin: 0 0 16px 0; font-size: 13px; color: #64748b; line-height: 1.5;">
+      Se actualizarán los parámetros en MyGeotab para la selección realizada. <b>Al finalizar la operación, los filtros de búsqueda se resetearán automáticamente.</b>
+    </p>
+    <div style="display: flex; justify-content: flex-end; gap: 10px;">
+      <button id="btn-cancel-confirm-save" type="button" class="cgps-btn cgps-btn-outline">Cancelar</button>
+      <button id="btn-exec-confirm-save" type="button" class="cgps-btn cgps-btn-primary" style="font-weight: 700;">Confirmar y Aplicar</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL VISTA PREVIA / DETALLE DEL REPORTE -->
 <div id="report-preview-modal" style="position: fixed; top:0; left:0; width:100vw; height:100vh; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(6px); z-index: 9999; display: none; justify-content: center; align-items: center; padding: 20px;">
   <div style="background: #ffffff; padding: 32px; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); width: 100%; max-width: 760px; max-height: 90vh; overflow-y: auto; border: 1px solid #e2e8f0;">
@@ -1029,6 +1043,7 @@ var addInConstructor = function (geotabApi, state, callback) {
   var REPORT_LINK_HASH = '#customReportSchedule,id:';
   var activeBulkTokens = [];
   var activeModule = 'hub';
+  var pendingActionToConfirm = null; 
   
   var activeUnitFilter = 'all'; 
   var activeParamFilter = 'all';
@@ -1298,6 +1313,45 @@ var addInConstructor = function (geotabApi, state, callback) {
     }); 
   }
 
+  function resetAllFilters() {
+    activeUnitFilter = 'all';
+    activeParamFilter = 'all';
+    activeFieldMissingFilter = 'all';
+    activeVehicleTypeFilter = 'all';
+    activeDateRange = null;
+    activeBulkTokens = [];
+    
+    if ($('cgps-filter')) $('cgps-filter').value = '';
+    if ($('cgps-filter-field')) $('cgps-filter-field').value = 'all';
+    if ($('cgps-bulk-input')) $('cgps-bulk-input').value = '';
+    if ($('cgps-bulk-input-std')) $('cgps-bulk-input-std').value = '';
+    if ($('cgps-mass-value-input')) $('cgps-mass-value-input').value = '';
+  }
+
+  function triggerConfirmModal(actionType) {
+    pendingActionToConfirm = actionType;
+    var modal = $('confirm-save-modal');
+    if (modal) modal.style.display = 'flex';
+  }
+
+  $('btn-cancel-confirm-save').addEventListener('click', function() {
+    pendingActionToConfirm = null;
+    var modal = $('confirm-save-modal');
+    if (modal) modal.style.display = 'none';
+  });
+
+  $('btn-exec-confirm-save').addEventListener('click', function() {
+    var modal = $('confirm-save-modal');
+    if (modal) modal.style.display = 'none';
+
+    if (pendingActionToConfirm === 'mass') {
+      executeMassUpdateUnified();
+    } else if (pendingActionToConfirm === 'inject') {
+      executeInjectRequiredParameters();
+    }
+    pendingActionToConfirm = null;
+  });
+
   function rebuildRows() {
     all = rawDevices
       .filter(function (d) { return !isExcludedDevice(d); })
@@ -1481,9 +1535,8 @@ var addInConstructor = function (geotabApi, state, callback) {
     $('cgps-mass-value-input').placeholder = labelText + '...';
   }
 
-  async function applyMassUpdateUnified() {
+  function applyMassUpdateUnified() {
     var selectedIds = Object.keys(selected).filter(function (k) { return selected[k]; });
-    var field = $('cgps-mass-field-select').value;
     var val = ($('cgps-mass-value-input').value || '').trim();
 
     if (selectedIds.length === 0) {
@@ -1495,6 +1548,14 @@ var addInConstructor = function (geotabApi, state, callback) {
       setMsg("Ingrese un valor para el campo seleccionado.", true);
       return;
     }
+
+    triggerConfirmModal('mass');
+  }
+
+  async function executeMassUpdateUnified() {
+    var selectedIds = Object.keys(selected).filter(function (k) { return selected[k]; });
+    var field = $('cgps-mass-field-select').value;
+    var val = ($('cgps-mass-value-input').value || '').trim();
 
     setMsg("Guardando cambios en " + selectedIds.length + " unidad(es)...");
 
@@ -1543,17 +1604,21 @@ var addInConstructor = function (geotabApi, state, callback) {
 
     try {
       await callMulti(api, calls);
-      setMsg("✅ Se guardaron los cambios en " + selectedIds.length + " unidad(es). Recargando datos...");
+      
+      resetAllFilters();
+      selected = {};
+
+      setMsg("✅ Se guardaron los cambios y se resetearon los filtros. Recargando datos...");
       setTimeout(function () {
         load();
-      }, 1500);
+      }, 1200);
     } catch (err) {
       console.error("Error al guardar cambios masivos:", err);
       setMsg("Error al guardar los cambios: " + (err.message || err), true);
     }
   }
 
-  async function injectRequiredParameters() {
+  function injectRequiredParameters() {
     var selectedIds = Object.keys(selected).filter(function (k) { return selected[k]; });
     
     if (selectedIds.length === 0) {
@@ -1561,6 +1626,11 @@ var addInConstructor = function (geotabApi, state, callback) {
       return;
     }
 
+    triggerConfirmModal('inject');
+  }
+
+  async function executeInjectRequiredParameters() {
+    var selectedIds = Object.keys(selected).filter(function (k) { return selected[k]; });
     setMsg("Inyectando 5 parámetros a " + selectedIds.length + " unidad(es)...");
 
     var calls = [];
@@ -1596,10 +1666,14 @@ var addInConstructor = function (geotabApi, state, callback) {
 
     try {
       await callMulti(api, calls);
-      setMsg("✅ Se completaron los 5 parámetros en " + selectedIds.length + " unidad(es). Recargando datos...");
+      
+      resetAllFilters();
+      selected = {};
+
+      setMsg("✅ Se completaron los 5 parámetros y se resetearon los filtros. Recargando datos...");
       setTimeout(function () {
         load();
-      }, 1500);
+      }, 1200);
     } catch (err) {
       console.error("Error al inyectar parámetros:", err);
       setMsg("Error al inyectar parámetros: " + (err.message || err), true);
@@ -3066,19 +3140,9 @@ ENTRADAS
 
   function switchView(mod) {
     activeModule = mod;
-    activeUnitFilter = 'all';
-    activeParamFilter = 'all';
-    activeFieldMissingFilter = 'all';
-    activeVehicleTypeFilter = 'all';
-    activeDateRange = null;
+    resetAllFilters();
     selected = {};
-    activeBulkTokens = [];
-    if($('cgps-bulk-input')) $('cgps-bulk-input').value = '';
-    if($('cgps-bulk-input-std')) $('cgps-bulk-input-std').value = '';
-    if($('cgps-filter')) $('cgps-filter').value = '';
-    if($('cgps-filter-field')) $('cgps-filter-field').value = 'all';
-    if($('cgps-mass-value-input')) $('cgps-mass-value-input').value = '';
-    
+
     if($('hdr-actions-certi')) $('hdr-actions-certi').style.display = 'none';
     if($('hdr-actions-master')) $('hdr-actions-master').style.display = 'none';
     if($('hdr-actions-reports')) $('hdr-actions-reports').style.display = 'none';
