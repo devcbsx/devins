@@ -88,7 +88,7 @@
   </div>
 </div>
 
-<!-- MODAL PARA CLONAR Y CREAR REPORTE -->
+<!-- MODAL PARA CLONAR Y CREAR REPORTE (SIN GRUPOS DESTINO) -->
 <div id="create-report-modal" style="position: fixed; top:0; left:0; width:100vw; height:100vh; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(6px); z-index: 9999; display: none; justify-content: center; align-items: center; padding: 20px;">
   <div style="background: #ffffff; padding: 32px; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); width: 100%; max-width: 680px; max-height: 90vh; overflow-y: auto; border: 1px solid #e2e8f0;">
     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px; margin-bottom: 20px;">
@@ -127,14 +127,6 @@
         <input type="text" id="create-rep-name" class="cgps-input" placeholder="Nombre autogenerado o editable" style="width: 100%; height: 38px; font-weight: 600;">
       </div>
 
-      <div>
-        <label style="font-weight: 600; color: #0f172a; display: block; margin-bottom: 6px;">4. Asignar Grupos Destino (Múltiple Selección):</label>
-        <input type="text" id="create-rep-dest-search" class="cgps-input" placeholder="🔍 Filtrar cliente..." style="width: 100%; height: 36px; margin-bottom: 8px;">
-        <div id="create-rep-dest-groups-list" style="max-height: 140px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; background: #f8fafc; display: flex; flex-direction: column; gap: 8px;">
-          <span style="color: #64748b; font-size: 12px;">Cargando lista de grupos destino...</span>
-        </div>
-      </div>
-
       <div id="create-rep-status" style="font-size: 12px; font-weight: 700; min-height: 20px;"></div>
     </div>
 
@@ -144,20 +136,20 @@
   </div>
 </div>
 
-<!-- MODAL PARA VALIDAR / MODIFICAR DIAGNÓSTICOS DE REPORTES -->
+<!-- MODAL PARA VALIDAR / MODIFICAR DIAGNÓSTICOS Y GRUPOS DE REPORTES -->
 <div id="edit-diagnostics-modal" style="position: fixed; top:0; left:0; width:100vw; height:100vh; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(6px); z-index: 9999; display: none; justify-content: center; align-items: center; padding: 20px;">
   <div style="background: #ffffff; padding: 32px; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); width: 100%; max-width: 900px; max-height: 92vh; overflow-y: auto; border: 1px solid #e2e8f0;">
     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px; margin-bottom: 16px;">
       <h2 style="margin:0; font-size: 18px; color: #0f172a; font-weight: 700; display: flex; align-items: center; gap: 8px;">
-        <span>🔧</span> VALIDAR Y MODIFICAR DIAGNÓSTICOS DE REPORTE
+        <span>🔧</span> VALIDAR Y MODIFICAR DIAGNÓSTICOS Y GRUPOS DE REPORTE
       </h2>
       <button id="btn-close-edit-diags-modal" type="button" class="cgps-btn cgps-btn-outline" style="font-size: 12px; padding: 6px 14px;">✕ Cerrar</button>
     </div>
 
-    <!-- BOTÓN PARA CARGAR REPORTES BAJO DEMANDA -->
+    <!-- BOTÓN DE CARGA BAJO DEMANDA OPTIMIZADO -->
     <div style="background: #f0f9ff; border: 1px solid #bae6fd; padding: 12px 16px; border-radius: 10px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
       <span style="font-size: 12px; font-weight: 600; color: #0369a1;">
-        Presione el botón para consultar y refrescar la lista de reportes de Geotab para los Puntos 1 y 2.
+        Presione el botón para consultar y resolver los nombres de reportes desde Geotab para los Puntos 1 y 2.
       </span>
       <button id="btn-load-reports-list" type="button" class="cgps-btn cgps-btn-primary" style="font-size: 12px; font-weight: 700; height: 34px;">
         ⚡ Cargar Lista de Reportes
@@ -201,9 +193,21 @@
         </div>
       </div>
 
+      <!-- SECCIÓN DE ASIGNACIÓN DE GRUPOS DESTINO -->
+      <div style="background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 8px;">
+        <label style="font-weight: 700; color: #0f172a; font-size: 14px;">
+          3. Asignar Grupos Destino al Reporte
+        </label>
+        <input type="text" id="edit-diag-dest-search" class="cgps-input" placeholder="🔍 Filtrar grupos por nombre..." style="width: 100%; height: 34px; font-size: 12px;">
+        <div id="edit-diag-dest-groups-list" style="max-height: 120px; overflow-y: auto; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; background: #ffffff; display: flex; flex-direction: column; gap: 6px;">
+          <span style="color: #64748b; font-size: 12px; font-style: italic;">Seleccione un reporte arriba para cargar los grupos asignados actualmente...</span>
+        </div>
+      </div>
+
+      <!-- SECCIÓN DE DIAGNÓSTICOS / NORMAS -->
       <div style="background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 12px;">
         <label style="font-weight: 700; color: #0f172a; font-size: 14px;">
-          3. Modificar o Añadir Diagnósticos / Normas al Reporte
+          4. Modificar o Añadir Diagnósticos / Normas al Reporte
         </label>
 
         <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; background: #ffffff; display: flex; flex-direction: column; gap: 10px;">
@@ -237,7 +241,7 @@
 
     <div style="text-align: right; margin-top: 24px; border-top: 1px solid #e2e8f0; padding-top: 16px; display: flex; justify-content: flex-end; gap: 10px;">
       <button id="btn-save-diagnostics" type="button" class="cgps-btn cgps-btn-primary" style="font-size: 13px; font-weight: 700; padding: 10px 20px;">
-        💾 Guardar Diagnósticos en Geotab
+        💾 Guardar Cambios en Geotab
       </button>
     </div>
   </div>
@@ -582,7 +586,7 @@
               </div>
             </div>
 
-            <!-- Selector de Ventana de Tiempo (Fecha Desde/Hasta + Horas) -->
+            <!-- Selector de Ventana de Tiempo -->
             <div style="background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;">
               <label style="font-size: 11px; font-weight: 700; color: #0284c7; display: block; margin-bottom: 6px; text-transform: uppercase;">Ventana del Evento (Hora local UTC-5 Lima):</label>
               <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
@@ -628,7 +632,7 @@
       </div>
     </div>
 
-    <!-- DASHBOARD KPI FLEET RECONSTRUCTED FULL -->
+    <!-- DASHBOARD KPI FLEET -->
     <div id="sec-kpi-container" class="cgps-kpi-grid" style="margin-top: 12px;">
       <div class="cgps-card kpi-btn-card" id="kpi-card-sn-vin" title="Filtrar con serial y VIN">
         <div class="cgps-kpi-title">CON SERIAL + VIN</div>
@@ -1687,7 +1691,6 @@ var addInConstructor = function (geotabApi, state, callback) {
     });
   });
 
-  // LÓGICA DE AUTOCOMPLETADO Y VENTANA DE TIEMPO PARA FLASH REPORT
   function populateFlashDatalists() {
     var dlPlacas = $('flash-placas-list');
     var dlVins = $('flash-vins-list');
@@ -2139,31 +2142,6 @@ ENTRADAS
     }
   }
 
-  function renderDestinationGroupsList() {
-    var container = $('create-rep-dest-groups-list');
-    var query = ($('create-rep-dest-search').value || '').toLowerCase().trim();
-    if (!container) return;
-
-    var allDestGroups = getGroupsUnderParent('b278A').concat(getGroupsUnderParent('b27A7'));
-    var uniqueMap = {};
-    allDestGroups.forEach(function(g) { uniqueMap[g.id] = g; });
-    var allCombined = Object.keys(uniqueMap).map(function(k) { return uniqueMap[k]; });
-    allCombined.sort(function(a, b) { return (a.name || '').localeCompare(b.name || '', 'es'); });
-
-    var html = '';
-
-    allCombined.forEach(function(g) {
-      if (!query || g.name.toLowerCase().indexOf(query) >= 0) {
-        html += '<label style="display: flex; align-items: center; gap: 8px; font-size: 12px; cursor: pointer;">' +
-          '<input type="checkbox" class="chk-dest-group" value="' + htmlEsc(g.id) + '"> ' +
-          '<span style="font-weight:600; color:#0f172a;">' + htmlEsc(g.name) + '</span>' +
-          '</label>';
-      }
-    });
-
-    container.innerHTML = html || '<span style="color:#64748b; font-size:12px;">No se encontraron grupos destino coincidentes.</span>';
-  }
-
   async function handleSourceGroupChange() {
     var sourceGid = $('create-rep-source-group').value;
     var scheduleSel = $('create-rep-source-schedule');
@@ -2254,10 +2232,8 @@ ENTRADAS
     $('create-rep-name').value = "";
     $('create-rep-status').textContent = "";
     $('create-rep-source-search').value = "";
-    $('create-rep-dest-search').value = "";
     
     populateSourceGroupsDropdown();
-    renderDestinationGroupsList();
     $('create-report-modal').style.display = 'flex';
   }
 
@@ -2265,11 +2241,6 @@ ENTRADAS
     var sourceSchedId = $('create-rep-source-schedule').value;
     var repName = $('create-rep-name').value.trim();
     var statusDiv = $('create-rep-status');
-
-    var selectedDestCheckboxes = document.querySelectorAll('.chk-dest-group:checked');
-    var destGroupsList = Array.from(selectedDestCheckboxes).map(function(cb) { 
-      return { id: cb.value }; 
-    });
 
     if (!sourceSchedId) {
       statusDiv.style.color = "#ef4444";
@@ -2283,12 +2254,6 @@ ENTRADAS
       return;
     }
 
-    if (destGroupsList.length === 0) {
-      statusDiv.style.color = "#ef4444";
-      statusDiv.textContent = "Seleccione al menos un grupo destino.";
-      return;
-    }
-
     var sourceSched = sourceGroupSchedules.find(function(s){ return s.id === sourceSchedId; });
     if (!sourceSched) {
       statusDiv.style.color = "#ef4444";
@@ -2297,7 +2262,7 @@ ENTRADAS
     }
 
     statusDiv.style.color = "#0284c7";
-    statusDiv.textContent = "Registrando reporte limpio sin diagnósticos en Geotab...";
+    statusDiv.textContent = "Registrando reporte limpio sin grupos ni diagnósticos en Geotab...";
 
     try {
       var newSchedule = {
@@ -2307,8 +2272,8 @@ ENTRADAS
         period: sourceSched.period || "Today",
         isActive: true,
         template: { id: sourceSched.template ? sourceSched.template.id : "b114D" },
-        groups: destGroupsList,
-        includeAllChildrenGroups: destGroupsList,
+        groups: [],
+        includeAllChildrenGroups: [],
         arguments: {
           entityType: (sourceSched.arguments && sourceSched.arguments.entityType) || "Device",
           redirectSendReportTrue: false,
@@ -2324,7 +2289,7 @@ ENTRADAS
       var newReportId = typeof createdResult === 'string' ? createdResult : (createdResult && createdResult.id ? createdResult.id : createdResult);
 
       statusDiv.style.color = "#10b981";
-      statusDiv.textContent = "✅ ¡Reporte clonado y generado sin diagnósticos con éxito! (ID: " + newReportId + ")";
+      statusDiv.textContent = "✅ ¡Reporte creado con éxito sin grupos ni diagnósticos! (ID: " + newReportId + ")";
       
       setTimeout(function() {
         $('create-report-modal').style.display = 'none';
@@ -2342,17 +2307,20 @@ ENTRADAS
     }
   }
 
-  // MODAL DE DIAGNÓSTICOS: PRECARGA BAJO DEMANDA
+  // MODAL DE DIAGNÓSTICOS Y GRUPOS: CARGA Y RENDIMIENTO OPTIMIZADO
   function openEditDiagnosticsModal() {
     $('edit-diagnostics-modal').style.display = 'flex';
     $('edit-diag-status').style.color = "#0284c7";
 
     $('edit-diag-search-mod').value = '';
     $('edit-diag-search-comp').value = '';
+    $('edit-diag-dest-search').value = '';
     $('diag-library-search').value = '';
     $('edit-diag-input-text').value = '';
     $('diag-library-select').innerHTML = '<option value="">-- Seleccione un tipo y presione "Cargar Catálogo" --</option>';
     loadedCatalogItems = [];
+
+    renderEditDiagGroupsList([]);
 
     if (rawSchedules && rawSchedules.length > 0) {
       populateDiagnosticsReportDropdowns();
@@ -2360,14 +2328,14 @@ ENTRADAS
     } else {
       $('edit-diag-select-report').innerHTML = '<option value="">-- Presione "Cargar Lista de Reportes" arriba --</option>';
       $('edit-diag-select-compare').innerHTML = '<option value="">-- Presione "Cargar Lista de Reportes" arriba --</option>';
-      $('edit-diag-status').textContent = "Presione el botón '⚡ Cargar Lista de Reportes' para sincronizar con Geotab.";
+      $('edit-diag-status').textContent = "Presione el botón '⚡ Cargar Lista de Reportes' para resolver y cargar los nombres desde Geotab.";
     }
   }
 
   async function loadDiagnosticsReportsList() {
     var statusDiv = $('edit-diag-status');
     statusDiv.style.color = "#0284c7";
-    statusDiv.textContent = "Cargando programaciones de reporte desde Geotab...";
+    statusDiv.textContent = "Cargando y resolviendo nombres de reportes desde Geotab...";
 
     try {
       var fetchedSchedules = await callApi(api, 'Get', { typeName: 'CustomReportSchedule' });
@@ -2386,7 +2354,7 @@ ENTRADAS
 
       populateDiagnosticsReportDropdowns();
       statusDiv.style.color = "#10b981";
-      statusDiv.textContent = "✅ Lista de reportes cargada con éxito (" + rawSchedules.length + " reportes registrados).";
+      statusDiv.textContent = "✅ Lista de reportes procesada con éxito (" + rawSchedules.length + " reportes cargados).";
 
     } catch (err) {
       console.error("Error al cargar lista de reportes:", err);
@@ -2430,6 +2398,32 @@ ENTRADAS
 
     if (currentValMod) selMod.value = currentValMod;
     if (currentValComp) selComp.value = currentValComp;
+  }
+
+  function renderEditDiagGroupsList(assignedGroupIds) {
+    var container = $('edit-diag-dest-groups-list');
+    var query = ($('edit-diag-dest-search').value || '').toLowerCase().trim();
+    if (!container) return;
+
+    var allDestGroups = getGroupsUnderParent('b278A').concat(getGroupsUnderParent('b27A7'));
+    var uniqueMap = {};
+    allDestGroups.forEach(function(g) { uniqueMap[g.id] = g; });
+    var allCombined = Object.keys(uniqueMap).map(function(k) { return uniqueMap[k]; });
+    allCombined.sort(function(a, b) { return (a.name || '').localeCompare(b.name || '', 'es'); });
+
+    var html = '';
+
+    allCombined.forEach(function(g) {
+      if (!query || g.name.toLowerCase().indexOf(query) >= 0) {
+        var isChecked = assignedGroupIds && assignedGroupIds.includes(g.id);
+        html += '<label style="display: flex; align-items: center; gap: 8px; font-size: 12px; cursor: pointer;">' +
+          '<input type="checkbox" class="chk-edit-dest-group" value="' + htmlEsc(g.id) + '"' + (isChecked ? ' checked' : '') + '> ' +
+          '<span style="font-weight:600; color:#0f172a;">' + htmlEsc(g.name) + '</span>' +
+          '</label>';
+      }
+    });
+
+    container.innerHTML = html || '<span style="color:#64748b; font-size:12px;">No se encontraron grupos coincidentes.</span>';
   }
 
   // CARGA BAJO DEMANDA DE CATÁLOGO (DIAGNÓSTICOS O NORMAS)
@@ -2517,6 +2511,7 @@ ENTRADAS
 
     if (!repId) {
       container.innerHTML = '<span style="color: #64748b; font-size: 12px; font-style: italic;">Seleccione un reporte para cargar sus diagnósticos...</span>';
+      if (isMod) renderEditDiagGroupsList([]);
       return;
     }
 
@@ -2534,6 +2529,12 @@ ENTRADAS
       }
 
       var repObj = fetchRes[0];
+      
+      if (isMod) {
+        var assignedGroupIds = (repObj.groups || []).map(function(g){ return g.id; });
+        renderEditDiagGroupsList(assignedGroupIds);
+      }
+
       var diagList = (repObj.arguments && repObj.arguments.diagnostics) || [];
 
       if (diagList.length === 0) {
@@ -2651,7 +2652,15 @@ ENTRADAS
 
       entity.arguments.diagnostics = newDiagsArray;
 
-      statusDiv.textContent = "Guardando diagnósticos actualizados...";
+      var selectedDestCheckboxes = document.querySelectorAll('.chk-edit-dest-group:checked');
+      var destGroupsList = Array.from(selectedDestCheckboxes).map(function(cb) { 
+        return { id: cb.value }; 
+      });
+
+      entity.groups = destGroupsList;
+      entity.includeAllChildrenGroups = destGroupsList;
+
+      statusDiv.textContent = "Guardando diagnósticos y grupos actualizados...";
 
       await callApi(api, 'Set', {
         typeName: 'CustomReportSchedule',
@@ -2659,7 +2668,7 @@ ENTRADAS
       });
 
       statusDiv.style.color = "#10b981";
-      statusDiv.textContent = "✅ ¡Diagnósticos actualizados correctamente en Geotab!";
+      statusDiv.textContent = "✅ ¡Diagnósticos y grupos actualizados correctamente en Geotab!";
 
       setTimeout(function() {
         $('edit-diagnostics-modal').style.display = 'none';
@@ -2672,7 +2681,7 @@ ENTRADAS
     } catch (err) {
       console.error("Error al actualizar diagnósticos:", err);
       statusDiv.style.color = "#ef4444";
-      statusDiv.textContent = "Error al guardar diagnósticos: " + (err.message || JSON.stringify(err));
+      statusDiv.textContent = "Error al guardar cambios: " + (err.message || JSON.stringify(err));
     }
   }
 
@@ -3481,10 +3490,6 @@ ENTRADAS
     populateSourceGroupsDropdown();
   });
 
-  $('create-rep-dest-search').addEventListener('keyup', function() {
-    renderDestinationGroupsList();
-  });
-
   $('create-rep-source-group').addEventListener('change', handleSourceGroupChange);
   $('create-rep-source-schedule').addEventListener('change', handleSourceScheduleChange);
   $('btn-apply-prefix-preset').addEventListener('click', applyNamePrefixPreset);
@@ -3499,6 +3504,12 @@ ENTRADAS
   $('btn-load-reports-list').addEventListener('click', loadDiagnosticsReportsList);
   $('edit-diag-search-mod').addEventListener('keyup', populateDiagnosticsReportDropdowns);
   $('edit-diag-search-comp').addEventListener('keyup', populateDiagnosticsReportDropdowns);
+  $('edit-diag-dest-search').addEventListener('keyup', function() {
+    var currentRepId = $('edit-diag-select-report').value;
+    var currentSched = rawSchedules.find(function(s){ return s.id === currentRepId; });
+    var assignedGroupIds = currentSched ? (currentSched.groups || []).map(function(g){ return g.id; }) : [];
+    renderEditDiagGroupsList(assignedGroupIds);
+  });
 
   $('btn-load-library-items').addEventListener('click', loadCatalogItemsOnDemand);
   $('diag-library-search').addEventListener('keyup', filterCatalogItems);
