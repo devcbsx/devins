@@ -144,7 +144,7 @@
   </div>
 </div>
 
-<!-- MODAL PARA VALIDAR / MODIFICAR DIAGNÓSTICOS DE REPORTES (SOLO NOMBRES + CARGA BAJO DEMANDA Y FILTROS) -->
+<!-- MODAL PARA VALIDAR / MODIFICAR DIAGNÓSTICOS DE REPORTES -->
 <div id="edit-diagnostics-modal" style="position: fixed; top:0; left:0; width:100vw; height:100vh; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(6px); z-index: 9999; display: none; justify-content: center; align-items: center; padding: 20px;">
   <div style="background: #ffffff; padding: 32px; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); width: 100%; max-width: 900px; max-height: 92vh; overflow-y: auto; border: 1px solid #e2e8f0;">
     <!-- Encabezado Modal -->
@@ -195,13 +195,12 @@
         </div>
       </div>
 
-      <!-- Paso 3: Carga bajo demanda de Diagnósticos o Normas de Eventos -->
+      <!-- Paso 3: Carga bajo demanda de Diagnósticos o Normas de Eventos (BOTÓN SIEMPRE ACTIVO) -->
       <div style="background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 12px;">
         <label style="font-weight: 700; color: #0f172a; font-size: 14px;">
           3. Modificar o Añadir Diagnósticos / Normas al Reporte
         </label>
 
-        <!-- Selector Tipo + Botón de Carga Bajo Demanda + Filtro Dinámico -->
         <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; background: #ffffff; display: flex; flex-direction: column; gap: 10px;">
           <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
             <b style="color: #0284c7; font-size: 12px; text-transform: uppercase;">Tipo a cargar:</b>
@@ -217,9 +216,11 @@
 
           <div style="display: flex; gap: 8px; align-items: center;">
             <select id="diag-library-select" class="cgps-input" style="flex: 1; height: 36px; font-size: 12px; font-weight: 600;">
-              <option value="">-- Seleccione un tipo y presione 'Cargar Catálogo' --</option>
+              <option value="">-- Seleccione un tipo y presione "Cargar Catálogo" --</option>
             </select>
-            <button id="btn-add-diag-from-library" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px; font-size: 12px; font-weight: 700;">➕ Añadir seleccionado</button>
+            <button id="btn-add-diag-from-library" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px; font-size: 12px; font-weight: 700; display: inline-flex !important; visibility: visible !important;">
+              ➕ Añadir seleccionado
+            </button>
           </div>
         </div>
 
@@ -319,7 +320,6 @@
         <button id="master-btn-excel" type="button" class="cgps-btn cgps-btn-white" style="font-weight:700;">📊 Exportar XLSX</button>
       </div>
 
-      <!-- BOTONES EN EL ENCABEZADO DE REPORTES POR CLIENTE -->
       <div id="hdr-actions-reports" style="display: none; gap: 8px;">
         <button id="reports-btn-open-create-modal" type="button" class="cgps-btn cgps-btn-white" style="font-weight:700;">➕ Copiar Reporte de Cliente</button>
         <button id="reports-btn-open-edit-diags-modal" type="button" class="cgps-btn cgps-btn-secondary" style="font-weight:700;">🔧 Validar / Modificar Diagnósticos</button>
@@ -606,7 +606,7 @@
       </div>
     </div>
 
-    <!-- DASHBOARD KPI FLEET RECONSTRUCTED FULL (RESTAURADO SEGÚN CAPTURA DE PANTALLA) -->
+    <!-- DASHBOARD KPI FLEET RECONSTRUCTED FULL -->
     <div id="sec-kpi-container" class="cgps-kpi-grid" style="margin-top: 12px;">
       <div class="cgps-card kpi-btn-card" id="kpi-card-sn-vin" title="Filtrar con serial y VIN">
         <div class="cgps-kpi-title">CON SERIAL + VIN</div>
@@ -625,7 +625,6 @@
         <div class="cgps-kpi-value" id="kpi-val-2" style="color: #6366f1;">0</div>
       </div>
 
-      <!-- CARDS ESPECÍFICAS DE VALIDACIÓN Y PARÁMETROS -->
       <div class="cgps-card kpi-btn-card" id="kpi-card-4" title="Filtrar completos (5/5)">
         <div class="cgps-kpi-title">PARÁMETROS 5/5</div>
         <div class="cgps-kpi-value" id="kpi-val-4" style="color: #10b981;">0</div>
@@ -651,7 +650,6 @@
         <div class="cgps-kpi-value" id="kpi-val-norazon" style="color: #b91c1c;">0</div>
       </div>
 
-      <!-- SEGUNDA FILA / TARJETAS DE TIPOS DE VEHÍCULO -->
       <div class="cgps-card kpi-btn-card" id="kpi-card-type-remolcadores" title="Filtrar remolcadores">
         <div class="cgps-kpi-title">REMOLCADORES</div>
         <div class="cgps-kpi-value" id="kpi-val-remolcadores" style="color: #0284c7;">0</div>
@@ -943,7 +941,7 @@ var addInConstructor = function (geotabApi, state, callback) {
   var filteredAllowedGroupsList = []; 
   var rawSchedules = [], templateNamesById = {};
   var usersById = {}, rulesById = {}, diagById = {}, currentReportRows = [];
-  var loadedCatalogItems = []; // Almacena ítems cargados dinámicamente en el Paso 3
+  var loadedCatalogItems = []; 
   var sourceGroupSchedules = [];
   var REPORT_LINK_HASH = '#customReportSchedule,id:';
   var activeBulkTokens = [];
@@ -2273,7 +2271,7 @@ ENTRADAS
     }
   }
 
-  // MODAL DE DIAGNÓSTICOS: SOLO MOSTRAR NOMBRES DE REPORTES Y CARGA DE NORMAS/DIAGNÓSTICOS BAJO DEMANDA
+  // MODAL DE DIAGNÓSTICOS: PRECARGA DE REPORTES
   async function openEditDiagnosticsModal() {
     $('edit-diagnostics-modal').style.display = 'flex';
     $('edit-diag-status').style.color = "#0284c7";
@@ -2313,7 +2311,6 @@ ENTRADAS
     }
   }
 
-  // Muestra ÚNICAMENTE el nombre del reporte sin ID entre paréntesis
   function populateDiagnosticsReportDropdowns() {
     var queryMod = ($('edit-diag-search-mod').value || '').toLowerCase().trim();
     var queryComp = ($('edit-diag-search-comp').value || '').toLowerCase().trim();
@@ -2351,7 +2348,7 @@ ENTRADAS
     if (currentValComp) selComp.value = currentValComp;
   }
 
-  // CARGA BAJO DEMANDA DE CATÁLOGO (DIAGNÓSTICOS O NORMAS) SEGÚN LA ELECCIÓN DEL USUARIO
+  // CARGA BAJO DEMANDA DE CATÁLOGO (DIAGNÓSTICOS O NORMAS)
   async function loadCatalogItemsOnDemand() {
     var typeChoice = $('diag-library-type-choice').value;
     var statusDiv = $('edit-diag-status');
@@ -2392,15 +2389,19 @@ ENTRADAS
     }
   }
 
+  // CORREGIDO: Mantiene SIEMPRE el botón de añadir seleccionado activo y visible
   function filterCatalogItems() {
     var sel = $('diag-library-select');
     var query = ($('diag-library-search').value || '').toLowerCase().trim();
     if (!sel) return;
 
-    sel.innerHTML = '<option value="">-- Seleccione un elemento para añadir --</option>';
+    sel.innerHTML = '';
 
     if (!loadedCatalogItems || loadedCatalogItems.length === 0) {
-      sel.innerHTML = '<option value="">-- No hay elementos cargados. Presione "Cargar Catálogo" --</option>';
+      var optDefault = document.createElement('option');
+      optDefault.value = "";
+      optDefault.textContent = '-- No hay elementos cargados. Presione "Cargar Catálogo" --';
+      sel.appendChild(optDefault);
       return;
     }
 
@@ -2416,7 +2417,10 @@ ENTRADAS
     });
 
     if (count === 0) {
-      sel.innerHTML = '<option value="">-- Sin coincidencias para la búsqueda --</option>';
+      var optEmpty = document.createElement('option');
+      optEmpty.value = "";
+      optEmpty.textContent = '-- Sin coincidencias para la búsqueda --';
+      sel.appendChild(optEmpty);
     }
   }
 
@@ -2506,10 +2510,11 @@ ENTRADAS
     setMsg("📋 Diagnósticos copiados al área de edición.");
   }
 
+  // AÑADIR SELECCIONADO AL TEXTAREA
   function addSelectedDiagnosticFromLibrary() {
     var selectedVal = $('diag-library-select').value;
     if (!selectedVal) {
-      alert("Seleccione un elemento del catálogo primero.");
+      alert("Por favor, seleccione un elemento válido del catálogo desplegable primero.");
       return;
     }
 
@@ -2519,6 +2524,7 @@ ENTRADAS
     } else {
       $('edit-diag-input-text').value = selectedVal;
     }
+    setMsg("➕ Elemento '" + selectedVal + "' añadido al recuadro de texto.");
   }
 
   async function saveDiagnosticsToReport() {
