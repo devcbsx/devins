@@ -147,11 +147,21 @@
 <!-- MODAL PARA VALIDAR / MODIFICAR DIAGNÓSTICOS DE REPORTES -->
 <div id="edit-diagnostics-modal" style="position: fixed; top:0; left:0; width:100vw; height:100vh; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(6px); z-index: 9999; display: none; justify-content: center; align-items: center; padding: 20px;">
   <div style="background: #ffffff; padding: 32px; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); width: 100%; max-width: 900px; max-height: 92vh; overflow-y: auto; border: 1px solid #e2e8f0;">
-    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px; margin-bottom: 20px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px; margin-bottom: 16px;">
       <h2 style="margin:0; font-size: 18px; color: #0f172a; font-weight: 700; display: flex; align-items: center; gap: 8px;">
         <span>🔧</span> VALIDAR Y MODIFICAR DIAGNÓSTICOS DE REPORTE
       </h2>
       <button id="btn-close-edit-diags-modal" type="button" class="cgps-btn cgps-btn-outline" style="font-size: 12px; padding: 6px 14px;">✕ Cerrar</button>
+    </div>
+
+    <!-- BOTÓN PARA CARGAR REPORTES BAJO DEMANDA -->
+    <div style="background: #f0f9ff; border: 1px solid #bae6fd; padding: 12px 16px; border-radius: 10px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+      <span style="font-size: 12px; font-weight: 600; color: #0369a1;">
+        Presione el botón para consultar y refrescar la lista de reportes de Geotab para los Puntos 1 y 2.
+      </span>
+      <button id="btn-load-reports-list" type="button" class="cgps-btn cgps-btn-primary" style="font-size: 12px; font-weight: 700; height: 34px;">
+        ⚡ Cargar Lista de Reportes
+      </button>
     </div>
 
     <div style="display: flex; flex-direction: column; gap: 20px; font-size: 13px;">
@@ -161,7 +171,7 @@
           <label style="font-weight: 700; color: #0f172a; display: block; margin-bottom: 6px; font-size: 13px;">1. Reporte a modificar</label>
           <input type="text" id="edit-diag-search-mod" class="cgps-input" placeholder="🔍 Buscar por palabra clave..." style="width: 100%; height: 34px; margin-bottom: 6px; font-size: 12px;">
           <select id="edit-diag-select-report" class="cgps-input" style="width: 100%; height: 38px; font-weight: 600;">
-            <option value="">-- Cargando reportes precargados... --</option>
+            <option value="">-- Presione "Cargar Lista de Reportes" arriba --</option>
           </select>
         </div>
         <div>
@@ -177,7 +187,7 @@
           <label style="font-weight: 700; color: #0f172a; display: block; margin-bottom: 6px; font-size: 13px;">2. Reporte a comparar</label>
           <input type="text" id="edit-diag-search-comp" class="cgps-input" placeholder="🔍 Buscar por palabra clave..." style="width: 100%; height: 34px; margin-bottom: 6px; font-size: 12px;">
           <select id="edit-diag-select-compare" class="cgps-input" style="width: 100%; height: 38px; font-weight: 600;">
-            <option value="">-- Cargando reportes precargados... --</option>
+            <option value="">-- Presione "Cargar Lista de Reportes" arriba --</option>
           </select>
         </div>
         <div>
@@ -2319,7 +2329,9 @@ ENTRADAS
       setTimeout(function() {
         $('create-report-modal').style.display = 'none';
         rawSchedules = [];
-        handleReportGroupChange();
+        if (getSelectedSubGroupIds().length > 0) {
+          handleReportGroupChange();
+        }
       }, 1200);
 
     } catch (err) {
@@ -2330,11 +2342,10 @@ ENTRADAS
     }
   }
 
-  // MODAL DE DIAGNÓSTICOS: PRECARGA DE REPORTES
-  async function openEditDiagnosticsModal() {
+  // MODAL DE DIAGNÓSTICOS: PRECARGA BAJO DEMANDA
+  function openEditDiagnosticsModal() {
     $('edit-diagnostics-modal').style.display = 'flex';
     $('edit-diag-status').style.color = "#0284c7";
-    $('edit-diag-status').textContent = "Precargando lista de reportes...";
 
     $('edit-diag-search-mod').value = '';
     $('edit-diag-search-comp').value = '';
@@ -2343,11 +2354,24 @@ ENTRADAS
     $('diag-library-select').innerHTML = '<option value="">-- Seleccione un tipo y presione "Cargar Catálogo" --</option>';
     loadedCatalogItems = [];
 
+    if (rawSchedules && rawSchedules.length > 0) {
+      populateDiagnosticsReportDropdowns();
+      $('edit-diag-status').textContent = "Lista precargada. Si desea sincronizar datos nuevos, presione '⚡ Cargar Lista de Reportes'.";
+    } else {
+      $('edit-diag-select-report').innerHTML = '<option value="">-- Presione "Cargar Lista de Reportes" arriba --</option>';
+      $('edit-diag-select-compare').innerHTML = '<option value="">-- Presione "Cargar Lista de Reportes" arriba --</option>';
+      $('edit-diag-status').textContent = "Presione el botón '⚡ Cargar Lista de Reportes' para sincronizar con Geotab.";
+    }
+  }
+
+  async function loadDiagnosticsReportsList() {
+    var statusDiv = $('edit-diag-status');
+    statusDiv.style.color = "#0284c7";
+    statusDiv.textContent = "Cargando programaciones de reporte desde Geotab...";
+
     try {
-      if (!rawSchedules || rawSchedules.length === 0) {
-        var fetchedSchedules = await callApi(api, 'Get', { typeName: 'CustomReportSchedule' });
-        rawSchedules = fetchedSchedules || [];
-      }
+      var fetchedSchedules = await callApi(api, 'Get', { typeName: 'CustomReportSchedule' });
+      rawSchedules = fetchedSchedules || [];
 
       var tplIds = [];
       rawSchedules.forEach(function (s) {
@@ -2361,12 +2385,13 @@ ENTRADAS
       });
 
       populateDiagnosticsReportDropdowns();
-      $('edit-diag-status').textContent = "";
+      statusDiv.style.color = "#10b981";
+      statusDiv.textContent = "✅ Lista de reportes cargada con éxito (" + rawSchedules.length + " reportes registrados).";
 
     } catch (err) {
-      console.error("Error en la precarga de reportes:", err);
-      $('edit-diag-status').style.color = "#ef4444";
-      $('edit-diag-status').textContent = "Error durante la precarga: " + (err.message || err);
+      console.error("Error al cargar lista de reportes:", err);
+      statusDiv.style.color = "#ef4444";
+      statusDiv.textContent = "Error al cargar reportes: " + (err.message || err);
     }
   }
 
@@ -2639,7 +2664,9 @@ ENTRADAS
       setTimeout(function() {
         $('edit-diagnostics-modal').style.display = 'none';
         rawSchedules = [];
-        if (typeof handleReportGroupChange === 'function') handleReportGroupChange();
+        if (getSelectedSubGroupIds().length > 0) {
+          handleReportGroupChange();
+        }
       }, 1200);
 
     } catch (err) {
@@ -3469,6 +3496,7 @@ ENTRADAS
     $('edit-diagnostics-modal').style.display = 'none';
   });
   
+  $('btn-load-reports-list').addEventListener('click', loadDiagnosticsReportsList);
   $('edit-diag-search-mod').addEventListener('keyup', populateDiagnosticsReportDropdowns);
   $('edit-diag-search-comp').addEventListener('keyup', populateDiagnosticsReportDropdowns);
 
