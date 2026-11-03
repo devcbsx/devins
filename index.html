@@ -147,7 +147,6 @@
 <!-- MODAL PARA VALIDAR / MODIFICAR DIAGNÓSTICOS DE REPORTES -->
 <div id="edit-diagnostics-modal" style="position: fixed; top:0; left:0; width:100vw; height:100vh; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(6px); z-index: 9999; display: none; justify-content: center; align-items: center; padding: 20px;">
   <div style="background: #ffffff; padding: 32px; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); width: 100%; max-width: 900px; max-height: 92vh; overflow-y: auto; border: 1px solid #e2e8f0;">
-    <!-- Encabezado Modal -->
     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px; margin-bottom: 20px;">
       <h2 style="margin:0; font-size: 18px; color: #0f172a; font-weight: 700; display: flex; align-items: center; gap: 8px;">
         <span>🔧</span> VALIDAR Y MODIFICAR DIAGNÓSTICOS DE REPORTE
@@ -155,10 +154,8 @@
       <button id="btn-close-edit-diags-modal" type="button" class="cgps-btn cgps-btn-outline" style="font-size: 12px; padding: 6px 14px;">✕ Cerrar</button>
     </div>
 
-    <!-- Contenido en 3 Pasos -->
     <div style="display: flex; flex-direction: column; gap: 20px; font-size: 13px;">
       
-      <!-- Paso 1 -->
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid #e2e8f0;">
         <div>
           <label style="font-weight: 700; color: #0f172a; display: block; margin-bottom: 6px; font-size: 13px;">1. Reporte a modificar</label>
@@ -175,7 +172,6 @@
         </div>
       </div>
 
-      <!-- Paso 2 -->
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid #e2e8f0;">
         <div>
           <label style="font-weight: 700; color: #0f172a; display: block; margin-bottom: 6px; font-size: 13px;">2. Reporte a comparar</label>
@@ -195,7 +191,6 @@
         </div>
       </div>
 
-      <!-- Paso 3: Carga bajo demanda (Con flexbox protegido y botón inmune a desbordamientos) -->
       <div style="background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 12px;">
         <label style="font-weight: 700; color: #0f172a; font-size: 14px;">
           3. Modificar o Añadir Diagnósticos / Normas al Reporte
@@ -214,7 +209,6 @@
             <input type="text" id="diag-library-search" class="cgps-input" placeholder="🔍 Filtrar por palabra clave..." style="flex: 1; min-width: 180px; height: 34px; font-size: 12px;">
           </div>
 
-          <!-- Selector con flex truncado y Botón con ancho inamovible -->
           <div style="display: flex; gap: 8px; align-items: center; width: 100%;">
             <select id="diag-library-select" class="cgps-input" style="flex: 1; min-width: 0; max-width: calc(100% - 175px); height: 36px; font-size: 12px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">
               <option value="">-- Seleccione un tipo y presione "Cargar Catálogo" --</option>
@@ -231,7 +225,6 @@
       <div id="edit-diag-status" style="font-size: 12px; font-weight: 700; min-height: 20px;"></div>
     </div>
 
-    <!-- Pie del Modal -->
     <div style="text-align: right; margin-top: 24px; border-top: 1px solid #e2e8f0; padding-top: 16px; display: flex; justify-content: flex-end; gap: 10px;">
       <button id="btn-save-diagnostics" type="button" class="cgps-btn cgps-btn-primary" style="font-size: 13px; font-weight: 700; padding: 10px 20px;">
         💾 Guardar Diagnósticos en Geotab
@@ -552,15 +545,19 @@
             <span>📋</span> PARÁMETROS MANUALES DEL SINIESTRO
           </div>
 
+          <!-- Datalists para autocompletado -->
+          <datalist id="flash-placas-list"></datalist>
+          <datalist id="flash-vins-list"></datalist>
+
           <div style="display: flex; flex-direction: column; gap: 10px;">
             <div style="display: flex; gap: 8px;">
               <div style="flex: 1;">
                 <label style="font-size: 11px; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">Placa del Vehículo:</label>
-                <input type="text" id="flash-input-placa" class="cgps-input" placeholder="Ej: ABC-123" style="width: 100%; height: 36px; text-transform: uppercase;">
+                <input type="text" id="flash-input-placa" list="flash-placas-list" class="cgps-input" placeholder="Buscar o escribir placa..." style="width: 100%; height: 36px; text-transform: uppercase;">
               </div>
               <div style="flex: 1;">
                 <label style="font-size: 11px; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">VIN:</label>
-                <input type="text" id="flash-input-vin" class="cgps-input" placeholder="VIN (17 caracteres)..." style="width: 100%; height: 36px; text-transform: uppercase;">
+                <input type="text" id="flash-input-vin" list="flash-vins-list" class="cgps-input" placeholder="Buscar o escribir VIN..." style="width: 100%; height: 36px; text-transform: uppercase;">
               </div>
             </div>
 
@@ -575,9 +572,23 @@
               </div>
             </div>
 
-            <div>
-              <label style="font-size: 11px; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">Fecha y Ventana (Hora local UTC-5 Lima):</label>
-              <input type="text" id="flash-input-ventana" class="cgps-input" placeholder="Ej: 15/10/2026 14:00–15:30" style="width: 100%; height: 36px;">
+            <!-- Selector de Ventana de Tiempo (Fecha Desde/Hasta + Horas) -->
+            <div style="background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;">
+              <label style="font-size: 11px; font-weight: 700; color: #0284c7; display: block; margin-bottom: 6px; text-transform: uppercase;">Ventana del Evento (Hora local UTC-5 Lima):</label>
+              <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
+                <div style="flex: 1; min-width: 130px;">
+                  <span style="font-size: 10px; font-weight: 600; color: #64748b; display: block;">Fecha:</span>
+                  <input type="date" id="flash-date-event" class="cgps-input" style="width: 100%; height: 34px;">
+                </div>
+                <div style="flex: 1; min-width: 90px;">
+                  <span style="font-size: 10px; font-weight: 600; color: #64748b; display: block;">Hora Desde:</span>
+                  <input type="time" id="flash-time-start" class="cgps-input" value="14:00" style="width: 100%; height: 34px;">
+                </div>
+                <div style="flex: 1; min-width: 90px;">
+                  <span style="font-size: 10px; font-weight: 600; color: #64748b; display: block;">Hora Hasta:</span>
+                  <input type="time" id="flash-time-end" class="cgps-input" value="15:30" style="width: 100%; height: 34px;">
+                </div>
+              </div>
             </div>
 
             <div>
@@ -1666,12 +1677,59 @@ var addInConstructor = function (geotabApi, state, callback) {
     });
   });
 
+  // LÓGICA DE AUTOCOMPLETADO Y VENTANA DE TIEMPO PARA FLASH REPORT
+  function populateFlashDatalists() {
+    var dlPlacas = $('flash-placas-list');
+    var dlVins = $('flash-vins-list');
+    if (!dlPlacas || !dlVins) return;
+
+    var htmlPlacas = '';
+    var htmlVins = '';
+
+    all.forEach(function(r) {
+      if (r.placa) htmlPlacas += '<option value="' + htmlEsc(r.placa) + '">' + htmlEsc(r.razon || '') + '</option>';
+      if (r.vin) htmlVins += '<option value="' + htmlEsc(r.vin) + '">' + htmlEsc(r.placa || '') + '</option>';
+    });
+
+    dlPlacas.innerHTML = htmlPlacas;
+    dlVins.innerHTML = htmlVins;
+  }
+
+  $('flash-input-placa').addEventListener('input', function() {
+    var val = this.value.trim().toLowerCase();
+    var match = all.find(function(r) { return r.placa.toLowerCase() === val; });
+    if (match) {
+      if (match.vin) $('flash-input-vin').value = match.vin;
+      if (match.tipoVehiculo) $('flash-input-modelo').value = match.tipoVehiculo;
+    }
+  });
+
+  $('flash-input-vin').addEventListener('input', function() {
+    var val = this.value.trim().toLowerCase();
+    var match = all.find(function(r) { return r.vin.toLowerCase() === val; });
+    if (match) {
+      if (match.placa) $('flash-input-placa').value = match.placa;
+      if (match.tipoVehiculo) $('flash-input-modelo').value = match.tipoVehiculo;
+    }
+  });
+
   function generateFlashReportPrompt() {
     var placa = ($('flash-input-placa').value || '').trim().toUpperCase() || '[XXX-000]';
     var vin = ($('flash-input-vin').value || '').trim().toUpperCase() || '[...]';
     var modelo = ($('flash-input-modelo').value || '').trim() || '[...]';
     var baseGeotab = ($('flash-input-base').value || '').trim() || 'divemotor';
-    var ventana = ($('flash-input-ventana').value || '').trim() || '[dd/mm/aaaa hh:mm–hh:mm]';
+    
+    var dateVal = $('flash-date-event').value;
+    var timeStart = $('flash-time-start').value || '00:00';
+    var timeEnd = $('flash-time-end').value || '23:59';
+    
+    var ventana = '[dd/mm/aaaa hh:mm–hh:mm]';
+    if (dateVal) {
+      var parts = dateVal.split('-');
+      var formattedDate = parts[2] + '/' + parts[1] + '/' + parts[0];
+      ventana = formattedDate + ' ' + timeStart + '–' + timeEnd;
+    }
+
     var relato = ($('flash-input-relato').value || '').trim() || '[relato del cliente]';
     var fotos = ($('flash-input-fotos').value || '').trim() || '[detalles de fotos]';
 
@@ -1684,7 +1742,7 @@ ENTRADAS
 - Placa: ${placa} · VIN: ${vin} · Modelo: ${modelo}
 - Fecha y ventana (hora local, UTC-5 Lima): ${ventana}
 - Descripción del suceso de acuerdo a imágenes y adjuntos: ${relato}
-  Detalle de fotos: ${fotos}`;
+  Detalle de fotografías: ${fotos}`;
 
     $('flash-output-prompt').value = fullPrompt;
     setMsg("Prompt MCP de Flash Report generado con éxito.");
@@ -2390,7 +2448,6 @@ ENTRADAS
     }
   }
 
-  // FILTRADO CON TRUNCADO CONTROLADO PARA PROTEGER EL BOTÓN
   function filterCatalogItems() {
     var sel = $('diag-library-select');
     var query = ($('diag-library-search').value || '').toLowerCase().trim();
@@ -2513,7 +2570,6 @@ ENTRADAS
     setMsg("📋 Diagnósticos copiados al área de edición.");
   }
 
-  // AÑADIR SELECCIONADO AL TEXTAREA
   function addSelectedDiagnosticFromLibrary() {
     var selectedVal = $('diag-library-select').value;
     if (!selectedVal) {
@@ -2967,6 +3023,11 @@ ENTRADAS
         $('sec-bulk-container').style.display = 'none';
         $('sec-controls-container').style.display = 'none';
         $('sec-table-container').style.display = 'none';
+
+        populateFlashDatalists();
+        if (!$('flash-date-event').value) {
+          $('flash-date-event').value = new Date().toISOString().split('T')[0];
+        }
       }
     }
   }
@@ -3285,6 +3346,7 @@ ENTRADAS
         rebuildRows();
         renderList();
         populateGeneralParentGroupsDropdown();
+        populateFlashDatalists();
 
         setMsg(all.length + ' activos y ' + Object.keys(groupsById).length + ' grupos sincronizados correctamente.');
 
@@ -3410,7 +3472,6 @@ ENTRADAS
   $('edit-diag-search-mod').addEventListener('keyup', populateDiagnosticsReportDropdowns);
   $('edit-diag-search-comp').addEventListener('keyup', populateDiagnosticsReportDropdowns);
 
-  // Carga bajo demanda del tipo seleccionado (Diagnóstico o Norma)
   $('btn-load-library-items').addEventListener('click', loadCatalogItemsOnDemand);
   $('diag-library-search').addEventListener('keyup', filterCatalogItems);
 
@@ -3493,7 +3554,9 @@ ENTRADAS
     $('flash-input-placa').value = '';
     $('flash-input-vin').value = '';
     $('flash-input-modelo').value = '';
-    $('flash-input-ventana').value = '';
+    $('flash-date-event').value = new Date().toISOString().split('T')[0];
+    $('flash-time-start').value = '14:00';
+    $('flash-time-end').value = '15:30';
     $('flash-input-relato').value = '';
     $('flash-input-fotos').value = '';
     $('flash-output-prompt').value = '';
