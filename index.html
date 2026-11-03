@@ -88,7 +88,7 @@
   </div>
 </div>
 
-<!-- MODAL PARA CLONAR Y CREAR REPORTE (SIN GRUPOS DESTINO) -->
+<!-- MODAL PARA CLONAR Y CREAR REPORTE -->
 <div id="create-report-modal" style="position: fixed; top:0; left:0; width:100vw; height:100vh; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(6px); z-index: 9999; display: none; justify-content: center; align-items: center; padding: 20px;">
   <div style="background: #ffffff; padding: 32px; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); width: 100%; max-width: 680px; max-height: 90vh; overflow-y: auto; border: 1px solid #e2e8f0;">
     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px; margin-bottom: 20px;">
@@ -304,6 +304,13 @@
         <div class="testn-card-icon">💥</div>
         <h2>FLASH REPORT (MCP)</h2>
         <p>Generador de Prompts para Investigación de Siniestros e IA MCP</p>
+      </div>
+
+      <!-- MÓDULO NUEVO: CREAR USUARIO AUTOMÁTICO -->
+      <div class="testn-card" id="btn-mod-create-user" style="border-color: #10b981 !important;">
+        <div class="testn-card-icon">👤</div>
+        <h2>NUEVO USUARIO</h2>
+        <p>Creación automática de usuario con perfil Administrador Cliente - ADDINS</p>
       </div>
     </div>
   </div>
@@ -628,6 +635,56 @@
             <button id="flash-btn-copy" type="button" class="cgps-btn cgps-btn-secondary" style="padding: 4px 12px; font-size: 11px;">📋 Copiar Prompt MCP</button>
           </div>
           <textarea id="flash-output-prompt" class="cgps-textarea" rows="23" style="width: 100%; font-family: 'JetBrains Mono', monospace; font-size: 11px; background-color: #f8fafc;" placeholder="Haga clic en 'Generar Prompt MCP' para obtener la instrucción lista para copiar..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- MÓDULO NUEVO: CREAR USUARIO AUTOMÁTICO -->
+    <div id="sec-create-user" style="display: none;">
+      <div class="cgps-card" style="margin-top: 12px; background: #ffffff; max-width: 680px;">
+        <div style="font-size: 13px; font-weight: 800; color: #0284c7; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;">
+          <span>👤</span> CREAR USUARIO EN GEOTAB (CONFIGURACIÓN AUTOMÁTICA)
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 14px; font-size: 13px;">
+          <div>
+            <label style="font-weight: 700; color: #0f172a; display: block; margin-bottom: 4px;">Nombre de usuario (correo electrónico):</label>
+            <input type="text" id="usr-input-email" class="cgps-input" value="demo_empresa" style="width: 100%; height: 38px; font-weight: 600;">
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div>
+              <label style="font-weight: 700; color: #0f172a; display: block; margin-bottom: 4px;">Nombre:</label>
+              <input type="text" id="usr-input-firstname" class="cgps-input" value="demo" style="width: 100%; height: 38px;">
+            </div>
+            <div>
+              <label style="font-weight: 700; color: #0f172a; display: block; margin-bottom: 4px;">Apellido:</label>
+              <input type="text" id="usr-input-lastname" class="cgps-input" value="empresa" style="width: 100%; height: 38px;">
+            </div>
+          </div>
+
+          <div>
+            <label style="font-weight: 700; color: #0f172a; display: block; margin-bottom: 4px;">Autorización de seguridad:</label>
+            <input type="text" id="usr-input-security" class="cgps-input" value="Administrador Cliente - ADDINS" disabled style="width: 100%; height: 38px; font-weight: 700; color: #0369a1; background: #f0f9ff;">
+          </div>
+
+          <div>
+            <label style="font-weight: 700; color: #0f172a; display: block; margin-bottom: 4px;">Grupos (Asignar el grupo):</label>
+            <div style="display: flex; gap: 8px; margin-bottom: 6px;">
+              <input type="text" id="usr-group-search" class="cgps-input" placeholder="🔍 Filtrar grupo por nombre..." style="width: 220px; height: 38px;">
+              <select id="usr-select-group" class="cgps-input" style="flex: 1; height: 38px; font-weight: 600;">
+                <option value="">-- Seleccione Grupo --</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="usr-status-msg" style="font-size: 12px; font-weight: 700; min-height: 20px;"></div>
+
+          <div style="text-align: right; margin-top: 10px; border-top: 1px solid #e2e8f0; padding-top: 16px;">
+            <button id="usr-btn-submit" type="button" class="cgps-btn cgps-btn-primary" style="font-size: 13px; font-weight: 700; padding: 10px 24px; height: 40px;">
+              ⚡ Crear Usuario Automático
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -1733,8 +1790,8 @@ var addInConstructor = function (geotabApi, state, callback) {
     var baseGeotab = ($('flash-input-base').value || '').trim() || 'divemotor';
     
     var dateVal = $('flash-date-event').value;
-    var timeStart = $('flash-time-start').value || '00:00';
-    var timeEnd = $('flash-time-end').value || '23:59';
+    var timeStart = $('flash-time-start').value || '14:00';
+    var timeEnd = $('flash-time-end').value || '15:30';
     
     var ventana = '[dd/mm/aaaa hh:mm–hh:mm]';
     if (dateVal) {
@@ -1759,6 +1816,83 @@ ENTRADAS
 
     $('flash-output-prompt').value = fullPrompt;
     setMsg("Prompt MCP de Flash Report generado con éxito.");
+  }
+
+  // FUNCIONES MÓDULO NUEVO USUARIO AUTOMÁTICO
+  function populateUserGroupsDropdown() {
+    var sel = $('usr-select-group');
+    var query = ($('usr-group-search').value || '').toLowerCase().trim();
+    if (!sel) return;
+
+    sel.innerHTML = '<option value="">-- Seleccione Grupo --</option>';
+
+    var allGroupsList = Object.keys(groupsById).map(function(k) { return groupsById[k]; });
+    allGroupsList.sort(function(a, b) {
+      return (a.name || '').localeCompare(b.name || '', 'es');
+    });
+
+    allGroupsList.forEach(function(g) {
+      if (!g || !g.id || !g.name || /^Group/.test(g.id)) return;
+      if (!query || g.name.toLowerCase().indexOf(query) >= 0 || g.id.toLowerCase().indexOf(query) >= 0) {
+        var opt = document.createElement('option');
+        opt.value = g.id;
+        opt.textContent = g.name;
+        sel.appendChild(opt);
+      }
+    });
+  }
+
+  async function createNewUserAutomated() {
+    var email = ($('usr-input-email').value || '').trim();
+    var firstName = ($('usr-input-firstname').value || '').trim();
+    var lastName = ($('usr-input-lastname').value || '').trim();
+    var selectedGroupId = $('usr-select-group').value;
+    var statusDiv = $('usr-status-msg');
+
+    if (!email) {
+      statusDiv.style.color = "#ef4444";
+      statusDiv.textContent = "Debe ingresar el nombre de usuario (correo electrónico).";
+      return;
+    }
+
+    if (!selectedGroupId) {
+      statusDiv.style.color = "#ef4444";
+      statusDiv.textContent = "Debe seleccionar un grupo para asignar al usuario.";
+      return;
+    }
+
+    var groupObj = groupsById[selectedGroupId];
+    var groupName = groupObj ? groupObj.name : selectedGroupId;
+
+    statusDiv.style.color = "#0284c7";
+    statusDiv.textContent = "Creando usuario '" + email + "' en Geotab...";
+
+    try {
+      var newUser = {
+        name: email,
+        firstName: firstName,
+        lastName: lastName,
+        companyGroups: [{ id: selectedGroupId }],
+        securityGroups: [{ id: "GroupSecurityClientAdminId" }],
+        activeFrom: new Date().toISOString(),
+        activeTo: "2050-01-01T00:00:00.000Z"
+      };
+
+      var res = await callApi(api, 'Add', {
+        typeName: 'User',
+        entity: newUser
+      });
+
+      var newUserId = typeof res === 'string' ? res : (res && res.id ? res.id : 'OK');
+
+      statusDiv.style.color = "#10b981";
+      statusDiv.textContent = "✅ ¡Usuario '" + email + "' creado con éxito en el grupo '" + groupName + "'! (ID: " + newUserId + ")";
+
+    } catch (err) {
+      console.error("Error al crear usuario:", err);
+      statusDiv.style.color = "#ef4444";
+      statusDiv.textContent = "Error al crear usuario: " + (err.message || JSON.stringify(err));
+    }
   }
 
   function initAutoReportGroups() {
@@ -2965,6 +3099,7 @@ ENTRADAS
         $('sec-reports').style.display = 'none';
         $('sec-activations').style.display = 'none';
         $('sec-flash').style.display = 'none';
+        $('sec-create-user').style.display = 'none';
         $('sec-kpi-container').style.display = 'grid';
         $('sec-certi-combined-box').style.display = 'grid';
         $('sec-bulk-container').style.display = 'none';
@@ -2980,6 +3115,7 @@ ENTRADAS
         $('sec-reports').style.display = 'none';
         $('sec-activations').style.display = 'none';
         $('sec-flash').style.display = 'none';
+        $('sec-create-user').style.display = 'none';
         $('sec-kpi-container').style.display = 'grid';
         $('sec-certi-combined-box').style.display = 'none';
         $('sec-bulk-container').style.display = 'block';
@@ -2997,6 +3133,7 @@ ENTRADAS
         $('sec-reports').style.display = 'none';
         $('sec-activations').style.display = 'none';
         $('sec-flash').style.display = 'none';
+        $('sec-create-user').style.display = 'none';
         $('sec-kpi-container').style.display = 'grid';
         $('sec-certi-combined-box').style.display = 'none';
         $('sec-bulk-container').style.display = 'block';
@@ -3011,6 +3148,7 @@ ENTRADAS
         $('sec-reports').style.display = 'none';
         $('sec-activations').style.display = 'none';
         $('sec-flash').style.display = 'none';
+        $('sec-create-user').style.display = 'none';
         $('sec-audit').style.display = 'block';
         $('sec-kpi-container').style.display = 'none';
         $('sec-certi-combined-box').style.display = 'none';
@@ -3027,6 +3165,7 @@ ENTRADAS
         $('sec-audit').style.display = 'none';
         $('sec-activations').style.display = 'none';
         $('sec-flash').style.display = 'none';
+        $('sec-create-user').style.display = 'none';
         $('sec-reports').style.display = 'block';
         $('sec-kpi-container').style.display = 'none';
         $('sec-certi-combined-box').style.display = 'none';
@@ -3041,6 +3180,7 @@ ENTRADAS
         $('sec-audit').style.display = 'none';
         $('sec-reports').style.display = 'none';
         $('sec-flash').style.display = 'none';
+        $('sec-create-user').style.display = 'none';
         $('sec-activations').style.display = 'block';
         $('sec-kpi-container').style.display = 'none';
         $('sec-certi-combined-box').style.display = 'none';
@@ -3053,6 +3193,7 @@ ENTRADAS
         $('sec-audit').style.display = 'none';
         $('sec-reports').style.display = 'none';
         $('sec-activations').style.display = 'none';
+        $('sec-create-user').style.display = 'none';
         $('sec-flash').style.display = 'block';
         $('sec-kpi-container').style.display = 'none';
         $('sec-certi-combined-box').style.display = 'none';
@@ -3064,6 +3205,21 @@ ENTRADAS
         if (!$('flash-date-event').value) {
           $('flash-date-event').value = new Date().toISOString().split('T')[0];
         }
+      } else if (mod === 'create-user') {
+        $('testn-mod-title').textContent = 'Crear Usuario Automático';
+        $('sec-master').style.display = 'none';
+        $('sec-audit').style.display = 'none';
+        $('sec-reports').style.display = 'none';
+        $('sec-activations').style.display = 'none';
+        $('sec-flash').style.display = 'none';
+        $('sec-create-user').style.display = 'block';
+        $('sec-kpi-container').style.display = 'none';
+        $('sec-certi-combined-box').style.display = 'none';
+        $('sec-bulk-container').style.display = 'none';
+        $('sec-controls-container').style.display = 'none';
+        $('sec-table-container').style.display = 'none';
+
+        populateUserGroupsDropdown();
       }
     }
   }
@@ -3382,6 +3538,7 @@ ENTRADAS
         rebuildRows();
         renderList();
         populateGeneralParentGroupsDropdown();
+        populateUserGroupsDropdown();
         populateFlashDatalists();
 
         setMsg(all.length + ' activos y ' + Object.keys(groupsById).length + ' grupos sincronizados correctamente.');
@@ -3410,6 +3567,10 @@ ENTRADAS
   $('audit-btn-create-client').addEventListener('click', createNewClientGroup);
   $('audit-btn-create-general').addEventListener('click', createGeneralGroup);
   $('audit-gen-parent-search').addEventListener('keyup', populateGeneralParentGroupsDropdown);
+
+  // EVENTOS NUEVO USUARIO
+  $('usr-group-search').addEventListener('keyup', populateUserGroupsDropdown);
+  $('usr-btn-submit').addEventListener('click', createNewUserAutomated);
 
   // EVENTOS MASTER SWITCH
   $('master-btn-excel').addEventListener('click', exportMasterExcel);
@@ -3636,6 +3797,7 @@ ENTRADAS
   $('btn-mod-audit').addEventListener('click', function() { switchView('audit'); });
   $('btn-mod-reports').addEventListener('click', function() { switchView('reports'); });
   $('btn-mod-activations').addEventListener('click', function() { switchView('activations'); });
+  $('btn-mod-create-user').addEventListener('click', function() { switchView('create-user'); });
   $('testn-btn-back').addEventListener('click', function() { switchView('hub'); });
 
   // BÚSQUEDA Y SELECTOR DE CAMPO
