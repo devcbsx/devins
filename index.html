@@ -159,7 +159,6 @@
       <button id="btn-close-edit-diags-modal" type="button" class="cgps-btn cgps-btn-outline" style="font-size: 12px; padding: 6px 14px;">✕ Cerrar</button>
     </div>
 
-    <!-- BOTÓN DE CARGA BAJO DEMANDA OPTIMIZADO -->
     <div style="background: #f0f9ff; border: 1px solid #bae6fd; padding: 12px 16px; border-radius: 10px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
       <span style="font-size: 12px; font-weight: 600; color: #0369a1;">
         Presione el botón para consultar y resolver los nombres de reportes desde Geotab para los Puntos 1 y 2.
@@ -170,7 +169,6 @@
     </div>
 
     <div style="display: flex; flex-direction: column; gap: 20px; font-size: 13px;">
-      
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid #e2e8f0;">
         <div>
           <label style="font-weight: 700; color: #0f172a; display: block; margin-bottom: 6px; font-size: 13px;">1. Reporte a modificar</label>
@@ -206,7 +204,6 @@
         </div>
       </div>
 
-      <!-- SECCIÓN DE ASIGNACIÓN DE GRUPOS DESTINO -->
       <div style="background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 8px;">
         <label style="font-weight: 700; color: #0f172a; font-size: 14px;">
           3. Asignar Grupos Destino al Reporte
@@ -217,7 +214,6 @@
         </div>
       </div>
 
-      <!-- SECCIÓN DE DIAGNÓSTICOS / NORMAS -->
       <div style="background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 12px;">
         <label style="font-weight: 700; color: #0f172a; font-size: 14px;">
           4. Modificar o Añadir Diagnósticos / Normas al Reporte
@@ -312,14 +308,12 @@
         <p>Procesamiento inteligente de formato de respuesta</p>
       </div>
 
-      <!-- MÓDULO: FLASH REPORT (MCP) -->
       <div class="testn-card" id="btn-mod-flash" style="border-color: #38bdf8 !important;">
         <div class="testn-card-icon">💥</div>
         <h2>FLASH REPORT (MCP)</h2>
         <p>Generador de Prompts para Investigación de Siniestros e IA MCP</p>
       </div>
 
-      <!-- MÓDULO NUEVO: CREAR USUARIO AUTOMÁTICO -->
       <div class="testn-card" id="btn-mod-create-user" style="border-color: #10b981 !important;">
         <div class="testn-card-icon">👤</div>
         <h2>NUEVO USUARIO</h2>
@@ -330,7 +324,6 @@
 
   <!-- VISTA 2: CONTENEDOR DE MODULOS OPERATIVOS -->
   <div id="testn-module-view" style="display: none;">
-    
     <div class="cgps-hero" style="margin-bottom: 16px;">
       <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
         <button id="testn-btn-back" type="button" class="cgps-btn cgps-btn-secondary" style="font-size: 13px;">← Volver al Hub</button>
@@ -579,7 +572,6 @@
             <span>📋</span> PARÁMETROS MANUALES DEL SINIESTRO
           </div>
 
-          <!-- Datalists para autocompletado -->
           <datalist id="flash-placas-list"></datalist>
           <datalist id="flash-vins-list"></datalist>
 
@@ -606,7 +598,6 @@
               </div>
             </div>
 
-            <!-- Selector de Ventana de Tiempo -->
             <div style="background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;">
               <label style="font-size: 11px; font-weight: 700; color: #0284c7; display: block; margin-bottom: 6px; text-transform: uppercase;">Ventana del Evento (Hora local UTC-5 Lima):</label>
               <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
@@ -1007,22 +998,6 @@ var addInConstructor = function (geotabApi, state, callback) {
   var PASS_CORRECTA = "3219878";
   var USUARIO_PERMITIDO = "ejecutivo.cuentas13@navisaf.pe";
 
-  document.getElementById('testn-btn-login').addEventListener('click', function() {
-    var val = document.getElementById('testn-pass-input').value;
-    if (val === PASS_CORRECTA) {
-      document.getElementById('testn-login-overlay').style.display = 'none';
-      document.getElementById('cgps-root').style.display = 'block';
-    } else {
-      document.getElementById('testn-login-err').textContent = "Contraseña incorrecta";
-    }
-  });
-
-  document.getElementById('testn-pass-input').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-      document.getElementById('testn-btn-login').click();
-    }
-  });
-
   var REQUIRED_PARAMS = [
     { description: "Enable Gps Altitude Logging", offset: 181, bytes: "CA==" },
     { description: "Disable Accelerometer Record Limit", offset: 65, bytes: "Ag==" },
@@ -1054,6 +1029,34 @@ var addInConstructor = function (geotabApi, state, callback) {
   var currentSelectedReportObj = null;
   var fetchedSubGroups = [];
   var pendingSaveAction = null;
+
+  var $ = function (id) { return document.getElementById(id); };
+
+  // INICIALIZACIÓN DE EVENTOS DEL LOGIN
+  function setupLoginListeners() {
+    var btnLogin = $('testn-btn-login');
+    var inputPass = $('testn-pass-input');
+
+    if (btnLogin) {
+      btnLogin.onclick = function() {
+        var val = inputPass ? inputPass.value : '';
+        if (val === PASS_CORRECTA) {
+          $('testn-login-overlay').style.display = 'none';
+          $('cgps-root').style.display = 'block';
+        } else {
+          $('testn-login-err').textContent = "Contraseña incorrecta";
+        }
+      };
+    }
+
+    if (inputPass) {
+      inputPass.onkeypress = function(e) {
+        if (e.key === 'Enter') {
+          if (btnLogin) btnLogin.click();
+        }
+      };
+    }
+  }
 
   function pad(n) { return n < 10 ? '0' + n : '' + n; }
   function fmtDate(iso) {
@@ -1300,8 +1303,6 @@ var addInConstructor = function (geotabApi, state, callback) {
     }); 
   }
 
-  var $ = function (id) { return document.getElementById(id); };
-
   function callMulti(apiRef, calls) { 
     return new Promise(function (ok, fail) { 
       if (!apiRef) {
@@ -1312,7 +1313,6 @@ var addInConstructor = function (geotabApi, state, callback) {
     }); 
   }
 
-  // FUNCIONALIDAD ADICIONAL: RESETEOS AUTOMÁTICOS Y MODAL DE CONFIRMACIÓN
   function resetAllFilters() {
     selected = {};
     activeBulkTokens = [];
@@ -1339,19 +1339,23 @@ var addInConstructor = function (geotabApi, state, callback) {
     $('confirm-save-modal').style.display = 'flex';
   }
 
-  $('btn-cancel-save').addEventListener('click', function() {
-    $('confirm-save-modal').style.display = 'none';
-    pendingSaveAction = null;
-  });
-
-  $('btn-confirm-save-action').addEventListener('click', function() {
-    $('confirm-save-modal').style.display = 'none';
-    if (typeof pendingSaveAction === 'function') {
-      var fn = pendingSaveAction;
+  if ($('btn-cancel-save')) {
+    $('btn-cancel-save').addEventListener('click', function() {
+      $('confirm-save-modal').style.display = 'none';
       pendingSaveAction = null;
-      fn();
-    }
-  });
+    });
+  }
+
+  if ($('btn-confirm-save-action')) {
+    $('btn-confirm-save-action').addEventListener('click', function() {
+      $('confirm-save-modal').style.display = 'none';
+      if (typeof pendingSaveAction === 'function') {
+        var fn = pendingSaveAction;
+        pendingSaveAction = null;
+        fn();
+      }
+    });
+  }
 
   function rebuildRows() {
     all = rawDevices
@@ -1810,22 +1814,26 @@ var addInConstructor = function (geotabApi, state, callback) {
     setMsg("Formatos procesados correctamente.");
   }
 
-  $('act-btn-process').addEventListener('click', processActivationsText);
-  $('act-btn-clear').addEventListener('click', function() {
-    $('act-input-text').value = '';
-    $('act-output-text').value = '';
-    if ($('act-detected-badge')) $('act-detected-badge').style.display = 'none';
-    setMsg("Texto de activaciones limpiado.");
-  });
-  
-  $('act-btn-copy').addEventListener('click', function() {
-    var outElem = $('act-output-text');
-    if (!outElem.value) return;
-    outElem.select();
-    navigator.clipboard.writeText(outElem.value).then(function() {
-      setMsg("📋 Formato de activación copiado al portapapeles.");
+  if ($('act-btn-process')) $('act-btn-process').addEventListener('click', processActivationsText);
+  if ($('act-btn-clear')) {
+    $('act-btn-clear').addEventListener('click', function() {
+      $('act-input-text').value = '';
+      $('act-output-text').value = '';
+      if ($('act-detected-badge')) $('act-detected-badge').style.display = 'none';
+      setMsg("Texto de activaciones limpiado.");
     });
-  });
+  }
+  
+  if ($('act-btn-copy')) {
+    $('act-btn-copy').addEventListener('click', function() {
+      var outElem = $('act-output-text');
+      if (!outElem.value) return;
+      outElem.select();
+      navigator.clipboard.writeText(outElem.value).then(function() {
+        setMsg("📋 Formato de activación copiado al portapapeles.");
+      });
+    });
+  }
 
   function populateFlashDatalists() {
     var dlPlacas = $('flash-placas-list');
@@ -1844,23 +1852,27 @@ var addInConstructor = function (geotabApi, state, callback) {
     dlVins.innerHTML = htmlVins;
   }
 
-  $('flash-input-placa').addEventListener('input', function() {
-    var val = this.value.trim().toLowerCase();
-    var match = all.find(function(r) { return r.placa.toLowerCase() === val; });
-    if (match) {
-      if (match.vin) $('flash-input-vin').value = match.vin;
-      if (match.tipoVehiculo) $('flash-input-modelo').value = match.tipoVehiculo;
-    }
-  });
+  if ($('flash-input-placa')) {
+    $('flash-input-placa').addEventListener('input', function() {
+      var val = this.value.trim().toLowerCase();
+      var match = all.find(function(r) { return r.placa.toLowerCase() === val; });
+      if (match) {
+        if (match.vin) $('flash-input-vin').value = match.vin;
+        if (match.tipoVehiculo) $('flash-input-modelo').value = match.tipoVehiculo;
+      }
+    });
+  }
 
-  $('flash-input-vin').addEventListener('input', function() {
-    var val = this.value.trim().toLowerCase();
-    var match = all.find(function(r) { return r.vin.toLowerCase() === val; });
-    if (match) {
-      if (match.placa) $('flash-input-placa').value = match.placa;
-      if (match.tipoVehiculo) $('flash-input-modelo').value = match.tipoVehiculo;
-    }
-  });
+  if ($('flash-input-vin')) {
+    $('flash-input-vin').addEventListener('input', function() {
+      var val = this.value.trim().toLowerCase();
+      var match = all.find(function(r) { return r.vin.toLowerCase() === val; });
+      if (match) {
+        if (match.placa) $('flash-input-placa').value = match.placa;
+        if (match.tipoVehiculo) $('flash-input-modelo').value = match.tipoVehiculo;
+      }
+    });
+  }
 
   function generateFlashReportPrompt() {
     var placa = ($('flash-input-placa').value || '').trim().toUpperCase() || '[XXX-000]';
@@ -1897,7 +1909,6 @@ ENTRADAS
     setMsg("Prompt MCP de Flash Report generado con éxito.");
   }
 
-  // FUNCIONES MÓDULO NUEVO USUARIO AUTOMÁTICO
   function populateUserGroupsDropdown() {
     var sel = $('usr-select-group');
     var query = ($('usr-group-search').value || '').toLowerCase().trim();
@@ -2520,7 +2531,6 @@ ENTRADAS
     }
   }
 
-  // MODAL DE DIAGNÓSTICOS Y GRUPOS: CARGA Y RENDIMIENTO OPTIMIZADO
   function openEditDiagnosticsModal() {
     $('edit-diagnostics-modal').style.display = 'flex';
     $('edit-diag-status').style.color = "#0284c7";
@@ -2639,7 +2649,6 @@ ENTRADAS
     container.innerHTML = html || '<span style="color:#64748b; font-size:12px;">No se encontraron grupos coincidentes.</span>';
   }
 
-  // CARGA BAJO DEMANDA DE CATÁLOGO (DIAGNÓSTICOS O NORMAS)
   async function loadCatalogItemsOnDemand() {
     var typeChoice = $('diag-library-type-choice').value;
     var statusDiv = $('edit-diag-status');
@@ -3546,6 +3555,7 @@ ENTRADAS
   }
 
   function load() {
+    setupLoginListeners();
     setMsg('Sincronizando activos y DeviceStatusInfo de MyGeotab...');
 
     var sessionP = new Promise(function (ok) {
@@ -3625,279 +3635,313 @@ ENTRADAS
     });
   }
 
-  // GUARDAR SELECCIONADOS
-  $('cgps-btn-apply-mass-unified').addEventListener('click', requestApplyMassUpdateUnified);
+  if ($('cgps-btn-apply-mass-unified')) $('cgps-btn-apply-mass-unified').addEventListener('click', requestApplyMassUpdateUnified);
+  if ($('testn-btn-refresh-hub')) $('testn-btn-refresh-hub').addEventListener('click', function() { load(); });
+  if ($('testn-btn-refresh-mod')) $('testn-btn-refresh-mod').addEventListener('click', function() { load(); });
 
-  // RECARGA Y SINCRONIZACIÓN
-  $('testn-btn-refresh-hub').addEventListener('click', function() { load(); });
-  $('testn-btn-refresh-mod').addEventListener('click', function() { load(); });
+  if ($('audit-btn-create-client')) $('audit-btn-create-client').addEventListener('click', createNewClientGroup);
+  if ($('audit-btn-create-general')) $('audit-btn-create-general').addEventListener('click', createGeneralGroup);
+  if ($('audit-gen-parent-search')) $('audit-gen-parent-search').addEventListener('keyup', populateGeneralParentGroupsDropdown);
 
-  // EVENTOS AUDITORÍA DE GRUPOS
-  $('audit-btn-create-client').addEventListener('click', createNewClientGroup);
-  $('audit-btn-create-general').addEventListener('click', createGeneralGroup);
-  $('audit-gen-parent-search').addEventListener('keyup', populateGeneralParentGroupsDropdown);
+  if ($('usr-group-search')) $('usr-group-search').addEventListener('keyup', populateUserGroupsDropdown);
+  if ($('usr-btn-submit')) $('usr-btn-submit').addEventListener('click', createNewUserAutomated);
 
-  // EVENTOS NUEVO USUARIO
-  $('usr-group-search').addEventListener('keyup', populateUserGroupsDropdown);
-  $('usr-btn-submit').addEventListener('click', createNewUserAutomated);
+  if ($('master-btn-excel')) $('master-btn-excel').addEventListener('click', exportMasterExcel);
 
-  // EVENTOS MASTER SWITCH
-  $('master-btn-excel').addEventListener('click', exportMasterExcel);
+  if ($('master-btn-week')) {
+    $('master-btn-week').addEventListener('click', function() {
+      var now = new Date();
+      var dayOfWeek = now.getDay(); 
+      var distanceToMonday = (dayOfWeek + 6) % 7;
+      var startOfWeek = new Date(now);
+      startOfWeek.setDate(now.getDate() - distanceToMonday);
+      startOfWeek.setHours(0,0,0,0);
 
-  $('master-btn-week').addEventListener('click', function() {
-    var now = new Date();
-    var dayOfWeek = now.getDay(); 
-    var distanceToMonday = (dayOfWeek + 6) % 7;
-    var startOfWeek = new Date(now);
-    startOfWeek.setDate(now.getDate() - distanceToMonday);
-    startOfWeek.setHours(0,0,0,0);
-
-    activeDateRange = { start: startOfWeek, end: new Date() };
-    renderList();
-    setMsg('Filtrado: Esta semana al corte.');
-  });
-
-  $('master-btn-custom-range').addEventListener('click', function() {
-    var fromVal = $('master-date-from').value;
-    var toVal = $('master-date-to').value;
-
-    if (!fromVal || !toVal) {
-      setMsg('Seleccione ambas fechas para filtrar.', true);
-      return;
-    }
-
-    var start = new Date(fromVal + 'T00:00:00');
-    var end = new Date(toVal + 'T23:59:59');
-
-    activeDateRange = { start: start, end: end };
-    renderList();
-    setMsg('Rango personalizado aplicado.');
-  });
-
-  $('master-btn-reset-dates').addEventListener('click', function() {
-    $('master-date-from').value = '';
-    $('master-date-to').value = '';
-    activeDateRange = null;
-    renderList();
-    setMsg('Filtros de fecha restablecidos.');
-  });
-
-  // FILTRADO MASIVO
-  $('cgps-btn-bulk').addEventListener('click', function() { applyBulkFilter($('cgps-bulk-input').value); });
-  $('cgps-btn-bulk-clear').addEventListener('click', function() { $('cgps-bulk-input').value = ''; applyBulkFilter(''); });
-  
-  $('cgps-btn-bulk-std').addEventListener('click', function() { applyBulkFilter($('cgps-bulk-input-std').value); });
-  $('cgps-btn-bulk-clear-std').addEventListener('click', function() { $('cgps-bulk-input-std').value = ''; applyBulkFilter(''); });
-
-  // EVENTOS REPORTES POR CLIENTE
-  $('reports-search-input').addEventListener('keyup', function() {
-    renderSubGroupsChecklist();
-  });
-
-  $('reports-btn-select-all-subgroups').addEventListener('click', function() {
-    var cbs = document.querySelectorAll('.chk-report-subgroup');
-    cbs.forEach(function(cb) { cb.checked = true; });
-    window.updateReportSelectedSubgroupsCount();
-  });
-
-  $('reports-btn-deselect-all-subgroups').addEventListener('click', function() {
-    var cbs = document.querySelectorAll('.chk-report-subgroup');
-    cbs.forEach(function(cb) { cb.checked = false; });
-    window.updateReportSelectedSubgroupsCount();
-  });
-
-  $('reports-btn-search').addEventListener('click', function() {
-    handleReportGroupChange();
-  });
-
-  // CREACIÓN DE REPORTES
-  $('reports-btn-open-create-modal').addEventListener('click', openCreateReportModal);
-  $('btn-close-create-modal').addEventListener('click', function() {
-    $('create-report-modal').style.display = 'none';
-  });
-
-  $('create-rep-source-search').addEventListener('keyup', function() {
-    populateSourceGroupsDropdown();
-  });
-
-  $('create-rep-source-group').addEventListener('change', handleSourceGroupChange);
-  $('create-rep-source-schedule').addEventListener('change', handleSourceScheduleChange);
-  $('btn-apply-prefix-preset').addEventListener('click', applyNamePrefixPreset);
-  $('btn-submit-create-report').addEventListener('click', createAndSubmitReport);
-
-  // EVENTOS MODAL MODIFICAR Y VALIDAR DIAGNÓSTICOS CON CARGA BAJO DEMANDA
-  $('reports-btn-open-edit-diags-modal').addEventListener('click', openEditDiagnosticsModal);
-  $('btn-close-edit-diags-modal').addEventListener('click', function() {
-    $('edit-diagnostics-modal').style.display = 'none';
-  });
-  
-  $('btn-load-reports-list').addEventListener('click', loadDiagnosticsReportsList);
-  $('edit-diag-search-mod').addEventListener('keyup', populateDiagnosticsReportDropdowns);
-  $('edit-diag-search-comp').addEventListener('keyup', populateDiagnosticsReportDropdowns);
-  $('edit-diag-dest-search').addEventListener('keyup', function() {
-    var currentRepId = $('edit-diag-select-report').value;
-    var currentSched = rawSchedules.find(function(s){ return s.id === currentRepId; });
-    var assignedGroupIds = currentSched ? (currentSched.groups || []).map(function(g){ return g.id; }) : [];
-    renderEditDiagGroupsList(assignedGroupIds);
-  });
-
-  $('btn-load-library-items').addEventListener('click', loadCatalogItemsOnDemand);
-  $('diag-library-search').addEventListener('keyup', filterCatalogItems);
-
-  $('edit-diag-select-report').addEventListener('change', function() { handleEditDiagSelectReport('modificar'); });
-  $('edit-diag-select-compare').addEventListener('change', function() { handleEditDiagSelectReport('comparar'); });
-  $('btn-copy-compare-diags').addEventListener('click', copyCompareDiagnosticsToInput);
-  $('btn-add-diag-from-library').addEventListener('click', addSelectedDiagnosticFromLibrary);
-  $('btn-save-diagnostics').addEventListener('click', saveDiagnosticsToReport);
-
-  // EVENTOS MODAL VISUALIZACIÓN Y COPIA
-  $('btn-close-prev-modal').addEventListener('click', function() {
-    $('report-preview-modal').style.display = 'none';
-  });
-
-  $('btn-copy-rules').addEventListener('click', function() {
-    if (!currentSelectedReportObj || !currentSelectedReportObj._rules) return;
-    var txt = currentSelectedReportObj._rules.join(', ');
-    navigator.clipboard.writeText(txt).then(function() {
-      alert('📋 Normas copiadas al portapapeles');
+      activeDateRange = { start: startOfWeek, end: new Date() };
+      renderList();
+      setMsg('Filtrado: Esta semana al corte.');
     });
-  });
+  }
 
-  $('btn-copy-diags').addEventListener('click', function() {
-    if (!currentSelectedReportObj || !currentSelectedReportObj._diags) return;
-    var txt = currentSelectedReportObj._diags.join(', ');
-    navigator.clipboard.writeText(txt).then(function() {
-      alert('📋 Diagnósticos copiados al portapapeles');
+  if ($('master-btn-custom-range')) {
+    $('master-btn-custom-range').addEventListener('click', function() {
+      var fromVal = $('master-date-from').value;
+      var toVal = $('master-date-to').value;
+
+      if (!fromVal || !toVal) {
+        setMsg('Seleccione ambas fechas para filtrar.', true);
+        return;
+      }
+
+      var start = new Date(fromVal + 'T00:00:00');
+      var end = new Date(toVal + 'T23:59:59');
+
+      activeDateRange = { start: start, end: end };
+      renderList();
+      setMsg('Rango personalizado aplicado.');
     });
-  });
+  }
 
-  $('reports-listbody').addEventListener('click', function (e) {
-    var b = e.target.closest ? e.target.closest('.btn-view-report') : null;
-    if (!b) return;
-    var found = currentReportRows.find(function (x) { return x.id === b.getAttribute('data-id'); });
-    if (found) openReportPreviewModal(found);
-  });
+  if ($('master-btn-reset-dates')) {
+    $('master-btn-reset-dates').addEventListener('click', function() {
+      $('master-date-from').value = '';
+      $('master-date-to').value = '';
+      activeDateRange = null;
+      renderList();
+      setMsg('Filtros de fecha restablecidos.');
+    });
+  }
 
-  // FILTROS DE REPORTES
-  $('rep-filter-from').addEventListener('change', applyReportFilters);
-  $('rep-filter-to').addEventListener('change', applyReportFilters);
-  $('rep-filter-user').addEventListener('change', applyReportFilters);
+  if ($('cgps-btn-bulk')) $('cgps-btn-bulk').addEventListener('click', function() { applyBulkFilter($('cgps-bulk-input').value); });
+  if ($('cgps-btn-bulk-clear')) $('cgps-btn-bulk-clear').addEventListener('click', function() { $('cgps-bulk-input').value = ''; applyBulkFilter(''); });
+  
+  if ($('cgps-btn-bulk-std')) $('cgps-btn-bulk-std').addEventListener('click', function() { applyBulkFilter($('cgps-bulk-input-std').value); });
+  if ($('cgps-btn-bulk-clear-std')) $('cgps-btn-bulk-clear-std').addEventListener('click', function() { $('cgps-bulk-input-std').value = ''; applyBulkFilter(''); });
+
+  if ($('reports-search-input')) {
+    $('reports-search-input').addEventListener('keyup', function() {
+      renderSubGroupsChecklist();
+    });
+  }
+
+  if ($('reports-btn-select-all-subgroups')) {
+    $('reports-btn-select-all-subgroups').addEventListener('click', function() {
+      var cbs = document.querySelectorAll('.chk-report-subgroup');
+      cbs.forEach(function(cb) { cb.checked = true; });
+      window.updateReportSelectedSubgroupsCount();
+    });
+  }
+
+  if ($('reports-btn-deselect-all-subgroups')) {
+    $('reports-btn-deselect-all-subgroups').addEventListener('click', function() {
+      var cbs = document.querySelectorAll('.chk-report-subgroup');
+      cbs.forEach(function(cb) { cb.checked = false; });
+      window.updateReportSelectedSubgroupsCount();
+    });
+  }
+
+  if ($('reports-btn-search')) {
+    $('reports-btn-search').addEventListener('click', function() {
+      handleReportGroupChange();
+    });
+  }
+
+  if ($('reports-btn-open-create-modal')) $('reports-btn-open-create-modal').addEventListener('click', openCreateReportModal);
+  if ($('btn-close-create-modal')) {
+    $('btn-close-create-modal').addEventListener('click', function() {
+      $('create-report-modal').style.display = 'none';
+    });
+  }
+
+  if ($('create-rep-source-search')) {
+    $('create-rep-source-search').addEventListener('keyup', function() {
+      populateSourceGroupsDropdown();
+    });
+  }
+
+  if ($('create-rep-source-group')) $('create-rep-source-group').addEventListener('change', handleSourceGroupChange);
+  if ($('create-rep-source-schedule')) $('create-rep-source-schedule').addEventListener('change', handleSourceScheduleChange);
+  if ($('btn-apply-prefix-preset')) $('btn-apply-prefix-preset').addEventListener('click', applyNamePrefixPreset);
+  if ($('btn-submit-create-report')) $('btn-submit-create-report').addEventListener('click', createAndSubmitReport);
+
+  if ($('reports-btn-open-edit-diags-modal')) $('reports-btn-open-edit-diags-modal').addEventListener('click', openEditDiagnosticsModal);
+  if ($('btn-close-edit-diags-modal')) {
+    $('btn-close-edit-diags-modal').addEventListener('click', function() {
+      $('edit-diagnostics-modal').style.display = 'none';
+    });
+  }
+  
+  if ($('btn-load-reports-list')) $('btn-load-reports-list').addEventListener('click', loadDiagnosticsReportsList);
+  if ($('edit-diag-search-mod')) $('edit-diag-search-mod').addEventListener('keyup', populateDiagnosticsReportDropdowns);
+  if ($('edit-diag-search-comp')) $('edit-diag-search-comp').addEventListener('keyup', populateDiagnosticsReportDropdowns);
+  if ($('edit-diag-dest-search')) {
+    $('edit-diag-dest-search').addEventListener('keyup', function() {
+      var currentRepId = $('edit-diag-select-report').value;
+      var currentSched = rawSchedules.find(function(s){ return s.id === currentRepId; });
+      var assignedGroupIds = currentSched ? (currentSched.groups || []).map(function(g){ return g.id; }) : [];
+      renderEditDiagGroupsList(assignedGroupIds);
+    });
+  }
+
+  if ($('btn-load-library-items')) $('btn-load-library-items').addEventListener('click', loadCatalogItemsOnDemand);
+  if ($('diag-library-search')) $('diag-library-search').addEventListener('keyup', filterCatalogItems);
+
+  if ($('edit-diag-select-report')) $('edit-diag-select-report').addEventListener('change', function() { handleEditDiagSelectReport('modificar'); });
+  if ($('edit-diag-select-compare')) $('edit-diag-select-compare').addEventListener('change', function() { handleEditDiagSelectReport('comparar'); });
+  if ($('btn-copy-compare-diags')) $('btn-copy-compare-diags').addEventListener('click', copyCompareDiagnosticsToInput);
+  if ($('btn-add-diag-from-library')) $('btn-add-diag-from-library').addEventListener('click', addSelectedDiagnosticFromLibrary);
+  if ($('btn-save-diagnostics')) $('btn-save-diagnostics').addEventListener('click', saveDiagnosticsToReport);
+
+  if ($('btn-close-prev-modal')) {
+    $('btn-close-prev-modal').addEventListener('click', function() {
+      $('report-preview-modal').style.display = 'none';
+    });
+  }
+
+  if ($('btn-copy-rules')) {
+    $('btn-copy-rules').addEventListener('click', function() {
+      if (!currentSelectedReportObj || !currentSelectedReportObj._rules) return;
+      var txt = currentSelectedReportObj._rules.join(', ');
+      navigator.clipboard.writeText(txt).then(function() {
+        alert('📋 Normas copiadas al portapapeles');
+      });
+    });
+  }
+
+  if ($('btn-copy-diags')) {
+    $('btn-copy-diags').addEventListener('click', function() {
+      if (!currentSelectedReportObj || !currentSelectedReportObj._diags) return;
+      var txt = currentSelectedReportObj._diags.join(', ');
+      navigator.clipboard.writeText(txt).then(function() {
+        alert('📋 Diagnósticos copiados al portapapeles');
+      });
+    });
+  }
+
+  if ($('reports-listbody')) {
+    $('reports-listbody').addEventListener('click', function (e) {
+      var b = e.target.closest ? e.target.closest('.btn-view-report') : null;
+      if (!b) return;
+      var found = currentReportRows.find(function (x) { return x.id === b.getAttribute('data-id'); });
+      if (found) openReportPreviewModal(found);
+    });
+  }
+
+  if ($('rep-filter-from')) $('rep-filter-from').addEventListener('change', applyReportFilters);
+  if ($('rep-filter-to')) $('rep-filter-to').addEventListener('change', applyReportFilters);
+  if ($('rep-filter-user')) $('rep-filter-user').addEventListener('change', applyReportFilters);
   if ($('rep-filter-keyword')) $('rep-filter-keyword').addEventListener('input', applyReportFilters);
   
-  $('rep-filter-clear').addEventListener('click', function () {
-    $('rep-filter-from').value = ''; 
-    $('rep-filter-to').value = ''; 
-    $('rep-filter-user').value = '';
-    if ($('rep-filter-keyword')) $('rep-filter-keyword').value = '';
-    applyReportFilters();
-  });
-
-  // AUDITORÍA DE GRUPOS
-  $('cgps-btn-exec-audit').addEventListener('click', executeGroupAudit);
-  $('cgps-btn-clear-audit').addEventListener('click', function() {
-    $('cgps-audit-input').value = '';
-    $('cgps-audit-results-card').style.display = 'none';
-    setMsg('Auditoría de grupos limpiada.');
-  });
-
-  // CERTI GPS
-  $('cgps-btn-view').addEventListener('click', function() {
-    switchView('certi');
-    $('sec-controls-container').scrollIntoView({ behavior: 'smooth' });
-    setMsg('Visualizando tabla de activos.');
-  });
-  $('cgps-btn-mail').addEventListener('click', generateLegalText);
-  $('cgps-btn-doc').addEventListener('click', downloadWordDoc);
-  $('cgps-btn-copy-legal').addEventListener('click', function() {
-    var txtElem = $('cgps-legal-text');
-    txtElem.select();
-    navigator.clipboard.writeText(txtElem.value).then(function() {
-      setMsg('📋 Texto legal copiado al portapapeles.');
+  if ($('rep-filter-clear')) {
+    $('rep-filter-clear').addEventListener('click', function () {
+      $('rep-filter-from').value = ''; 
+      $('rep-filter-to').value = ''; 
+      $('rep-filter-user').value = '';
+      if ($('rep-filter-keyword')) $('rep-filter-keyword').value = '';
+      applyReportFilters();
     });
-  });
+  }
 
-  // EVENTOS FLASH REPORT (MCP)
-  $('btn-mod-flash').addEventListener('click', function() { switchView('flash'); });
-  $('flash-btn-generate').addEventListener('click', generateFlashReportPrompt);
-  $('flash-btn-clear').addEventListener('click', function() {
-    $('flash-input-placa').value = '';
-    $('flash-input-vin').value = '';
-    $('flash-input-modelo').value = '';
-    $('flash-date-event').value = new Date().toISOString().split('T')[0];
-    $('flash-time-start').value = '14:00';
-    $('flash-time-end').value = '15:30';
-    $('flash-input-relato').value = '';
-    $('flash-input-fotos').value = '';
-    $('flash-output-prompt').value = '';
-    setMsg('Campos de Flash Report limpiados.');
-  });
-  $('flash-btn-copy').addEventListener('click', function() {
-    var outElem = $('flash-output-prompt');
-    if (!outElem.value) return;
-    outElem.select();
-    navigator.clipboard.writeText(outElem.value).then(function() {
-      setMsg('📋 Prompt MCP copiado al portapapeles.');
+  if ($('cgps-btn-exec-audit')) $('cgps-btn-exec-audit').addEventListener('click', executeGroupAudit);
+  if ($('cgps-btn-clear-audit')) {
+    $('cgps-btn-clear-audit').addEventListener('click', function() {
+      $('cgps-audit-input').value = '';
+      $('cgps-audit-results-card').style.display = 'none';
+      setMsg('Auditoría de grupos limpiada.');
     });
-  });
+  }
 
-  // EVENTOS KPI DASHBOARD
-  $('kpi-card-sn-vin').addEventListener('click', function() { activeUnitFilter = (activeUnitFilter === 'snVin') ? 'all' : 'snVin'; renderList(); });
-  $('kpi-card-novin').addEventListener('click', function() { activeUnitFilter = (activeUnitFilter === 'noVin') ? 'all' : 'noVin'; renderList(); });
-  $('kpi-card-nosn').addEventListener('click', function() { activeUnitFilter = (activeUnitFilter === 'noSn') ? 'all' : 'noSn'; renderList(); });
-  $('kpi-card-2').addEventListener('click', function() { activeUnitFilter = (activeUnitFilter === 'selected') ? 'all' : 'selected'; renderList(); });
+  if ($('cgps-btn-view')) {
+    $('cgps-btn-view').addEventListener('click', function() {
+      switchView('certi');
+      $('sec-controls-container').scrollIntoView({ behavior: 'smooth' });
+      setMsg('Visualizando tabla de activos.');
+    });
+  }
+  if ($('cgps-btn-mail')) $('cgps-btn-mail').addEventListener('click', generateLegalText);
+  if ($('cgps-btn-doc')) $('cgps-btn-doc').addEventListener('click', downloadWordDoc);
+  if ($('cgps-btn-copy-legal')) {
+    $('cgps-btn-copy-legal').addEventListener('click', function() {
+      var txtElem = $('cgps-legal-text');
+      txtElem.select();
+      navigator.clipboard.writeText(txtElem.value).then(function() {
+        setMsg('📋 Texto legal copiado al portapapeles.');
+      });
+    });
+  }
 
-  $('kpi-card-4').addEventListener('click', function() { activeParamFilter = (activeParamFilter === 'full') ? 'all' : 'full'; renderList(); });
-  $('kpi-card-less5').addEventListener('click', function() { activeParamFilter = (activeParamFilter === 'less5') ? 'all' : 'less5'; renderList(); });
+  if ($('btn-mod-flash')) $('btn-mod-flash').addEventListener('click', function() { switchView('flash'); });
+  if ($('flash-btn-generate')) $('flash-btn-generate').addEventListener('click', generateFlashReportPrompt);
+  if ($('flash-btn-clear')) {
+    $('flash-btn-clear').addEventListener('click', function() {
+      $('flash-input-placa').value = '';
+      $('flash-input-vin').value = '';
+      $('flash-input-modelo').value = '';
+      $('flash-date-event').value = new Date().toISOString().split('T')[0];
+      $('flash-time-start').value = '14:00';
+      $('flash-time-end').value = '15:30';
+      $('flash-input-relato').value = '';
+      $('flash-input-fotos').value = '';
+      $('flash-output-prompt').value = '';
+      setMsg('Campos de Flash Report limpiados.');
+    });
+  }
+  if ($('flash-btn-copy')) {
+    $('flash-btn-copy').addEventListener('click', function() {
+      var outElem = $('flash-output-prompt');
+      if (!outElem.value) return;
+      outElem.select();
+      navigator.clipboard.writeText(outElem.value).then(function() {
+        setMsg('📋 Prompt MCP copiado al portapapeles.');
+      });
+    });
+  }
 
-  $('kpi-card-noanualidad').addEventListener('click', function() { activeFieldMissingFilter = (activeFieldMissingFilter === 'noanualidad') ? 'all' : 'noanualidad'; renderList(); });
-  $('kpi-card-noestado').addEventListener('click', function() { activeFieldMissingFilter = (activeFieldMissingFilter === 'noestado') ? 'all' : 'noestado'; renderList(); });
-  $('kpi-card-noruc').addEventListener('click', function() { activeFieldMissingFilter = (activeFieldMissingFilter === 'noruc') ? 'all' : 'noruc'; renderList(); });
-  $('kpi-card-norazon').addEventListener('click', function() { activeFieldMissingFilter = (activeFieldMissingFilter === 'norazon') ? 'all' : 'norazon'; renderList(); });
+  if ($('kpi-card-sn-vin')) $('kpi-card-sn-vin').addEventListener('click', function() { activeUnitFilter = (activeUnitFilter === 'snVin') ? 'all' : 'snVin'; renderList(); });
+  if ($('kpi-card-novin')) $('kpi-card-novin').addEventListener('click', function() { activeUnitFilter = (activeUnitFilter === 'noVin') ? 'all' : 'noVin'; renderList(); });
+  if ($('kpi-card-nosn')) $('kpi-card-nosn').addEventListener('click', function() { activeUnitFilter = (activeUnitFilter === 'noSn') ? 'all' : 'noSn'; renderList(); });
+  if ($('kpi-card-2')) $('kpi-card-2').addEventListener('click', function() { activeUnitFilter = (activeUnitFilter === 'selected') ? 'all' : 'selected'; renderList(); });
 
-  $('kpi-card-type-remolcadores').addEventListener('click', function() { activeVehicleTypeFilter = (activeVehicleTypeFilter === 'remolcadores') ? 'all' : 'remolcadores'; renderList(); });
-  $('kpi-card-type-volquetes').addEventListener('click', function() { activeVehicleTypeFilter = (activeVehicleTypeFilter === 'volquetes') ? 'all' : 'volquetes'; renderList(); });
-  $('kpi-card-type-sintipo').addEventListener('click', function() { activeVehicleTypeFilter = (activeVehicleTypeFilter === 'sintipo') ? 'all' : 'sintipo'; renderList(); });
-  $('kpi-card-type-otrostipos').addEventListener('click', function() { activeVehicleTypeFilter = (activeVehicleTypeFilter === 'otrostipos') ? 'all' : 'otrostipos'; renderList(); });
+  if ($('kpi-card-4')) $('kpi-card-4').addEventListener('click', function() { activeParamFilter = (activeParamFilter === 'full') ? 'all' : 'full'; renderList(); });
+  if ($('kpi-card-less5')) $('kpi-card-less5').addEventListener('click', function() { activeParamFilter = (activeParamFilter === 'less5') ? 'all' : 'less5'; renderList(); });
 
-  // NAVEGACIÓN ENTRE MÓDULOS
-  $('btn-mod-certi').addEventListener('click', function() { switchView('certi'); });
-  $('btn-mod-valid').addEventListener('click', function() { switchView('valid'); });
-  $('btn-mod-master').addEventListener('click', function() { switchView('master'); });
-  $('btn-mod-audit').addEventListener('click', function() { switchView('audit'); });
-  $('btn-mod-reports').addEventListener('click', function() { switchView('reports'); });
-  $('btn-mod-activations').addEventListener('click', function() { switchView('activations'); });
-  $('btn-mod-create-user').addEventListener('click', function() { switchView('create-user'); });
-  $('testn-btn-back').addEventListener('click', function() { switchView('hub'); });
+  if ($('kpi-card-noanualidad')) $('kpi-card-noanualidad').addEventListener('click', function() { activeFieldMissingFilter = (activeFieldMissingFilter === 'noanualidad') ? 'all' : 'noanualidad'; renderList(); });
+  if ($('kpi-card-noestado')) $('kpi-card-noestado').addEventListener('click', function() { activeFieldMissingFilter = (activeFieldMissingFilter === 'noestado') ? 'all' : 'noestado'; renderList(); });
+  if ($('kpi-card-noruc')) $('kpi-card-noruc').addEventListener('click', function() { activeFieldMissingFilter = (activeFieldMissingFilter === 'noruc') ? 'all' : 'noruc'; renderList(); });
+  if ($('kpi-card-norazon')) $('kpi-card-norazon').addEventListener('click', function() { activeFieldMissingFilter = (activeFieldMissingFilter === 'norazon') ? 'all' : 'norazon'; renderList(); });
 
-  // BÚSQUEDA Y SELECTOR DE CAMPO
+  if ($('kpi-card-type-remolcadores')) $('kpi-card-type-remolcadores').addEventListener('click', function() { activeVehicleTypeFilter = (activeVehicleTypeFilter === 'remolcadores') ? 'all' : 'remolcadores'; renderList(); });
+  if ($('kpi-card-type-volquetes')) $('kpi-card-type-volquetes').addEventListener('click', function() { activeVehicleTypeFilter = (activeVehicleTypeFilter === 'volquetes') ? 'all' : 'volquetes'; renderList(); });
+  if ($('kpi-card-type-sintipo')) $('kpi-card-type-sintipo').addEventListener('click', function() { activeVehicleTypeFilter = (activeVehicleTypeFilter === 'sintipo') ? 'all' : 'sintipo'; renderList(); });
+  if ($('kpi-card-type-otrostipos')) $('kpi-card-type-otrostipos').addEventListener('click', function() { activeVehicleTypeFilter = (activeVehicleTypeFilter === 'otrostipos') ? 'all' : 'otrostipos'; renderList(); });
+
+  if ($('btn-mod-certi')) $('btn-mod-certi').addEventListener('click', function() { switchView('certi'); });
+  if ($('btn-mod-valid')) $('btn-mod-valid').addEventListener('click', function() { switchView('valid'); });
+  if ($('btn-mod-master')) $('btn-mod-master').addEventListener('click', function() { switchView('master'); });
+  if ($('btn-mod-audit')) $('btn-mod-audit').addEventListener('click', function() { switchView('audit'); });
+  if ($('btn-mod-reports')) $('btn-mod-reports').addEventListener('click', function() { switchView('reports'); });
+  if ($('btn-mod-activations')) $('btn-mod-activations').addEventListener('click', function() { switchView('activations'); });
+  if ($('btn-mod-create-user')) $('btn-mod-create-user').addEventListener('click', function() { switchView('create-user'); });
+  if ($('testn-btn-back')) $('testn-btn-back').addEventListener('click', function() { switchView('hub'); });
+
   var filterTimer = null;
-  $('cgps-filter').addEventListener('input', function () { clearTimeout(filterTimer); filterTimer = setTimeout(renderList, 200); });
-  $('cgps-filter-field').addEventListener('change', renderList);
-  $('cgps-mass-field-select').addEventListener('change', updateMassInputPlaceholder);
+  if ($('cgps-filter')) {
+    $('cgps-filter').addEventListener('input', function () { 
+      clearTimeout(filterTimer); 
+      filterTimer = setTimeout(renderList, 200); 
+    });
+  }
+  if ($('cgps-filter-field')) $('cgps-filter-field').addEventListener('change', renderList);
+  if ($('cgps-mass-field-select')) $('cgps-mass-field-select').addEventListener('change', updateMassInputPlaceholder);
 
-  // SELECCIÓN EN TABLA
-  $('cgps-listbody').addEventListener('change', function (e) {
-    var id = e.target.getAttribute('data-id');
-    if (e.target.type === 'checkbox' && id) {
-      selected[id] = e.target.checked;
-      renderList();
-      updateKPIs();
-    }
-  });
-
-  $('cgps-sel-vis').addEventListener('click', function () {
-    all.forEach(function (r) {
-      if (isRowMatchingFilters(r)) {
-        selected[r.id] = true;
+  if ($('cgps-listbody')) {
+    $('cgps-listbody').addEventListener('change', function (e) {
+      var id = e.target.getAttribute('data-id');
+      if (e.target.type === 'checkbox' && id) {
+        selected[id] = e.target.checked;
+        renderList();
+        updateKPIs();
       }
     });
-    renderList();
-  });
+  }
 
-  $('cgps-sel-none').addEventListener('click', function () { 
-    selected = {}; 
-    renderList(); 
-  });
+  if ($('cgps-sel-vis')) {
+    $('cgps-sel-vis').addEventListener('click', function () {
+      all.forEach(function (r) {
+        if (isRowMatchingFilters(r)) {
+          selected[r.id] = true;
+        }
+      });
+      renderList();
+    });
+  }
+
+  if ($('cgps-sel-none')) {
+    $('cgps-sel-none').addEventListener('click', function () { 
+      selected = {}; 
+      renderList(); 
+    });
+  }
 
   var loadStarted = false;
 
@@ -3917,7 +3961,6 @@ ENTRADAS
   };
 };
 
-// REGISTRO PARA MYGEOTAB
 window.geotab = window.geotab || {};
 window.geotab.addin = window.geotab.addin || {};
 
