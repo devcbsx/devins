@@ -801,6 +801,9 @@
           <option value="estadoProvincia">Estado / Provincia</option>
           <option value="anualidad">Anualidad</option>
           <option value="tipoVehiculo">Tipo Vehículo</option>
+          <option value="marca" class="opt-valid-only">Marca</option>
+          <option value="modelo" class="opt-valid-only">Modelo</option>
+          <option value="anio" class="opt-valid-only">Año</option>
           <option value="grupos">Grupos</option>
         </select>
         
@@ -817,6 +820,9 @@
           <option value="estadoProvincia" class="opt-valid-only">Estado / Provincia</option>
           <option value="anualidad" class="opt-valid-only">Anualidad</option>
           <option value="tipoVehiculo" class="opt-valid-only">Tipo Vehículo</option>
+          <option value="marca" class="opt-valid-only">Marca</option>
+          <option value="modelo" class="opt-valid-only">Modelo</option>
+          <option value="anio" class="opt-valid-only">Año</option>
         </select>
         
         <input type="text" id="cgps-mass-value-input" class="cgps-input" placeholder="Nuevo valor..." style="width: 180px;">
@@ -833,7 +839,7 @@
         <table class="cgps-table">
           <thead id="cgps-table-head"></thead>
           <tbody id="cgps-listbody">
-            <tr><td colspan="12" style="text-align:center; padding: 24px; color: #64748b;">Cargando activos…</td></tr>
+            <tr><td colspan="15" style="text-align:center; padding: 24px; color: #64748b;">Cargando activos…</td></tr>
           </tbody>
         </table>
       </div>
@@ -1006,7 +1012,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     { description: "Enable Engine Retarder Selection And Accel Pedal", offset: 166, bytes: "CQ==" }
   ];
 
-  var DEVICE_FIELDS = ['id', 'name', 'licensePlate', 'licenseState', 'vehicleIdentificationNumber', 'serialNumber', 'activeFrom', 'activeTo', 'deviceType', 'groups', 'customProperties', 'customParameters', 'comment'];
+  var DEVICE_FIELDS = ['id', 'name', 'licensePlate', 'licenseState', 'vehicleIdentificationNumber', 'serialNumber', 'activeFrom', 'activeTo', 'deviceType', 'groups', 'customProperties', 'customParameters', 'comment', 'make', 'model', 'year'];
 
   var all = [], groupsById = {}, statusById = {}, selected = {}, rawDevices = [];
   var filteredAllowedGroupsList = []; 
@@ -1264,6 +1270,10 @@ var addInConstructor = function (geotabApi, state, callback) {
     var anualidadVal = getCustomValue(cpMap, /ANUALIDAD/i);
     var tipoVehiculoVal = getCustomValue(cpMap, /TIPO\s*DE\s*VEHICULO|TIPO\s*VEHICULO/i);
     
+    var marcaVal = (d.make || '').trim() || getCustomValue(cpMap, /^MARCA$/i);
+    var modeloVal = (d.model || '').trim() || getCustomValue(cpMap, /^MODELO$/i);
+    var anioVal = (d.year ? String(d.year) : '').trim() || getCustomValue(cpMap, /^A[N\u00D1]O$/i);
+
     var estadoProv = (d.licenseState || '').trim() || getCustomValue(cpMap, /ESTADO|PROVINCIA/i);
 
     var isExcluded = isExcludedDevice(d);
@@ -1282,6 +1292,9 @@ var addInConstructor = function (geotabApi, state, callback) {
       estadoProvincia: estadoProv,
       anualidad: anualidadVal,
       tipoVehiculo: tipoVehiculoVal,
+      marca: marcaVal,
+      modelo: modeloVal,
+      anio: anioVal,
       grupos: getGroupsList(d),
       rawGroupIds: (d.groups || []).map(function(g){ return g.id; }),
       paramCount: paramStatus.count,
@@ -1289,7 +1302,7 @@ var addInConstructor = function (geotabApi, state, callback) {
       isExcluded: isExcluded
     };
     row._nom = name.toLowerCase(); row._p = row.placa.toLowerCase(); row._v = vin.toLowerCase(); row._s = serial.toLowerCase();
-    row._hay = [name, row.placa, vin, serial, row.grupos, razonSocial, rucVal, estadoProv, anualidadVal, tipoVehiculoVal].join(' ').toLowerCase();
+    row._hay = [name, row.placa, vin, serial, row.grupos, razonSocial, rucVal, estadoProv, anualidadVal, tipoVehiculoVal, marcaVal, modeloVal, anioVal].join(' ').toLowerCase();
     return row;
   }
 
@@ -1527,7 +1540,7 @@ var addInConstructor = function (geotabApi, state, callback) {
       if (btnInject) {
         btnInject.style.display = 'none';
       }
-      if (['nombreActivo', 'placa', 'estadoProvincia', 'anualidad', 'tipoVehiculo'].includes($('cgps-mass-field-select').value)) {
+      if (['nombreActivo', 'placa', 'estadoProvincia', 'anualidad', 'tipoVehiculo', 'marca', 'modelo', 'anio'].includes($('cgps-mass-field-select').value)) {
         $('cgps-mass-field-select').value = 'razon';
       }
     }
@@ -1583,7 +1596,16 @@ var addInConstructor = function (geotabApi, state, callback) {
       else if (field === 'ruc') targetPropName = "RUC";
       else if (field === 'anualidad') targetPropName = "Anualidad";
       else if (field === 'tipoVehiculo') targetPropName = "Tipo de Vehiculo";
-      else if (field === 'estadoProvincia') {
+      else if (field === 'marca') {
+        device.make = val;
+        targetPropName = "Marca";
+      } else if (field === 'modelo') {
+        device.model = val;
+        targetPropName = "Modelo";
+      } else if (field === 'anio') {
+        if (!isNaN(parseInt(val, 10))) device.year = parseInt(val, 10);
+        targetPropName = "Año";
+      } else if (field === 'estadoProvincia') {
         device.licenseState = val;
       } else if (field === 'placa') {
         device.licensePlate = val;
@@ -3313,16 +3335,19 @@ ENTRADAS
       head.innerHTML = '<tr>' +
         '<th style="width: 36px; text-align: center;"></th>' +
         '<th style="width: 150px;">Nombre del Activo</th>' +
-        '<th style="width: 110px;">Placa</th>' +
+        '<th style="width: 100px;">Placa</th>' +
         '<th style="width: 110px;">Activado Desde</th>' +
-        '<th style="width: 160px;">VIN</th>' +
+        '<th style="width: 150px;">VIN</th>' +
         '<th style="width: 110px;">Parámetros (5)</th>' +
-        '<th style="width: 140px;">Grupos</th>' +
-        '<th style="width: 120px;">Estado/Prov.</th>' +
-        '<th style="width: 110px;">RUC</th>' +
-        '<th style="width: 180px;">Razón Social</th>' +
-        '<th style="width: 90px;">Anualidad</th>' +
+        '<th style="width: 130px;">Grupos</th>' +
+        '<th style="width: 110px;">Estado/Prov.</th>' +
+        '<th style="width: 100px;">RUC</th>' +
+        '<th style="width: 160px;">Razón Social</th>' +
+        '<th style="width: 80px;">Anualidad</th>' +
         '<th style="width: 110px;">Tipo Vehículo</th>' +
+        '<th style="width: 100px;">Marca</th>' +
+        '<th style="width: 110px;">Modelo</th>' +
+        '<th style="width: 70px;">Año</th>' +
         '</tr>';
     }
   }
@@ -3431,12 +3456,15 @@ ENTRADAS
           '<td>' + htmlEsc(r.razon || 'Sin Razón Social') + '</td>' +
           '<td>' + htmlEsc(r.anualidad || '-') + '</td>' +
           '<td>' + htmlEsc(r.tipoVehiculo || 'Sin Tipo') + '</td>' +
+          '<td>' + htmlEsc(r.marca || '-') + '</td>' +
+          '<td>' + htmlEsc(r.modelo || '-') + '</td>' +
+          '<td>' + htmlEsc(r.anio || '-') + '</td>' +
           '</tr>';
       }
     });
 
     if ($('cgps-listbody')) {
-      $('cgps-listbody').innerHTML = html || '<tr><td colspan="12" style="text-align:center; padding: 24px; color: #64748b;">Sin resultados coincidentes para la combinación de filtros aplicada</td></tr>';
+      $('cgps-listbody').innerHTML = html || '<tr><td colspan="15" style="text-align:center; padding: 24px; color: #64748b;">Sin resultados coincidentes para la combinación de filtros aplicada</td></tr>';
     }
     updateKPIs();
     highlightKpiCards();
