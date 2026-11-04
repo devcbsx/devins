@@ -281,7 +281,7 @@
       <div class="testn-card" id="btn-mod-valid">
         <div class="testn-card-icon">⚡</div>
         <h2>VALIDACIÓN DE VARIABLES</h2>
-        <p>Auditoría e inyección de los 5 parámetros obligatorios</p>
+        <p>Auditoría, inyección de 5 parámetros y decodificación VIN</p>
       </div>
 
       <div class="testn-card" id="btn-mod-master">
@@ -811,6 +811,8 @@
         
         <button id="cgps-sel-vis" type="button" class="cgps-btn cgps-btn-outline">Seleccionar visibles</button>
         <button id="cgps-sel-none" type="button" class="cgps-btn cgps-btn-outline">Limpiar</button>
+
+        <button id="cgps-btn-decode-vin" type="button" class="cgps-btn opt-valid-only" style="background: linear-gradient(135deg, #0284c7, #6366f1); color: #fff; font-weight: 700; display: none;">🚗 Decodificar VINs (Geotab API)</button>
         
         <select id="cgps-mass-field-select" class="cgps-input" style="width: 160px; font-weight: 600; color: #0f172a;">
           <option value="razon">Razón Social</option>
@@ -1015,6 +1017,7 @@ var addInConstructor = function (geotabApi, state, callback) {
   var DEVICE_FIELDS = ['id', 'name', 'licensePlate', 'licenseState', 'vehicleIdentificationNumber', 'serialNumber', 'activeFrom', 'activeTo', 'deviceType', 'groups', 'customProperties', 'customParameters', 'comment', 'make', 'model', 'year'];
 
   var all = [], groupsById = {}, statusById = {}, selected = {}, rawDevices = [];
+  var decodedVinCache = {}; 
   var filteredAllowedGroupsList = []; 
   var rawSchedules = [], templateNamesById = {};
   var usersById = {}, rulesById = {}, diagById = {}, currentReportRows = [];
@@ -1256,10 +1259,50 @@ var addInConstructor = function (geotabApi, state, callback) {
     return names.join(', ');
   }
 
+  /**
+   * Decodifica VINs usando el endpoint oficial DecodeVins de Geotab API
+   */
+  async function decodeVinsForDevices(vinList) {
+    if (!vinList || vinList.length === 0) return {};
+
+    var cleanVins = vinList.map(function(v) { return (v || '').trim().toUpperCase(); }).filter(function(v) { return v.length >= 11; });
+
+    var uniqueVins = Array.from(new Set(cleanVins)).filter(function(v) { return !decodedVinCache[v]; });
+
+    if (uniqueVins.length === 0) return decodedVinCache;
+
+    setMsg("Decodificando " + uniqueVins.length + " VINs mediante la API DecodeVins...");
+
+    for (var i = 0; i < uniqueVins.length; i += 50) {
+      var chunk = uniqueVins.slice(i, i + 50);
+
+      try {
+        var res = await callApi(api, 'DecodeVins', { vins: chunk });
+        
+        if (Array.isArray(res)) {
+          res.forEach(function(item) {
+            if (item && item.vin) {
+              var vKey = item.vin.trim().toUpperCase();
+              decodedVinCache[vKey] = {
+                make: item.make || item.manufacturer || '',
+                model: item.model || item.vehicleModel || '',
+                year: item.year ? String(item.year) : ''
+              };
+            }
+          });
+        }
+      } catch (err) {
+        console.warn("Error al llamar DecodeVins para chunk de VINs:", err);
+      }
+    }
+
+    return decodedVinCache;
+  }
+
   function toRow(d) {
     var name = (d.name || '').trim();
     var plate = (d.licensePlate || '').trim();
-    var vin = (d.vehicleIdentificationNumber || '').trim();
+    var vin = (d.vehicleIdentificationNumber || '').trim().toUpperCase();
     var serial = (d.serialNumber || '').trim();
     var paramStatus = evalDeviceParameters(d);
     
@@ -1270,9 +1313,11 @@ var addInConstructor = function (geotabApi, state, callback) {
     var anualidadVal = getCustomValue(cpMap, /ANUALIDAD/i);
     var tipoVehiculoVal = getCustomValue(cpMap, /TIPO\s*DE\s*VEHICULO|TIPO\s*VEHICULO/i);
     
-    var marcaVal = (d.make || '').trim() || getCustomValue(cpMap, /^MARCA$/i);
-    var modeloVal = (d.model || '').trim() || getCustomValue(cpMap, /^MODELO$/i);
-    var anioVal = (d.year ? String(d.year) : '').trim() || getCustomValue(cpMap, /^A[N\u00D1]O$/i);
+    var decodedInfo = decodedVinCache[vin] || {};
+
+    var marcaVal = decodedInfo.make || (d.make || '').trim() || getCustomValue(cpMap, /^MARCA$/i);
+    var modeloVal = decodedInfo.model || (d.model || '').trim() || getCustomValue(cpMap, /^MODELO$/i);
+    var anioVal = decodedInfo.year || (d.year ? String(d.year) : '').trim() || getCustomValue(cpMap, /^A[N\u00D1]O$/i);
 
     var estadoProv = (d.licenseState || '').trim() || getCustomValue(cpMap, /ESTADO|PROVINCIA/i);
 
@@ -1528,6 +1573,7 @@ var addInConstructor = function (geotabApi, state, callback) {
   function updateMassSelectVisibility() {
     var validOpts = document.querySelectorAll('.opt-valid-only');
     var btnInject = $('cgps-btn-inject-params');
+    var btnDecode = $('cgps-btn-decode-vin');
 
     if (activeModule === 'valid') {
       validOpts.forEach(function(opt) { opt.style.display = 'block'; });
@@ -1535,11 +1581,14 @@ var addInConstructor = function (geotabApi, state, callback) {
         btnInject.style.display = 'inline-flex';
         btnInject.style.visibility = 'visible';
       }
+      if (btnDecode) {
+        btnDecode.style.display = 'inline-flex';
+        btnDecode.style.visibility = 'visible';
+      }
     } else {
       validOpts.forEach(function(opt) { opt.style.display = 'none'; });
-      if (btnInject) {
-        btnInject.style.display = 'none';
-      }
+      if (btnInject) btnInject.style.display = 'none';
+      if (btnDecode) btnDecode.style.display = 'none';
       if (['nombreActivo', 'placa', 'estadoProvincia', 'anualidad', 'tipoVehiculo', 'marca', 'modelo', 'anio'].includes($('cgps-mass-field-select').value)) {
         $('cgps-mass-field-select').value = 'razon';
       }
@@ -1551,6 +1600,26 @@ var addInConstructor = function (geotabApi, state, callback) {
     var selectedOpt = $('cgps-mass-field-select').options[$('cgps-mass-field-select').selectedIndex];
     var labelText = selectedOpt ? selectedOpt.text : 'valor';
     $('cgps-mass-value-input').placeholder = labelText + '...';
+  }
+
+  async function triggerVinDecodeProcess() {
+    var selectedIds = Object.keys(selected).filter(function (k) { return selected[k]; });
+    var targetRows = selectedIds.length > 0 
+      ? all.filter(function(r){ return selectedIds.includes(r.id); })
+      : getActiveRowsForModule().filter(function(r) { return isRowMatchingFilters(r); });
+
+    var vinsToDecode = targetRows.map(function(r){ return r.vin; }).filter(Boolean);
+
+    if (vinsToDecode.length === 0) {
+      setMsg("No se encontraron VINs válidos en la selección o vista actual.", true);
+      return;
+    }
+
+    setMsg("Iniciando decodificación de " + vinsToDecode.length + " VINs con DecodeVins...");
+    await decodeVinsForDevices(vinsToDecode);
+    rebuildRows();
+    renderList();
+    setMsg("✅ Se decodificaron y actualizaron Marca, Modelo y Año para " + vinsToDecode.length + " vehículos.");
   }
 
   function requestApplyMassUpdateUnified() {
@@ -1716,6 +1785,10 @@ var addInConstructor = function (geotabApi, state, callback) {
     if (target && (target.id === 'cgps-btn-inject-params' || target.closest('#cgps-btn-inject-params'))) {
       e.preventDefault();
       requestInjectRequiredParameters();
+    }
+    if (target && (target.id === 'cgps-btn-decode-vin' || target.closest('#cgps-btn-decode-vin'))) {
+      e.preventDefault();
+      triggerVinDecodeProcess();
     }
   });
 
