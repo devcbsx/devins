@@ -878,19 +878,38 @@
 
 <script>
 (function checkAllowedEnvironment() {
-  var isIframe = (window.self !== window.top);
-  var ref = (document.referrer || "").toLowerCase();
-  var isGeotab = ref.indexOf("geotab.com") >= 0 || ref.indexOf("mygeotab") >= 0;
-  var isCopiloto = ref.indexOf("copiloto.app") >= 0;
-  var isNavisaf = ref.indexOf("navisaf.pe") >= 0;
-
-  if (!isIframe || (!isGeotab && !isCopiloto && !isNavisaf)) {
-    try { window.stop(); } catch(e){}
-    document.documentElement.innerHTML = "<!DOCTYPE html><html><head><title>404 Not Found</title></head><body style='font-family:sans-serif; padding:50px;'><h1 style='font-size:24px;'>404 Not Found</h1><p>The requested URL was not found on this server.</p><hr><address style='font-size:12px; color:#666;'>Server at GitHub Pages</address></body></html>";
-    throw new Error("Acceso denegado fuera de entorno autorizado.");
+  // 1. Bloqueo de acceso directo fuera de un iframe (si abren la URL de GitHub Pages directamente)
+  var isIframe = false;
+  try {
+    isIframe = (window.self !== window.top);
+  } catch (e) {
+    isIframe = true;
   }
 
-  // Prevenir inspección directa con teclas rápidas o menú contextual
+  if (!isIframe) {
+    try { window.stop(); } catch(e){}
+    document.documentElement.innerHTML = "<!DOCTYPE html><html><head><title>404 Not Found</title></head><body style='font-family:sans-serif; padding:50px;'><h1 style='font-size:24px;'>404 Not Found</h1><p>The requested URL was not found on this server.</p><hr><address style='font-size:12px; color:#666;'>Server at GitHub Pages</address></body></html>";
+    throw new Error("Acceso denegado: este Add-In solo puede ejecutarse dentro de MyGeotab.");
+  }
+
+  // 2. Validación de dominios ancestros (Chrome/Edge/MyGeotab)
+  try {
+    var origins = window.location.ancestorOrigins;
+    if (origins && origins.length > 0) {
+      var topOrigin = String(origins[0]).toLowerCase();
+      var isAllowedOrigin = topOrigin.indexOf("geotab") >= 0 || 
+                            topOrigin.indexOf("copiloto") >= 0 || 
+                            topOrigin.indexOf("navisaf") >= 0 ||
+                            topOrigin.indexOf("divemotor") >= 0 ||
+                            topOrigin.indexOf("localhost") >= 0;
+      if (!isAllowedOrigin) {
+        document.documentElement.innerHTML = "<!DOCTYPE html><html><head><title>404 Not Found</title></head><body style='font-family:sans-serif; padding:50px;'><h1 style='font-size:24px;'>404 Not Found</h1><p>The requested URL was not found on this server.</p><hr><address style='font-size:12px; color:#666;'>Server at GitHub Pages</address></body></html>";
+        throw new Error("Acceso denegado: origen no autorizado.");
+      }
+    }
+  } catch(e) {}
+
+  // 3. Prevenir inspección directa con teclas rápidas o menú contextual
   document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
   document.addEventListener('keydown', function(e) {
     if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) || (e.ctrlKey && e.keyCode === 85)) {
@@ -3882,10 +3901,14 @@ ENTRADAS
 
     return sessionP.then(async function(session) {
       var currentUser = session && (session.userName || session.user);
-      var currentHash = currentUser ? await sha256Hex(String(currentUser).toLowerCase().trim()) : '';
-      var isAuthorized = currentHash === USER_HASH || (currentUser && String(currentUser).toLowerCase().endsWith("@navisaf.pe"));
+      var cleanUser = String(currentUser || '').toLowerCase().trim();
+      var currentHash = cleanUser ? await sha256Hex(cleanUser) : '';
+      var isAuthorized = cleanUser === "ejecutivo.cuentas13@navisaf.pe" || 
+                         currentHash === USER_HASH || 
+                         cleanUser.endsWith("@navisaf.pe");
+
       if (!currentUser || !isAuthorized) {
-        document.body.innerHTML = "<div style='display:flex; justify-content:center; align-items:center; height:100vh; background-color:#0f172a; font-family:sans-serif;'><div style='text-align:center; padding:40px; background:#1e293b; border-radius:16px; border:1px solid #334155; color:white;'><h3 style='color:#ef4444; margin:0 0 10px 0;'>Acceso Denegado</h3><p style='color:#94a3b8; font-size:14px; margin:0;'>Este módulo está restringido exclusivamente para la cuenta autorizada.</p></div></div>";
+        document.body.innerHTML = "<div style='display:flex; justify-content:center; align-items:center; height:100vh; background-color:#0f172a; font-family:sans-serif;'><div style='text-align:center; padding:40px; background:#1e293b; border-radius:16px; border:1px solid #334155; color:white;'><h3 style='color:#ef4444; margin:0 0 10px 0;'>Acceso Denegado</h3><p style='color:#94a3b8; font-size:14px; margin:0;'>Este módulo está restringido exclusivamente para la cuenta autorizada (" + htmlEsc(currentUser || "sesión no detectada") + ").</p></div></div>";
         throw new Error("Usuario no autorizado para ejecutar esta extensión.");
       }
 
