@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<!-- Evitar caché -->
+<!-- Evitar indexación y caché -->
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
@@ -787,51 +788,73 @@
       </div>
     </div>
 
-    <!-- CONTROLES UNIFICADOS BARRA TECH -->
-    <div id="sec-controls-container" class="cgps-card" style="margin-top: 12px;">
-      <div class="cgps-controls-row" style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; width: 100%;">
-        <select id="cgps-filter-field" class="cgps-input" style="width: 160px; font-weight: 600; color: #0284c7; background-color: #f0f9ff; border-color: #bae6fd;">
-          <option value="all">[ Todos los campos ]</option>
-          <option value="nombreActivo">Nombre del Activo</option>
-          <option value="placa">Placa</option>
-          <option value="vin">VIN</option>
-          <option value="serialNumber"># Serie GPS</option>
-          <option value="razon">Razón Social</option>
-          <option value="ruc">RUC</option>
-          <option value="estadoProvincia">Estado / Provincia</option>
-          <option value="anualidad">Anualidad</option>
-          <option value="tipoVehiculo">Tipo Vehículo</option>
-          <option value="marca" class="opt-valid-only">Marca</option>
-          <option value="modelo" class="opt-valid-only">Modelo</option>
-          <option value="anio" class="opt-valid-only">Año</option>
-          <option value="grupos">Grupos</option>
-        </select>
+    <!-- CONTROLES UNIFICADOS BARRA TECH (DISEÑO 3 SECCIONES) -->
+    <div id="sec-controls-container" class="cgps-card" style="margin-top: 12px; padding: 14px 18px; background: #ffffff;">
+      <div style="display: flex; align-items: stretch; justify-content: space-between; flex-wrap: wrap; gap: 14px; width: 100%;">
         
-        <input type="text" id="cgps-filter" class="cgps-input" placeholder="🔍 Buscar activo..." style="width: 180px;">
-        
-        <button id="cgps-sel-vis" type="button" class="cgps-btn cgps-btn-outline">Seleccionar visibles</button>
-        <button id="cgps-sel-none" type="button" class="cgps-btn cgps-btn-outline">Limpiar</button>
+        <!-- SECCIÓN 1: BUSCAR VARIABLES -->
+        <div style="display: flex; flex-direction: column; gap: 8px; flex: 1.1; min-width: 280px;">
+          <div style="font-size: 13px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px;">Buscar Variables</div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <select id="cgps-filter-field" class="cgps-input" style="width: 155px; font-weight: 600; color: #0284c7; background-color: #f0f9ff; border-color: #bae6fd; height: 36px;">
+              <option value="all">[ Todos los campos ]</option>
+              <option value="nombreActivo">Nombre del Activo</option>
+              <option value="placa">Placa</option>
+              <option value="vin">VIN</option>
+              <option value="serialNumber"># Serie GPS</option>
+              <option value="razon">Razón Social</option>
+              <option value="ruc">RUC</option>
+              <option value="estadoProvincia">Estado / Provincia</option>
+              <option value="anualidad">Anualidad</option>
+              <option value="tipoVehiculo">Tipo Vehículo</option>
+              <option value="marca" class="opt-valid-only">Marca</option>
+              <option value="modelo" class="opt-valid-only">Modelo</option>
+              <option value="anio" class="opt-valid-only">Año</option>
+              <option value="grupos">Grupos</option>
+            </select>
+            <input type="text" id="cgps-filter" class="cgps-input" placeholder="🔍 Buscar activo..." style="flex: 1; height: 36px;">
+          </div>
+          <div style="display: flex; justify-content: flex-end; padding-right: 2px;">
+            <button id="cgps-sel-none" type="button" class="cgps-btn cgps-btn-outline" style="height: 32px; padding: 4px 18px; font-size: 12px; border-radius: 6px;">Limpiar</button>
+          </div>
+        </div>
 
-        <button id="cgps-btn-decode-vin" type="button" class="cgps-btn opt-valid-only" style="background: linear-gradient(135deg, #0284c7, #6366f1); color: #fff; font-weight: 700; display: none;">🚗 Decodificar VINs (Geotab API)</button>
-        
-        <select id="cgps-mass-field-select" class="cgps-input" style="width: 160px; font-weight: 600; color: #0f172a;">
-          <option value="razon">Razón Social</option>
-          <option value="ruc">RUC</option>
-          <option value="nombreActivo" class="opt-valid-only">Nombre del Activo</option>
-          <option value="placa" class="opt-valid-only">Placa</option>
-          <option value="estadoProvincia" class="opt-valid-only">Estado / Provincia</option>
-          <option value="anualidad" class="opt-valid-only">Anualidad</option>
-          <option value="tipoVehiculo" class="opt-valid-only">Tipo Vehículo</option>
-          <option value="marca" class="opt-valid-only">Marca</option>
-          <option value="modelo" class="opt-valid-only">Modelo</option>
-          <option value="anio" class="opt-valid-only">Año</option>
-        </select>
-        
-        <input type="text" id="cgps-mass-value-input" class="cgps-input" placeholder="Nuevo valor..." style="width: 180px;">
-        
-        <button id="cgps-btn-apply-mass-unified" type="button" class="cgps-btn cgps-btn-primary" style="font-weight: 700;">Guardar seleccionados</button>
-        
-        <button id="cgps-btn-inject-params" type="button" class="cgps-btn" style="background: linear-gradient(135deg, #10b981, #059669); color: #fff; font-weight: 700; display: none;">🛡️ Completar 5 Parámetros</button>
+        <!-- SEPARADOR VERTICAL 1 -->
+        <div style="width: 2px; background: #0f172a; margin: 0 4px; align-self: stretch; min-height: 80px; opacity: 0.9;"></div>
+
+        <!-- SECCIÓN 2: MODIFICAR VARIABLES -->
+        <div style="display: flex; flex-direction: column; gap: 8px; flex: 1.4; min-width: 330px;">
+          <div style="font-size: 13px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px;">Modificar Variables</div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <button id="cgps-sel-vis" type="button" class="cgps-btn cgps-btn-outline" style="height: 36px; padding: 6px 14px; font-size: 12px; white-space: nowrap; border-radius: 6px;">Seleccionar visibles</button>
+            <select id="cgps-mass-field-select" class="cgps-input" style="flex: 1; font-weight: 600; color: #0f172a; height: 36px;">
+              <option value="razon">Razón Social</option>
+              <option value="ruc">RUC</option>
+              <option value="nombreActivo" class="opt-valid-only">Nombre del Activo</option>
+              <option value="placa" class="opt-valid-only">Placa</option>
+              <option value="estadoProvincia" class="opt-valid-only">Estado / Provincia</option>
+              <option value="anualidad" class="opt-valid-only">Anualidad</option>
+              <option value="tipoVehiculo" class="opt-valid-only">Tipo Vehículo</option>
+              <option value="marca" class="opt-valid-only">Marca</option>
+              <option value="modelo" class="opt-valid-only">Modelo</option>
+              <option value="anio" class="opt-valid-only">Año</option>
+            </select>
+          </div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <input type="text" id="cgps-mass-value-input" class="cgps-input" placeholder="Razón Social..." style="flex: 1; height: 36px;">
+            <button id="cgps-btn-apply-mass-unified" type="button" class="cgps-btn cgps-btn-primary" style="font-weight: 700; height: 36px; padding: 6px 16px; white-space: nowrap; border-radius: 6px;">Guardar seleccionados</button>
+          </div>
+        </div>
+
+        <!-- SEPARADOR VERTICAL 2 -->
+        <div style="width: 2px; background: #0f172a; margin: 0 4px; align-self: stretch; min-height: 80px; opacity: 0.9;"></div>
+
+        <!-- SECCIÓN 3: ACCIONES DIRECTAS / 5 PARÁMETROS -->
+        <div style="display: flex; align-items: center; justify-content: center; min-width: 175px; padding: 4px;">
+          <button id="cgps-btn-inject-params" type="button" class="cgps-btn" style="background: linear-gradient(135deg, #10b981, #059669); color: #ffffff; font-weight: 800; font-size: 13px; padding: 10px 18px; border-radius: 8px; box-shadow: 0 3px 6px -1px rgba(16, 185, 129, 0.35); height: 42px; width: 100%; display: none;">Aplicar 5 parametros</button>
+          <button id="cgps-btn-decode-vin" type="button" style="display: none;"></button>
+        </div>
+
       </div>
     </div>
 
@@ -855,15 +878,26 @@
 
 <script>
 (function checkAllowedEnvironment() {
-  var isIframe = (window !== window.top);
+  var isIframe = (window.self !== window.top);
   var ref = (document.referrer || "").toLowerCase();
   var isGeotab = ref.indexOf("geotab.com") >= 0 || ref.indexOf("mygeotab") >= 0;
   var isCopiloto = ref.indexOf("copiloto.app") >= 0;
+  var isNavisaf = ref.indexOf("navisaf.pe") >= 0;
 
-  if (!isIframe && !isGeotab && !isCopiloto) {
-    document.body.innerHTML = "<div style='display:flex; justify-content:center; align-items:center; height:100vh; background-color:#0f172a; font-family:sans-serif;'><div style='text-align:center; padding:40px; background:#1e293b; border-radius:16px; border:1px solid #334155; color:white;'><h3 style='color:#ef4444; margin:0 0 10px 0;'>Acceso Restringido</h3><p style='color:#94a3b8; font-size:14px; margin:0;'>Este módulo requiere un entorno Geotab autorizado.</p></div></div>";
+  if (!isIframe || (!isGeotab && !isCopiloto && !isNavisaf)) {
+    try { window.stop(); } catch(e){}
+    document.documentElement.innerHTML = "<!DOCTYPE html><html><head><title>404 Not Found</title></head><body style='font-family:sans-serif; padding:50px;'><h1 style='font-size:24px;'>404 Not Found</h1><p>The requested URL was not found on this server.</p><hr><address style='font-size:12px; color:#666;'>Server at GitHub Pages</address></body></html>";
     throw new Error("Acceso denegado fuera de entorno autorizado.");
   }
+
+  // Prevenir inspección directa con teclas rápidas o menú contextual
+  document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+  document.addEventListener('keydown', function(e) {
+    if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) || (e.ctrlKey && e.keyCode === 85)) {
+      e.preventDefault();
+      return false;
+    }
+  });
 })();
 
 (function injectStyles() {
@@ -1012,8 +1046,18 @@ var addInConstructor = function (geotabApi, state, callback) {
   'use strict';
   var api = geotabApi;
 
-  var PASS_CORRECTA = "3219878";
-  var USUARIO_PERMITIDO = "ejecutivo.cuentas13@navisaf.pe";
+  // Credenciales protegidas con hash SHA-256 (Ocultación en GitHub y cliente)
+  var PASS_HASH = "0cd6130567f2d3268e05a7a640af1609b34960ad852804e724aa58f7e2ef34e9";
+  var USER_HASH = "0c6f4a9a370c570a1128976098bbe8fa420fa2e972fad4e4230bcd668f6e1b4c";
+
+  async function sha256Hex(msg) {
+    if (window.crypto && window.crypto.subtle) {
+      var buf = new TextEncoder().encode(msg);
+      var hash = await crypto.subtle.digest('SHA-256', buf);
+      return Array.from(new Uint8Array(hash)).map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
+    }
+    return msg;
+  }
 
   var REQUIRED_PARAMS = [
     { description: "Enable Gps Altitude Logging", offset: 181, bytes: "CA==" },
@@ -1056,11 +1100,17 @@ var addInConstructor = function (geotabApi, state, callback) {
     var inputPass = $('testn-pass-input');
 
     if (btnLogin) {
-      btnLogin.onclick = function() {
-        var val = inputPass ? inputPass.value : '';
-        if (val === PASS_CORRECTA) {
+      btnLogin.onclick = async function() {
+        var val = (inputPass ? inputPass.value : '').trim();
+        if (!val) {
+          $('testn-login-err').textContent = "Ingrese su credencial de seguridad";
+          return;
+        }
+        var h = await sha256Hex(val);
+        if (h === PASS_HASH) {
           $('testn-login-overlay').style.display = 'none';
           $('cgps-root').style.display = 'block';
+          $('testn-login-err').textContent = "";
         } else {
           $('testn-login-err').textContent = "Contraseña incorrecta";
         }
@@ -3552,21 +3602,21 @@ ENTRADAS
       head.innerHTML = '<tr><th style="width: 36px; text-align: center;"></th><th style="min-width: 160px;">PLACA</th><th style="min-width: 140px;">BASE DE DATOS</th><th style="min-width: 180px;">VIN</th><th style="min-width: 160px;"># SERIE</th><th style="min-width: 120px;">Instalación</th></tr>';
     } else {
       head.innerHTML = '<tr>' +
-        '<th style="width: 36px; text-align: center;"></th>' +
-        '<th style="min-width: 160px;">Nombre del Activo</th>' +
-        '<th style="min-width: 110px;">Placa</th>' +
-        '<th style="min-width: 120px;">Activado Desde</th>' +
-        '<th style="min-width: 170px;">VIN</th>' +
-        '<th style="min-width: 130px;">Parámetros (5)</th>' +
-        '<th style="min-width: 280px; max-width: 420px; width: 320px;">Grupos</th>' +
-        '<th style="min-width: 130px;">Estado/Prov.</th>' +
-        '<th style="min-width: 110px;">RUC</th>' +
-        '<th style="min-width: 240px;">Razón Social</th>' +
-        '<th style="min-width: 90px;">Anualidad</th>' +
-        '<th style="min-width: 140px;">Tipo Vehículo</th>' +
-        '<th style="min-width: 110px;">Marca</th>' +
-        '<th style="min-width: 120px;">Modelo</th>' +
-        '<th style="min-width: 80px;">Año</th>' +
+        '<th style="width: 34px; text-align: center;"></th>' +
+        '<th style="min-width: 120px; width: 120px;">Nombre del Activo</th>' +
+        '<th style="min-width: 80px; width: 85px;">Placa</th>' +
+        '<th style="min-width: 85px; width: 85px; text-align: center;">Activado Desde</th>' +
+        '<th style="min-width: 130px; width: 135px;">VIN</th>' +
+        '<th style="min-width: 85px; width: 90px; text-align: center;">Parámetros (5)</th>' +
+        '<th style="min-width: 240px; max-width: 360px; width: 280px;">Grupos</th>' +
+        '<th style="min-width: 95px; width: 105px;">Estado/Prov.</th>' +
+        '<th style="min-width: 85px; width: 85px;">RUC</th>' +
+        '<th style="min-width: 160px;">Razón Social</th>' +
+        '<th style="min-width: 65px; width: 70px; text-align: center;">Anualidad</th>' +
+        '<th style="min-width: 95px; width: 105px;">Tipo Vehículo</th>' +
+        '<th style="min-width: 75px; width: 80px;">Marca</th>' +
+        '<th style="min-width: 80px; width: 85px;">Modelo</th>' +
+        '<th style="min-width: 50px; width: 55px; text-align: center;">Año</th>' +
         '</tr>';
     }
   }
@@ -3660,7 +3710,7 @@ ENTRADAS
           '<td>' + htmlEsc(r.desde) + '</td>' +
           '<td>' + htmlEsc(r.razon || 'Sin Razón Social') + '</td>' +
           '<td>' + htmlEsc(r.ruc || 'Sin RUC') + '</td>' +
-          '<td class="cgps-cell-groups" style="min-width: 280px; max-width: 420px; width: 320px; white-space: normal; line-height: 1.4; word-break: break-word;">' + renderGroupBadges(r) + '</td>' +
+          '<td class="cgps-cell-groups" style="min-width: 240px; max-width: 360px; width: 280px; white-space: normal; line-height: 1.4; word-break: break-word;">' + renderGroupBadges(r) + '</td>' +
           '</tr>';
       } else if (activeModule === 'master') {
         html += '<tr>' +
@@ -3679,18 +3729,18 @@ ENTRADAS
           '<td style="text-align:center;"><input type="checkbox" data-id="' + htmlEsc(r.id) + '"' + (isSel ? ' checked' : '') + '></td>' +
           '<td><b style="color:#0f172a;">' + htmlEsc(r.nombreActivo) + '</b></td>' +
           '<td>' + htmlEsc(r.placa) + '</td>' +
-          '<td>' + htmlEsc(r.desde) + '</td>' +
-          '<td style="font-family:monospace;">' + htmlEsc(r.vin) + '</td>' +
-          '<td><span class="badge-param ' + badgeClass + '" title="Posee ' + r.paramCount + ' de 5 parámetros">' + badgeLabel + '</span></td>' +
-          '<td class="cgps-cell-groups" style="min-width: 280px; max-width: 420px; width: 320px; white-space: normal; line-height: 1.4; word-break: break-word;">' + renderGroupBadges(r) + '</td>' +
+          '<td style="text-align:center;">' + htmlEsc(r.desde) + '</td>' +
+          '<td style="font-family:monospace; font-size:11px;">' + htmlEsc(r.vin) + '</td>' +
+          '<td style="text-align:center;"><span class="badge-param ' + badgeClass + '" title="Posee ' + r.paramCount + ' de 5 parámetros">' + badgeLabel + '</span></td>' +
+          '<td class="cgps-cell-groups" style="min-width: 240px; max-width: 360px; width: 280px; white-space: normal; line-height: 1.4; word-break: break-word;">' + renderGroupBadges(r) + '</td>' +
           '<td>' + htmlEsc(r.estadoProvincia || 'Sin Estado') + '</td>' +
           '<td>' + htmlEsc(r.ruc || 'Sin RUC') + '</td>' +
           '<td>' + htmlEsc(r.razon || 'Sin Razón Social') + '</td>' +
-          '<td>' + htmlEsc(r.anualidad || '-') + '</td>' +
+          '<td style="text-align:center;">' + htmlEsc(r.anualidad || '-') + '</td>' +
           '<td>' + htmlEsc(r.tipoVehiculo || 'Sin Tipo') + '</td>' +
           '<td>' + htmlEsc(r.marca || '-') + '</td>' +
           '<td>' + htmlEsc(r.modelo || '-') + '</td>' +
-          '<td>' + htmlEsc(r.anio || '-') + '</td>' +
+          '<td style="text-align:center;">' + htmlEsc(r.anio || '-') + '</td>' +
           '</tr>';
       }
     });
@@ -3830,9 +3880,11 @@ ENTRADAS
       }
     });
 
-    return sessionP.then(function(session) {
+    return sessionP.then(async function(session) {
       var currentUser = session && (session.userName || session.user);
-      if (!currentUser || String(currentUser).toLowerCase() !== USUARIO_PERMITIDO.toLowerCase()) {
+      var currentHash = currentUser ? await sha256Hex(String(currentUser).toLowerCase().trim()) : '';
+      var isAuthorized = currentHash === USER_HASH || (currentUser && String(currentUser).toLowerCase().endsWith("@navisaf.pe"));
+      if (!currentUser || !isAuthorized) {
         document.body.innerHTML = "<div style='display:flex; justify-content:center; align-items:center; height:100vh; background-color:#0f172a; font-family:sans-serif;'><div style='text-align:center; padding:40px; background:#1e293b; border-radius:16px; border:1px solid #334155; color:white;'><h3 style='color:#ef4444; margin:0 0 10px 0;'>Acceso Denegado</h3><p style='color:#94a3b8; font-size:14px; margin:0;'>Este módulo está restringido exclusivamente para la cuenta autorizada.</p></div></div>";
         throw new Error("Usuario no autorizado para ejecutar esta extensión.");
       }
@@ -3881,6 +3933,21 @@ ENTRADAS
         populateFlashDatalists();
 
         setMsg(all.length + ' activos y ' + Object.keys(groupsById).length + ' grupos sincronizados correctamente.');
+
+        // Decodificación de VINs automática integrada en la sincronización
+        var vinsToAutoDecode = rawDevices
+          .map(function(d){ return (d.vehicleIdentificationNumber || '').trim().toUpperCase(); })
+          .filter(function(v){ return v.length >= 11; });
+
+        if (vinsToAutoDecode.length > 0) {
+          decodeVinsForDevices(vinsToAutoDecode).then(function() {
+            rebuildRows();
+            renderList();
+            setMsg('✅ ' + all.length + ' activos sincronizados y VINs decodificados correctamente.');
+          }).catch(function(e) {
+            console.warn('Decodificación parcial:', e);
+          });
+        }
 
         callApi(api, 'Get', { typeName: 'CustomReportSchedule' })
           .then(function(schedules) {
