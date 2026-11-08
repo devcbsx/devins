@@ -9,26 +9,23 @@
 
 <title>Control Z — Fleet & Tech Intelligence</title>
 
-<!-- Tipografía Google Fonts -->
+<!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./css/styles.css?v=3.0">
 
-<!-- Estilos CSS -->
-<link rel="stylesheet" href="./css/styles.css?v=2.0">
-
-<!-- Librería SheetJS -->
+<!-- SheetJS -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
 
-<!-- MODAL DE LOGIN PERMANENTE -->
+<!-- MODAL LOGIN -->
 <div id="testn-login-overlay" style="position: fixed; top:0; left:0; width:100vw; height:100vh; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); z-index: 99999; display: flex; justify-content: center; align-items: center;">
   <div style="background: #ffffff; padding: 40px 32px; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); width: 100%; max-width: 380px; text-align: center; border: 1px solid #e2e8f0;">
     <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #0ea5e9, #6366f1); border-radius: 12px; margin: 0 auto 16px auto; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 20px;">Z</div>
     <div style="font-size: 11px; font-weight: 800; color: #0284c7; letter-spacing: 1.5px; margin-bottom: 6px; text-transform: uppercase;">Control Z Engine</div>
     <h2 style="margin: 0 0 8px 0; font-size: 20px; color: #0f172a; font-weight: 700;">Acceso al Módulo</h2>
-    <p style="font-size: 13px; color: #64748b; margin-bottom: 24px;">Ingrese su credencial de seguridad para continuar:</p>
     <input type="password" id="testn-pass-input" placeholder="••••••••" style="width: 100%; padding: 12px; border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 14px; text-align: center; margin-bottom: 12px; outline: none;">
     <div id="testn-login-err" style="color: #ef4444; font-size: 12px; font-weight: 600; min-height: 20px; margin-bottom: 12px;"></div>
     <button id="testn-btn-login" type="button" class="cgps-btn cgps-btn-primary" style="width: 100%; padding: 12px; font-size: 14px; font-weight: 700;">Iniciar Sesión</button>
@@ -36,7 +33,8 @@
 </div>
 
 <div class="cgps-wrapper" id="cgps-root" style="display: none;">
-  <!-- HUB PRINCIPAL -->
+
+  <!-- HUB DASHBOARD -->
   <div id="testn-hub-view">
     <div class="cgps-hero" style="margin-bottom: 24px;">
       <div style="display: flex; align-items: center; gap: 14px;">
@@ -46,7 +44,7 @@
           <p style="margin: 2px 0 0 0; font-size: 12px; color: #94a3b8;">Plataforma de gestión de parámetros, certificados y activaciones GPS</p>
         </div>
       </div>
-      <button id="testn-btn-refresh-hub" type="button" class="cgps-btn cgps-btn-white" style="font-weight:700;">🔄 Sincronizar Geotab</button>
+      <button type="button" onclick="loadData()" class="cgps-btn cgps-btn-white" style="font-weight:700;">🔄 Sincronizar Geotab</button>
     </div>
 
     <div class="testn-grid">
@@ -61,7 +59,7 @@
     </div>
   </div>
 
-  <!-- VISTA DE MÓDULOS -->
+  <!-- VISTA DE MÓDULOS UNIFICADA -->
   <div id="testn-module-view" style="display: none;">
     <div class="cgps-hero" style="margin-bottom: 16px;">
       <div style="display: flex; align-items: center; gap: 14px;">
@@ -70,22 +68,92 @@
       </div>
     </div>
 
-    <!-- CONTENEDOR DE TABLA ADAPTABLE -->
+    <!-- TARJETAS DE KPI SUPERIORES -->
+    <div id="sec-kpi-container" class="cgps-kpi-grid" style="margin-bottom: 12px;">
+      <div class="cgps-card kpi-btn-card"><div class="cgps-kpi-title">CON SERIAL + VIN</div><div class="cgps-kpi-value" style="color: #0284c7;">ALL</div></div>
+      <div class="cgps-card kpi-btn-card"><div class="cgps-kpi-title">PARÁMETROS 5/5</div><div class="cgps-kpi-value" style="color: #10b981;">OK</div></div>
+      <div class="cgps-card kpi-btn-card"><div class="cgps-kpi-title">REMOLCADORES</div><div class="cgps-kpi-value" style="color: #8b5cf6;">ACT</div></div>
+      <div class="cgps-card kpi-btn-card"><div class="cgps-kpi-title">VOLQUETES</div><div class="cgps-kpi-value" style="color: #06b6d4;">ACT</div></div>
+    </div>
+
+    <!-- BARRA DE CONTROLES Y FILTROS -->
+    <div id="sec-controls-container" class="cgps-card" style="margin-bottom: 12px;">
+      <div class="cgps-controls-row">
+        <select id="cgps-filter-field" class="cgps-input" style="width: 160px; font-weight: 600; color: #0284c7;">
+          <option value="all">[ Todos los campos ]</option>
+          <option value="nombreActivo">Nombre del Activo</option>
+          <option value="placa">Placa</option>
+          <option value="vin">VIN</option>
+        </select>
+        <input type="text" id="cgps-filter" class="cgps-input" placeholder="🔍 Buscar activo..." style="width: 220px;">
+        <button type="button" class="cgps-btn cgps-btn-primary" onclick="exportMasterExcel()">📊 Exportar Excel</button>
+        <button type="button" class="cgps-btn cgps-btn-secondary" onclick="generateLegalText()">📜 Generar Texto Legal</button>
+        <button type="button" class="cgps-btn cgps-btn-white" onclick="downloadWordDoc()">📄 Word (ANEXO N°01)</button>
+      </div>
+    </div>
+
+    <!-- SUB-SECCIONES ESPECÍFICAS DE MÓDULOS -->
+    <div id="sec-master" style="display: none;" class="cgps-card" style="margin-bottom: 12px;">
+      <div style="font-size: 11px; font-weight: 800; color: #0284c7; margin-bottom: 6px;">MASTER SWITCH - RANGO DE FECHAS</div>
+      <div style="display: flex; gap: 8px;">
+        <input type="date" id="master-date-from" class="cgps-input">
+        <input type="date" id="master-date-to" class="cgps-input">
+      </div>
+    </div>
+
+    <div id="sec-audit" style="display: none;" class="cgps-card">
+      <h3>Auditoría de Grupos</h3>
+      <input type="text" id="audit-new-client-name" class="cgps-input" placeholder="Razón Social">
+      <input type="text" id="audit-new-client-vehicle-type" class="cgps-input" placeholder="Tipo de Vehículo">
+      <button type="button" onclick="createNewClientGroup()" class="cgps-btn cgps-btn-primary" style="margin-top: 8px;">Crear Grupo</button>
+    </div>
+
+    <div id="sec-reports" style="display: none;" class="cgps-card">
+      <h3>Clonar / Crear Reportes</h3>
+      <input type="text" id="create-rep-name" class="cgps-input" placeholder="Nombre del Reporte">
+      <button type="button" onclick="createAndSubmitReport()" class="cgps-btn cgps-btn-primary" style="margin-top: 8px;">Crear Reporte</button>
+    </div>
+
+    <div id="sec-activations" style="display: none;" class="cgps-card">
+      <h3>Activaciones de Unidades</h3>
+      <textarea id="act-input-text" class="cgps-textarea" rows="4" placeholder="Pegue la solicitud de activación..."></textarea>
+      <button type="button" onclick="processActivationsText()" class="cgps-btn cgps-btn-primary" style="margin-top: 8px;">Procesar Respuesta</button>
+      <textarea id="act-output-text" class="cgps-textarea" rows="4" style="margin-top: 8px;" readonly></textarea>
+    </div>
+
+    <div id="sec-flash" style="display: none;" class="cgps-card">
+      <h3>Flash Report Prompt (MCP)</h3>
+      <input type="text" id="flash-input-placa" class="cgps-input" placeholder="Placa">
+      <input type="text" id="flash-input-vin" class="cgps-input" placeholder="VIN">
+      <textarea id="flash-input-relato" class="cgps-textarea" rows="3" placeholder="Relato del evento..."></textarea>
+      <button type="button" onclick="generateFlashReportPrompt()" class="cgps-btn cgps-btn-primary" style="margin-top: 8px;">Generar Prompt</button>
+      <textarea id="flash-output-prompt" class="cgps-textarea" rows="4" style="margin-top: 8px;" readonly></textarea>
+    </div>
+
+    <div id="sec-create-user" style="display: none;" class="cgps-card">
+      <h3>Creación de Usuario</h3>
+      <input type="text" id="usr-input-email" class="cgps-input" placeholder="Correo electrónico">
+      <select id="usr-select-group" class="cgps-input" style="margin-top: 6px;"><option value="GroupSecurityClientAdminId">Administrador Cliente</option></select>
+      <button type="button" onclick="createNewUserAutomated()" class="cgps-btn cgps-btn-primary" style="margin-top: 8px;">Crear Usuario</button>
+    </div>
+
+    <!-- CONTENEDOR DE TABLA DE DATOS -->
     <div id="sec-table-container" class="cgps-table-container">
       <div class="cgps-table-scroll">
         <table class="cgps-table">
           <thead id="cgps-table-head"></thead>
           <tbody id="cgps-listbody">
-            <tr><td colspan="15" style="text-align:center; padding: 24px; color: #64748b;">Cargando información...</td></tr>
+            <tr><td colspan="15" style="text-align:center; padding: 24px; color: #64748b;">Cargando activos...</td></tr>
           </tbody>
         </table>
       </div>
     </div>
     <div id="cgps-msg" class="cgps-msg" style="margin-top: 12px;"></div>
   </div>
+
 </div>
 
-<!-- SCRIPTS DE MÓDULOS -->
+<!-- SCRIPTS DE LOS MÓDULOS -->
 <script src="./js/core.js"></script>
 <script src="./js/mod-certi.js"></script>
 <script src="./js/mod-valid.js"></script>
