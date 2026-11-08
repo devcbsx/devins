@@ -14,8 +14,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 
-<!-- Estilos Inyectados Extrados -->
-<link rel="stylesheet" href="./css/styles.css">
+<!-- Estilos CSS -->
+<link rel="stylesheet" href="./css/styles.css?v=2.0">
 
 <!-- Librería SheetJS -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -24,45 +24,68 @@
 
 <!-- MODAL DE LOGIN PERMANENTE -->
 <div id="testn-login-overlay" style="position: fixed; top:0; left:0; width:100vw; height:100vh; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); z-index: 99999; display: flex; justify-content: center; align-items: center;">
-  <div style="background: #ffffff; padding: 40px 32px; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1); width: 100%; max-width: 380px; text-align: center; border: 1px solid #e2e8f0;">
+  <div style="background: #ffffff; padding: 40px 32px; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); width: 100%; max-width: 380px; text-align: center; border: 1px solid #e2e8f0;">
     <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #0ea5e9, #6366f1); border-radius: 12px; margin: 0 auto 16px auto; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 20px;">Z</div>
     <div style="font-size: 11px; font-weight: 800; color: #0284c7; letter-spacing: 1.5px; margin-bottom: 6px; text-transform: uppercase;">Control Z Engine</div>
-    <h2 style="margin: 0 0 8px 0; font-size: 20px; color: #0f172a; font-weight: 700; letter-spacing: -0.5px;">Acceso al Módulo</h2>
+    <h2 style="margin: 0 0 8px 0; font-size: 20px; color: #0f172a; font-weight: 700;">Acceso al Módulo</h2>
     <p style="font-size: 13px; color: #64748b; margin-bottom: 24px;">Ingrese su credencial de seguridad para continuar:</p>
-    <input type="password" id="testn-pass-input" placeholder="••••••••" style="width: 100%; padding: 12px 16px; border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 14px; text-align: center; margin-bottom: 12px; outline: none; transition: border 0.2s, box-shadow 0.2s;">
+    <input type="password" id="testn-pass-input" placeholder="••••••••" style="width: 100%; padding: 12px; border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 14px; text-align: center; margin-bottom: 12px; outline: none;">
     <div id="testn-login-err" style="color: #ef4444; font-size: 12px; font-weight: 600; min-height: 20px; margin-bottom: 12px;"></div>
-    <button id="testn-btn-login" type="button" class="cgps-btn cgps-btn-primary" style="width: 100%; padding: 12px; font-size: 14px; font-weight: 700; border-radius: 8px;">Iniciar Sesión</button>
+    <button id="testn-btn-login" type="button" class="cgps-btn cgps-btn-primary" style="width: 100%; padding: 12px; font-size: 14px; font-weight: 700;">Iniciar Sesión</button>
   </div>
 </div>
 
 <div class="cgps-wrapper" id="cgps-root" style="display: none;">
-  <!-- VISTA DASHBOARD -->
+  <!-- HUB PRINCIPAL -->
   <div id="testn-hub-view">
     <div class="cgps-hero" style="margin-bottom: 24px;">
       <div style="display: flex; align-items: center; gap: 14px;">
         <div style="width: 40px; height: 40px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 18px; color: #38bdf8;">Z</div>
         <div>
-          <h1 style="margin: 0; font-size: 20px; font-weight: 700; letter-spacing: -0.5px;">CONTROL Z — TECH FLEET HUB</h1>
-          <p style="margin: 2px 0 0 0; font-size: 12px; color: #94a3b8; font-weight: 500;">Plataforma de gestión de parámetros, certificados y activaciones GPS</p>
+          <h1 style="margin: 0; font-size: 20px; font-weight: 700;">CONTROL Z — TECH FLEET HUB</h1>
+          <p style="margin: 2px 0 0 0; font-size: 12px; color: #94a3b8;">Plataforma de gestión de parámetros, certificados y activaciones GPS</p>
         </div>
       </div>
       <button id="testn-btn-refresh-hub" type="button" class="cgps-btn cgps-btn-white" style="font-weight:700;">🔄 Sincronizar Geotab</button>
     </div>
 
     <div class="testn-grid">
-      <div class="testn-card" id="btn-mod-certi"><div class="testn-card-icon">📜</div><h2>CERTI GPS</h2><p>Generación automatizada de cartas y solicitudes legales</p></div>
-      <div class="testn-card" id="btn-mod-valid"><div class="testn-card-icon">⚡</div><h2>VALIDACIÓN DE VARIABLES</h2><p>Auditoría, inyección de 5 parámetros y decodificación VIN</p></div>
-      <div class="testn-card" id="btn-mod-master"><div class="testn-card-icon">🎛️</div><h2>MASTER SWITCH</h2><p>Control de fechas de instalación y exportación a Excel</p></div>
-      <div class="testn-card" id="btn-mod-audit"><div class="testn-card-icon">🔍</div><h2>AUDITORÍA DE GRUPOS</h2><p>Validación de árbol de grupos vs razones sociales</p></div>
-      <div class="testn-card" id="btn-mod-reports"><div class="testn-card-icon">📊</div><h2>REPORTES POR CLIENTE</h2><p>Gestión y clonación masiva de programaciones</p></div>
-      <div class="testn-card" id="btn-mod-activations"><div class="testn-card-icon">🚀</div><h2>ACTIVACIONES DE UNIDADES</h2><p>Procesamiento inteligente de formato de respuesta</p></div>
-      <div class="testn-card" id="btn-mod-flash" style="border-color: #38bdf8 !important;"><div class="testn-card-icon">💥</div><h2>FLASH REPORT (MCP)</h2><p>Generador de Prompts para Investigación de Siniestros e IA MCP</p></div>
-      <div class="testn-card" id="btn-mod-create-user" style="border-color: #10b981 !important;"><div class="testn-card-icon">👤</div><h2>NUEVO USUARIO</h2><p>Creación automática de usuario con perfil Administrador Cliente - ADDINS</p></div>
+      <div class="testn-card" onclick="switchView('certi')"><div class="testn-card-icon">📜</div><h2>CERTI GPS</h2><p>Generación automatizada de cartas y solicitudes legales</p></div>
+      <div class="testn-card" onclick="switchView('valid')"><div class="testn-card-icon">⚡</div><h2>VALIDACIÓN DE VARIABLES</h2><p>Auditoría, inyección de 5 parámetros y decodificación VIN</p></div>
+      <div class="testn-card" onclick="switchView('master')"><div class="testn-card-icon">🎛️</div><h2>MASTER SWITCH</h2><p>Control de fechas de instalación y exportación a Excel</p></div>
+      <div class="testn-card" onclick="switchView('audit')"><div class="testn-card-icon">🔍</div><h2>AUDITORÍA DE GRUPOS</h2><p>Validación de árbol de grupos vs razones sociales</p></div>
+      <div class="testn-card" onclick="switchView('reports')"><div class="testn-card-icon">📊</div><h2>REPORTES POR CLIENTE</h2><p>Gestión y clonación masiva de programaciones</p></div>
+      <div class="testn-card" onclick="switchView('activations')"><div class="testn-card-icon">🚀</div><h2>ACTIVACIONES DE UNIDADES</h2><p>Procesamiento inteligente de formato de respuesta</p></div>
+      <div class="testn-card" onclick="switchView('flash')" style="border-color: #38bdf8 !important;"><div class="testn-card-icon">💥</div><h2>FLASH REPORT (MCP)</h2><p>Generador de Prompts para Investigación de Siniestros e IA MCP</p></div>
+      <div class="testn-card" onclick="switchView('create-user')" style="border-color: #10b981 !important;"><div class="testn-card-icon">👤</div><h2>NUEVO USUARIO</h2><p>Creación automática de usuario con perfil Administrador Cliente - ADDINS</p></div>
     </div>
+  </div>
+
+  <!-- VISTA DE MÓDULOS -->
+  <div id="testn-module-view" style="display: none;">
+    <div class="cgps-hero" style="margin-bottom: 16px;">
+      <div style="display: flex; align-items: center; gap: 14px;">
+        <button type="button" class="cgps-btn cgps-btn-secondary" onclick="switchView('hub')">← Volver al Hub</button>
+        <h1 id="testn-mod-title" style="font-size: 18px; margin: 0; text-transform: uppercase;">MÓDULO</h1>
+      </div>
+    </div>
+
+    <!-- CONTENEDOR DE TABLA ADAPTABLE -->
+    <div id="sec-table-container" class="cgps-table-container">
+      <div class="cgps-table-scroll">
+        <table class="cgps-table">
+          <thead id="cgps-table-head"></thead>
+          <tbody id="cgps-listbody">
+            <tr><td colspan="15" style="text-align:center; padding: 24px; color: #64748b;">Cargando información...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div id="cgps-msg" class="cgps-msg" style="margin-top: 12px;"></div>
   </div>
 </div>
 
-<!-- CARGA DE MÓDULOS DE JAVASCRIPT -->
+<!-- SCRIPTS DE MÓDULOS -->
 <script src="./js/core.js"></script>
 <script src="./js/mod-certi.js"></script>
 <script src="./js/mod-valid.js"></script>
@@ -72,6 +95,5 @@
 <script src="./js/mod-activations.js"></script>
 <script src="./js/mod-flash.js"></script>
 <script src="./js/mod-users.js"></script>
-
 </body>
 </html>
