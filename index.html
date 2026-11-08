@@ -892,22 +892,32 @@
     throw new Error("Acceso denegado: este Add-In solo puede ejecutarse dentro de MyGeotab.");
   }
 
-  // 2. Validación de dominios ancestros (Chrome/Edge/MyGeotab)
+  // 2. Validación estricta del dominio ancestro: SOLO https://user.copiloto.app
+  var isAllowedOrigin = false;
   try {
     var origins = window.location.ancestorOrigins;
+    var candidateOrigin = "";
+
     if (origins && origins.length > 0) {
-      var topOrigin = String(origins[0]).toLowerCase();
-      var isAllowedOrigin = topOrigin.indexOf("geotab") >= 0 || 
-                            topOrigin.indexOf("copiloto") >= 0 || 
-                            topOrigin.indexOf("navisaf") >= 0 ||
-                            topOrigin.indexOf("divemotor") >= 0 ||
-                            topOrigin.indexOf("localhost") >= 0;
-      if (!isAllowedOrigin) {
-        document.documentElement.innerHTML = "<!DOCTYPE html><html><head><title>404 Not Found</title></head><body style='font-family:sans-serif; padding:50px;'><h1 style='font-size:24px;'>404 Not Found</h1><p>The requested URL was not found on this server.</p><hr><address style='font-size:12px; color:#666;'>Server at GitHub Pages</address></body></html>";
-        throw new Error("Acceso denegado: origen no autorizado.");
-      }
+      // El primer elemento corresponde al ancestro superior (dominio donde se abre el Add-In)
+      candidateOrigin = String(origins[0] || "");
+    } else if (document.referrer) {
+      // Respaldo para navegadores que no exponen ancestorOrigins
+      candidateOrigin = String(document.referrer);
     }
-  } catch(e) {}
+
+    var parsedOrigin = new URL(candidateOrigin);
+    isAllowedOrigin = parsedOrigin.protocol === "https:" &&
+                      parsedOrigin.hostname.toLowerCase() === "user.copiloto.app";
+  } catch (e) {
+    isAllowedOrigin = false;
+  }
+
+  if (!isAllowedOrigin) {
+    try { window.stop(); } catch(e){}
+    document.documentElement.innerHTML = "<!DOCTYPE html><html><head><title>404 Not Found</title></head><body style='font-family:sans-serif; padding:50px;'><h1 style='font-size:24px;'>404 Not Found</h1><p>The requested URL was not found on this server.</p><hr><address style='font-size:12px; color:#666;'>Server at GitHub Pages</address></body></html>";
+    throw new Error("Acceso denegado: origen no autorizado.");
+  }
 
   // 3. Prevenir inspección directa con teclas rápidas o menú contextual
   document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
@@ -1065,9 +1075,9 @@ var addInConstructor = function (geotabApi, state, callback) {
   'use strict';
   var api = geotabApi;
 
-  // Credenciales protegidas con hash SHA-256 (Ocultación en GitHub y cliente)
+  // Credencial de acceso protegida con hash SHA-256 (Ocultación en GitHub y cliente)
+  // Usuario autorizado de forma exclusiva: ejecutivo.cuentas13@navisaf.pe
   var PASS_HASH = "0cd6130567f2d3268e05a7a640af1609b34960ad852804e724aa58f7e2ef34e9";
-  var USER_HASH = "0c6f4a9a370c570a1128976098bbe8fa420fa2e972fad4e4230bcd668f6e1b4c";
 
   async function sha256Hex(msg) {
     if (window.crypto && window.crypto.subtle) {
@@ -3902,10 +3912,7 @@ ENTRADAS
     return sessionP.then(async function(session) {
       var currentUser = session && (session.userName || session.user);
       var cleanUser = String(currentUser || '').toLowerCase().trim();
-      var currentHash = cleanUser ? await sha256Hex(cleanUser) : '';
-      var isAuthorized = cleanUser === "ejecutivo.cuentas13@navisaf.pe" || 
-                         currentHash === USER_HASH || 
-                         cleanUser.endsWith("@navisaf.pe");
+      var isAuthorized = cleanUser === "ejecutivo.cuentas13@navisaf.pe";
 
       if (!currentUser || !isAuthorized) {
         document.body.innerHTML = "<div style='display:flex; justify-content:center; align-items:center; height:100vh; background-color:#0f172a; font-family:sans-serif;'><div style='text-align:center; padding:40px; background:#1e293b; border-radius:16px; border:1px solid #334155; color:white;'><h3 style='color:#ef4444; margin:0 0 10px 0;'>Acceso Denegado</h3><p style='color:#94a3b8; font-size:14px; margin:0;'>Este módulo está restringido exclusivamente para la cuenta autorizada (" + htmlEsc(currentUser || "sesión no detectada") + ").</p></div></div>";
