@@ -77,13 +77,11 @@ html, body {
 .cgps-kpi-value { font-size: 20px; font-weight: 800; color: #0f172a; line-height: 1; letter-spacing: -0.5px; }
 
 .certi-two-cols-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; }
-
 .cgps-controls-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; width: 100%; }
 .cgps-input, .cgps-textarea { padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12px; outline: none; background-color: #ffffff; transition: border 0.2s, box-shadow 0.2s; font-family: inherit; }
 .cgps-input:focus, .cgps-textarea:focus { border-color: #0284c7 !important; box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15) !important; }
 .cgps-input:disabled { background-color: #f1f5f9 !important; cursor: not-allowed !important; color: #94a3b8 !important; }
 
-/* TABLA Y SCROLL HORIZONTAL COMPLETO */
 .cgps-table-container { background-color: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; width: 100%; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
 .cgps-table-scroll { max-height: 520px; overflow-y: auto; overflow-x: auto; width: 100%; -webkit-overflow-scrolling: touch; }
 
