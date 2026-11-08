@@ -53,11 +53,3 @@ function renderListValid() {
 
   tbody.innerHTML = html || '<tr><td colspan="15" style="text-align:center; padding: 24px;">Sin resultados.</td></tr>';
 }
-
-async function triggerVinDecodeProcess() {
-  var vinsToDecode = ControlZ.all.map(r => r.vin).filter(Boolean);
-  if (vinsToDecode.length === 0) { setMsg("No hay VINs válidos.", true); return; }
-  setMsg("Decodificando VINs con DecodeVins...");
-  renderListValid();
-  setMsg("✅ VINs decodificados con éxito.");
-}
