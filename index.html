@@ -8,7 +8,7 @@
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
 
-<title>Control Hun Fleet Manager</title>
+<title>Control Hub Fleet Manager</title>
 
 <!-- Tipografía Profesional Google Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -24,7 +24,7 @@
 <div id="testn-login-overlay" style="position: fixed; top:0; left:0; width:100vw; height:100vh; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); z-index: 99999; display: flex; justify-content: center; align-items: center;">
   <div style="background: #ffffff; padding: 40px 32px; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1); width: 100%; max-width: 380px; text-align: center; border: 1px solid #e2e8f0;">
     <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #0ea5e9, #6366f1); border-radius: 12px; margin: 0 auto 16px auto; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 20px;">H</div>
-    <div style="font-size: 11px; font-weight: 800; color: #0284c7; letter-spacing: 1.5px; margin-bottom: 6px; text-transform: uppercase;">Control Hun Fleet Manager</div>
+    <div style="font-size: 11px; font-weight: 800; color: #0284c7; letter-spacing: 1.5px; margin-bottom: 6px; text-transform: uppercase;">Control Hub Fleet Manager</div>
     <h2 style="margin: 0 0 8px 0; font-size: 20px; color: #0f172a; font-weight: 700; letter-spacing: -0.5px;">Acceso al Módulo</h2>
     <p style="font-size: 13px; color: #64748b; margin-bottom: 24px;">Ingrese su credencial de seguridad para continuar:</p>
     <input type="password" id="testn-pass-input" placeholder="••••••••" style="width: 100%; padding: 12px 16px; border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 14px; text-align: center; margin-bottom: 12px; outline: none; transition: border 0.2s, box-shadow 0.2s;">
@@ -264,7 +264,7 @@
       <div style="display: flex; align-items: center; gap: 14px;">
         <div style="width: 40px; height: 40px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 18px; color: #38bdf8;">H</div>
         <div>
-          <h1 style="margin: 0; font-size: 20px; font-weight: 700; letter-spacing: -0.5px;">CONTROL HUN FLEET MANAGER</h1>
+          <h1 style="margin: 0; font-size: 20px; font-weight: 700; letter-spacing: -0.5px;">CONTROL HUB FLEET MANAGER</h1>
           <p style="margin: 2px 0 0 0; font-size: 12px; color: #94a3b8; font-weight: 500;">Plataforma de gestión de parámetros, certificados y activaciones GPS</p>
         </div>
       </div>
@@ -977,6 +977,7 @@
     #sec-table-container .cgps-table { width: max-content; min-width: 100%; }
     #sec-table-container .cgps-table th,
     #sec-table-container .cgps-table td { overflow: visible; text-overflow: clip; white-space: nowrap; }
+    #sec-table-container .cgps-table td.cgps-cell-groups { white-space: normal !important; }
     .cgps-msg { min-height: 20px; font-size: 12px; font-weight: 600; color: #10b981; }
     .cgps-msg.cgps-err { color: #ef4444; }
 
@@ -1610,6 +1611,26 @@ var addInConstructor = function (geotabApi, state, callback) {
     $('cgps-mass-value-input').placeholder = labelText + '...';
   }
 
+  function requestTriggerVinDecodeProcess() {
+    var selectedIds = Object.keys(selected).filter(function (k) { return selected[k]; });
+    var targetRows = selectedIds.length > 0 
+      ? all.filter(function(r){ return selectedIds.includes(r.id); })
+      : getActiveRowsForModule().filter(function(r) { return isRowMatchingFilters(r); });
+
+    var vinsToDecode = targetRows.map(function(r){ return r.vin; }).filter(Boolean);
+
+    if (vinsToDecode.length === 0) {
+      setMsg("No se encontraron VINs válidos en la selección o vista actual.", true);
+      return;
+    }
+
+    showConfirmSaveModal(
+      "Confirmar Decodificación de VINs",
+      "Se consultará la API DecodeVins de Geotab para actualizar Marca, Modelo y Año de " + vinsToDecode.length + " vehículo(s). ¿Desea proceder?",
+      function() { triggerVinDecodeProcess(); }
+    );
+  }
+
   async function triggerVinDecodeProcess() {
     var selectedIds = Object.keys(selected).filter(function (k) { return selected[k]; });
     var targetRows = selectedIds.length > 0 
@@ -1796,7 +1817,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     }
     if (target && (target.id === 'cgps-btn-decode-vin' || target.closest('#cgps-btn-decode-vin'))) {
       e.preventDefault();
-      triggerVinDecodeProcess();
+      requestTriggerVinDecodeProcess();
     }
   });
 
@@ -2033,6 +2054,33 @@ ENTRADAS
         sel.appendChild(opt);
       }
     });
+  }
+
+  function requestCreateNewUserAutomated() {
+    var email = ($('usr-input-email').value || '').trim();
+    var selectedGroupId = $('usr-select-group').value;
+    var statusDiv = $('usr-status-msg');
+
+    if (!email) {
+      statusDiv.style.color = "#ef4444";
+      statusDiv.textContent = "Debe ingresar el nombre de usuario (correo electrónico).";
+      return;
+    }
+
+    if (!selectedGroupId) {
+      statusDiv.style.color = "#ef4444";
+      statusDiv.textContent = "Debe seleccionar un grupo para asignar al usuario.";
+      return;
+    }
+
+    var groupObj = groupsById[selectedGroupId];
+    var groupName = groupObj ? groupObj.name : selectedGroupId;
+
+    showConfirmSaveModal(
+      "Confirmar Creación de Usuario",
+      "Se creará el usuario '" + email + "' en Geotab con perfil Administrador Cliente asignado al grupo '" + groupName + "'. ¿Desea proceder?",
+      function() { createNewUserAutomated(); }
+    );
   }
 
   async function createNewUserAutomated() {
@@ -2564,6 +2612,30 @@ ENTRADAS
     $('create-report-modal').style.display = 'flex';
   }
 
+  function requestCreateAndSubmitReport() {
+    var sourceSchedId = $('create-rep-source-schedule').value;
+    var repName = $('create-rep-name').value.trim();
+    var statusDiv = $('create-rep-status');
+
+    if (!sourceSchedId) {
+      statusDiv.style.color = "#ef4444";
+      statusDiv.textContent = "Seleccione un reporte origen para clonar.";
+      return;
+    }
+
+    if (!repName) {
+      statusDiv.style.color = "#ef4444";
+      statusDiv.textContent = "Ingrese un nombre para el reporte.";
+      return;
+    }
+
+    showConfirmSaveModal(
+      "Confirmar Clonación de Reporte",
+      "Se creará la nueva programación '" + repName + "' en MyGeotab. ¿Desea proceder?",
+      function() { createAndSubmitReport(); }
+    );
+  }
+
   async function createAndSubmitReport() {
     var sourceSchedId = $('create-rep-source-schedule').value;
     var repName = $('create-rep-name').value.trim();
@@ -2937,6 +3009,26 @@ ENTRADAS
     setMsg("➕ Elemento '" + selectedVal + "' añadido al recuadro de texto.");
   }
 
+  function requestSaveDiagnosticsToReport() {
+    var repId = $('edit-diag-select-report').value;
+    var statusDiv = $('edit-diag-status');
+
+    if (!repId) {
+      statusDiv.style.color = "#ef4444";
+      statusDiv.textContent = "Debe seleccionar un reporte a modificar en el Paso 1 antes de guardar.";
+      return;
+    }
+
+    var reportObj = rawSchedules.find(function(s){ return s.id === repId; });
+    var repName = reportObj ? (reportObj._resolvedName || reportObj.name || repId) : repId;
+
+    showConfirmSaveModal(
+      "Confirmar Modificación de Reporte",
+      "Se guardarán los diagnósticos y grupos asignados para el reporte '" + repName + "'. ¿Desea proceder?",
+      function() { saveDiagnosticsToReport(); }
+    );
+  }
+
   async function saveDiagnosticsToReport() {
     var repId = $('edit-diag-select-report').value;
     var statusDiv = $('edit-diag-status');
@@ -3033,6 +3125,25 @@ ENTRADAS
     });
   }
 
+  function requestCreateNewClientGroup() {
+    var clientName = $('audit-new-client-name').value.trim();
+    var vehicleType = $('audit-new-client-vehicle-type').value.trim();
+    var statusDiv = $('audit-create-status');
+
+    if (!clientName || !vehicleType) {
+      statusDiv.style.color = "#ef4444";
+      statusDiv.textContent = "⚠️ Para crear un cliente nuevo debe completar tanto la 'Razón Social' como el 'Tipo de Vehículo'.";
+      return;
+    }
+
+    var divemotorGroupName = vehicleType + "_" + clientName;
+    showConfirmSaveModal(
+      "Confirmar Creación de Cliente",
+      "Se creará el cliente '" + clientName + "' en CLIENTES (b278A) y '" + divemotorGroupName + "' en DIVEMOTOR (b27A8). ¿Desea proceder?",
+      function() { createNewClientGroup(); }
+    );
+  }
+
   async function createNewClientGroup() {
     var clientName = $('audit-new-client-name').value.trim();
     var vehicleType = $('audit-new-client-vehicle-type').value.trim();
@@ -3071,6 +3182,33 @@ ENTRADAS
       statusDiv.style.color = "#ef4444";
       statusDiv.textContent = "Error al crear cliente: " + (err.message || JSON.stringify(err));
     }
+  }
+
+  function requestCreateGeneralGroup() {
+    var parentId = $('audit-gen-parent-select').value;
+    var name = $('audit-gen-group-name').value.trim();
+    var statusDiv = $('audit-create-status');
+
+    if (!parentId) {
+      statusDiv.style.color = "#ef4444";
+      statusDiv.textContent = "Por favor seleccione el grupo padre de la lista.";
+      return;
+    }
+
+    if (!name) {
+      statusDiv.style.color = "#ef4444";
+      statusDiv.textContent = "Por favor ingrese el nombre para el nuevo grupo.";
+      return;
+    }
+
+    var parentGroupObj = groupsById[parentId];
+    var parentName = parentGroupObj ? parentGroupObj.name : parentId;
+
+    showConfirmSaveModal(
+      "Confirmar Creación de Grupo General",
+      "Se creará el grupo '" + name + "' bajo el grupo padre '" + parentName + "'. ¿Desea proceder?",
+      function() { createGeneralGroup(); }
+    );
   }
 
   async function createGeneralGroup() {
@@ -3409,7 +3547,7 @@ ENTRADAS
     var head = $('cgps-table-head');
     if (!head) return;
     if (activeModule === 'certi') {
-      head.innerHTML = '<tr><th style="width: 36px; text-align: center;"></th><th style="min-width: 120px;">Placa</th><th style="min-width: 160px;">VIN</th><th style="min-width: 110px;">Activo Desde</th><th style="min-width: 220px;">Razón Social</th><th style="min-width: 120px;">RUC</th><th style="min-width: 200px;">Grupos</th></tr>';
+      head.innerHTML = '<tr><th style="width: 36px; text-align: center;"></th><th style="min-width: 120px;">Placa</th><th style="min-width: 160px;">VIN</th><th style="min-width: 110px;">Activo Desde</th><th style="min-width: 220px;">Razón Social</th><th style="min-width: 120px;">RUC</th><th style="min-width: 280px; max-width: 420px; width: 320px;">Grupos</th></tr>';
     } else if (activeModule === 'master') {
       head.innerHTML = '<tr><th style="width: 36px; text-align: center;"></th><th style="min-width: 160px;">PLACA</th><th style="min-width: 140px;">BASE DE DATOS</th><th style="min-width: 180px;">VIN</th><th style="min-width: 160px;"># SERIE</th><th style="min-width: 120px;">Instalación</th></tr>';
     } else {
@@ -3420,7 +3558,7 @@ ENTRADAS
         '<th style="min-width: 120px;">Activado Desde</th>' +
         '<th style="min-width: 170px;">VIN</th>' +
         '<th style="min-width: 130px;">Parámetros (5)</th>' +
-        '<th style="min-width: 220px;">Grupos</th>' +
+        '<th style="min-width: 280px; max-width: 420px; width: 320px;">Grupos</th>' +
         '<th style="min-width: 130px;">Estado/Prov.</th>' +
         '<th style="min-width: 110px;">RUC</th>' +
         '<th style="min-width: 240px;">Razón Social</th>' +
@@ -3493,6 +3631,19 @@ ENTRADAS
     return true;
   }
 
+  function renderGroupBadges(r) {
+    if (!r.grupos || !r.grupos.trim()) {
+      return '<span style="color:#94a3b8; font-style:italic;">Sin Grupo</span>';
+    }
+    var groupNames = r.grupos.split(',').map(function(s) { return s.trim(); }).filter(Boolean);
+    if (groupNames.length === 0) {
+      return '<span style="color:#94a3b8; font-style:italic;">Sin Grupo</span>';
+    }
+    return groupNames.map(function(gn) {
+      return '<span style="display:inline-block; background:#f0f9ff; color:#0369a1; padding:2px 7px; border-radius:4px; font-size:11px; margin:2px 4px 2px 0; border:1px solid #bae6fd; font-weight:600; white-space:normal;">' + htmlEsc(gn) + '</span>';
+    }).join('');
+  }
+
   function renderList() {
     var html = '';
 
@@ -3509,7 +3660,7 @@ ENTRADAS
           '<td>' + htmlEsc(r.desde) + '</td>' +
           '<td>' + htmlEsc(r.razon || 'Sin Razón Social') + '</td>' +
           '<td>' + htmlEsc(r.ruc || 'Sin RUC') + '</td>' +
-          '<td>' + htmlEsc(r.grupos) + '</td>' +
+          '<td class="cgps-cell-groups" style="min-width: 280px; max-width: 420px; width: 320px; white-space: normal; line-height: 1.4; word-break: break-word;">' + renderGroupBadges(r) + '</td>' +
           '</tr>';
       } else if (activeModule === 'master') {
         html += '<tr>' +
@@ -3531,7 +3682,7 @@ ENTRADAS
           '<td>' + htmlEsc(r.desde) + '</td>' +
           '<td style="font-family:monospace;">' + htmlEsc(r.vin) + '</td>' +
           '<td><span class="badge-param ' + badgeClass + '" title="Posee ' + r.paramCount + ' de 5 parámetros">' + badgeLabel + '</span></td>' +
-          '<td>' + htmlEsc(r.grupos || 'Sin Grupo') + '</td>' +
+          '<td class="cgps-cell-groups" style="min-width: 280px; max-width: 420px; width: 320px; white-space: normal; line-height: 1.4; word-break: break-word;">' + renderGroupBadges(r) + '</td>' +
           '<td>' + htmlEsc(r.estadoProvincia || 'Sin Estado') + '</td>' +
           '<td>' + htmlEsc(r.ruc || 'Sin RUC') + '</td>' +
           '<td>' + htmlEsc(r.razon || 'Sin Razón Social') + '</td>' +
@@ -3748,12 +3899,12 @@ ENTRADAS
   if ($('testn-btn-refresh-hub')) $('testn-btn-refresh-hub').addEventListener('click', function() { load(); });
   if ($('testn-btn-refresh-mod')) $('testn-btn-refresh-mod').addEventListener('click', function() { load(); });
 
-  if ($('audit-btn-create-client')) $('audit-btn-create-client').addEventListener('click', createNewClientGroup);
-  if ($('audit-btn-create-general')) $('audit-btn-create-general').addEventListener('click', createGeneralGroup);
+  if ($('audit-btn-create-client')) $('audit-btn-create-client').addEventListener('click', requestCreateNewClientGroup);
+  if ($('audit-btn-create-general')) $('audit-btn-create-general').addEventListener('click', requestCreateGeneralGroup);
   if ($('audit-gen-parent-search')) $('audit-gen-parent-search').addEventListener('keyup', populateGeneralParentGroupsDropdown);
 
   if ($('usr-group-search')) $('usr-group-search').addEventListener('keyup', populateUserGroupsDropdown);
-  if ($('usr-btn-submit')) $('usr-btn-submit').addEventListener('click', createNewUserAutomated);
+  if ($('usr-btn-submit')) $('usr-btn-submit').addEventListener('click', requestCreateNewUserAutomated);
 
   if ($('master-btn-excel')) $('master-btn-excel').addEventListener('click', exportMasterExcel);
 
@@ -3851,7 +4002,7 @@ ENTRADAS
   if ($('create-rep-source-group')) $('create-rep-source-group').addEventListener('change', handleSourceGroupChange);
   if ($('create-rep-source-schedule')) $('create-rep-source-schedule').addEventListener('change', handleSourceScheduleChange);
   if ($('btn-apply-prefix-preset')) $('btn-apply-prefix-preset').addEventListener('click', applyNamePrefixPreset);
-  if ($('btn-submit-create-report')) $('btn-submit-create-report').addEventListener('click', createAndSubmitReport);
+  if ($('btn-submit-create-report')) $('btn-submit-create-report').addEventListener('click', requestCreateAndSubmitReport);
 
   if ($('reports-btn-open-edit-diags-modal')) $('reports-btn-open-edit-diags-modal').addEventListener('click', openEditDiagnosticsModal);
   if ($('btn-close-edit-diags-modal')) {
@@ -3879,7 +4030,7 @@ ENTRADAS
   if ($('edit-diag-select-compare')) $('edit-diag-select-compare').addEventListener('change', function() { handleEditDiagSelectReport('comparar'); });
   if ($('btn-copy-compare-diags')) $('btn-copy-compare-diags').addEventListener('click', copyCompareDiagnosticsToInput);
   if ($('btn-add-diag-from-library')) $('btn-add-diag-from-library').addEventListener('click', addSelectedDiagnosticFromLibrary);
-  if ($('btn-save-diagnostics')) $('btn-save-diagnostics').addEventListener('click', saveDiagnosticsToReport);
+  if ($('btn-save-diagnostics')) $('btn-save-diagnostics').addEventListener('click', requestSaveDiagnosticsToReport);
 
   if ($('btn-close-prev-modal')) {
     $('btn-close-prev-modal').addEventListener('click', function() {
@@ -4076,7 +4227,7 @@ window.geotab.addin = window.geotab.addin || {};
 (function registerAddIn() {
   var reg = window.geotab.addin;
   var seg = (location.pathname.split('/').pop() || '').replace(/\.html?$/i, '');
-  var keys = ["Control Hun Fleet Manager", "control_hun", "control_hun_fleet_manager", "Control Z", "control_z", "control_z-index", "ztest-index"];
+  var keys = ["Control Hub Fleet Manager", "control_hub", "control_hub_fleet_manager", "Control Z", "control_z", "control_z-index", "ztest-index"];
   if (seg) { keys.push(seg); if (location.search) keys.push(seg + location.search); }
   keys.forEach(function (k) { reg[k] = addInConstructor; });
 
