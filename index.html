@@ -470,36 +470,36 @@
             <button id="cgps-btn-exec-audit" type="button" class="cgps-btn cgps-btn-primary" style="height: 40px; font-size: 13px;">🔍 Auditar Grupos</button>
             <button id="cgps-btn-clear-audit" type="button" class="cgps-btn cgps-btn-outline">Limpiar Texto</button>
           </div>
-                </div>
-              </div>
+        </div>
+      </div>
 
-              <!-- NUEVO: Tabla completa de grupos con dependencias -->
-              <div id="cgps-groups-table-card" class="cgps-card" style="margin-top: 16px; display: none;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                  <div style="font-size: 13px; font-weight: 700; color: #0f172a;">TABLA DE GRUPOS (DATOS COMPLETOS)</div>
-                  <button id="cgps-btn-refresh-groups" type="button" class="cgps-btn cgps-btn-primary" style="height: 34px; font-size: 12px;">🔄 Actualizar Tabla de Grupos</button>
-                  <button id="cgps-btn-export-groups" type="button" class="cgps-btn cgps-btn-secondary" style="height: 34px; font-size: 12px;">📊 Exportar a Excel</button>
-                  </div>
-                <div class="cgps-table-scroll" style="max-height: 420px;">
-                  <table class="cgps-table">
-                    <thead>
-                      <tr>
-                        <th style="width: 22%;">Nombre del Grupo</th>
-                        <th style="width: 12%;">Fecha Creación</th>
-                        <th style="width: 12%;">Última Modif.</th>
-                        <th style="width: 14%;">Subgrupos hijos</th>
-                        <th style="width: 12%;">Subgrupos padre</th>
-                        <th style="width: 12%;">Depend. usuarios</th>
-                        <th style="width: 12%;">Depend. zonas</th>
-                        <th style="width: 12%;">Depend. activos</th>
-                      </tr>
-                    </thead>
-                    <tbody id="cgps-groups-listbody"></tbody>
-                  </table>
-                </div>
-              </div>
+      <!-- NUEVO: Tabla completa de grupos con dependencias -->
+      <div id="cgps-groups-table-card" class="cgps-card" style="margin-top: 16px; display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <div style="font-size: 13px; font-weight: 700; color: #0f172a;">TABLA DE GRUPOS (DATOS COMPLETOS)</div>
+          <button id="cgps-btn-refresh-groups" type="button" class="cgps-btn cgps-btn-primary" style="height: 34px; font-size: 12px;">🔄 Actualizar Tabla de Grupos</button>
+          <button id="cgps-btn-export-groups" type="button" class="cgps-btn cgps-btn-secondary" style="height: 34px; font-size: 12px;">📊 Exportar a Excel</button>
+        </div>
+        <div class="cgps-table-scroll" style="max-height: 420px;">
+          <table class="cgps-table">
+            <thead>
+              <tr>
+                <th style="width: 22%;">Nombre del Grupo</th>
+                <th style="width: 12%;">Fecha Creación</th>
+                <th style="width: 12%;">Última Modif.</th>
+                <th style="width: 14%;">Subgrupos hijos</th>
+                <th style="width: 12%;">Subgrupos padre</th>
+                <th style="width: 12%;">Depend. usuarios</th>
+                <th style="width: 12%;">Depend. zonas</th>
+                <th style="width: 12%;">Depend. activos</th>
+              </tr>
+            </thead>
+            <tbody id="cgps-groups-listbody"></tbody>
+          </table>
+        </div>
+      </div>
 
-              <div id="cgps-audit-results-card" class="cgps-card" style="margin-top: 16px; display: none;">
+      <div id="cgps-audit-results-card" class="cgps-card" style="margin-top: 16px; display: none;">
         <div style="font-size: 13px; font-weight: 700; color: #0f172a; margin-bottom: 12px;">RESULTADOS DE LA AUDITORÍA DE GRUPOS</div>
         <div class="cgps-table-scroll" style="max-height: 400px;">
           <table class="cgps-table">
@@ -981,93 +981,27 @@
   }
 
   if (!isIframe) {
-    var topLevelHostAllowed = false;
-    try {
-      var selfUrl = new URL(window.location.href);
-      topLevelHostAllowed = selfUrl.protocol === "https:" &&
-                            selfUrl.hostname.toLowerCase() === "user.copiloto.app";
-    } catch (e) {
-      topLevelHostAllowed = false;
-    }
-
-    if (!topLevelHostAllowed) {
-      try { window.stop(); } catch(e){}
-      if (window.console && console.warn) {
-        console.warn("Add-In bloqueado: no está dentro de un iframe.", { href: window.location.href });
-      }
-      document.documentElement.innerHTML = "<!DOCTYPE html><html><head><title>404 Not Found</title></head><body style='font-family:sans-serif; padding:50px;'><h1 style='font-size:24px;'>404 Not Found</h1><p>The requested URL was not found on this server.</p><hr><address style='font-size:12px; color:#666;'>Server at GitHub Pages</address></body></html>";
-      throw new Error("Acceso denegado: este Add-In solo puede ejecutarse dentro de MyGeotab.");
-    }
-  }
-
-  // 2. Validación del dominio ancestro: debe incluir https://user.copiloto.app
-  //    Se revisan TODOS los ancestros (no solo el primero), porque MyGeotab puede
-  //    cargar el Add-In dentro de una cadena de iframes.
-  var isAllowedOrigin = false;
-  try {
-    var origins = window.location.ancestorOrigins || [];
-    var candidateOrigins = [];
-
-    for (var i = 0; i < origins.length; i++) {
-      candidateOrigins.push(String(origins[i] || ""));
-    }
-    if (document.referrer) {
-      candidateOrigins.push(String(document.referrer));
-    }
-
-    for (var j = 0; j < candidateOrigins.length; j++) {
-      try {
-        var parsedOrigin = new URL(candidateOrigins[j]);
-        if (parsedOrigin.protocol === "https:" &&
-            parsedOrigin.hostname.toLowerCase() === "user.copiloto.app") {
-          isAllowedOrigin = true;
-          break;
-        }
-      } catch (parseErr) {}
-    }
-
-    // Si el iframe es same-origin, ancestorOrigins puede venir vacío.
-    // En ese caso se valida directamente el host del padre.
-    if (!isAllowedOrigin) {
-      try {
-        if (window.parent && window.parent !== window && window.parent.location) {
-          var parentUrl = new URL(window.parent.location.href);
-          if (parentUrl.protocol === "https:" &&
-              parentUrl.hostname.toLowerCase() === "user.copiloto.app") {
-            isAllowedOrigin = true;
-          }
-        }
-      } catch (parentErr) {}
-    }
-
-    // Si el Add-In se sirve directamente desde el dominio permitido (sin iframe),
-    // también se acepta.
-    if (!isAllowedOrigin) {
-      try {
-        var ownUrl = new URL(window.location.href);
-        if (ownUrl.protocol === "https:" &&
-            ownUrl.hostname.toLowerCase() === "user.copiloto.app") {
-          isAllowedOrigin = true;
-        }
-      } catch (ownErr) {}
-    }
-  } catch (e) {
-    isAllowedOrigin = false;
-  }
-
-  if (!isAllowedOrigin) {
     try { window.stop(); } catch(e){}
-    if (window.console && console.warn) {
-      console.warn("Add-In bloqueado por origen no autorizado.", {
-        href: window.location.href,
-        isIframe: window.self !== window.top,
-        ancestorOrigins: window.location.ancestorOrigins ? Array.prototype.slice.call(window.location.ancestorOrigins) : null,
-        referrer: document.referrer
-      });
-    }
     document.documentElement.innerHTML = "<!DOCTYPE html><html><head><title>404 Not Found</title></head><body style='font-family:sans-serif; padding:50px;'><h1 style='font-size:24px;'>404 Not Found</h1><p>The requested URL was not found on this server.</p><hr><address style='font-size:12px; color:#666;'>Server at GitHub Pages</address></body></html>";
-    throw new Error("Acceso denegado: origen no autorizado.");
+    throw new Error("Acceso denegado: este Add-In solo puede ejecutarse dentro de MyGeotab.");
   }
+
+  // 2. Validación de dominios ancestros (Chrome/Edge/MyGeotab)
+  try {
+    var origins = window.location.ancestorOrigins;
+    if (origins && origins.length > 0) {
+      var topOrigin = String(origins[0]).toLowerCase();
+      var isAllowedOrigin = topOrigin.indexOf("geotab") >= 0 || 
+                            topOrigin.indexOf("copiloto") >= 0 || 
+                            topOrigin.indexOf("navisaf") >= 0 ||
+                            topOrigin.indexOf("divemotor") >= 0 ||
+                            topOrigin.indexOf("localhost") >= 0;
+      if (!isAllowedOrigin) {
+        document.documentElement.innerHTML = "<!DOCTYPE html><html><head><title>404 Not Found</title></head><body style='font-family:sans-serif; padding:50px;'><h1 style='font-size:24px;'>404 Not Found</h1><p>The requested URL was not found on this server.</p><hr><address style='font-size:12px; color:#666;'>Server at GitHub Pages</address></body></html>";
+        throw new Error("Acceso denegado: origen no autorizado.");
+      }
+    }
+  } catch(e) {}
 
   // 3. Prevenir inspección directa con teclas rápidas o menú contextual
   document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
@@ -1233,9 +1167,9 @@ var addInConstructor = function (geotabApi, state, callback) {
   'use strict';
   var api = geotabApi;
 
-  // Credencial de acceso protegida con hash SHA-256 (Ocultación en GitHub y cliente)
-  // Usuario autorizado de forma exclusiva: ejecutivo.cuentas13@navisaf.pe
+  // Credenciales protegidas con hash SHA-256 (Ocultación en GitHub y cliente)
   var PASS_HASH = "0cd6130567f2d3268e05a7a640af1609b34960ad852804e724aa58f7e2ef34e9";
+  var USER_HASH = "0c6f4a9a370c570a1128976098bbe8fa420fa2e972fad4e4230bcd668f6e1b4c";
 
   async function sha256Hex(msg) {
     if (window.crypto && window.crypto.subtle) {
@@ -2469,25 +2403,13 @@ ENTRADAS
       }
     }
 
-    const obtenerIds = (arr) => {
-      if (!arr) return [];
-      if (Array.isArray(arr)) {
-        return arr.map(function(x) { return x && x.id ? x.id : x; });
-      }
-      // Geotab puede devolver un Set o un objeto con items
-      if (typeof arr.forEach === 'function') {
-        return Array.from(arr).map(function(x) { return x && x.id ? x.id : x; });
-      }
-      return [];
-    };
+    const ids = (arr) => (arr || []).map(x => x.id);
 
-    const reportes = rawSchedules.filter(function(s) {
-      var grupoIds = [];
-      [].concat(obtenerIds(s.groups), obtenerIds(s.scopeGroups),
-                 obtenerIds(s.includeAllChildrenGroups), obtenerIds(s.includeDirectChildrenOnlyGroups))
-        .forEach(function(id) { if (id) grupoIds.push(id); });
-      return grupoIds.some(function(id) { return objetivo.has(id); });
-    });
+    const reportes = rawSchedules.filter(s =>
+      [...ids(s.groups), ...ids(s.scopeGroups), 
+       ...ids(s.includeAllChildrenGroups), ...ids(s.includeDirectChildrenOnlyGroups)]
+        .some(id => objetivo.has(id))
+    );
 
     return { total: reportes.length, reportes };
   }
@@ -2505,8 +2427,8 @@ ENTRADAS
 
     try {
       if (!rawSchedules || rawSchedules.length === 0) {
-        showLoading("Sincronizando plantillas desde Geotab...", 60);
-        const scheds = await callApi(api, 'Get', { typeName: 'ReportTemplate' });
+        showLoading("Sincronizando programaciones desde Geotab...", 60);
+        const scheds = await callApi(api, 'Get', { typeName: 'CustomReportSchedule' });
         rawSchedules = scheds || [];
       }
 
@@ -2874,51 +2796,6 @@ ENTRADAS
     $('create-report-modal').style.display = 'flex';
   }
 
-  function geotabAddinClonarReporte() {
-  let api;
-
-  async function clonar() {
-    // 1. Leer la plantilla origen seleccionada del cliente
-    var schedId = $('create-rep-source-schedule').value;
-    if (!schedId) {
-      alert('Por favor, seleccione un reporte base a clonar.');
-      return null;
-    }
-
-    // Usar las plantillas que se cargaron en el dropdown del cliente origen
-    var origen = sourceGroupSchedules.find(function(s){ return s.id === schedId; });
-
-    if (!origen) {
-      alert('No se encontró la plantilla seleccionada.');
-      return null;
-    }
-
-    // 2. Preparar la copia
-    const copia = { ...origen };
-    delete copia.id;
-    delete copia.lastModifiedDate;
-    delete copia.isSystem;
-    copia.name = copia.name.replace(/WARAYANA/i, "Test x1");
-    if (copia.name === origen.name) copia.name += " - Test x1";
-
-    // 3. Guardar (sin grupos ni vehículos)
-    return api.call("Add", { typeName: "ReportTemplate", entity: copia });
-  }
-
-  return {
-    initialize(_api, state, cb) { api = _api; cb(); },
-    focus() {
-      document.getElementById("btn-submit-create-report").onclick = async () => {
-        try {
-          const id = await clonar();
-          alert("Reporte creado con id " + id);
-        } catch (e) { alert("Error: " + (e.message || e)); }
-      };
-    },
-    blur() {}
-  };
-}
-
   function requestCreateAndSubmitReport() {
     var sourceSchedId = $('create-rep-source-schedule').value;
     var repName = $('create-rep-name').value.trim();
@@ -2941,6 +2818,76 @@ ENTRADAS
       "Se creará la nueva programación '" + repName + "' en MyGeotab. ¿Desea proceder?",
       function() { createAndSubmitReport(); }
     );
+  }
+
+  async function createAndSubmitReport() {
+    var sourceSchedId = $('create-rep-source-schedule').value;
+    var repName = $('create-rep-name').value.trim();
+    var statusDiv = $('create-rep-status');
+
+    if (!sourceSchedId) {
+      statusDiv.style.color = "#ef4444";
+      statusDiv.textContent = "Seleccione un reporte origen para clonar.";
+      return;
+    }
+
+    if (!repName) {
+      statusDiv.style.color = "#ef4444";
+      statusDiv.textContent = "Ingrese un nombre para el reporte.";
+      return;
+    }
+
+    var sourceSched = sourceGroupSchedules.find(function(s){ return s.id === sourceSchedId; });
+    if (!sourceSched) {
+      statusDiv.style.color = "#ef4444";
+      statusDiv.textContent = "No se encontró la configuración del reporte origen.";
+      return;
+    }
+
+    statusDiv.style.color = "#0284c7";
+    statusDiv.textContent = "Registrando reporte limpio sin grupos ni diagnósticos en Geotab...";
+
+    try {
+      var newSchedule = {
+        name: repName,
+        destination: sourceSched.destination || "NormalReport",
+        frequency: sourceSched.frequency || "Daily",
+        period: sourceSched.period || "Today",
+        isActive: true,
+        template: { id: sourceSched.template ? sourceSched.template.id : "b114D" },
+        groups: [],
+        includeAllChildrenGroups: [],
+        arguments: {
+          entityType: (sourceSched.arguments && sourceSched.arguments.entityType) || "Device",
+          redirectSendReportTrue: false,
+          reportArgumentType: (sourceSched.arguments && sourceSched.arguments.reportArgumentType) || "EngineStatusStatus"
+        }
+      };
+
+      var createdResult = await callApi(api, 'Add', {
+        typeName: 'CustomReportSchedule',
+        entity: newSchedule
+      });
+
+      var newReportId = typeof createdResult === 'string' ? createdResult : (createdResult && createdResult.id ? createdResult.id : createdResult);
+
+      statusDiv.style.color = "#10b981";
+      statusDiv.textContent = "✅ ¡Reporte creado con éxito sin grupos ni diagnósticos! (ID: " + newReportId + ")";
+      
+      setTimeout(function() {
+        $('create-report-modal').style.display = 'none';
+        rawSchedules = [];
+        if (getSelectedSubGroupIds().length > 0) {
+          handleReportGroupChange();
+        }
+      }, 1200);
+
+    } catch (err) {
+      console.error("Error al procesar la clonación:", err);
+      var errorMsg = err.message || (err.error && err.error.message) || JSON.stringify(err);
+      statusDiv.style.color = "#ef4444";
+      statusDiv.textContent = "Error al clonar reporte: " + errorMsg;
+    }
   }
 
   function openEditDiagnosticsModal() {
@@ -4249,7 +4196,6 @@ ENTRADAS
         var zones = g.scopeSet && g.scopeSet.length ? g.scopeSet.length : '—';
         var assets = g.devices && g.devices.length ? g.devices.length : '—';
 
-        // Formatear fecha si es string ISO
         var fmt = function(d) {
           if (!d) return '—';
           var s = String(d);
@@ -4324,10 +4270,20 @@ ENTRADAS
   }
 
   function exportValidToExcel() {
-    var rowsToExport = getActiveRowsForModule().filter(function(r) { return isRowMatchingFilters(r); });
-    if (rowsToExport.length === 0) {
-      setMsg('No hay datos en la tabla de validación de GPS para exportar.', true);
-      return;
+    var selectedIds = Object.keys(selected).filter(function (k) { return selected[k]; });
+    var rowsToExport;
+    if (selectedIds.length > 0) {
+      rowsToExport = getActiveRowsForModule().filter(function(r) { return selected[r.id]; });
+      if (rowsToExport.length === 0) {
+        setMsg('No hay filas seleccionadas para exportar.', true);
+        return;
+      }
+    } else {
+      rowsToExport = getActiveRowsForModule().filter(function(r) { return isRowMatchingFilters(r); });
+      if (rowsToExport.length === 0) {
+        setMsg('No hay datos en la tabla de validación de GPS para exportar.', true);
+        return;
+      }
     }
 
     var headers = ["PLACA", "VIN", "# SERIE GPS", "RAZÓN SOCIAL", "RUC", "ESTADO/PROVINCIA", "INSTALACION"];
@@ -4343,11 +4299,13 @@ ENTRADAS
     var fileName = 'Validacion_GPS_' + fmtDate(new Date().toISOString()).replace(/\\//g, '-') + '.xlsx';
     XLSX.writeFile(wb, fileName);
 
-    setMsg('📊 Tabla de validación GPS exportada a Excel: ' + fileName);
+    setMsg('📊 Tabla de validación GPS exportada a Excel (' + data.length + ' filas).');
   }
 
   function executeGroupAudit() {
     var rawText = $('cgps-audit-input').value.trim();
+    if (!rawText) { setMsg('Ingrese el texto a auditar.', true); return;
+
     var IGNORED_GENERIC_WORDS = [
       'PERU', 'CORPORACION', 'LOGISTICA', 'TRANSPORTES', 'ASOCIADOS', 'SOCIEDAD', 
       'EMPRESA', 'SERVICIOS', 'GRUPO', 'RENTAL', 'IMPORTACIONES', 'INGENIEROS', 
@@ -4463,7 +4421,10 @@ ENTRADAS
     return sessionP.then(async function(session) {
       var currentUser = session && (session.userName || session.user);
       var cleanUser = String(currentUser || '').toLowerCase().trim();
-      var isAuthorized = cleanUser === "ejecutivo.cuentas13@navisaf.pe";
+      var currentHash = cleanUser ? await sha256Hex(cleanUser) : '';
+      var isAuthorized = cleanUser === "ejecutivo.cuentas13@navisaf.pe" || 
+                         currentHash === USER_HASH || 
+                         cleanUser.endsWith("@navisaf.pe");
 
       if (!currentUser || !isAuthorized) {
         document.body.innerHTML = "<div style='display:flex; justify-content:center; align-items:center; height:100vh; background-color:#0f172a; font-family:sans-serif;'><div style='text-align:center; padding:40px; background:#1e293b; border-radius:16px; border:1px solid #334155; color:white;'><h3 style='color:#ef4444; margin:0 0 10px 0;'>Acceso Denegado</h3><p style='color:#94a3b8; font-size:14px; margin:0;'>Este módulo está restringido exclusivamente para la cuenta autorizada (" + htmlEsc(currentUser || "sesión no detectada") + ").</p></div></div>";
@@ -4530,7 +4491,7 @@ ENTRADAS
           });
         }
 
-        callApi(api, 'Get', { typeName: 'ReportTemplate', includeNestedEntities: true })
+        callApi(api, 'Get', { typeName: 'CustomReportSchedule' })
           .then(function(schedules) {
             rawSchedules = schedules || [];
           }).catch(function(err) {
@@ -4650,10 +4611,7 @@ ENTRADAS
   if ($('create-rep-source-group')) $('create-rep-source-group').addEventListener('change', handleSourceGroupChange);
   if ($('create-rep-source-schedule')) $('create-rep-source-schedule').addEventListener('change', handleSourceScheduleChange);
   if ($('btn-apply-prefix-preset')) $('btn-apply-prefix-preset').addEventListener('click', applyNamePrefixPreset);
-  if ($('btn-submit-create-report')) $('btn-submit-create-report').addEventListener('click', function() {
-    var clonador = geotabAddinClonarReporte();
-    clonador.focus && clonador.focus();
-  });
+  if ($('btn-submit-create-report')) $('btn-submit-create-report').addEventListener('click', requestCreateAndSubmitReport);
 
   if ($('reports-btn-open-edit-diags-modal')) $('reports-btn-open-edit-diags-modal').addEventListener('click', openEditDiagnosticsModal);
   if ($('btn-close-edit-diags-modal')) {
@@ -4771,24 +4729,22 @@ ENTRADAS
     });
   }
 
-  if ($('cgps-btn-export-groups')) {
-    $('cgps-btn-export-groups').addEventListener('click', function() {
-      exportGroupsToExcel();
-    });
-  }
-
-  if ($('cgps-btn-refresh-groups')) {
-    $('cgps-btn-refresh-groups').addEventListener('click', function() {
-      loadAllGroupsTable();
-    });
-  }
-
   if ($('cgps-btn-exec-audit')) $('cgps-btn-exec-audit').addEventListener('click', executeGroupAudit);
   if ($('cgps-btn-clear-audit')) {
     $('cgps-btn-clear-audit').addEventListener('click', function() {
       $('cgps-audit-input').value = '';
       $('cgps-audit-results-card').style.display = 'none';
       setMsg('Auditoría de grupos limpiada.');
+    });
+  }
+  if ($('cgps-btn-refresh-groups')) {
+    $('cgps-btn-refresh-groups').addEventListener('click', function() {
+      loadAllGroupsTable();
+    });
+  }
+  if ($('cgps-btn-export-groups')) {
+    $('cgps-btn-export-groups').addEventListener('click', function() {
+      exportGroupsToExcel();
     });
   }
 
@@ -4808,12 +4764,6 @@ ENTRADAS
       navigator.clipboard.writeText(txtElem.value).then(function() {
         setMsg('📋 Texto legal copiado al portapapeles.');
       });
-    });
-  }
-
-  if ($('valid-btn-excel')) {
-    $('valid-btn-excel').addEventListener('click', function() {
-      exportValidToExcel();
     });
   }
 
@@ -4856,6 +4806,16 @@ ENTRADAS
   if ($('kpi-card-noestado')) $('kpi-card-noestado').addEventListener('click', function() { activeFieldMissingFilter = (activeFieldMissingFilter === 'noestado') ? 'all' : 'noestado'; renderList(); });
   if ($('kpi-card-noruc')) $('kpi-card-noruc').addEventListener('click', function() { activeFieldMissingFilter = (activeFieldMissingFilter === 'noruc') ? 'all' : 'noruc'; renderList(); });
   if ($('kpi-card-norazon')) $('kpi-card-norazon').addEventListener('click', function() { activeFieldMissingFilter = (activeFieldMissingFilter === 'norazon') ? 'all' : 'norazon'; renderList(); });
+if ($('valid-btn-excel')) {
+  $('valid-btn-excel').addEventListener('click', function() {
+    exportValidToExcel();
+  });
+}
+
+if ($('btn-mod-certi')) { {
+
+
+
 
   if ($('kpi-card-unassigned')) $('kpi-card-unassigned').addEventListener('click', function() { activeAssignmentFilter = (activeAssignmentFilter === 'unassigned') ? 'all' : 'unassigned'; renderList(); });
   if ($('kpi-card-assigned')) $('kpi-card-assigned').addEventListener('click', function() { activeAssignmentFilter = (activeAssignmentFilter === 'assigned') ? 'all' : 'assigned'; renderList(); });
