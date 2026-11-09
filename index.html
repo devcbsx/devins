@@ -4269,6 +4269,7 @@ ENTRADAS
           '<td style="text-align:center;">' + users + '</td>' +
           '<td style="text-align:center;">' + zones + '</td>' +
           '<td style="text-align:center;">' + assets + '</td>' +
+          '<td style="text-align:center;"><button class="btn-small" onclick="geotabAddin.renameGroup(\'' + htmlEsc(g.id) + '\', prompt(\'Nuevo nombre:\', \'' + htmlEsc(g.name) + '\'))">Cambiar Nombre</button></td>' +
           '</tr>';
       }).join('');
 
@@ -4361,8 +4362,9 @@ ENTRADAS
 
   function executeGroupAudit() {
     var rawText = $('cgps-audit-input').value.trim();
-      'PERU', 'CORPORACION', 'LOGISTICA', 'TRANSPORTES', 'ASOCIADOS', 'SOCIEDAD', 
-      'EMPRESA', 'SERVICIOS', 'GRUPO', 'RENTAL', 'IMPORTACIONES', 'INGENIEROS', 
+    var IGNORED_GENERIC_WORDS = [
+      'PERU', 'CORPORACION', 'LOGISTICA', 'TRANSPORTES', 'ASOCIADOS', 'SOCIEDAD',
+      'EMPRESA', 'SERVICIOS', 'GRUPO', 'RENTAL', 'IMPORTACIONES', 'INGENIEROS',
       'COMERCIAL', 'INVERSIONES', 'GENERALES', 'INDUSTRIA', 'INDUSTRIAS', 'CONTRATISTAS'
     ];
 
@@ -4454,6 +4456,43 @@ ENTRADAS
     $('cgps-audit-listbody').innerHTML = resultsHtml || '<tr><td colspan="4" style="text-align:center;">No se detectaron clientes válidos en el texto.</td></tr>';
     $('cgps-audit-results-card').style.display = 'block';
     setMsg('Auditoría del árbol de grupos finalizada.');
+  }
+
+  async function renameGroup(groupId, newName) {
+    var apiRef = api;
+    if (!apiRef) {
+      setMsg('API de Geotab no disponible.', true);
+      return;
+    }
+
+    try {
+      var grupo = await callApi(apiRef, 'Get', { typeName: 'Group', search: { id: groupId } });
+      if (!grupo || grupo.length === 0) {
+        setMsg('No se encontró el grupo con ID: ' + groupId, true);
+        return;
+      }
+
+      var grupoData = grupo[0];
+      var originalName = grupoData.name || '';
+
+      if (newName.trim() === originalName) {
+        setMsg('El nombre es el mismo que el actual.', true);
+        return;
+      }
+
+      var updateData = {
+        name: newName.trim(),
+        lastModifiedUser: session && session.user ? session.user : 'sysadmin',
+        lastModifiedDate: new Date().toISOString(),
+        validFromDate: grupoData.validFromDate || new Date().toISOString()
+      };
+
+      var result = await callApi(apiRef, 'Set', { typeName: 'Group', entity: updateData });
+      setMsg('✅ Nombre del grupo cambiado correctamente: ' + originalName + ' → ' + newName.trim());
+    } catch (e) {
+      console.error('Error cambiando nombre del grupo:', e);
+      setMsg('❌ Error al cambiar nombre del grupo: ' + (e.message || String(e)), true);
+    }
   }
 
   function load() {
