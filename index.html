@@ -466,10 +466,35 @@
             <button id="cgps-btn-exec-audit" type="button" class="cgps-btn cgps-btn-primary" style="height: 40px; font-size: 13px;">🔍 Auditar Grupos</button>
             <button id="cgps-btn-clear-audit" type="button" class="cgps-btn cgps-btn-outline">Limpiar Texto</button>
           </div>
-        </div>
-      </div>
+                </div>
+              </div>
 
-      <div id="cgps-audit-results-card" class="cgps-card" style="margin-top: 16px; display: none;">
+              <!-- NUEVO: Tabla completa de grupos con dependencias -->
+              <div id="cgps-groups-table-card" class="cgps-card" style="margin-top: 16px; display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                  <div style="font-size: 13px; font-weight: 700; color: #0f172a;">TABLA DE GRUPOS (DATOS COMPLETOS)</div>
+                  <button id="cgps-btn-refresh-groups" type="button" class="cgps-btn cgps-btn-primary" style="height: 34px; font-size: 12px;">🔄 Actualizar Tabla de Grupos</button>
+                </div>
+                <div class="cgps-table-scroll" style="max-height: 420px;">
+                  <table class="cgps-table">
+                    <thead>
+                      <tr>
+                        <th style="width: 22%;">Nombre del Grupo</th>
+                        <th style="width: 12%;">Fecha Creación</th>
+                        <th style="width: 12%;">Última Modif.</th>
+                        <th style="width: 14%;">Subgrupos hijos</th>
+                        <th style="width: 12%;">Subgrupos padre</th>
+                        <th style="width: 12%;">Depend. usuarios</th>
+                        <th style="width: 12%;">Depend. zonas</th>
+                        <th style="width: 12%;">Depend. activos</th>
+                      </tr>
+                    </thead>
+                    <tbody id="cgps-groups-listbody"></tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div id="cgps-audit-results-card" class="cgps-card" style="margin-top: 16px; display: none;">
         <div style="font-size: 13px; font-weight: 700; color: #0f172a; margin-bottom: 12px;">RESULTADOS DE LA AUDITORÍA DE GRUPOS</div>
         <div class="cgps-table-scroll" style="max-height: 400px;">
           <table class="cgps-table">
@@ -2439,13 +2464,25 @@ ENTRADAS
       }
     }
 
-    const ids = (arr) => (arr || []).map(x => x.id);
+    const obtenerIds = (arr) => {
+      if (!arr) return [];
+      if (Array.isArray(arr)) {
+        return arr.map(function(x) { return x && x.id ? x.id : x; });
+      }
+      // Geotab puede devolver un Set o un objeto con items
+      if (typeof arr.forEach === 'function') {
+        return Array.from(arr).map(function(x) { return x && x.id ? x.id : x; });
+      }
+      return [];
+    };
 
-    const reportes = rawSchedules.filter(s =>
-      [...ids(s.groups), ...ids(s.scopeGroups), 
-       ...ids(s.includeAllChildrenGroups), ...ids(s.includeDirectChildrenOnlyGroups)]
-        .some(id => objetivo.has(id))
-    );
+    const reportes = rawSchedules.filter(function(s) {
+      var grupoIds = [];
+      [].concat(obtenerIds(s.groups), obtenerIds(s.scopeGroups),
+                 obtenerIds(s.includeAllChildrenGroups), obtenerIds(s.includeDirectChildrenOnlyGroups))
+        .forEach(function(id) { if (id) grupoIds.push(id); });
+      return grupoIds.some(function(id) { return objetivo.has(id); });
+    });
 
     return { total: reportes.length, reportes };
   }
@@ -4188,8 +4225,55 @@ ENTRADAS
       .trim();
   }
 
-  function executeGroupAudit() {
-    var rawText = $('cgps-audit-input').value.trim();
+  async function loadAllGroupsTable() {
+    var tbody = $('cgps-groups-listbody');
+    $('cgps-groups-table-card').style.display = 'block';
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#64748b;">Cargando grupos desde Geotab...</td></tr>';
+
+    try {
+      var groups = await callApi(api, 'Get', { typeName: 'Group', includeNestedEntities: true });
+      if (!groups || groups.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#94a3b8;">No se encontraron grupos.</td></tr>';
+        return;
+      }
+
+      var rows = groups.map(function(g) {
+        var children = g.children && g.children.length ? g.children.map(function(c) { return htmlEsc(c.name); }).join(', ') : '—';
+        var parents = g.parents && g.parents.length ? g.parents.map(function(p) { return htmlEsc(p.name); }).join(', ') : '—';
+        var users = g.userSet && g.userSet.length ? g.userSet.length : '—';
+        var zones = g.scopeSet && g.scopeSet.length ? g.scopeSet.length : '—';
+        var assets = g.devices && g.devices.length ? g.devices.length : '—';
+
+        // Formatear fecha si es string ISO
+        var fmt = function(d) {
+          if (!d) return '—';
+          var s = String(d);
+          if (s.length >= 10) {
+            var parts = s.split('T')[0].split('-');
+            if (parts.length === 3) return parts[2] + '/' + parts[1] + '/' + parts[0];
+          }
+          return s;
+        };
+
+        return '<tr>' +
+          '<td><b>' + htmlEsc(g.name) + '</b><br><small style="color:#64748b;">ID: ' + htmlEsc(g.id) + '</small></td>' +
+          '<td style="font-family:\'JetBrains Mono\',monospace;font-size:11px;">' + fmt(g.createDate) + '</td>' +
+          '<td style="font-family:\'JetBrains Mono\',monospace;font-size:11px;">' + fmt(g.lastModifiedDate) + '</td>' +
+          '<td>' + htmlEsc(children) + '</td>' +
+          '<td>' + htmlEsc(parents) + '</td>' +
+          '<td style="text-align:center;">' + users + '</td>' +
+          '<td style="text-align:center;">' + zones + '</td>' +
+          '<td style="text-align:center;">' + assets + '</td>' +
+          '</tr>';
+      }).join('');
+
+      tbody.innerHTML = rows || '<tr><td colspan="8" style="text-align:center; color:#94a3b8;">No hay grupos con datos.</td></tr>';
+    } catch (e) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#ef4444;">Error: ' + htmlEsc(e.message) + '</td></tr>';
+      console.error('Error cargando grupos:', e);
+    }
+  }
+    });\n  }\n\n  function executeGroupAudit() {\n    var rawText = $('cgps-audit-input').value.trim();
     if (!rawText) { setMsg('Ingrese el texto a auditar.', true); return; }
 
     var IGNORED_GENERIC_WORDS = [
@@ -4374,7 +4458,7 @@ ENTRADAS
           });
         }
 
-        callApi(api, 'Get', { typeName: 'ReportTemplate' })
+        callApi(api, 'Get', { typeName: 'ReportTemplate', includeNestedEntities: true })
           .then(function(schedules) {
             rawSchedules = schedules || [];
           }).catch(function(err) {
@@ -4612,6 +4696,12 @@ ENTRADAS
       $('rep-filter-user').value = '';
       if ($('rep-filter-keyword')) $('rep-filter-keyword').value = '';
       applyReportFilters();
+    });
+  }
+
+  if ($('cgps-btn-refresh-groups')) {
+    $('cgps-btn-refresh-groups').addEventListener('click', function() {
+      loadAllGroupsTable();
     });
   }
 
