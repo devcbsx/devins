@@ -2891,13 +2891,14 @@ ENTRADAS
         period: sourceSched.period || "Today",
         isActive: true,
         template: { id: sourceSched.template ? sourceSched.template.id : "b114D" },
-        groups: sourceSched.groups || [],
-        includeAllChildrenGroups: sourceSched.includeAllChildrenGroups || [],
+        groups: (sourceSched.groups || []).map(function (g) { return typeof g === 'string' ? { id: g } : g; }),
+        includeAllChildrenGroups: (sourceSched.includeAllChildrenGroups || []).map(function (g) { return typeof g === 'string' ? { id: g } : g; }),
         scopeGroupFilter: sourceSched.scopeGroupFilter || { groupFilterCondition: { groupId: (sourceSched.groups && sourceSched.groups.length ? sourceSched.groups[0] : 'b278A') } },
         arguments: {
           entityType: (sourceSched.arguments && sourceSched.arguments.entityType) || "Device",
           redirectSendReportTrue: false,
-          reportArgumentType: (sourceSched.arguments && sourceSched.arguments.reportArgumentType) || "EngineStatusStatus"
+          reportArgumentType: (sourceSched.arguments && sourceSched.arguments.reportArgumentType) || "EngineStatusStatus",
+          ScopeGroupFilter: sourceSched.arguments && sourceSched.arguments.ScopeGroupFilter ? sourceSched.arguments.ScopeGroupFilter : null
         }
       };
 
