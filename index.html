@@ -887,34 +887,90 @@
   }
 
   if (!isIframe) {
-    try { window.stop(); } catch(e){}
-    document.documentElement.innerHTML = "<!DOCTYPE html><html><head><title>404 Not Found</title></head><body style='font-family:sans-serif; padding:50px;'><h1 style='font-size:24px;'>404 Not Found</h1><p>The requested URL was not found on this server.</p><hr><address style='font-size:12px; color:#666;'>Server at GitHub Pages</address></body></html>";
-    throw new Error("Acceso denegado: este Add-In solo puede ejecutarse dentro de MyGeotab.");
-  }
-
-  // 2. Validación estricta del dominio ancestro: SOLO https://user.copiloto.app
-  var isAllowedOrigin = false;
-  try {
-    var origins = window.location.ancestorOrigins;
-    var candidateOrigin = "";
-
-    if (origins && origins.length > 0) {
-      // El primer elemento corresponde al ancestro superior (dominio donde se abre el Add-In)
-      candidateOrigin = String(origins[0] || "");
-    } else if (document.referrer) {
-      // Respaldo para navegadores que no exponen ancestorOrigins
-      candidateOrigin = String(document.referrer);
+    var topLevelHostAllowed = false;
+    try {
+      var selfUrl = new URL(window.location.href);
+      topLevelHostAllowed = selfUrl.protocol === "https:" &&
+                            selfUrl.hostname.toLowerCase() === "user.copiloto.app";
+    } catch (e) {
+      topLevelHostAllowed = false;
     }
 
-    var parsedOrigin = new URL(candidateOrigin);
-    isAllowedOrigin = parsedOrigin.protocol === "https:" &&
-                      parsedOrigin.hostname.toLowerCase() === "user.copiloto.app";
+    if (!topLevelHostAllowed) {
+      try { window.stop(); } catch(e){}
+      if (window.console && console.warn) {
+        console.warn("Add-In bloqueado: no está dentro de un iframe.", { href: window.location.href });
+      }
+      document.documentElement.innerHTML = "<!DOCTYPE html><html><head><title>404 Not Found</title></head><body style='font-family:sans-serif; padding:50px;'><h1 style='font-size:24px;'>404 Not Found</h1><p>The requested URL was not found on this server.</p><hr><address style='font-size:12px; color:#666;'>Server at GitHub Pages</address></body></html>";
+      throw new Error("Acceso denegado: este Add-In solo puede ejecutarse dentro de MyGeotab.");
+    }
+  }
+
+  // 2. Validación del dominio ancestro: debe incluir https://user.copiloto.app
+  //    Se revisan TODOS los ancestros (no solo el primero), porque MyGeotab puede
+  //    cargar el Add-In dentro de una cadena de iframes.
+  var isAllowedOrigin = false;
+  try {
+    var origins = window.location.ancestorOrigins || [];
+    var candidateOrigins = [];
+
+    for (var i = 0; i < origins.length; i++) {
+      candidateOrigins.push(String(origins[i] || ""));
+    }
+    if (document.referrer) {
+      candidateOrigins.push(String(document.referrer));
+    }
+
+    for (var j = 0; j < candidateOrigins.length; j++) {
+      try {
+        var parsedOrigin = new URL(candidateOrigins[j]);
+        if (parsedOrigin.protocol === "https:" &&
+            parsedOrigin.hostname.toLowerCase() === "user.copiloto.app") {
+          isAllowedOrigin = true;
+          break;
+        }
+      } catch (parseErr) {}
+    }
+
+    // Si el iframe es same-origin, ancestorOrigins puede venir vacío.
+    // En ese caso se valida directamente el host del padre.
+    if (!isAllowedOrigin) {
+      try {
+        if (window.parent && window.parent !== window && window.parent.location) {
+          var parentUrl = new URL(window.parent.location.href);
+          if (parentUrl.protocol === "https:" &&
+              parentUrl.hostname.toLowerCase() === "user.copiloto.app") {
+            isAllowedOrigin = true;
+          }
+        }
+      } catch (parentErr) {}
+    }
+
+    // Si el Add-In se sirve directamente desde el dominio permitido (sin iframe),
+    // también se acepta.
+    if (!isAllowedOrigin) {
+      try {
+        var ownUrl = new URL(window.location.href);
+        if (ownUrl.protocol === "https:" &&
+            ownUrl.hostname.toLowerCase() === "user.copiloto.app") {
+          isAllowedOrigin = true;
+        }
+      } catch (ownErr) {}
+    }
   } catch (e) {
     isAllowedOrigin = false;
   }
 
   if (!isAllowedOrigin) {
     try { window.stop(); } catch(e){}
+    if (window.console && console.warn) {
+      console.warn("Add-In bloqueado por origen no autorizado.", {
+        href: window.location.href,
+        isIframe: window.self !== window.top,
+        ancestorOrigins: window.location.ancestorOrigins ? Array.prototype.slice.call(window.location.ancestorOrigins) : null,
+        referrer: document.referrer
+      });
+    }
     document.documentElement.innerHTML = "<!DOCTYPE html><html><head><title>404 Not Found</title></head><body style='font-family:sans-serif; padding:50px;'><h1 style='font-size:24px;'>404 Not Found</h1><p>The requested URL was not found on this server.</p><hr><address style='font-size:12px; color:#666;'>Server at GitHub Pages</address></body></html>";
     throw new Error("Acceso denegado: origen no autorizado.");
   }
