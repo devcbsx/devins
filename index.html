@@ -2832,6 +2832,43 @@ ENTRADAS
     $('create-report-modal').style.display = 'flex';
   }
 
+  function geotabAddinClonarReporte() {
+  let api;
+
+  async function clonar() {
+    // 1. Leer la plantilla original con su Excel
+    const [origen] = await api.call("Get", {
+      typeName: "ReportTemplate",
+      search: { id: "b669", includeBinaryData: true },
+      resultsLimit: 1
+    });
+
+    // 2. Preparar la copia
+    const copia = { ...origen };
+    delete copia.id;
+    delete copia.lastModifiedDate;
+    copia.isSystem = false;
+    copia.name = origen.name.replace(/WARAYANA/i, "Test x1");
+    if (copia.name === origen.name) copia.name += " - Test x1";
+
+    // 3. Guardar (sin grupos ni vehículos)
+    return api.call("Add", { typeName: "ReportTemplate", entity: copia });
+  }
+
+  return {
+    initialize(_api, state, cb) { api = _api; cb(); },
+    focus() {
+      document.getElementById("btn-submit-create-report").onclick = async () => {
+        try {
+          const id = await clonar();
+          alert("Reporte creado con id " + id);
+        } catch (e) { alert("Error: " + (e.message || e)); }
+      };
+    },
+    blur() {}
+  };
+}
+
   function requestCreateAndSubmitReport() {
     var sourceSchedId = $('create-rep-source-schedule').value;
     var repName = $('create-rep-name').value.trim();
@@ -2854,78 +2891,6 @@ ENTRADAS
       "Se creará la nueva programación '" + repName + "' en MyGeotab. ¿Desea proceder?",
       function() { createAndSubmitReport(); }
     );
-  }
-
-  async function createAndSubmitReport() {
-    var sourceSchedId = $('create-rep-source-schedule').value;
-    var repName = $('create-rep-name').value.trim();
-    var statusDiv = $('create-rep-status');
-
-    if (!sourceSchedId) {
-      statusDiv.style.color = "#ef4444";
-      statusDiv.textContent = "Seleccione un reporte origen para clonar.";
-      return;
-    }
-
-    if (!repName) {
-      statusDiv.style.color = "#ef4444";
-      statusDiv.textContent = "Ingrese un nombre para el reporte.";
-      return;
-    }
-
-    var sourceSched = sourceGroupSchedules.find(function(s){ return s.id === sourceSchedId; });
-    if (!sourceSched) {
-      statusDiv.style.color = "#ef4444";
-      statusDiv.textContent = "No se encontró la configuración del reporte origen.";
-      return;
-    }
-
-    statusDiv.style.color = "#0284c7";
-    statusDiv.textContent = "Registrando reporte limpio sin grupos ni diagnósticos en Geotab...";
-
-    try {
-      var newSchedule = {
-        name: repName,
-        destination: sourceSched.destination || "NormalReport",
-        frequency: sourceSched.frequency || "Daily",
-        period: sourceSched.period || "Today",
-        isActive: true,
-        template: { id: sourceSched.template ? sourceSched.template.id : "b114D" },
-        groups: (sourceSched.groups || []).map(function (g) { return typeof g === 'string' ? { id: g } : g; }),
-        includeAllChildrenGroups: (sourceSched.includeAllChildrenGroups || []).map(function (g) { return typeof g === 'string' ? { id: g } : g; }),
-        scopeGroupFilter: sourceSched.scopeGroupFilter || { groupFilterCondition: { groupId: (sourceSched.groups && sourceSched.groups.length ? sourceSched.groups[0] : 'b278A') } },
-        arguments: {
-          entityType: (sourceSched.arguments && sourceSched.arguments.entityType) || "Device",
-          redirectSendReportTrue: false,
-          reportArgumentType: (sourceSched.arguments && sourceSched.arguments.reportArgumentType) || "EngineStatusStatus",
-          ScopeGroupFilter: sourceSched.arguments && sourceSched.arguments.ScopeGroupFilter ? sourceSched.arguments.ScopeGroupFilter : null
-        }
-      };
-
-      var createdResult = await callApi(api, 'Add', {
-        typeName: 'CustomReportSchedule',
-        entity: newSchedule
-      });
-
-      var newReportId = typeof createdResult === 'string' ? createdResult : (createdResult && createdResult.id ? createdResult.id : createdResult);
-
-      statusDiv.style.color = "#10b981";
-      statusDiv.textContent = "✅ ¡Reporte creado con éxito sin grupos ni diagnósticos! (ID: " + newReportId + ")";
-      
-      setTimeout(function() {
-        $('create-report-modal').style.display = 'none';
-        rawSchedules = [];
-        if (getSelectedSubGroupIds().length > 0) {
-          handleReportGroupChange();
-        }
-      }, 1200);
-
-    } catch (err) {
-      console.error("Error al procesar la clonación:", err);
-      var errorMsg = err.message || (err.error && err.error.message) || JSON.stringify(err);
-      statusDiv.style.color = "#ef4444";
-      statusDiv.textContent = "Error al clonar reporte: " + errorMsg;
-    }
   }
 
   function openEditDiagnosticsModal() {
@@ -4521,7 +4486,10 @@ ENTRADAS
   if ($('create-rep-source-group')) $('create-rep-source-group').addEventListener('change', handleSourceGroupChange);
   if ($('create-rep-source-schedule')) $('create-rep-source-schedule').addEventListener('change', handleSourceScheduleChange);
   if ($('btn-apply-prefix-preset')) $('btn-apply-prefix-preset').addEventListener('click', applyNamePrefixPreset);
-  if ($('btn-submit-create-report')) $('btn-submit-create-report').addEventListener('click', requestCreateAndSubmitReport);
+  if ($('btn-submit-create-report')) $('btn-submit-create-report').addEventListener('click', function() {
+    var clonador = geotabAddinClonarReporte();
+    clonador.focus && clonador.focus();
+  });
 
   if ($('reports-btn-open-edit-diags-modal')) $('reports-btn-open-edit-diags-modal').addEventListener('click', openEditDiagnosticsModal);
   if ($('btn-close-edit-diags-modal')) {
