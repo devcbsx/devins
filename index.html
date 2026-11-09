@@ -483,17 +483,18 @@
                 <div class="cgps-table-scroll" style="max-height: 420px;">
                   <table class="cgps-table">
                     <thead>
-                      <tr>
-                        <th style="width: 22%;">Nombre del Grupo</th>
-                        <th style="width: 12%;">Fecha Creación</th>
-                        <th style="width: 12%;">Última Modif.</th>
-                        <th style="width: 14%;">Subgrupos hijos</th>
-                        <th style="width: 12%;">Subgrupos padre</th>
-                        <th style="width: 12%;">Depend. usuarios</th>
-                        <th style="width: 12%;">Depend. zonas</th>
-                        <th style="width: 12%;">Depend. activos</th>
-                      </tr>
-                    </thead>
+                                          <tr>
+                                            <th style="width: 18%;">Nombre del Grupo</th>
+                                            <th style="width: 10%;">Fecha Creación</th>
+                                            <th style="width: 10%;">Última Modif.</th>
+                                            <th style="width: 12%;">Subgrupos hijos</th>
+                                            <th style="width: 10%;">Subgrupos padre</th>
+                                            <th style="width: 10%;">Depend. usuarios</th>
+                                            <th style="width: 10%;">Depend. zonas</th>
+                                            <th style="width: 10%;">Depend. activos</th>
+                                            <th style="width: 10%;">Cambiar Nombre</th>
+                                          </tr>
+                                        </thead>
                     <tbody id="cgps-groups-listbody"></tbody>
                   </table>
                 </div>
@@ -3665,8 +3666,10 @@ ENTRADAS
         renderHeader();
         renderList();
       } else if (mod === 'valid') {
-        $('testn-mod-title').textContent = 'Validación de Variables GPS';
-        $('sec-master').style.display = 'none';
+              $('testn-mod-title').textContent = 'Validación de Variables GPS';
+              $('hdr-actions-valid').style.display = 'flex';
+
+              $('sec-master').style.display = 'none';
         $('sec-audit').style.display = 'none';
         $('sec-reports').style.display = 'none';
         $('sec-activations').style.display = 'none';
@@ -4233,14 +4236,14 @@ ENTRADAS
   async function loadAllGroupsTable() {
     var tbody = $('cgps-groups-listbody');
     $('cgps-groups-table-card').style.display = 'block';
-    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#64748b;">Cargando grupos desde Geotab...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; color:#64748b;">Cargando grupos desde Geotab...</td></tr>';
 
     try {
-      var groups = await callApi(api, 'Get', { typeName: 'Group', includeNestedEntities: true });
-      if (!groups || groups.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#94a3b8;">No se encontraron grupos.</td></tr>';
-        return;
-      }
+          var groups = await callApi(api, 'Get', { typeName: 'Group', includeNestedEntities: true });
+          if (!groups || groups.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; color:#94a3b8;">No se encontraron grupos.</td></tr>';
+            return;
+          }
 
       var rows = groups.map(function(g) {
         var children = g.children && g.children.length ? g.children.map(function(c) { return htmlEsc(c.name); }).join(', ') : '—';
@@ -4273,11 +4276,11 @@ ENTRADAS
           '</tr>';
       }).join('');
 
-      tbody.innerHTML = rows || '<tr><td colspan="8" style="text-align:center; color:#94a3b8;">No hay grupos con datos.</td></tr>';
+      tbody.innerHTML = rows || '<tr><td colspan="9" style="text-align:center; color:#94a3b8;">No hay grupos con datos.</td></tr>';
     } catch (e) {
-      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#ef4444;">Error: ' + htmlEsc(e.message) + '</td></tr>';
-      console.error('Error cargando grupos:', e);
-    }
+          tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; color:#ef4444;">Error: ' + htmlEsc(e.message) + '</td></tr>';
+          console.error('Error cargando grupos:', e);
+        }
   }
 
   function exportGroupsToExcel() {
@@ -4360,7 +4363,7 @@ ENTRADAS
     setMsg('📊 Tabla de validación GPS exportada a Excel (' + data.length + ' filas). Seleccionadas: ' + (selectedIds.length > 0 ? selectedIds.length : 'todas'));
   }
 
-  function executeGroupAudit() {
+  async function executeGroupAudit() {
     var rawText = $('cgps-audit-input').value.trim();
     var IGNORED_GENERIC_WORDS = [
       'PERU', 'CORPORACION', 'LOGISTICA', 'TRANSPORTES', 'ASOCIADOS', 'SOCIEDAD',
@@ -4454,9 +4457,12 @@ ENTRADAS
     });
 
     $('cgps-audit-listbody').innerHTML = resultsHtml || '<tr><td colspan="4" style="text-align:center;">No se detectaron clientes válidos en el texto.</td></tr>';
-    $('cgps-audit-results-card').style.display = 'block';
-    setMsg('Auditoría del árbol de grupos finalizada.');
-  }
+        $('cgps-audit-results-card').style.display = 'block';
+        setMsg('Auditoría del árbol de grupos finalizada.');
+
+        // Cargar tabla completa de grupos con dependencias
+        await loadAllGroupsTable();
+      }
 
   async function renameGroup(groupId, newName) {
     var apiRef = api;
