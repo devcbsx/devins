@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+?<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="utf-8">
@@ -370,20 +370,6 @@
         <div class="testn-card-icon">👤</div>
         <h2>NUEVO USUARIO</h2>
         <p>Creación automática de usuario con perfil Administrador Cliente - ADDINS</p>
-      </div>
-
-      <div class="testn-card" id="btn-hub-unassigned" style="border-color: #f59e0b !important;">
-        <div class="testn-card-icon">📦</div>
-        <h2>UNIDADES SIN ASIGNAR</h2>
-        <p>Activos que pertenecen al grupo "Unidades sin asignar"</p>
-        <div class="testn-card-metric" id="hub-kpi-unassigned" style="color: #d97706;">0</div>
-      </div>
-
-      <div class="testn-card" id="btn-hub-assigned" style="border-color: #10b981 !important;">
-        <div class="testn-card-icon">✅</div>
-        <h2>UNIDADES ASIGNADAS</h2>
-        <p>Activos que no tienen el grupo "Unidades sin asignar"</p>
-        <div class="testn-card-metric" id="hub-kpi-assigned" style="color: #059669;">0</div>
       </div>
     </div>
   </div>
@@ -802,6 +788,14 @@
         <div class="cgps-kpi-title">SIN RAZÓN SOCIAL</div>
         <div class="cgps-kpi-value" id="kpi-val-norazon" style="color: #b91c1c;">0</div>
       </div>
+      <div class="cgps-card kpi-btn-card" id="kpi-card-unassigned" title="Filtrar unidades sin asignar">
+        <div class="cgps-kpi-title">UNIDADES SIN ASIGNAR</div>
+        <div class="cgps-kpi-value" id="kpi-val-unassigned" style="color: #d97706;">0</div>
+      </div>
+      <div class="cgps-card kpi-btn-card" id="kpi-card-assigned" title="Filtrar unidades asignadas">
+        <div class="cgps-kpi-title">UNIDADES ASIGNADAS</div>
+        <div class="cgps-kpi-value" id="kpi-val-assigned" style="color: #059669;">0</div>
+      </div>
 
       <div class="cgps-card kpi-btn-card" id="kpi-card-type-remolcadores" title="Filtrar remolcadores">
         <div class="cgps-kpi-title">REMOLCADORES</div>
@@ -842,23 +836,29 @@
       </div>
     </div>
 
-    <div id="sec-bulk-container" class="cgps-card" style="margin-top: 12px;">
-      <div style="font-size: 12px; font-weight: 700; margin-bottom: 8px; color: #0f172a;">SELECCIÓN MASIVA DE ACTIVOS</div>
-      <div style="display: flex; gap: 10px; align-items: flex-start; flex-wrap: wrap;">
-        <textarea id="cgps-bulk-input-std" class="cgps-textarea" placeholder="Pegue la lista de nombres de activos, placas, VINs o series..." rows="3" style="flex: 1; min-width: 250px; font-family: 'JetBrains Mono', monospace; font-size: 12px;"></textarea>
-        <div style="display: flex; flex-direction: column; gap: 6px;">
-          <button id="cgps-btn-bulk-std" type="button" class="cgps-btn cgps-btn-secondary">Filtrar Masivo</button>
-          <button id="cgps-btn-bulk-clear-std" type="button" class="cgps-btn cgps-btn-outline">Limpiar</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- CONTROLES UNIFICADOS BARRA TECH (DISEÑO 3 SECCIONES) -->
+    <!-- CONTROLES UNIFICADOS BARRA TECH (DISEÑO 4 SECCIONES) -->
     <div id="sec-controls-container" class="cgps-card" style="margin-top: 12px; padding: 14px 18px; background: #ffffff;">
       <div style="display: flex; align-items: stretch; justify-content: space-between; flex-wrap: wrap; gap: 14px; width: 100%;">
-        
+
+        <!-- SECCIÓN 0: BÚSQUEDA MASIVA -->
+        <div id="sec-bulk-container" style="display: none; flex: 1.2; min-width: 320px;">
+          <div style="display: flex; gap: 14px; align-items: stretch;">
+            <div style="flex: 1; min-width: 0;">
+              <div style="font-size: 13px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px; margin-bottom: 8px;">Búsqueda masiva de activos</div>
+              <div style="display: flex; gap: 8px; align-items: flex-start;">
+                <textarea id="cgps-bulk-input-std" class="cgps-textarea" placeholder="Pegue la lista de nombres de activos, placas, VINs o series..." rows="2" style="flex: 1; min-width: 0; font-family: 'JetBrains Mono', monospace; font-size: 12px;"></textarea>
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                  <button id="cgps-btn-bulk-std" type="button" class="cgps-btn cgps-btn-secondary">Filtrar Masivo</button>
+                  <button id="cgps-btn-bulk-clear-std" type="button" class="cgps-btn cgps-btn-outline">Limpiar</button>
+                </div>
+              </div>
+            </div>
+            <div style="width: 2px; background: #0f172a; margin: 0 4px; align-self: stretch; min-height: 80px; opacity: 0.9;"></div>
+          </div>
+        </div>
+
         <!-- SECCIÓN 1: BUSCAR VARIABLES -->
-        <div style="display: flex; flex-direction: column; gap: 8px; flex: 1.1; min-width: 280px;">
+        <div style="display: flex; flex-direction: column; gap: 8px; flex: 1.0; min-width: 280px;">
           <div style="font-size: 13px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px;">Buscar Variables</div>
           <div style="display: flex; gap: 8px; align-items: center;">
             <select id="cgps-filter-field" class="cgps-input" style="width: 155px; font-weight: 600; color: #0284c7; background-color: #f0f9ff; border-color: #bae6fd; height: 36px;">
@@ -879,7 +879,7 @@
             </select>
             <input type="text" id="cgps-filter" class="cgps-input" placeholder="🔍 Buscar activo..." style="flex: 1; height: 36px;">
           </div>
-          <div style="display: flex; justify-content: flex-end; padding-right: 2px;">
+          <div style="display: flex; justify-content: center; padding-right: 2px;">
             <button id="cgps-sel-none" type="button" class="cgps-btn cgps-btn-outline" style="height: 32px; padding: 4px 18px; font-size: 12px; border-radius: 6px;">Limpiar</button>
           </div>
         </div>
@@ -888,7 +888,7 @@
         <div style="width: 2px; background: #0f172a; margin: 0 4px; align-self: stretch; min-height: 80px; opacity: 0.9;"></div>
 
         <!-- SECCIÓN 2: MODIFICAR VARIABLES -->
-        <div style="display: flex; flex-direction: column; gap: 8px; flex: 1.4; min-width: 330px;">
+        <div style="display: flex; flex-direction: column; gap: 8px; flex: 1.35; min-width: 330px;">
           <div style="font-size: 13px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px;">Modificar Variables</div>
           <div style="display: flex; gap: 8px; align-items: center;">
             <button id="cgps-sel-vis" type="button" class="cgps-btn cgps-btn-outline" style="height: 36px; padding: 6px 14px; font-size: 12px; white-space: nowrap; border-radius: 6px;">Seleccionar visibles</button>
@@ -1105,7 +1105,6 @@
     .testn-card-icon { font-size: 24px; margin-bottom: 12px; }
     .testn-card h2 { font-size: 15px !important; color: #0f172a !important; font-weight: 700 !important; margin: 0 0 6px 0 !important; text-transform: uppercase !important; letter-spacing: 0.5px; }
     .testn-card p { font-size: 12px !important; color: #64748b !important; margin: 0 !important; line-height: 1.4 !important; }
-    .testn-card-metric { margin-top: 10px; font-size: 28px; font-weight: 800; line-height: 1; letter-spacing: -0.5px; }
 
     .cgps-btn { padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; white-space: nowrap; transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
     .cgps-btn:disabled { opacity: 0.5; cursor: not-allowed !important; }
@@ -1707,8 +1706,8 @@ var addInConstructor = function (geotabApi, state, callback) {
     $('kpi-title-2').textContent = "SELECCIONADOS";
     $('kpi-val-2').textContent = selCount;
 
-    if ($('hub-kpi-unassigned')) $('hub-kpi-unassigned').textContent = cUnassigned;
-    if ($('hub-kpi-assigned')) $('hub-kpi-assigned').textContent = cAssigned;
+    if ($('kpi-val-unassigned')) $('kpi-val-unassigned').textContent = cUnassigned;
+    if ($('kpi-val-assigned')) $('kpi-val-assigned').textContent = cAssigned;
 
     if (activeModule === 'certi' || activeModule === 'master') {
       $('kpi-card-4').style.display = 'none';
@@ -1718,6 +1717,8 @@ var addInConstructor = function (geotabApi, state, callback) {
       $('kpi-card-noestado').style.display = 'none';
       $('kpi-card-noruc').style.display = 'none';
       $('kpi-card-norazon').style.display = 'none';
+      $('kpi-card-unassigned').style.display = 'none';
+      $('kpi-card-assigned').style.display = 'none';
 
       $('kpi-card-type-remolcadores').style.display = 'none';
       $('kpi-card-type-volquetes').style.display = 'none';
@@ -1733,6 +1734,8 @@ var addInConstructor = function (geotabApi, state, callback) {
       $('kpi-card-noestado').style.display = 'block';
       $('kpi-card-noruc').style.display = 'block';
       $('kpi-card-norazon').style.display = 'block';
+      $('kpi-card-unassigned').style.display = 'block';
+      $('kpi-card-assigned').style.display = 'block';
 
       $('kpi-card-type-remolcadores').style.display = 'block';
       $('kpi-card-type-volquetes').style.display = 'block';
@@ -1760,14 +1763,17 @@ var addInConstructor = function (geotabApi, state, callback) {
     [
       'kpi-card-sn-vin', 'kpi-card-novin', 'kpi-card-nosn', 'kpi-card-2', 'kpi-card-4', 
       'kpi-card-less5', 'kpi-card-noanualidad', 'kpi-card-noestado', 'kpi-card-noruc', 'kpi-card-norazon',
+      'kpi-card-unassigned', 'kpi-card-assigned',
       'kpi-card-type-remolcadores', 'kpi-card-type-volquetes', 'kpi-card-type-sintipo', 'kpi-card-type-otrostipos'
     ].forEach(function(id) {
       if ($(id)) $(id).classList.remove('kpi-active');
     });
 
-    if (activeUnitFilter === 'all' && activeParamFilter === 'all' && activeFieldMissingFilter === 'all' && activeVehicleTypeFilter === 'all') {
+    if (activeUnitFilter === 'all' && activeParamFilter === 'all' && activeFieldMissingFilter === 'all' && activeVehicleTypeFilter === 'all' && activeAssignmentFilter === 'all') {
       if ($('kpi-card-sn-vin')) $('kpi-card-sn-vin').classList.add('kpi-active');
     } else {
+      if (activeAssignmentFilter === 'unassigned' && $('kpi-card-unassigned')) $('kpi-card-unassigned').classList.add('kpi-active');
+      if (activeAssignmentFilter === 'assigned' && $('kpi-card-assigned')) $('kpi-card-assigned').classList.add('kpi-active');
       if (activeUnitFilter === 'snVin' && $('kpi-card-sn-vin')) $('kpi-card-sn-vin').classList.add('kpi-active');
       if (activeUnitFilter === 'noVin' && $('kpi-card-novin')) $('kpi-card-novin').classList.add('kpi-active');
       if (activeUnitFilter === 'noSn' && $('kpi-card-nosn')) $('kpi-card-nosn').classList.add('kpi-active');
@@ -3607,13 +3613,6 @@ ENTRADAS
     setMsg('Filtro masivo aplicado: ' + activeBulkTokens.length + ' valores.');
   }
 
-  function openValidWithAssignmentFilter(filter) {
-    switchView('valid');
-    activeAssignmentFilter = filter || 'all';
-    renderList();
-    setMsg(filter === 'unassigned' ? 'Mostrando unidades sin asignar.' : 'Mostrando unidades asignadas.');
-  }
-
   function switchView(mod) {
     activeModule = mod;
     resetAllFilters();
@@ -4706,6 +4705,9 @@ ENTRADAS
   if ($('kpi-card-noruc')) $('kpi-card-noruc').addEventListener('click', function() { activeFieldMissingFilter = (activeFieldMissingFilter === 'noruc') ? 'all' : 'noruc'; renderList(); });
   if ($('kpi-card-norazon')) $('kpi-card-norazon').addEventListener('click', function() { activeFieldMissingFilter = (activeFieldMissingFilter === 'norazon') ? 'all' : 'norazon'; renderList(); });
 
+  if ($('kpi-card-unassigned')) $('kpi-card-unassigned').addEventListener('click', function() { activeAssignmentFilter = (activeAssignmentFilter === 'unassigned') ? 'all' : 'unassigned'; renderList(); });
+  if ($('kpi-card-assigned')) $('kpi-card-assigned').addEventListener('click', function() { activeAssignmentFilter = (activeAssignmentFilter === 'assigned') ? 'all' : 'assigned'; renderList(); });
+
   if ($('kpi-card-type-remolcadores')) $('kpi-card-type-remolcadores').addEventListener('click', function() { activeVehicleTypeFilter = (activeVehicleTypeFilter === 'remolcadores') ? 'all' : 'remolcadores'; renderList(); });
   if ($('kpi-card-type-volquetes')) $('kpi-card-type-volquetes').addEventListener('click', function() { activeVehicleTypeFilter = (activeVehicleTypeFilter === 'volquetes') ? 'all' : 'volquetes'; renderList(); });
   if ($('kpi-card-type-sintipo')) $('kpi-card-type-sintipo').addEventListener('click', function() { activeVehicleTypeFilter = (activeVehicleTypeFilter === 'sintipo') ? 'all' : 'sintipo'; renderList(); });
@@ -4718,8 +4720,6 @@ ENTRADAS
   if ($('btn-mod-reports')) $('btn-mod-reports').addEventListener('click', function() { switchView('reports'); });
   if ($('btn-mod-activations')) $('btn-mod-activations').addEventListener('click', function() { switchView('activations'); });
   if ($('btn-mod-create-user')) $('btn-mod-create-user').addEventListener('click', function() { switchView('create-user'); });
-  if ($('btn-hub-unassigned')) $('btn-hub-unassigned').addEventListener('click', function() { openValidWithAssignmentFilter('unassigned'); });
-  if ($('btn-hub-assigned')) $('btn-hub-assigned').addEventListener('click', function() { openValidWithAssignmentFilter('assigned'); });
   if ($('testn-btn-back')) $('testn-btn-back').addEventListener('click', function() { switchView('hub'); });
 
   var filterTimer = null;
