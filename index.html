@@ -393,6 +393,10 @@
         <button id="master-btn-excel" type="button" class="cgps-btn cgps-btn-white" style="font-weight:700;">📊 Exportar XLSX</button>
       </div>
 
+      <div id="hdr-actions-valid" style="display: none; gap: 8px;">
+        <button id="valid-btn-excel" type="button" class="cgps-btn cgps-btn-white" style="font-weight:700;">📊 Exportar XLSX</button>
+      </div>
+
       <div id="hdr-actions-reports" style="display: none; gap: 8px;">
         <button id="reports-btn-open-create-modal" type="button" class="cgps-btn cgps-btn-white" style="font-weight:700;">➕ Copiar Reporte de Cliente</button>
         <button id="reports-btn-open-edit-diags-modal" type="button" class="cgps-btn cgps-btn-secondary" style="font-weight:700;">🔧 Validar / Modificar Diagnósticos</button>
@@ -474,7 +478,8 @@
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                   <div style="font-size: 13px; font-weight: 700; color: #0f172a;">TABLA DE GRUPOS (DATOS COMPLETOS)</div>
                   <button id="cgps-btn-refresh-groups" type="button" class="cgps-btn cgps-btn-primary" style="height: 34px; font-size: 12px;">🔄 Actualizar Tabla de Grupos</button>
-                </div>
+                  <button id="cgps-btn-export-groups" type="button" class="cgps-btn cgps-btn-secondary" style="height: 34px; font-size: 12px;">📊 Exportar a Excel</button>
+                  </div>
                 <div class="cgps-table-scroll" style="max-height: 420px;">
                   <table class="cgps-table">
                     <thead>
@@ -4273,9 +4278,76 @@ ENTRADAS
       console.error('Error cargando grupos:', e);
     }
   }
-    });\n  }\n\n  function executeGroupAudit() {\n    var rawText = $('cgps-audit-input').value.trim();
-    if (!rawText) { setMsg('Ingrese el texto a auditar.', true); return; }
 
+  function exportGroupsToExcel() {
+    var tbody = $('cgps-groups-listbody');
+    var rows = tbody.querySelectorAll('tr');
+    if (rows.length === 0) {
+      setMsg('No hay datos en la tabla de grupos para exportar.', true);
+      return;
+    }
+
+    var headers = [];
+    var headerCells = tbody.querySelector('thead th');
+    if (headerCells) {
+      headers = Array.from(headerCells.querySelectorAll('th')).map(function(th) {
+        return th.textContent.trim();
+      });
+    }
+
+    var data = [];
+    rows.forEach(function(row) {
+      var cells = row.querySelectorAll('td');
+      var rowData = [];
+      cells.forEach(function(cell) {
+        rowData.push(cell.textContent.trim());
+      });
+      if (rowData.length > 0) {
+        data.push(rowData);
+      }
+    });
+
+    if (data.length === 0) {
+      setMsg('No hay datos para exportar.', true);
+      return;
+    }
+
+    var sheetData = [headers].concat(data);
+    var wb = XLSX.utils.book_new();
+    var ws = XLSX.utils.aoa_to_sheet(sheetData);
+    XLSX.utils.book_append_sheet(wb, ws, "Grupos");
+
+    var fileName = 'Grupos_Datos_' + fmtDate(new Date().toISOString()).replace(/\\//g, '-') + '.xlsx';
+    XLSX.writeFile(wb, fileName);
+
+    setMsg('📊 Tabla de grupos exportada a Excel: ' + fileName);
+  }
+
+  function exportValidToExcel() {
+    var rowsToExport = getActiveRowsForModule().filter(function(r) { return isRowMatchingFilters(r); });
+    if (rowsToExport.length === 0) {
+      setMsg('No hay datos en la tabla de validación de GPS para exportar.', true);
+      return;
+    }
+
+    var headers = ["PLACA", "VIN", "# SERIE GPS", "RAZÓN SOCIAL", "RUC", "ESTADO/PROVINCIA", "INSTALACION"];
+    var data = rowsToExport.map(function(r) {
+      return [r.placa, r.vin, r.serialNumber, r.razon || '', r.ruc || '', r.estadoProvincia || '', r.desde || ''];
+    });
+
+    var sheetData = [headers].concat(data);
+    var wb = XLSX.utils.book_new();
+    var ws = XLSX.utils.aoa_to_sheet(sheetData);
+    ws['!cols'] = [{ wch: 18 }, { wch: 22 }, { wch: 20 }, { wch: 30 }, { wch: 16 }, { wch: 20 }, { wch: 16 }];
+
+    var fileName = 'Validacion_GPS_' + fmtDate(new Date().toISOString()).replace(/\\//g, '-') + '.xlsx';
+    XLSX.writeFile(wb, fileName);
+
+    setMsg('📊 Tabla de validación GPS exportada a Excel: ' + fileName);
+  }
+
+  function executeGroupAudit() {
+    var rawText = $('cgps-audit-input').value.trim();
     var IGNORED_GENERIC_WORDS = [
       'PERU', 'CORPORACION', 'LOGISTICA', 'TRANSPORTES', 'ASOCIADOS', 'SOCIEDAD', 
       'EMPRESA', 'SERVICIOS', 'GRUPO', 'RENTAL', 'IMPORTACIONES', 'INGENIEROS', 
@@ -4699,6 +4771,12 @@ ENTRADAS
     });
   }
 
+  if ($('cgps-btn-export-groups')) {
+    $('cgps-btn-export-groups').addEventListener('click', function() {
+      exportGroupsToExcel();
+    });
+  }
+
   if ($('cgps-btn-refresh-groups')) {
     $('cgps-btn-refresh-groups').addEventListener('click', function() {
       loadAllGroupsTable();
@@ -4730,6 +4808,12 @@ ENTRADAS
       navigator.clipboard.writeText(txtElem.value).then(function() {
         setMsg('📋 Texto legal copiado al portapapeles.');
       });
+    });
+  }
+
+  if ($('valid-btn-excel')) {
+    $('valid-btn-excel').addEventListener('click', function() {
+      exportValidToExcel();
     });
   }
 
