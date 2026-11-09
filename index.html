@@ -2463,8 +2463,8 @@ ENTRADAS
 
     try {
       if (!rawSchedules || rawSchedules.length === 0) {
-        showLoading("Sincronizando programaciones desde Geotab...", 60);
-        const scheds = await callApi(api, 'Get', { typeName: 'CustomReportSchedule' });
+        showLoading("Sincronizando plantillas desde Geotab...", 60);
+        const scheds = await callApi(api, 'Get', { typeName: 'ReportTemplate' });
         rawSchedules = scheds || [];
       }
 
@@ -2836,19 +2836,27 @@ ENTRADAS
   let api;
 
   async function clonar() {
-    // 1. Leer la plantilla original con su Excel
-    const [origen] = await api.call("Get", {
-      typeName: "ReportTemplate",
-      search: { id: "b669", includeBinaryData: true },
-      resultsLimit: 1
-    });
+    // 1. Leer la plantilla origen seleccionada del cliente
+    var schedId = $('create-rep-source-schedule').value;
+    if (!schedId) {
+      alert('Por favor, seleccione un reporte base a clonar.');
+      return null;
+    }
+
+    // Usar las plantillas que se cargaron en el dropdown del cliente origen
+    var origen = sourceGroupSchedules.find(function(s){ return s.id === schedId; });
+
+    if (!origen) {
+      alert('No se encontró la plantilla seleccionada.');
+      return null;
+    }
 
     // 2. Preparar la copia
     const copia = { ...origen };
     delete copia.id;
     delete copia.lastModifiedDate;
-    copia.isSystem = false;
-    copia.name = origen.name.replace(/WARAYANA/i, "Test x1");
+    delete copia.isSystem;
+    copia.name = copia.name.replace(/WARAYANA/i, "Test x1");
     if (copia.name === origen.name) copia.name += " - Test x1";
 
     // 3. Guardar (sin grupos ni vehículos)
@@ -4366,7 +4374,7 @@ ENTRADAS
           });
         }
 
-        callApi(api, 'Get', { typeName: 'CustomReportSchedule' })
+        callApi(api, 'Get', { typeName: 'ReportTemplate' })
           .then(function(schedules) {
             rawSchedules = schedules || [];
           }).catch(function(err) {
