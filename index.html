@@ -4352,17 +4352,18 @@ ENTRADAS
       return;
     }
 
-    var headers = ["PLACA", "VIN", "# SERIE GPS", "RAZÓN SOCIAL", "RUC", "ESTADO/PROVINCIA", "INSTALACION"];
+    var headers = ["NOMBRE DEL ACTIVO", "PLACA", "ACTIVADO DESDE", "VIN", "PARÁMETROS (5)", "GRUPOS", "ESTADO/PROV.", "RUC", "RAZÓN SOCIAL", "ANUALIDAD", "TIPO VEHÍCULO", "MARCA", "MODELO", "AÑO"];
     var data = rowsToExport.map(function(r) {
-      return [r.placa, r.vin, r.serialNumber, r.razon || '', r.ruc || '', r.estadoProvincia || '', r.desde || ''];
+      return [r.nombreActivo, r.placa, r.desde || '', r.vin, r.paramCount + '/5', r.grupos || '', r.estadoProvincia || '', r.ruc || '', r.razon || '', r.anualidad || '', r.tipoVehiculo || '', r.marca || '', r.modelo || '', r.anio || ''];
     });
 
     var sheetData = [headers].concat(data);
     var wb = XLSX.utils.book_new();
     var ws = XLSX.utils.aoa_to_sheet(sheetData);
-    ws['!cols'] = [{ wch: 18 }, { wch: 22 }, { wch: 20 }, { wch: 30 }, { wch: 16 }, { wch: 20 }, { wch: 16 }];
+    ws['!cols'] = [{ wch: 22 }, { wch: 12 }, { wch: 16 }, { wch: 22 }, { wch: 14 }, { wch: 30 }, { wch: 14 }, { wch: 14 }, { wch: 25 }, { wch: 18 }, { wch: 16 }, { wch: 14 }, { wch: 16 }, { wch: 8 }];
 
     var fileName = 'Validacion_GPS_' + fmtDate(new Date().toISOString()).replace(/\//g, '-') + '.xlsx';
+    XLSX.utils.book_append_sheet(wb, ws, "Validacion GPS");
     XLSX.writeFile(wb, fileName);
 
     setMsg('📊 Tabla de validación GPS exportada a Excel (' + data.length + ' filas). Seleccionadas: ' + (selectedIds.length > 0 ? selectedIds.length : 'todas'));
