@@ -371,6 +371,20 @@
         <h2>NUEVO USUARIO</h2>
         <p>Creación automática de usuario con perfil Administrador Cliente - ADDINS</p>
       </div>
+
+      <div class="testn-card" id="btn-hub-unassigned" style="border-color: #f59e0b !important;">
+        <div class="testn-card-icon">📦</div>
+        <h2>UNIDADES SIN ASIGNAR</h2>
+        <p>Activos que pertenecen al grupo "Unidades sin asignar"</p>
+        <div class="testn-card-metric" id="hub-kpi-unassigned" style="color: #d97706;">0</div>
+      </div>
+
+      <div class="testn-card" id="btn-hub-assigned" style="border-color: #10b981 !important;">
+        <div class="testn-card-icon">✅</div>
+        <h2>UNIDADES ASIGNADAS</h2>
+        <p>Activos que no tienen el grupo "Unidades sin asignar"</p>
+        <div class="testn-card-metric" id="hub-kpi-assigned" style="color: #059669;">0</div>
+      </div>
     </div>
   </div>
 
@@ -903,7 +917,6 @@
         <!-- SECCIÓN 3: ACCIONES DIRECTAS / 5 PARÁMETROS -->
         <div style="display: flex; align-items: center; justify-content: center; min-width: 175px; padding: 4px;">
           <button id="cgps-btn-inject-params" type="button" class="cgps-btn" style="background: linear-gradient(135deg, #10b981, #059669); color: #ffffff; font-weight: 800; font-size: 13px; padding: 10px 18px; border-radius: 8px; box-shadow: 0 3px 6px -1px rgba(16, 185, 129, 0.35); height: 42px; width: 100%; display: none;">Aplicar 5 parametros</button>
-          <button id="cgps-btn-decode-vin" type="button" style="display: none;"></button>
         </div>
 
       </div>
@@ -1092,6 +1105,7 @@
     .testn-card-icon { font-size: 24px; margin-bottom: 12px; }
     .testn-card h2 { font-size: 15px !important; color: #0f172a !important; font-weight: 700 !important; margin: 0 0 6px 0 !important; text-transform: uppercase !important; letter-spacing: 0.5px; }
     .testn-card p { font-size: 12px !important; color: #64748b !important; margin: 0 !important; line-height: 1.4 !important; }
+    .testn-card-metric { margin-top: 10px; font-size: 28px; font-weight: 800; line-height: 1; letter-spacing: -0.5px; }
 
     .cgps-btn { padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; white-space: nowrap; transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
     .cgps-btn:disabled { opacity: 0.5; cursor: not-allowed !important; }
@@ -1228,6 +1242,7 @@ var addInConstructor = function (geotabApi, state, callback) {
   var activeParamFilter = 'all';
   var activeFieldMissingFilter = 'all'; 
   var activeVehicleTypeFilter = 'all'; 
+  var activeAssignmentFilter = 'all';
 
   var activeDateRange = null;
   var databaseName = "divemotor";
@@ -1549,9 +1564,14 @@ var addInConstructor = function (geotabApi, state, callback) {
       rawGroupIds: (d.groups || []).map(function(g){ return g.id; }),
       paramCount: paramStatus.count,
       paramMissing: paramStatus.missing,
-      isExcluded: isExcluded
+      isExcluded: isExcluded,
+      isUnassigned: (d.groups || []).some(function (g) {
+        var grp = g && groupsById[g.id];
+        return !!(grp && grp.name && normalizeStr(grp.name).indexOf('sin asignar') >= 0);
+      })
     };
     row._nom = name.toLowerCase(); row._p = row.placa.toLowerCase(); row._v = vin.toLowerCase(); row._s = serial.toLowerCase();
+    row._pNorm = row._p.replace(/[-\s]/g, '');
     row._hay = [name, row.placa, vin, serial, row.grupos, razonSocial, rucVal, estadoProv, anualidadVal, tipoVehiculoVal, marcaVal, modeloVal, anioVal].join(' ').toLowerCase();
     return row;
   }
@@ -1583,6 +1603,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     activeParamFilter = 'all';
     activeFieldMissingFilter = 'all';
     activeVehicleTypeFilter = 'all';
+    activeAssignmentFilter = 'all';
     activeDateRange = null;
 
     if ($('cgps-filter')) $('cgps-filter').value = '';
@@ -1657,10 +1678,14 @@ var addInConstructor = function (geotabApi, state, callback) {
     var countFull = 0, countLess5 = 0;
     var cNoAnualidad = 0, cNoEstado = 0, cNoRuc = 0, cNoRazon = 0;
     var cRemolcadores = 0, cVolquetes = 0, cSinTipo = 0, cOtrosTipos = 0;
+    var cUnassigned = 0, cAssigned = 0;
 
     rowsToCount.forEach(function (r) {
       if (r.paramCount === 5) countFull++;
       else countLess5++;
+
+      if (r.isUnassigned) cUnassigned++;
+      else cAssigned++;
 
       if (!r.anualidad || r.anualidad.trim() === '' || r.anualidad.trim() === '-') cNoAnualidad++;
       if (!r.estadoProvincia || r.estadoProvincia.trim() === '' || r.estadoProvincia.trim() === 'Sin Estado') cNoEstado++;
@@ -1681,6 +1706,9 @@ var addInConstructor = function (geotabApi, state, callback) {
 
     $('kpi-title-2').textContent = "SELECCIONADOS";
     $('kpi-val-2').textContent = selCount;
+
+    if ($('hub-kpi-unassigned')) $('hub-kpi-unassigned').textContent = cUnassigned;
+    if ($('hub-kpi-assigned')) $('hub-kpi-assigned').textContent = cAssigned;
 
     if (activeModule === 'certi' || activeModule === 'master') {
       $('kpi-card-4').style.display = 'none';
@@ -1778,7 +1806,6 @@ var addInConstructor = function (geotabApi, state, callback) {
   function updateMassSelectVisibility() {
     var validOpts = document.querySelectorAll('.opt-valid-only');
     var btnInject = $('cgps-btn-inject-params');
-    var btnDecode = $('cgps-btn-decode-vin');
 
     if (activeModule === 'valid') {
       validOpts.forEach(function(opt) { opt.style.display = 'block'; });
@@ -1786,14 +1813,9 @@ var addInConstructor = function (geotabApi, state, callback) {
         btnInject.style.display = 'inline-flex';
         btnInject.style.visibility = 'visible';
       }
-      if (btnDecode) {
-        btnDecode.style.display = 'inline-flex';
-        btnDecode.style.visibility = 'visible';
-      }
     } else {
       validOpts.forEach(function(opt) { opt.style.display = 'none'; });
       if (btnInject) btnInject.style.display = 'none';
-      if (btnDecode) btnDecode.style.display = 'none';
       if (['nombreActivo', 'placa', 'estadoProvincia', 'anualidad', 'tipoVehiculo', 'marca', 'modelo', 'anio'].includes($('cgps-mass-field-select').value)) {
         $('cgps-mass-field-select').value = 'razon';
       }
@@ -2010,10 +2032,6 @@ var addInConstructor = function (geotabApi, state, callback) {
     if (target && (target.id === 'cgps-btn-inject-params' || target.closest('#cgps-btn-inject-params'))) {
       e.preventDefault();
       requestInjectRequiredParameters();
-    }
-    if (target && (target.id === 'cgps-btn-decode-vin' || target.closest('#cgps-btn-decode-vin'))) {
-      e.preventDefault();
-      requestTriggerVinDecodeProcess();
     }
   });
 
@@ -3589,6 +3607,13 @@ ENTRADAS
     setMsg('Filtro masivo aplicado: ' + activeBulkTokens.length + ' valores.');
   }
 
+  function openValidWithAssignmentFilter(filter) {
+    switchView('valid');
+    activeAssignmentFilter = filter || 'all';
+    renderList();
+    setMsg(filter === 'unassigned' ? 'Mostrando unidades sin asignar.' : 'Mostrando unidades asignadas.');
+  }
+
   function switchView(mod) {
     activeModule = mod;
     resetAllFilters();
@@ -3785,6 +3810,9 @@ ENTRADAS
     if (activeUnitFilter === 'selected' && !selected[r.id]) return false;
 
     if (activeModule === 'valid') {
+      if (activeAssignmentFilter === 'unassigned' && !r.isUnassigned) return false;
+      if (activeAssignmentFilter === 'assigned' && r.isUnassigned) return false;
+
       if (activeParamFilter === 'full' && r.paramCount !== 5) return false;
       if (activeParamFilter === 'less5' && r.paramCount === 5) return false;
 
@@ -3808,10 +3836,15 @@ ENTRADAS
       }
     }
 
-    var nom = r._nom, p = r._p, v = r._v, s = r._s;
+    var nom = r._nom, p = r._p, v = r._v, s = r._s, pNorm = r._pNorm || p.replace(/[-\s]/g, '');
     if (activeBulkTokens.length > 0) {
       var matchBulk = activeBulkTokens.some(function (token) {
-        return nom === token || p === token || v === token || s === token || (token.length >= 3 && (nom.indexOf(token) >= 0 || p.indexOf(token) >= 0 || v.indexOf(token) >= 0 || s.indexOf(token) >= 0));
+        var tokenNorm = token.replace(/[-\s]/g, '');
+        if (nom === token || p === token || v === token || s === token) return true;
+        if (tokenNorm && pNorm === tokenNorm) return true;
+        if (token.length >= 3 && (nom.indexOf(token) >= 0 || p.indexOf(token) >= 0 || v.indexOf(token) >= 0 || s.indexOf(token) >= 0)) return true;
+        if (tokenNorm.length >= 3 && pNorm.indexOf(tokenNorm) >= 0) return true;
+        return false;
       });
       if (!matchBulk) return false;
     }
@@ -4685,6 +4718,8 @@ ENTRADAS
   if ($('btn-mod-reports')) $('btn-mod-reports').addEventListener('click', function() { switchView('reports'); });
   if ($('btn-mod-activations')) $('btn-mod-activations').addEventListener('click', function() { switchView('activations'); });
   if ($('btn-mod-create-user')) $('btn-mod-create-user').addEventListener('click', function() { switchView('create-user'); });
+  if ($('btn-hub-unassigned')) $('btn-hub-unassigned').addEventListener('click', function() { openValidWithAssignmentFilter('unassigned'); });
+  if ($('btn-hub-assigned')) $('btn-hub-assigned').addEventListener('click', function() { openValidWithAssignmentFilter('assigned'); });
   if ($('testn-btn-back')) $('testn-btn-back').addEventListener('click', function() { switchView('hub'); });
 
   var filterTimer = null;
