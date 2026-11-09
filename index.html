@@ -4324,7 +4324,20 @@ ENTRADAS
   }
 
   function exportValidToExcel() {
-    var rowsToExport = getActiveRowsForModule().filter(function(r) { return isRowMatchingFilters(r); });
+    var allActiveRows = getActiveRowsForModule().filter(function(r) { return isRowMatchingFilters(r); });
+    var selectedIds = Object.keys(selected).filter(function (k) { return selected[k]; });
+
+    var rowsToExport;
+    if (selectedIds.length > 0) {
+      rowsToExport = allActiveRows.filter(function(r) { return selected[r.id]; });
+      if (rowsToExport.length === 0) {
+        setMsg('No hay filas seleccionadas para exportar.', true);
+        return;
+      }
+    } else {
+      rowsToExport = allActiveRows;
+    }
+
     if (rowsToExport.length === 0) {
       setMsg('No hay datos en la tabla de validación de GPS para exportar.', true);
       return;
@@ -4343,12 +4356,11 @@ ENTRADAS
     var fileName = 'Validacion_GPS_' + fmtDate(new Date().toISOString()).replace(/\\//g, '-') + '.xlsx';
     XLSX.writeFile(wb, fileName);
 
-    setMsg('📊 Tabla de validación GPS exportada a Excel: ' + fileName);
+    setMsg('📊 Tabla de validación GPS exportada a Excel (' + data.length + ' filas). Seleccionadas: ' + (selectedIds.length > 0 ? selectedIds.length : 'todas'));
   }
 
   function executeGroupAudit() {
     var rawText = $('cgps-audit-input').value.trim();
-    var IGNORED_GENERIC_WORDS = [
       'PERU', 'CORPORACION', 'LOGISTICA', 'TRANSPORTES', 'ASOCIADOS', 'SOCIEDAD', 
       'EMPRESA', 'SERVICIOS', 'GRUPO', 'RENTAL', 'IMPORTACIONES', 'INGENIEROS', 
       'COMERCIAL', 'INVERSIONES', 'GENERALES', 'INDUSTRIA', 'INDUSTRIAS', 'CONTRATISTAS'
