@@ -3587,31 +3587,36 @@ ENTRADAS
   }
 
   function exportMasterExcel() {
-    var rowsToExport = getActiveRowsForModule().filter(function(r) { return isRowMatchingFilters(r); });
-    if (rowsToExport.length === 0) {
-      setMsg('No hay datos en la tabla para exportar.', true);
-      return;
+    try {
+      var rowsToExport = getActiveRowsForModule().filter(function(r) { return isRowMatchingFilters(r); });
+      if (rowsToExport.length === 0) {
+        setMsg('No hay datos en la tabla para exportar.', true);
+        return;
+      }
+
+      var sheetData = [
+        ["PLACA", "BASE DE DATOS", "VIN", "# SERIE", "INSTALACIÓN"]
+      ];
+
+      rowsToExport.forEach(function(r) {
+        sheetData.push([
+          r.placa, databaseName, r.vin, r.serialNumber, r.desde
+        ]);
+      });
+
+      var wb = XLSX.utils.book_new();
+      var ws = XLSX.utils.aoa_to_sheet(sheetData);
+      ws['!cols'] = [{ wch: 18 }, { wch: 18 }, { wch: 22 }, { wch: 20 }, { wch: 16 }];
+
+      var fileName = 'Master_Switch_Divemotor_' + fmtDate(new Date().toISOString()).replace(/\//g, '-') + '.xlsx';
+      XLSX.utils.book_append_sheet(wb, ws, "Master Switch");
+      XLSX.writeFile(wb, fileName);
+
+      setMsg('📊 Master Switch exportado con éxito (' + rowsToExport.length + ' registros).');
+    } catch (e) {
+      console.error('Error exportando Master Excel:', e);
+      setMsg('❌ Error exportando a Excel: ' + (e.message || String(e)), true);
     }
-
-    var sheetData = [
-      ["PLACA", "BASE DE DATOS", "VIN", "# SERIE", "INSTALACIÓN"]
-    ];
-
-    rowsToExport.forEach(function(r) {
-      sheetData.push([
-        r.placa, databaseName, r.vin, r.serialNumber, r.desde
-      ]);
-    });
-
-    var wb = XLSX.utils.book_new();
-    var ws = XLSX.utils.aoa_to_sheet(sheetData);
-    ws['!cols'] = [{ wch: 18 }, { wch: 18 }, { wch: 22 }, { wch: 20 }, { wch: 16 }];
-
-    var fileName = 'Master_Switch_Divemotor_' + fmtDate(new Date().toISOString()).replace(/\//g, '-') + '.xlsx';
-    XLSX.utils.book_append_sheet(wb, ws, "Master Switch");
-    XLSX.writeFile(wb, fileName);
-
-    setMsg('📊 Master Switch exportado con éxito (' + rowsToExport.length + ' registros).');
   }
 
   function applyBulkFilter(inputVal) {
@@ -4284,20 +4289,15 @@ ENTRADAS
   }
 
   function exportGroupsToExcel() {
-    var tbody = $('cgps-groups-listbody');
-    var rows = tbody.querySelectorAll('tr');
+    try {
+      var tbody = $('cgps-groups-listbody');
+      var rows = tbody.querySelectorAll('tr');
     if (rows.length === 0) {
       setMsg('No hay datos en la tabla de grupos para exportar.', true);
       return;
     }
 
-    var headers = [];
-    var headerCells = tbody.querySelector('thead th');
-    if (headerCells) {
-      headers = Array.from(headerCells.querySelectorAll('th')).map(function(th) {
-        return th.textContent.trim();
-      });
-    }
+    var headers = ["Nombre del Grupo", "Fecha Creación", "Última Modif.", "Subgrupos hijos", "Subgrupos padre", "Depend. usuarios", "Depend. zonas", "Depend. activos", "Cambiar Nombre"];
 
     var data = [];
     rows.forEach(function(row) {
@@ -4321,14 +4321,19 @@ ENTRADAS
     var ws = XLSX.utils.aoa_to_sheet(sheetData);
     XLSX.utils.book_append_sheet(wb, ws, "Grupos");
 
-    var fileName = 'Grupos_Datos_' + fmtDate(new Date().toISOString()).replace(/\\//g, '-') + '.xlsx';
+    var fileName = 'Grupos_Datos_' + fmtDate(new Date().toISOString()).replace(/\//g, '-') + '.xlsx';
     XLSX.writeFile(wb, fileName);
 
     setMsg('📊 Tabla de grupos exportada a Excel: ' + fileName);
+    } catch (e) {
+      console.error('Error exportando Grupos Excel:', e);
+      setMsg('❌ Error exportando a Excel: ' + (e.message || String(e)), true);
+    }
   }
 
   function exportValidToExcel() {
-    var allActiveRows = getActiveRowsForModule().filter(function(r) { return isRowMatchingFilters(r); });
+    try {
+      var allActiveRows = getActiveRowsForModule().filter(function(r) { return isRowMatchingFilters(r); });
     var selectedIds = Object.keys(selected).filter(function (k) { return selected[k]; });
 
     var rowsToExport;
@@ -4357,10 +4362,14 @@ ENTRADAS
     var ws = XLSX.utils.aoa_to_sheet(sheetData);
     ws['!cols'] = [{ wch: 18 }, { wch: 22 }, { wch: 20 }, { wch: 30 }, { wch: 16 }, { wch: 20 }, { wch: 16 }];
 
-    var fileName = 'Validacion_GPS_' + fmtDate(new Date().toISOString()).replace(/\\//g, '-') + '.xlsx';
+    var fileName = 'Validacion_GPS_' + fmtDate(new Date().toISOString()).replace(/\//g, '-') + '.xlsx';
     XLSX.writeFile(wb, fileName);
 
     setMsg('📊 Tabla de validación GPS exportada a Excel (' + data.length + ' filas). Seleccionadas: ' + (selectedIds.length > 0 ? selectedIds.length : 'todas'));
+    } catch (e) {
+      console.error('Error exportando Valid Excel:', e);
+      setMsg('❌ Error exportando a Excel: ' + (e.message || String(e)), true);
+    }
   }
 
   async function executeGroupAudit() {
