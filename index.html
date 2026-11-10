@@ -463,36 +463,35 @@
       </div>
 
       <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-top: 16px;">
-        <div class="cgps-card" style="flex: 1; min-width: 300px;">
-          <div style="font-size: 12px; font-weight: 700; margin-bottom: 8px; color: #0f172a;">PEGADO DE LISTA PARA AUDITORÍA DE GRUPOS</div>
-          <div style="display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap;">
-            <textarea id="cgps-audit-input" class="cgps-textarea" placeholder="Pegue aquí las observaciones o clientes en bloque..." rows="6" style="flex: 1; min-width: 300px; font-family: 'JetBrains Mono', monospace; font-size: 12px;"></textarea>
-            <div style="display: flex; flex-direction: column; gap: 8px;">
-              <button id="cgps-btn-exec-audit" type="button" class="cgps-btn cgps-btn-primary" style="height: 40px; font-size: 13px;">🔍 Auditar Grupos</button>
-              <button id="cgps-btn-clear-audit" type="button" class="cgps-btn cgps-btn-outline">Limpiar Texto</button>
-            </div>
-          </div>
-        </div>
+              <div class="cgps-card" style="flex: 1; min-width: 300px;">
+                <div style="font-size: 12px; font-weight: 700; margin-bottom: 8px; color: #0f172a;">PEGADO DE LISTA PARA AUDITORÍA DE GRUPOS</div>
+                <div style="display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap;">
+                  <textarea id="cgps-audit-input" class="cgps-textarea" placeholder="Pegue aquí las observaciones o clientes en bloque..." rows="6" style="flex: 1; min-width: 300px; font-family: 'JetBrains Mono', monospace; font-size: 12px;"></textarea>
+                  <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <button id="cgps-btn-exec-audit" type="button" class="cgps-btn cgps-btn-primary" style="height: 40px; font-size: 13px;">🔍 Auditar Grupos</button>
+                    <button id="cgps-btn-clear-audit" type="button" class="cgps-btn cgps-btn-outline">Limpiar Texto</button>
+                  </div>
+                </div>
+              </div>
 
-        <div id="cgps-groups-table-card" class="cgps-card" style="flex: 1; min-width: 400px; display: block;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-            <div style="font-size: 13px; font-weight: 700; color: #0f172a;">TABLA DE GRUPOS (DATOS COMPLETOS)</div>
-            <div style="display: flex; gap: 8px; align-items: center;">
-              <input type="text" id="cgps-groups-filter" class="cgps-input" placeholder="🔍 Filtrar grupo..." style="width: 200px; height: 34px; font-size: 12px;">
-              <button id="cgps-btn-refresh-groups" type="button" class="cgps-btn cgps-btn-primary" style="height: 34px; font-size: 12px;">🔄 Actualizar Tabla de Grupos</button>
-              <button id="cgps-btn-export-groups" type="button" class="cgps-btn cgps-btn-secondary" style="height: 34px; font-size: 12px;">📊 Exportar a Excel</button>
-            </div>
-          </div>
+              <div id="cgps-groups-table-card" class="cgps-card" style="flex: 1; min-width: 400px; display: block;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                  <div style="font-size: 13px; font-weight: 700; color: #0f172a;">TABLA DE GRUPOS (DATOS COMPLETOS)</div>
+                  <div style="display: flex; gap: 8px; align-items: center;">
+                    <button id="cgps-btn-refresh-groups" type="button" class="cgps-btn cgps-btn-primary" style="height: 34px; font-size: 12px;">🔄 Actualizar Tabla de Grupos</button>
+                    <button id="cgps-btn-export-groups" type="button" class="cgps-btn cgps-btn-secondary" style="height: 34px; font-size: 12px;">📊 Exportar a Excel</button>
+                  </div>
+                </div>
           <div class="cgps-table-scroll" style="max-height: 420px;">
             <table class="cgps-table">
               <thead>
-                <tr>
-                  <th style="width: 30%;">Nombre del Grupo</th>
-                  <th style="width: 20%;">Fecha Creación</th>
-                  <th style="width: 20%;">Última Modif.</th>
-                  <th style="width: 30%;">Cambiar Nombre</th>
-                </tr>
-              </thead>
+                              <tr>
+                                <th style="width: 30%;">GRUPO</th>
+                                <th style="width: 25%;">Numero de activos</th>
+                                <th style="width: 25%;">Numero de Zonas</th>
+                                <th style="width: 20%;">Numero de usuarios</th>
+                              </tr>
+                            </thead>
               <tbody id="cgps-groups-listbody"></tbody>
             </table>
           </div>
@@ -4276,32 +4275,32 @@ ENTRADAS
       };
 
       var rows = groupData.map(function(gd) {
-        var g = gd.group;
-        return '<tr>' +
-          '<td><b>' + htmlEsc(g.name) + '</b><br><small style="color:#64748b;">ID: ' + htmlEsc(g.id) + '</small></td>' +
-          '<td style="font-family:\'JetBrains Mono\',monospace;font-size:11px;">' + fmt(g.createDate) + '</td>' +
-          '<td style="font-family:\'JetBrains Mono\',monospace;font-size:11px;">' + fmt(g.lastModifiedDate) + '</td>' +
-          '<td style="text-align:center;"><button class="btn-small" onclick="geotabAddin.renameGroup(\'' + htmlEsc(g.id) + '\', prompt(\'Nuevo nombre:\', \'' + htmlEsc(g.name) + '\'))">Cambiar Nombre</button></td>' +
-          '</tr>';
-      }).join('');
+              var g = gd.group;
+              return '<tr>' +
+                '<td><b>' + htmlEsc(g.name) + '</b><br><small style="color:#64748b;">ID: ' + htmlEsc(g.id) + '</small></td>' +
+                '<td style="text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:11px;">' + gd.deviceCount + '</td>' +
+                '<td style="text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:11px;">' + gd.zoneCount + '</td>' +
+                '<td style="text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:11px;">' + gd.userCount + '</td>' +
+                '</tr>';
+            }).join('');
 
-      tbody.innerHTML = rows || '<tr><td colspan="4" style="text-align:center; color:#94a3b8;">No hay grupos con datos.</td></tr>';
-    } catch (e) {
-      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#ef4444;">Error: ' + htmlEsc(e.message) + '</td></tr>';
-      console.error('Error cargando grupos:', e);
-    }
-  }
+            tbody.innerHTML = rows || '<tr><td colspan="4" style="text-align:center; color:#94a3b8;">No hay grupos con datos.</td></tr>';
+          } catch (e) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#ef4444;">Error: ' + htmlEsc(e.message) + '</td></tr>';
+            console.error('Error cargando grupos:', e);
+          }
+        }
 
-  function exportGroupsToExcel() {
-    try {
-      var tbody = $('cgps-groups-listbody');
-      var rows = tbody.querySelectorAll('tr');
-    if (rows.length === 0) {
-      setMsg('No hay datos en la tabla de grupos para exportar.', true);
-      return;
-    }
+        function exportGroupsToExcel() {
+          try {
+            var tbody = $('cgps-groups-listbody');
+            var rows = tbody.querySelectorAll('tr');
+          if (rows.length === 0) {
+            setMsg('No hay datos en la tabla de grupos para exportar.', true);
+            return;
+          }
 
-    var headers = ["Nombre del Grupo", "Fecha Creación", "Última Modif.", "Cambiar Nombre"];
+          var headers = ["GRUPO", "Numero de activos", "Numero de Zonas", "Numero de usuarios"];
 
     var data = [];
     rows.forEach(function(row) {
@@ -4323,7 +4322,7 @@ ENTRADAS
     var sheetData = [headers].concat(data);
     var wb = XLSX.utils.book_new();
     var ws = XLSX.utils.aoa_to_sheet(sheetData);
-    ws['!cols'] = [{ wch: 30 }, { wch: 16 }, { wch: 16 }, { wch: 16 }];
+    ws['!cols'] = [{ wch: 35 }, { wch: 18 }, { wch: 18 }, { wch: 18 }];
     XLSX.utils.book_append_sheet(wb, ws, "Grupos");
 
     var fileName = 'Grupos_Datos_' + fmtDate(new Date().toISOString()).replace(/\//g, '-') + '.xlsx';
@@ -4847,25 +4846,12 @@ ENTRADAS
   }
 
   if ($('cgps-btn-refresh-groups')) {
-      $('cgps-btn-refresh-groups').addEventListener('click', function() {
-        loadAllGroupsTable();
-      });
-    }
-
-    if ($('cgps-groups-filter')) {
-      $('cgps-groups-filter').addEventListener('input', function() {
-        var filterText = this.value.toLowerCase().trim();
-        var tbody = $('cgps-groups-listbody');
-        if (!tbody) return;
-        var rows = tbody.querySelectorAll('tr');
-        rows.forEach(function(row) {
-          var text = row.textContent.toLowerCase();
-          row.style.display = text.indexOf(filterText) >= 0 ? '' : 'none';
+        $('cgps-btn-refresh-groups').addEventListener('click', function() {
+          loadAllGroupsTable();
         });
-      });
-    }
+      }
 
-  if ($('cgps-btn-exec-audit')) $('cgps-btn-exec-audit').addEventListener('click', executeGroupAudit);
+    if ($('cgps-btn-exec-audit')) $('cgps-btn-exec-audit').addEventListener('click', executeGroupAudit);
   if ($('cgps-btn-clear-audit')) {
       $('cgps-btn-clear-audit').addEventListener('click', function() {
         $('cgps-audit-input').value = '';
