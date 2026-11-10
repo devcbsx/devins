@@ -462,44 +462,44 @@
         <div id="audit-create-status" style="font-size: 12px; font-weight: 700; margin-top: 12px; min-height: 18px;"></div>
       </div>
 
-      <div class="cgps-card" style="margin-top: 16px;">
-        <div style="font-size: 12px; font-weight: 700; margin-bottom: 8px; color: #0f172a;">PEGADO DE LISTA PARA AUDITORÍA DE GRUPOS</div>
-        <div style="display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap;">
-          <textarea id="cgps-audit-input" class="cgps-textarea" placeholder="Pegue aquí las observaciones o clientes en bloque..." rows="6" style="flex: 1; min-width: 300px; font-family: 'JetBrains Mono', monospace; font-size: 12px;"></textarea>
-          <div style="display: flex; flex-direction: column; gap: 8px;">
-            <button id="cgps-btn-exec-audit" type="button" class="cgps-btn cgps-btn-primary" style="height: 40px; font-size: 13px;">🔍 Auditar Grupos</button>
-            <button id="cgps-btn-clear-audit" type="button" class="cgps-btn cgps-btn-outline">Limpiar Texto</button>
+      <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-top: 16px;">
+        <div class="cgps-card" style="flex: 1; min-width: 300px;">
+          <div style="font-size: 12px; font-weight: 700; margin-bottom: 8px; color: #0f172a;">PEGADO DE LISTA PARA AUDITORÍA DE GRUPOS</div>
+          <div style="display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap;">
+            <textarea id="cgps-audit-input" class="cgps-textarea" placeholder="Pegue aquí las observaciones o clientes en bloque..." rows="6" style="flex: 1; min-width: 300px; font-family: 'JetBrains Mono', monospace; font-size: 12px;"></textarea>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <button id="cgps-btn-exec-audit" type="button" class="cgps-btn cgps-btn-primary" style="height: 40px; font-size: 13px;">🔍 Auditar Grupos</button>
+              <button id="cgps-btn-clear-audit" type="button" class="cgps-btn cgps-btn-outline">Limpiar Texto</button>
+            </div>
           </div>
-                </div>
-              </div>
+        </div>
 
-              <!-- NUEVO: Tabla completa de grupos con dependencias -->
-              <div id="cgps-groups-table-card" class="cgps-card" style="margin-top: 16px; display: block;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                  <div style="font-size: 13px; font-weight: 700; color: #0f172a;">TABLA DE GRUPOS (DATOS COMPLETOS)</div>
-                  <button id="cgps-btn-refresh-groups" type="button" class="cgps-btn cgps-btn-primary" style="height: 34px; font-size: 12px;">🔄 Actualizar Tabla de Grupos</button>
-                  <button id="cgps-btn-export-groups" type="button" class="cgps-btn cgps-btn-secondary" style="height: 34px; font-size: 12px;">📊 Exportar a Excel</button>
-                  </div>
-                <div class="cgps-table-scroll" style="max-height: 420px;">
-                  <table class="cgps-table">
-                    <thead>
-                                          <tr>
-                                            <th style="width: 18%;">Nombre del Grupo</th>
-                                            <th style="width: 10%;">Fecha Creación</th>
-                                            <th style="width: 10%;">Última Modif.</th>
-                                            <th style="width: 12%;">Subgrupos hijos</th>
-                                            <th style="width: 10%;">Subgrupos padre</th>
-                                            <th style="width: 10%;">Depend. usuarios</th>
-                                            <th style="width: 10%;">Depend. zonas</th>
-                                            <th style="width: 10%;">Depend. activos</th>
-                                            <th style="width: 10%;">Cambiar Nombre</th>
-                                          </tr>
-                                        </thead>
-                    <tbody id="cgps-groups-listbody"></tbody>
-                  </table>
-                </div>
-                </div>
-                </div>
+        <div id="cgps-groups-table-card" class="cgps-card" style="flex: 1; min-width: 400px; display: block;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <div style="font-size: 13px; font-weight: 700; color: #0f172a;">TABLA DE GRUPOS (DATOS COMPLETOS)</div>
+            <button id="cgps-btn-refresh-groups" type="button" class="cgps-btn cgps-btn-primary" style="height: 34px; font-size: 12px;">🔄 Actualizar Tabla de Grupos</button>
+            <button id="cgps-btn-export-groups" type="button" class="cgps-btn cgps-btn-secondary" style="height: 34px; font-size: 12px;">📊 Exportar a Excel</button>
+          </div>
+          <div class="cgps-table-scroll" style="max-height: 420px;">
+            <table class="cgps-table">
+              <thead>
+                <tr>
+                  <th style="width: 18%;">Nombre del Grupo</th>
+                  <th style="width: 10%;">Fecha Creación</th>
+                  <th style="width: 10%;">Última Modif.</th>
+                  <th style="width: 12%;">Subgrupos hijos</th>
+                  <th style="width: 10%;">Subgrupos padre</th>
+                  <th style="width: 10%;">Depend. usuarios</th>
+                  <th style="width: 10%;">Depend. zonas</th>
+                  <th style="width: 10%;">Depend. activos</th>
+                  <th style="width: 10%;">Cambiar Nombre</th>
+                </tr>
+              </thead>
+              <tbody id="cgps-groups-listbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
 
                 <!-- Módulo Reportes por Cliente -->
     <div id="sec-reports" style="display: none;">
