@@ -477,8 +477,11 @@
         <div id="cgps-groups-table-card" class="cgps-card" style="flex: 1; min-width: 400px; display: block;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
             <div style="font-size: 13px; font-weight: 700; color: #0f172a;">TABLA DE GRUPOS (DATOS COMPLETOS)</div>
-            <button id="cgps-btn-refresh-groups" type="button" class="cgps-btn cgps-btn-primary" style="height: 34px; font-size: 12px;">🔄 Actualizar Tabla de Grupos</button>
-            <button id="cgps-btn-export-groups" type="button" class="cgps-btn cgps-btn-secondary" style="height: 34px; font-size: 12px;">📊 Exportar a Excel</button>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <input type="text" id="cgps-groups-filter" class="cgps-input" placeholder="🔍 Filtrar grupo..." style="width: 200px; height: 34px; font-size: 12px;">
+              <button id="cgps-btn-refresh-groups" type="button" class="cgps-btn cgps-btn-primary" style="height: 34px; font-size: 12px;">🔄 Actualizar Tabla de Grupos</button>
+              <button id="cgps-btn-export-groups" type="button" class="cgps-btn cgps-btn-secondary" style="height: 34px; font-size: 12px;">📊 Exportar a Excel</button>
+            </div>
           </div>
           <div class="cgps-table-scroll" style="max-height: 420px;">
             <table class="cgps-table">
@@ -4828,10 +4831,23 @@ ENTRADAS
   }
 
   if ($('cgps-btn-refresh-groups')) {
-    $('cgps-btn-refresh-groups').addEventListener('click', function() {
-      loadAllGroupsTable();
-    });
-  }
+      $('cgps-btn-refresh-groups').addEventListener('click', function() {
+        loadAllGroupsTable();
+      });
+    }
+
+    if ($('cgps-groups-filter')) {
+      $('cgps-groups-filter').addEventListener('input', function() {
+        var filterText = this.value.toLowerCase().trim();
+        var tbody = $('cgps-groups-listbody');
+        if (!tbody) return;
+        var rows = tbody.querySelectorAll('tr');
+        rows.forEach(function(row) {
+          var text = row.textContent.toLowerCase();
+          row.style.display = text.indexOf(filterText) >= 0 ? '' : 'none';
+        });
+      });
+    }
 
   if ($('cgps-btn-exec-audit')) $('cgps-btn-exec-audit').addEventListener('click', executeGroupAudit);
   if ($('cgps-btn-clear-audit')) {
