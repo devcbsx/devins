@@ -487,15 +487,10 @@
             <table class="cgps-table">
               <thead>
                 <tr>
-                  <th style="width: 18%;">Nombre del Grupo</th>
-                  <th style="width: 10%;">Fecha Creación</th>
-                  <th style="width: 10%;">Última Modif.</th>
-                  <th style="width: 12%;">Subgrupos hijos</th>
-                  <th style="width: 10%;">Subgrupos padre</th>
-                  <th style="width: 10%;">Depend. usuarios</th>
-                  <th style="width: 10%;">Depend. zonas</th>
-                  <th style="width: 10%;">Depend. activos</th>
-                  <th style="width: 10%;">Cambiar Nombre</th>
+                  <th style="width: 30%;">Nombre del Grupo</th>
+                  <th style="width: 20%;">Fecha Creación</th>
+                  <th style="width: 20%;">Última Modif.</th>
+                  <th style="width: 30%;">Cambiar Nombre</th>
                 </tr>
               </thead>
               <tbody id="cgps-groups-listbody"></tbody>
@@ -4230,22 +4225,16 @@ ENTRADAS
   async function loadAllGroupsTable() {
     var tbody = $('cgps-groups-listbody');
     $('cgps-groups-table-card').style.display = 'block';
-    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; color:#64748b;">Cargando grupos desde Geotab...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#64748b;">Cargando grupos desde Geotab...</td></tr>';
 
     try {
           var groups = await callApi(api, 'Get', { typeName: 'Group', includeNestedEntities: true });
           if (!groups || groups.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; color:#94a3b8;">No se encontraron grupos.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#94a3b8;">No se encontraron grupos.</td></tr>';
             return;
           }
 
       var rows = groups.map(function(g) {
-        var children = g.children && g.children.length ? g.children.map(function(c) { return htmlEsc(c.name); }).join(', ') : '—';
-        var parents = g.parents && g.parents.length ? g.parents.map(function(p) { return htmlEsc(p.name); }).join(', ') : '—';
-        var users = g.userSet && g.userSet.length ? g.userSet.length : '—';
-        var zones = g.scopeSet && g.scopeSet.length ? g.scopeSet.length : '—';
-        var assets = g.devices && g.devices.length ? g.devices.length : '—';
-
         // Formatear fecha si es string ISO
         var fmt = function(d) {
           if (!d) return '—';
@@ -4261,18 +4250,13 @@ ENTRADAS
           '<td><b>' + htmlEsc(g.name) + '</b><br><small style="color:#64748b;">ID: ' + htmlEsc(g.id) + '</small></td>' +
           '<td style="font-family:\'JetBrains Mono\',monospace;font-size:11px;">' + fmt(g.createDate) + '</td>' +
           '<td style="font-family:\'JetBrains Mono\',monospace;font-size:11px;">' + fmt(g.lastModifiedDate) + '</td>' +
-          '<td>' + htmlEsc(children) + '</td>' +
-          '<td>' + htmlEsc(parents) + '</td>' +
-          '<td style="text-align:center;">' + users + '</td>' +
-          '<td style="text-align:center;">' + zones + '</td>' +
-          '<td style="text-align:center;">' + assets + '</td>' +
           '<td style="text-align:center;"><button class="btn-small" onclick="geotabAddin.renameGroup(\'' + htmlEsc(g.id) + '\', prompt(\'Nuevo nombre:\', \'' + htmlEsc(g.name) + '\'))">Cambiar Nombre</button></td>' +
           '</tr>';
       }).join('');
 
-      tbody.innerHTML = rows || '<tr><td colspan="9" style="text-align:center; color:#94a3b8;">No hay grupos con datos.</td></tr>';
+      tbody.innerHTML = rows || '<tr><td colspan="4" style="text-align:center; color:#94a3b8;">No hay grupos con datos.</td></tr>';
     } catch (e) {
-          tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; color:#ef4444;">Error: ' + htmlEsc(e.message) + '</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#ef4444;">Error: ' + htmlEsc(e.message) + '</td></tr>';
           console.error('Error cargando grupos:', e);
         }
   }
@@ -4286,7 +4270,7 @@ ENTRADAS
       return;
     }
 
-    var headers = ["Nombre del Grupo", "Fecha Creación", "Última Modif.", "Subgrupos hijos", "Subgrupos padre", "Depend. usuarios", "Depend. zonas", "Depend. activos", "Cambiar Nombre"];
+    var headers = ["Nombre del Grupo", "Fecha Creación", "Última Modif.", "Cambiar Nombre"];
 
     var data = [];
     rows.forEach(function(row) {
@@ -4308,6 +4292,7 @@ ENTRADAS
     var sheetData = [headers].concat(data);
     var wb = XLSX.utils.book_new();
     var ws = XLSX.utils.aoa_to_sheet(sheetData);
+    ws['!cols'] = [{ wch: 30 }, { wch: 16 }, { wch: 16 }, { wch: 16 }];
     XLSX.utils.book_append_sheet(wb, ws, "Grupos");
 
     var fileName = 'Grupos_Datos_' + fmtDate(new Date().toISOString()).replace(/\//g, '-') + '.xlsx';
