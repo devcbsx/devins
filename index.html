@@ -474,7 +474,7 @@
               </div>
 
               <!-- NUEVO: Tabla completa de grupos con dependencias -->
-              <div id="cgps-groups-table-card" class="cgps-card" style="margin-top: 16px; display: none;">
+              <div id="cgps-groups-table-card" class="cgps-card" style="margin-top: 16px; display: block;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                   <div style="font-size: 13px; font-weight: 700; color: #0f172a;">TABLA DE GRUPOS (DATOS COMPLETOS)</div>
                   <button id="cgps-btn-refresh-groups" type="button" class="cgps-btn cgps-btn-primary" style="height: 34px; font-size: 12px;">🔄 Actualizar Tabla de Grupos</button>
@@ -498,27 +498,9 @@
                     <tbody id="cgps-groups-listbody"></tbody>
                   </table>
                 </div>
-              </div>
+                </div>
 
-              <div id="cgps-audit-results-card" class="cgps-card" style="margin-top: 16px; display: none;">
-        <div style="font-size: 13px; font-weight: 700; color: #0f172a; margin-bottom: 12px;">RESULTADOS DE LA AUDITORÍA DE GRUPOS</div>
-        <div class="cgps-table-scroll" style="max-height: 400px;">
-          <table class="cgps-table">
-            <thead>
-              <tr>
-                <th style="width: 35%;">Razón Social Detectada</th>
-                <th style="width: 40%;">Grupo(s) Coincidente(s) en Geotab</th>
-                <th style="width: 13%; text-align: center;"># Coincidencias</th>
-                <th style="width: 12%;">Estado Auditoría</th>
-              </tr>
-            </thead>
-            <tbody id="cgps-audit-listbody"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- Módulo Reportes por Cliente -->
+                <!-- Módulo Reportes por Cliente -->
     <div id="sec-reports" style="display: none;">
       <div class="cgps-card" style="margin-top: 12px;">
         <div style="display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap;">
@@ -3708,20 +3690,21 @@ ENTRADAS
         renderHeader();
         renderList();
       } else if (mod === 'audit') {
-        $('testn-mod-title').textContent = 'Auditoría de Grupos';
-        $('sec-master').style.display = 'none';
-        $('sec-reports').style.display = 'none';
-        $('sec-activations').style.display = 'none';
-        $('sec-flash').style.display = 'none';
-        $('sec-create-user').style.display = 'none';
-        $('sec-audit').style.display = 'block';
-        $('sec-kpi-container').style.display = 'none';
-        $('sec-certi-combined-box').style.display = 'none';
-        $('sec-bulk-container').style.display = 'none';
-        $('sec-controls-container').style.display = 'none';
-        $('sec-table-container').style.display = 'none';
+              $('testn-mod-title').textContent = 'Auditoría de Grupos';
+              $('sec-master').style.display = 'none';
+              $('sec-reports').style.display = 'none';
+              $('sec-activations').style.display = 'none';
+              $('sec-flash').style.display = 'none';
+              $('sec-create-user').style.display = 'none';
+              $('sec-audit').style.display = 'block';
+              $('sec-kpi-container').style.display = 'none';
+              $('sec-certi-combined-box').style.display = 'none';
+              $('sec-bulk-container').style.display = 'none';
+              $('sec-controls-container').style.display = 'none';
+              $('sec-table-container').style.display = 'none';
 
-        populateGeneralParentGroupsDropdown();
+              populateGeneralParentGroupsDropdown();
+              loadAllGroupsTable();
       } else if (mod === 'reports') {
         $('testn-mod-title').textContent = 'Reportes por Cliente';
         $('hdr-actions-reports').style.display = 'flex';
@@ -4467,12 +4450,9 @@ ENTRADAS
         '</tr>';
     });
 
-    $('cgps-audit-listbody').innerHTML = resultsHtml || '<tr><td colspan="4" style="text-align:center;">No se detectaron clientes válidos en el texto.</td></tr>';
-        $('cgps-audit-results-card').style.display = 'block';
-        setMsg('Auditoría del árbol de grupos finalizada.');
-
-        // Cargar tabla completa de grupos con dependencias
-        await loadAllGroupsTable();
+    // Actualizar tabla de grupos con las coincidencias resaltadas
+    await loadAllGroupsTable();
+    setMsg('Auditoría del árbol de grupos finalizada.');
       }
 
   async function renameGroup(groupId, newName) {
@@ -4853,12 +4833,11 @@ ENTRADAS
 
   if ($('cgps-btn-exec-audit')) $('cgps-btn-exec-audit').addEventListener('click', executeGroupAudit);
   if ($('cgps-btn-clear-audit')) {
-    $('cgps-btn-clear-audit').addEventListener('click', function() {
-      $('cgps-audit-input').value = '';
-      $('cgps-audit-results-card').style.display = 'none';
-      setMsg('Auditoría de grupos limpiada.');
-    });
-  }
+      $('cgps-btn-clear-audit').addEventListener('click', function() {
+        $('cgps-audit-input').value = '';
+        setMsg('Auditoría de grupos limpiada.');
+      });
+    }
 
   if ($('cgps-btn-view')) {
     $('cgps-btn-view').addEventListener('click', function() {
