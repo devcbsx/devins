@@ -4228,24 +4228,55 @@ ENTRADAS
     tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#64748b;">Cargando grupos desde Geotab...</td></tr>';
 
     try {
-          var groups = await callApi(api, 'Get', { typeName: 'Group', includeNestedEntities: true });
-          if (!groups || groups.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#94a3b8;">No se encontraron grupos.</td></tr>';
-            return;
-          }
+      var results = await callMulti(api, [
+        ["Get", { typeName: "Group", includeNestedEntities: true }],
+        ["Get", { typeName: "Device", propertySelector: { fields: ["id", "name", "groups", "activeFrom", "activeTo"] } }],
+        ["Get", { typeName: "Zone", propertySelector: { fields: ["id", "name", "groups"] } }],
+        ["Get", { typeName: "User", propertySelector: { fields: ["id", "name", "companyGroups"] } }]
+      ]);
 
-      var rows = groups.map(function(g) {
-        // Formatear fecha si es string ISO
-        var fmt = function(d) {
-          if (!d) return '—';
-          var s = String(d);
-          if (s.length >= 10) {
-            var parts = s.split('T')[0].split('-');
-            if (parts.length === 3) return parts[2] + '/' + parts[1] + '/' + parts[0];
-          }
-          return s;
+      var groups = results[0] || [];
+      var devices = results[1] || [];
+      var zones = results[2] || [];
+      var users = results[3] || [];
+
+      if (!groups || groups.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#94a3b8;">No se encontraron grupos.</td></tr>';
+        return;
+      }
+
+      // Build a map of group id -> group object
+      var groupsById = {};
+      groups.forEach(function(g) { groupsById[g.id] = g; });
+
+      // For each group, count related entities
+      var groupData = groups.map(function(g) {
+        var childCount = (g.children || []).length;
+        var deviceCount = devices.filter(function(d) { return (d.groups || []).some(function(gr) { return gr.id === g.id; }); }).length;
+        var zoneCount = zones.filter(function(z) { return (z.groups || []).some(function(gr) { return gr.id === g.id; }); }).length;
+        var userCount = users.filter(function(u) { return (u.companyGroups || []).some(function(gr) { return gr.id === g.id; }); }).length;
+
+        return {
+          group: g,
+          childCount: childCount,
+          deviceCount: deviceCount,
+          zoneCount: zoneCount,
+          userCount: userCount
         };
+      });
 
+      var fmt = function(d) {
+        if (!d) return '—';
+        var s = String(d);
+        if (s.length >= 10) {
+          var parts = s.split('T')[0].split('-');
+          if (parts.length === 3) return parts[2] + '/' + parts[1] + '/' + parts[0];
+        }
+        return s;
+      };
+
+      var rows = groupData.map(function(gd) {
+        var g = gd.group;
         return '<tr>' +
           '<td><b>' + htmlEsc(g.name) + '</b><br><small style="color:#64748b;">ID: ' + htmlEsc(g.id) + '</small></td>' +
           '<td style="font-family:\'JetBrains Mono\',monospace;font-size:11px;">' + fmt(g.createDate) + '</td>' +
@@ -4256,9 +4287,9 @@ ENTRADAS
 
       tbody.innerHTML = rows || '<tr><td colspan="4" style="text-align:center; color:#94a3b8;">No hay grupos con datos.</td></tr>';
     } catch (e) {
-          tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#ef4444;">Error: ' + htmlEsc(e.message) + '</td></tr>';
-          console.error('Error cargando grupos:', e);
-        }
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#ef4444;">Error: ' + htmlEsc(e.message) + '</td></tr>';
+      console.error('Error cargando grupos:', e);
+    }
   }
 
   function exportGroupsToExcel() {
