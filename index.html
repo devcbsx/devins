@@ -452,7 +452,7 @@
                 <div style="display: flex; flex-direction: column; gap: 10px;">
                   <div style="display: flex; gap: 8px;">
                     <input type="text" id="audit-gen-parent-search" class="cgps-input" placeholder="🔍 Filtrar grupo padre..." style="width: 150px; height: 40px; font-size: 13px;">
-                    <select id="audit-gen-parent-select" class="cgps-input" style="flex: 1; height: 40px; font-size: 13px; font-weight: 600;">
+                    <select id="audit-gen-parent-select" class="cgps-input" style="flex: 1; min-width: 200px; height: 40px; font-size: 13px; font-weight: 600;">
                       <option value="">-- Seleccione Grupo Padre --</option>
                     </select>
                   </div>
@@ -482,27 +482,8 @@
           </div>
 
       <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-top: 16px;">
-              <!-- Panel izquierdo: Búsqueda y gestión de grupos -->
-              <div class="cgps-card" style="flex: 1; min-width: 350px; max-width: 400px;">
-                <div style="font-size: 12px; font-weight: 700; margin-bottom: 12px; color: #0f172a; display: flex; align-items: center; gap: 8px;">
-                  <span>🔍</span> BÚSQUEDA Y GESTIÓN DE GRUPOS
-                </div>
-                <div style="margin-bottom: 12px;">
-                  <input type="text" id="cgps-group-search" class="cgps-input" placeholder="Buscar grupo por nombre..." style="width: 100%; height: 38px; font-size: 13px;">
-                </div>
-                <div style="max-height: 300px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px; background: #fafafa;">
-                  <table class="cgps-table" style="width: 100%;">
-                    <thead>
-                      <tr style="background: #f1f5f9; position: sticky; top: 0;">
-                        <th style="width: 70%; text-align: left; padding: 8px 12px; font-size: 11px; font-weight: 700; color: #475569;">GRUPO</th>
-                        <th style="width: 30%; text-align: center; padding: 8px 12px; font-size: 11px; font-weight: 700; color: #475569;">ACCIONES</th>
-                      </tr>
-                    </thead>
-                    <tbody id="cgps-group-search-results"></tbody>
-                  </table>
-                  <div id="cgps-group-search-empty" style="display: none; padding: 20px; text-align: center; color: #64748b; font-size: 12px;">No se encontraron grupos</div>
-                </div>
-              </div>
+              <!-- Eliminado: Búsqueda y gestión de grupos -->
+
 
               <!-- Panel derecho: Tabla completa de grupos con filtro -->
               <div id="cgps-groups-table-card" class="cgps-card" style="flex: 2; min-width: 500px; display: block;">
@@ -517,16 +498,17 @@
           
                 <div class="cgps-table-scroll" style="max-height: 500px;">
                   <table class="cgps-table">
-                    <thead>
-                      <tr>
-                        <th style="width: 40%;">GRUPO</th>
-                        <th style="width: 20%; text-align: center;">Nº Activos</th>
-                        <th style="width: 20%; text-align: center;">Nº Zonas</th>
-                        <th style="width: 20%; text-align: center;">Nº Usuarios</th>
-                      </tr>
-                    </thead>
-                    <tbody id="cgps-groups-listbody"></tbody>
-                  </table>
+                                      <thead>
+                                                      <tr>
+                                                        <th style="width: 35%;">GRUPO</th>
+                                                        <th style="width: 17%; text-align: center;">ID</th>
+                                                        <th style="width: 24%; text-align: center;">Nº Activos</th>
+                                                        <th style="width: 24%; text-align: center;">Nº Zonas</th>
+                                                        <th style="width: 24%; text-align: center;">Nº Usuarios</th>
+                                                      </tr>
+                                                    </thead>
+                                      <tbody id="cgps-groups-listbody"></tbody>
+                                    </table>
                 </div>
               </div>
             </div>
@@ -1340,11 +1322,25 @@ var addInConstructor = function (geotabApi, state, callback) {
   }
 
   function fmtDateTime(iso) {
-    if (!iso) return 'No registrada';
-    var d = new Date(iso);
-    if (isNaN(d.getTime())) return 'No registrada';
-    return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear() + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
-  }
+      if (!iso) return 'No registrada';
+      var d = new Date(iso);
+      if (isNaN(d.getTime())) return 'No registrada';
+      return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear() + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+    }
+
+    // --- Base de datos: IDs de grupos configurables ---
+    function getGroupIds() {
+      var db = databaseName || 'divemotor';
+      var ids = {
+        CLIENTES: 'b278A',
+        'TIPO DE MOTOR': 'b27A8'
+      };
+      if (db === 'divemotor_buses') {
+        ids.CLIENTES = 'b2795';
+        ids['TIPO DE MOTOR'] = 'b2796';
+      }
+      return ids;
+    }
 
   function htmlEsc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }).replace(/'/g, '&#39;'); }
 
@@ -4371,11 +4367,8 @@ ENTRADAS
 
   async function loadAllGroupsTable() {
       var tbody = $('cgps-groups-listbody');
-      var searchTbody = $('cgps-group-search-results');
-      var searchEmpty = $('cgps-group-search-empty');
       $('cgps-groups-table-card').style.display = 'block';
       tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#64748b;">Cargando grupos desde Geotab...</td></tr>';
-      if (searchTbody) searchTbody.innerHTML = '<tr><td colspan="2" style="text-align:center; color:#64748b;">Cargando...</td></tr>';
 
       try {
         var results = await callMulti(api, [
