@@ -425,42 +425,61 @@
     </div>
 
     <!-- Módulo Auditoría de Grupos -->
-    <div id="sec-audit" style="display: none;">
-      <div class="cgps-card" style="margin-top: 12px; background: #ffffff; border: 1px solid #bae6fd;">
-        <div style="font-size: 12px; font-weight: 800; color: #0369a1; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">
-          <span>📁</span> CREAR NUEVO GRUPO EN EL ÁRBOLES DE GEOTAB
-        </div>
-        
-        <div style="display: flex; gap: 16px; flex-wrap: wrap;">
-          <div style="flex: 1; min-width: 320px; background: #f0f9ff; padding: 14px; border-radius: 8px; border: 1px solid #e0f2fe;">
-            <div style="font-size: 11px; font-weight: 700; color: #0284c7; margin-bottom: 6px; text-transform: uppercase;">1. Opción: Cliente Nuevo</div>
-            <p style="font-size: 11px; color: #64748b; margin: 0 0 10px 0;">Crea automáticamente el cliente en <b>CLIENTES (b278A)</b> y en <b>DIVEMOTOR (b27A8)</b> con el formato <code>MODELO_CLIENTE</code>.</p>
-            
-            <div style="display: flex; flex-direction: column; gap: 8px;">
-              <input type="text" id="audit-new-client-name" class="cgps-input" placeholder="Nombre de la Razón Social..." style="width: 100%; height: 38px;">
-              <input type="text" id="audit-new-client-vehicle-type" class="cgps-input" placeholder="Tipo de vehículo (ej: AROCS 551)..." style="width: 100%; height: 38px;">
-              <button id="audit-btn-create-client" type="button" class="cgps-btn cgps-btn-primary" style="height: 38px; font-weight: 700; width: 100%; margin-top: 2px;">➕ Crear Cliente Nuevo</button>
+        <div id="sec-audit" style="display: none;">
+          <div class="cgps-card" style="margin-top: 12px; background: #ffffff; border: 1px solid #bae6fd;">
+            <div style="font-size: 12px; font-weight: 800; color: #0369a1; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">
+              <span>📁</span> CREAR NUEVO GRUPO EN EL ÁRBOLES DE GEOTAB
             </div>
-          </div>
-
-          <div style="flex: 1; min-width: 320px; background: #f8fafc; padding: 14px; border-radius: 8px; border: 1px solid #e2e8f0;">
-            <div style="font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 6px; text-transform: uppercase;">2. Opción: En General</div>
-            <p style="font-size: 11px; color: #64748b; margin: 0 0 10px 0;">Permite elegir cualquier grupo padre existente en el árbol de Geotab.</p>
-            
-            <div style="display: flex; flex-direction: column; gap: 8px;">
-              <div style="display: flex; gap: 8px;">
-                <input type="text" id="audit-gen-parent-search" class="cgps-input" placeholder="🔍 Filtrar grupo padre..." style="width: 140px; height: 38px;">
-                <select id="audit-gen-parent-select" class="cgps-input" style="flex: 1; height: 38px; font-size: 11px; font-weight: 600;">
-                  <option value="">-- Seleccione Grupo Padre --</option>
-                </select>
+       
+            <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+              <!-- Panel 1: Crear grupos para CLIENTES y TIPO DE VEHÍCULO -->
+              <div style="flex: 1; min-width: 300px; background: #f0f9ff; padding: 16px; border-radius: 8px; border: 1px solid #e0f2fe;">
+                <div style="font-size: 12px; font-weight: 700; color: #0284c7; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+                  <span>🏢</span> Crear grupos para CLIENTES y TIPO DE VEHÍCULO
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                  <input type="text" id="audit-new-client-name" class="cgps-input" placeholder="Nombre de la Empresa..." style="width: 100%; height: 40px; font-size: 13px;">
+                  <input type="text" id="audit-new-client-vehicle-type" class="cgps-input" placeholder="Tipo de vehículo (ej: AROCS 551)..." style="width: 100%; height: 40px; font-size: 13px;">
+                  <button id="audit-btn-create-client" type="button" class="cgps-btn cgps-btn-primary" style="height: 42px; font-weight: 700; width: 100%; font-size: 13px;">+ Crear Cliente Nuevo</button>
+                </div>
               </div>
-              <input type="text" id="audit-gen-group-name" class="cgps-input" placeholder="Nombre del nuevo grupo..." style="width: 100%; height: 38px;">
-              <button id="audit-btn-create-general" type="button" class="cgps-btn cgps-btn-secondary" style="height: 38px; font-weight: 700; width: 100%; margin-top: 2px;">📁 Crear Grupo General</button>
+
+              <!-- Panel 2: Crear grupos en un grupo ya creado -->
+              <div style="flex: 1; min-width: 300px; background: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                <div style="font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+                  <span>📁</span> Crear grupos en un grupo ya creado
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                  <div style="display: flex; gap: 8px;">
+                    <input type="text" id="audit-gen-parent-search" class="cgps-input" placeholder="🔍 Filtrar grupo padre..." style="width: 150px; height: 40px; font-size: 13px;">
+                    <select id="audit-gen-parent-select" class="cgps-input" style="flex: 1; height: 40px; font-size: 13px; font-weight: 600;">
+                      <option value="">-- Seleccione Grupo Padre --</option>
+                    </select>
+                  </div>
+                  <input type="text" id="audit-gen-group-name" class="cgps-input" placeholder="Nombre del nuevo grupo..." style="width: 100%; height: 40px; font-size: 13px;">
+                  <button id="audit-btn-create-general" type="button" class="cgps-btn cgps-btn-secondary" style="height: 42px; font-weight: 700; width: 100%; font-size: 13px;">Crear Grupo General</button>
+                </div>
+              </div>
+
+              <!-- Panel 3: Cambiar nombre de grupo -->
+              <div style="flex: 1; min-width: 300px; background: #fef3c7; padding: 16px; border-radius: 8px; border: 1px solid #fde68a;">
+                <div style="font-size: 12px; font-weight: 700; color: #b45309; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+                  <span>✏️</span> Cambiar nombre de grupo
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                  <div style="display: flex; gap: 8px;">
+                    <input type="text" id="audit-rename-parent-search" class="cgps-input" placeholder="🔍 Filtrar grupo padre..." style="width: 150px; height: 40px; font-size: 13px;">
+                    <select id="audit-rename-parent-select" class="cgps-input" style="flex: 1; height: 40px; font-size: 13px; font-weight: 600;">
+                      <option value="">-- Seleccione Grupo Padre --</option>
+                    </select>
+                  </div>
+                  <input type="text" id="audit-rename-group-name" class="cgps-input" placeholder="Nuevo nombre del grupo..." style="width: 100%; height: 40px; font-size: 13px;">
+                  <button id="audit-btn-rename-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 42px; font-weight: 700; width: 100%; font-size: 13px; background: #f59e0b; border-color: #f59e0b;">Cambiar Nombre</button>
+                </div>
+              </div>
             </div>
+            <div id="audit-create-status" style="font-size: 12px; font-weight: 700; margin-top: 12px; min-height: 18px;"></div>
           </div>
-        </div>
-        <div id="audit-create-status" style="font-size: 12px; font-weight: 700; margin-top: 12px; min-height: 18px;"></div>
-      </div>
 
       <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-top: 16px;">
               <!-- Panel izquierdo: Búsqueda y gestión de grupos -->
@@ -3336,29 +3355,52 @@ ENTRADAS
   }
 
   function populateGeneralParentGroupsDropdown() {
-    var sel = $('audit-gen-parent-select');
-    var query = ($('audit-gen-parent-search').value || '').toLowerCase().trim();
-    if (!sel) return;
+      var sel = $('audit-gen-parent-select');
+      var query = ($('audit-gen-parent-search').value || '').toLowerCase().trim();
+      if (!sel) return;
 
-    sel.innerHTML = '<option value="">-- Seleccione Grupo Padre --</option>';
+      sel.innerHTML = '<option value="">-- Seleccione Grupo Padre --</option>';
 
-    var allGroupsList = Object.keys(groupsById).map(function(k) { return groupsById[k]; });
-    allGroupsList.sort(function(a, b) {
-      return (a.name || '').localeCompare(b.name || '', 'es');
-    });
+      var allGroupsList = Object.keys(groupsById).map(function(k) { return groupsById[k]; });
+      allGroupsList.sort(function(a, b) {
+        return (a.name || '').localeCompare(b.name || '', 'es');
+      });
 
-    allGroupsList.forEach(function(g) {
-      if (!g || !g.id || !g.name) return;
-      if (!query || g.name.toLowerCase().indexOf(query) >= 0 || g.id.toLowerCase().indexOf(query) >= 0) {
-        var opt = document.createElement('option');
-        opt.value = g.id;
-        opt.textContent = g.name;
-        sel.appendChild(opt);
-      }
-    });
-  }
+      allGroupsList.forEach(function(g) {
+        if (!g || !g.id || !g.name) return;
+        if (!query || g.name.toLowerCase().indexOf(query) >= 0 || g.id.toLowerCase().indexOf(query) >= 0) {
+          var opt = document.createElement('option');
+          opt.value = g.id;
+          opt.textContent = g.name;
+          sel.appendChild(opt);
+        }
+      });
+    }
 
-  function requestCreateNewClientGroup() {
+    function populateRenameParentGroupsDropdown() {
+      var sel = $('audit-rename-parent-select');
+      var query = ($('audit-rename-parent-search').value || '').toLowerCase().trim();
+      if (!sel) return;
+
+      sel.innerHTML = '<option value="">-- Seleccione Grupo Padre --</option>';
+
+      var allGroupsList = Object.keys(groupsById).map(function(k) { return groupsById[k]; });
+      allGroupsList.sort(function(a, b) {
+        return (a.name || '').localeCompare(b.name || '', 'es');
+      });
+
+      allGroupsList.forEach(function(g) {
+        if (!g || !g.id || !g.name) return;
+        if (!query || g.name.toLowerCase().indexOf(query) >= 0 || g.id.toLowerCase().indexOf(query) >= 0) {
+          var opt = document.createElement('option');
+          opt.value = g.id;
+          opt.textContent = g.name;
+          sel.appendChild(opt);
+        }
+      });
+    }
+
+    function requestCreateNewClientGroup() {
     var clientName = $('audit-new-client-name').value.trim();
     var vehicleType = $('audit-new-client-vehicle-type').value.trim();
     var statusDiv = $('audit-create-status');
@@ -3418,33 +3460,60 @@ ENTRADAS
   }
 
   function requestCreateGeneralGroup() {
-    var parentId = $('audit-gen-parent-select').value;
-    var name = $('audit-gen-group-name').value.trim();
-    var statusDiv = $('audit-create-status');
+      var parentId = $('audit-gen-parent-select').value;
+      var name = $('audit-gen-group-name').value.trim();
+      var statusDiv = $('audit-create-status');
 
-    if (!parentId) {
-      statusDiv.style.color = "#ef4444";
-      statusDiv.textContent = "Por favor seleccione el grupo padre de la lista.";
-      return;
+      if (!parentId) {
+        statusDiv.style.color = "#ef4444";
+        statusDiv.textContent = "Por favor seleccione el grupo padre de la lista.";
+        return;
+      }
+
+      if (!name) {
+        statusDiv.style.color = "#ef4444";
+        statusDiv.textContent = "Por favor ingrese el nombre para el nuevo grupo.";
+        return;
+      }
+
+      var parentGroupObj = groupsById[parentId];
+      var parentName = parentGroupObj ? parentGroupObj.name : parentId;
+
+      showConfirmSaveModal(
+        "Confirmar Creación de Grupo General",
+        "Se creará el grupo '" + name + "' bajo el grupo padre '" + parentName + "'. ¿Desea proceder?",
+        function() { createGeneralGroup(); }
+      );
     }
 
-    if (!name) {
-      statusDiv.style.color = "#ef4444";
-      statusDiv.textContent = "Por favor ingrese el nombre para el nuevo grupo.";
-      return;
+    function requestRenameGroup() {
+      var parentId = $('audit-rename-parent-select').value;
+      var newName = $('audit-rename-group-name').value.trim();
+      var statusDiv = $('audit-create-status');
+
+      if (!parentId) {
+        statusDiv.style.color = "#ef4444";
+        statusDiv.textContent = "Por favor seleccione el grupo padre de la lista.";
+        return;
+      }
+
+      if (!newName) {
+        statusDiv.style.color = "#ef4444";
+        statusDiv.textContent = "Por favor ingrese el nuevo nombre para el grupo.";
+        return;
+      }
+
+      var parentGroupObj = groupsById[parentId];
+      var parentName = parentGroupObj ? parentGroupObj.name : parentId;
+
+      showConfirmSaveModal(
+        "Confirmar Cambio de Nombre",
+        "Se cambiará el nombre del grupo seleccionado a '" + newName + "' (bajo el grupo padre '" + parentName + "'). ¿Desea proceder?",
+        function() { executeRenameGroup(); }
+      );
     }
 
-    var parentGroupObj = groupsById[parentId];
-    var parentName = parentGroupObj ? parentGroupObj.name : parentId;
-
-    showConfirmSaveModal(
-      "Confirmar Creación de Grupo General",
-      "Se creará el grupo '" + name + "' bajo el grupo padre '" + parentName + "'. ¿Desea proceder?",
-      function() { createGeneralGroup(); }
-    );
-  }
-
-  async function createGeneralGroup() {
+    async function createGeneralGroup() {
     var parentId = $('audit-gen-parent-select').value;
     var name = $('audit-gen-group-name').value.trim();
     var statusDiv = $('audit-create-status');
@@ -3477,21 +3546,86 @@ ENTRADAS
       });
 
       statusDiv.style.color = "#10b981";
-      statusDiv.textContent = "✅ Grupo '" + name + "' creado con éxito bajo '" + parentName + "'";
-      $('audit-gen-group-name').value = '';
+            statusDiv.textContent = "✅ Grupo '" + name + "' creado con éxito bajo '" + parentName + "'";
+            $('audit-gen-group-name').value = '';
 
-      setTimeout(function() {
-        load();
-      }, 1000);
+            setTimeout(function() {
+              load();
+            }, 1000);
 
-    } catch (err) {
-      console.error("Error creando grupo general:", err);
-      statusDiv.style.color = "#ef4444";
-      statusDiv.textContent = "Error al crear grupo: " + (err.message || JSON.stringify(err));
-    }
-  }
+          } catch (err) {
+            console.error("Error creando grupo general:", err);
+            statusDiv.style.color = "#ef4444";
+            statusDiv.textContent = "Error al crear grupo: " + (err.message || JSON.stringify(err));
+          }
+        }
 
-  function generateLegalText() {
+        async function executeRenameGroup() {
+          var parentId = $('audit-rename-parent-select').value;
+          var newName = $('audit-rename-group-name').value.trim();
+          var statusDiv = $('audit-create-status');
+
+          if (!parentId) {
+            statusDiv.style.color = "#ef4444";
+            statusDiv.textContent = "Por favor seleccione el grupo padre de la lista.";
+            return;
+          }
+
+          if (!newName) {
+            statusDiv.style.color = "#ef4444";
+            statusDiv.textContent = "Por favor ingrese el nuevo nombre para el grupo.";
+            return;
+          }
+
+          var parentGroupObj = groupsById[parentId];
+          var parentName = parentGroupObj ? parentGroupObj.name : parentId;
+
+          // Find the group to rename (first group under the selected parent that matches the name)
+          var targetGroup = null;
+          var allGroupsList = Object.keys(groupsById).map(function(k) { return groupsById[k]; });
+          for (var i = 0; i < allGroupsList.length; i++) {
+            var g = allGroupsList[i];
+            if (g && g.parent && g.parent.id === parentId) {
+              targetGroup = g;
+              break;
+            }
+          }
+
+          if (!targetGroup) {
+            statusDiv.style.color = "#ef4444";
+            statusDiv.textContent = "No se encontró ningún grupo bajo el padre seleccionado.";
+            return;
+          }
+
+          statusDiv.style.color = "#0284c7";
+          statusDiv.textContent = "Cambiando nombre a '" + newName + "'...";
+
+          try {
+            var result = await callApi(api, 'Set', {
+              typeName: 'Group',
+              entity: {
+                id: targetGroup.id,
+                name: newName,
+                parent: { id: parentId }
+              }
+            });
+
+            statusDiv.style.color = "#10b981";
+            statusDiv.textContent = "✅ Nombre cambiado a '" + newName + "' con éxito";
+            $('audit-rename-group-name').value = '';
+
+            setTimeout(function() {
+              loadAllGroupsTable();
+            }, 1000);
+
+          } catch (err) {
+            console.error("Error cambiando nombre de grupo:", err);
+            statusDiv.style.color = "#ef4444";
+            statusDiv.textContent = "Error al cambiar nombre: " + (err.message || JSON.stringify(err));
+          }
+        }
+
+        function generateLegalText() {
     var selList = all.filter(function(r) { return selected[r.id]; });
     if (selList.length === 0) {
       setMsg("Seleccione al menos un activo para generar el texto legal.", true);
@@ -4648,10 +4782,12 @@ ENTRADAS
   if ($('testn-btn-refresh-mod')) $('testn-btn-refresh-mod').addEventListener('click', function() { load(); });
 
   if ($('audit-btn-create-client')) $('audit-btn-create-client').addEventListener('click', requestCreateNewClientGroup);
-  if ($('audit-btn-create-general')) $('audit-btn-create-general').addEventListener('click', requestCreateGeneralGroup);
-  if ($('audit-gen-parent-search')) $('audit-gen-parent-search').addEventListener('keyup', populateGeneralParentGroupsDropdown);
+    if ($('audit-btn-create-general')) $('audit-btn-create-general').addEventListener('click', requestCreateGeneralGroup);
+    if ($('audit-gen-parent-search')) $('audit-gen-parent-search').addEventListener('keyup', populateGeneralParentGroupsDropdown);
+    if ($('audit-rename-parent-search')) $('audit-rename-parent-search').addEventListener('keyup', populateRenameParentGroupsDropdown);
+    if ($('audit-btn-rename-group')) $('audit-btn-rename-group').addEventListener('click', requestRenameGroup);
 
-  if ($('usr-group-search')) $('usr-group-search').addEventListener('keyup', populateUserGroupsDropdown);
+    if ($('usr-group-search')) $('usr-group-search').addEventListener('keyup', populateUserGroupsDropdown);
   if ($('usr-btn-submit')) $('usr-btn-submit').addEventListener('click', requestCreateNewUserAutomated);
 
   if ($('master-btn-excel')) $('master-btn-excel').addEventListener('click', exportMasterExcel);
