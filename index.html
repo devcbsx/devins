@@ -4385,8 +4385,6 @@ ENTRADAS
 
         if (!groups || groups.length === 0) {
           tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#94a3b8;">No se encontraron grupos.</td></tr>';
-          if (searchTbody) searchTbody.innerHTML = '';
-          if (searchEmpty) searchEmpty.style.display = 'block';
           return;
         }
 
@@ -4424,28 +4422,9 @@ ENTRADAS
               tbody.innerHTML = rows || '<tr><td colspan="4" style="text-align:center; color:#94a3b8;">No hay grupos con datos.</td></tr>';
 
         // Populate left search panel
-        if (searchTbody) {
-          var searchRows = groupData.map(function(gd) {
-            var g = gd.group;
-            return '<tr>' +
-              '<td style="padding: 8px 12px; font-size: 12px;"><b>' + htmlEsc(g.name) + '</b><br><small style="color:#64748b;">ID: ' + htmlEsc(g.id) + '</small></td>' +
-              '<td style="padding: 8px 12px; text-align: center;">' +
-                '<button class="btn-small" onclick="geotabAddin.renameGroup(\'' + htmlEsc(g.id) + '\', prompt(\'Nuevo nombre:\', \'' + htmlEsc(g.name) + '\'))" style="padding: 4px 10px; font-size: 11px;">Cambiar Nombre</button>' +
-              '</td>' +
-              '</tr>';
-          }).join('');
-
-          if (searchRows) {
-            searchTbody.innerHTML = searchRows;
-            if (searchEmpty) searchEmpty.style.display = 'none';
-          } else {
-            searchTbody.innerHTML = '';
-            if (searchEmpty) searchEmpty.style.display = 'block';
-          }
-        }
+        // searchTbody and searchEmpty are no longer used in this function
       } catch (e) {
         tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#ef4444;">Error: ' + htmlEsc(e.message) + '</td></tr>';
-        if (searchTbody) searchTbody.innerHTML = '<tr><td colspan="2" style="text-align:center; color:#ef4444;">Error: ' + htmlEsc(e.message) + '</td></tr>';
         console.error('Error cargando grupos:', e);
       }
     }
@@ -4635,41 +4614,41 @@ ENTRADAS
       }
 
   async function renameGroup(groupId, newName) {
-    var apiRef = api;
-    if (!apiRef) {
-      setMsg('API de Geotab no disponible.', true);
-      return;
-    }
-
-    try {
-      var grupo = await callApi(apiRef, 'Get', { typeName: 'Group', search: { id: groupId } });
-      if (!grupo || grupo.length === 0) {
-        setMsg('No se encontró el grupo con ID: ' + groupId, true);
+      var apiRef = api;
+      if (!apiRef) {
+        setMsg('API de Geotab no disponible.', true);
         return;
       }
 
-      var grupoData = grupo[0];
-      var originalName = grupoData.name || '';
+      try {
+        var grupo = await callApi(apiRef, 'Get', { typeName: 'Group', search: { id: groupId } });
+        if (!grupo || grupo.length === 0) {
+          setMsg('No se encontró el grupo con ID: ' + groupId, true);
+          return;
+        }
 
-      if (newName.trim() === originalName) {
-        setMsg('El nombre es el mismo que el actual.', true);
-        return;
+        var grupoData = grupo[0];
+        var originalName = grupoData.name || '';
+
+        if (newName.trim() === originalName) {
+          setMsg('El nombre es el mismo que el actual.', true);
+          return;
+        }
+
+        var updateData = {
+          name: newName.trim(),
+          lastModifiedUser: 'sysadmin',
+          lastModifiedDate: new Date().toISOString(),
+          validFromDate: grupoData.validFromDate || new Date().toISOString()
+        };
+
+        var result = await callApi(apiRef, 'Set', { typeName: 'Group', entity: updateData });
+        setMsg('✅ Nombre del grupo cambiado correctamente: ' + originalName + ' → ' + newName.trim());
+      } catch (e) {
+        console.error('Error cambiando nombre del grupo:', e);
+        setMsg('❌ Error al cambiar nombre del grupo: ' + (e.message || String(e)), true);
       }
-
-      var updateData = {
-        name: newName.trim(),
-        lastModifiedUser: session && session.user ? session.user : 'sysadmin',
-        lastModifiedDate: new Date().toISOString(),
-        validFromDate: grupoData.validFromDate || new Date().toISOString()
-      };
-
-      var result = await callApi(apiRef, 'Set', { typeName: 'Group', entity: updateData });
-      setMsg('✅ Nombre del grupo cambiado correctamente: ' + originalName + ' → ' + newName.trim());
-    } catch (e) {
-      console.error('Error cambiando nombre del grupo:', e);
-      setMsg('❌ Error al cambiar nombre del grupo: ' + (e.message || String(e)), true);
     }
-  }
 
   function load() {
     setupLoginListeners();
@@ -5012,27 +4991,7 @@ ENTRADAS
           });
         }
 
-        if ($('cgps-group-search')) {
-                  $('cgps-group-search').addEventListener('input', function() {
-                    var filterText = this.value.toLowerCase().trim();
-                    var searchTbody = $('cgps-group-search-results');
-                    var searchEmpty = $('cgps-group-search-empty');
-                    if (!searchTbody) return;
-                    var rows = searchTbody.querySelectorAll('tr');
-                    var visibleCount = 0;
-                    rows.forEach(function(row) {
-                      var text = row.textContent.toLowerCase();
-                      var isVisible = text.indexOf(filterText) >= 0;
-                      row.style.display = isVisible ? '' : 'none';
-                      if (isVisible) visibleCount++;
-                    });
-                    if (searchEmpty) {
-                      searchEmpty.style.display = (visibleCount === 0 && filterText) ? 'block' : 'none';
-                    }
-                  });
-                }
-
-                if ($('cgps-groups-filter')) {
+        if ($('cgps-groups-filter')) {
                   $('cgps-groups-filter').addEventListener('input', function() {
                     var filterText = this.value.toLowerCase().trim();
                     var tbody = $('cgps-groups-listbody');
