@@ -751,14 +751,20 @@
             <input type="text" id="usr-input-security" class="cgps-input" value="Administrador Cliente - ADDINS" disabled style="width: 100%; height: 38px; font-weight: 700; color: #0369a1; background: #f0f9ff;">
           </div>
 
-          <div>
-            <label style="font-weight: 700; color: #0f172a; display: block; margin-bottom: 4px;">Grupos (Asignar el grupo):</label>
-            <div style="display: flex; gap: 8px; margin-bottom: 6px;">
-              <input type="text" id="usr-group-search" class="cgps-input" placeholder="🔍 Filtrar grupo por nombre..." style="width: 220px; height: 38px;">
-              <select id="usr-select-group" class="cgps-input" style="flex: 1; height: 38px; font-weight: 600;">
-                <option value="">-- Seleccione Grupo --</option>
-              </select>
+          <div style="margin-bottom: 6px;">
+            <label style="font-weight: 700; color: #0f172a; display: block; margin-bottom: 4px;">Grupos (seleccione uno o varios):</label>
+            <div style="max-height: 200px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px;">
+              <div style="display: flex; gap: 8px; margin-bottom: 6px;">
+                <input type="text" id="usr-group-search" class="cgps-input" placeholder="🔍 Filtrar grupo por nombre..." style="flex: 1; min-width: 100px; height: 32px;">
+                <button id="usr-btn-add-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 32px;">+ Agregar</button>
+              </div>
+              <div id="usr-group-list" style="display: flex; flex-wrap: wrap; gap: 6px; min-height: 30px;"></div>
             </div>
+          </div>
+
+          <div>
+            <label style="font-weight: 700; color: #0f172a; display: block; margin-bottom: 4px;">Contraseña del usuario:</label>
+            <input type="password" id="usr-input-password" class="cgps-input" placeholder="Mínimo 8 caracteres" style="width: 100%; height: 38px;">
           </div>
 
           <div id="usr-status-msg" style="font-size: 12px; font-weight: 700; min-height: 20px;"></div>
@@ -2295,11 +2301,12 @@ ENTRADAS
   }
 
   function populateUserGroupsDropdown() {
-    var sel = $('usr-select-group');
-    var query = ($('usr-group-search').value || '').toLowerCase().trim();
-    if (!sel) return;
+    var list = $('usr-group-list');
+    var search = $('usr-group-search');
+    var query = (search ? search.value : '').toLowerCase().trim();
+    if (!list) return;
 
-    sel.innerHTML = '<option value="">-- Seleccione Grupo --</option>';
+    list.innerHTML = '';
 
     var allGroupsList = Object.keys(groupsById).map(function(k) { return groupsById[k]; });
     allGroupsList.sort(function(a, b) {
@@ -2309,17 +2316,24 @@ ENTRADAS
     allGroupsList.forEach(function(g) {
       if (!g || !g.id || !g.name || /^Group/.test(g.id)) return;
       if (!query || g.name.toLowerCase().indexOf(query) >= 0 || g.id.toLowerCase().indexOf(query) >= 0) {
-        var opt = document.createElement('option');
-        opt.value = g.id;
-        opt.textContent = g.name;
-        sel.appendChild(opt);
+        var div = document.createElement('div');
+        div.className = 'usr-group-item';
+        div.dataset.gid = g.id;
+        div.style.cssText = 'display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 6px; font-size: 12px;';
+        div.innerHTML = '<span>' + htmlEsc(g.name) + '</span> <button type="button" class="usr-remove-group" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 14px;">×</button>';
+        div.querySelector('.usr-remove-group').addEventListener('click', function() {
+          div.remove();
+        });
+        list.appendChild(div);
       }
     });
   }
 
   function requestCreateNewUserAutomated() {
     var email = ($('usr-input-email').value || '').trim();
-    var selectedGroupId = $('usr-select-group').value;
+    var selectedGroupIds = [];
+    var groupList = $('usr-group-list');
+    var selectedGroups = groupList.querySelectorAll('.usr-group-item');
     var statusDiv = $('usr-status-msg');
 
     if (!email) {
@@ -2328,18 +2342,19 @@ ENTRADAS
       return;
     }
 
-    if (!selectedGroupId) {
+    if (selectedGroups.length === 0) {
       statusDiv.style.color = "#ef4444";
-      statusDiv.textContent = "Debe seleccionar un grupo para asignar al usuario.";
+      statusDiv.textContent = "Debe seleccionar al menos un grupo para asignar al usuario.";
       return;
     }
 
-    var groupObj = groupsById[selectedGroupId];
-    var groupName = groupObj ? groupObj.name : selectedGroupId;
+    selectedGroupIds = Array.from(selectedGroups).map(function(el) { return el.dataset.gid; });
+
+    var groupNames = Array.from(selectedGroups).map(function(el) { return el.textContent.trim(); }).join(', ');
 
     showConfirmSaveModal(
       "Confirmar Creación de Usuario",
-      "Se creará el usuario '" + email + "' en Geotab con perfil Administrador Cliente asignado al grupo '" + groupName + "'. ¿Desea proceder?",
+      "Se creará el usuario '" + email + "' en Geotab con perfil Administrador Cliente asignado a los grupos: " + groupNames + ". ¿Desea proceder?",
       function() { createNewUserAutomated(); }
     );
   }
@@ -2348,7 +2363,10 @@ ENTRADAS
     var email = ($('usr-input-email').value || '').trim();
     var firstName = ($('usr-input-firstname').value || '').trim();
     var lastName = ($('usr-input-lastname').value || '').trim();
-    var selectedGroupId = $('usr-select-group').value;
+    var password = ($('usr-input-password').value || '').trim();
+    var selectedGroupIds = [];
+    var groupList = $('usr-group-list');
+    var selectedGroups = groupList.querySelectorAll('.usr-group-item');
     var statusDiv = $('usr-status-msg');
 
     if (!email) {
@@ -2357,14 +2375,23 @@ ENTRADAS
       return;
     }
 
-    if (!selectedGroupId) {
+    if (!selectedGroupIds.length) {
       statusDiv.style.color = "#ef4444";
-      statusDiv.textContent = "Debe seleccionar un grupo para asignar al usuario.";
+      statusDiv.textContent = "Debe seleccionar al menos un grupo para asignar al usuario.";
       return;
     }
 
-    var groupObj = groupsById[selectedGroupId];
-    var groupName = groupObj ? groupObj.name : selectedGroupId;
+    if (!password) {
+      statusDiv.style.color = "#ef4444";
+      statusDiv.textContent = "Debe ingresar una contraseña para el usuario.";
+      return;
+    }
+
+    if (password.length < 8) {
+      statusDiv.style.color = "#ef4444";
+      statusDiv.textContent = "La contraseña debe tener al menos 8 caracteres.";
+      return;
+    }
 
     statusDiv.style.color = "#0284c7";
     statusDiv.textContent = "Creando usuario '" + email + "' en Geotab...";
@@ -2374,7 +2401,8 @@ ENTRADAS
         name: email,
         firstName: firstName,
         lastName: lastName,
-        companyGroups: [{ id: selectedGroupId }],
+        password: password,
+        companyGroups: selectedGroupIds.map(function(gid) { return { id: gid }; }),
         securityGroups: [{ id: "GroupSecurityClientAdminId" }],
         activeFrom: new Date().toISOString(),
         activeTo: "2050-01-01T00:00:00.000Z"
