@@ -3578,9 +3578,8 @@ ENTRADAS
 
           // Find the group to rename (first group under the selected parent that matches the name)
           var targetGroup = null;
-          var allGroupsList = Object.keys(groupsById).map(function(k) { return groupsById[k]; });
-          for (var i = 0; i < allGroupsList.length; i++) {
-            var g = allGroupsList[i];
+          for (var i = 0; i < allGroupsData.length; i++) {
+            var g = allGroupsData[i];
             if (g && g.parent && g.parent.id === parentId) {
               targetGroup = g;
               break;
@@ -4365,13 +4364,16 @@ ENTRADAS
       .trim();
   }
 
-  async function loadAllGroupsTable() {
-      var tbody = $('cgps-groups-listbody');
-      $('cgps-groups-table-card').style.display = 'block';
-      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#64748b;">Cargando grupos desde Geotab...</td></tr>';
+  // Global variable para almacenar los grupos cargados
+  var allGroupsData = [];
 
-      try {
-        var results = await callMulti(api, [
+  async function loadAllGroupsTable() {
+    var tbody = $('cgps-groups-listbody');
+    $('cgps-groups-table-card').style.display = 'block';
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#64748b;">Cargando grupos desde Geotab...</td></tr>';
+
+    try {
+      var results = await callMulti(api, [
           ["Get", { typeName: "Group", includeNestedEntities: true }],
           ["Get", { typeName: "Device", propertySelector: { fields: ["id", "name", "groups", "activeFrom", "activeTo"] } }],
           ["Get", { typeName: "Zone", propertySelector: { fields: ["id", "name", "groups"] } }],
@@ -4391,6 +4393,7 @@ ENTRADAS
         // Build a map of group id -> group object
         var groupsById = {};
         groups.forEach(function(g) { groupsById[g.id] = g; });
+        allGroupsData = groups.map(function(g) { return g; });
 
         // For each group, count related entities
         var groupData = groups.map(function(g) {
