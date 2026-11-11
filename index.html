@@ -3573,10 +3573,10 @@ ENTRADAS
             return;
           }
 
-          var parentGroupObj = groupsById[parentId];
+          var parentGroupObj = allGroupsData.find(function(g) { return g.id === parentId; }) || null;
           var parentName = parentGroupObj ? parentGroupObj.name : parentId;
 
-          // Find the group to rename (first group under the selected parent that matches the name)
+          // Find the first group under the selected parent
           var targetGroup = null;
           for (var i = 0; i < allGroupsData.length; i++) {
             var g = allGroupsData[i];
@@ -3593,7 +3593,7 @@ ENTRADAS
           }
 
           statusDiv.style.color = "#0284c7";
-          statusDiv.textContent = "Cambiando nombre a '" + newName + "'...";
+          statusDiv.textContent = "Cambiando nombre a '" + newName + "...";
 
           try {
             var result = await callApi(api, 'Set', {
@@ -3601,22 +3601,72 @@ ENTRADAS
               entity: {
                 id: targetGroup.id,
                 name: newName,
-                parent: { id: parentId }
+                lastModifiedUser: 'sysadmin',
+                lastModifiedDate: new Date().toISOString(),
+                validFromDate: targetGroup.validFromDate || new Date().toISOString()
               }
             });
-
-            statusDiv.style.color = "#10b981";
-            statusDiv.textContent = "✅ Nombre cambiado a '" + newName + "' con éxito";
-            $('audit-rename-group-name').value = '';
-
-            setTimeout(function() {
-              loadAllGroupsTable();
-            }, 1000);
-
-          } catch (err) {
-            console.error("Error cambiando nombre de grupo:", err);
+            setMsg('✅ Nombre del grupo cambiado correctamente: ' + targetGroup.name + ' → ' + newName);
+            executeGroupAudit();
+          } catch (e) {
+            console.error('Error cambiando nombre del grupo:', e);
             statusDiv.style.color = "#ef4444";
-            statusDiv.textContent = "Error al cambiar nombre: " + (err.message || JSON.stringify(err));
+            statusDiv.textContent = '❌ Error al cambiar nombre del grupo: ' + (e.message || String(e));
+          }
+        }
+
+        async function executeRenameGroup() {
+          var parentId = $('audit-rename-parent-select').value;
+          var newName = $('audit-rename-group-name').value.trim();
+          var statusDiv = $('audit-create-status');
+
+          if (!parentId) {
+            statusDiv.style.color = "#ef4444";
+            statusDiv.textContent = "Por favor seleccione el grupo padre de la lista.";
+            return;
+          }
+
+          if (!newName) {
+            statusDiv.style.color = "#ef4444";
+            statusDiv.textContent = "Por favor ingrese el nuevo nombre para el grupo.";
+            return;
+          }
+
+          var targetGroup = null;
+          for (var i = 0; i < allGroupsData.length; i++) {
+            var g = allGroupsData[i];
+            if (g && g.parent && g.parent.id === parentId) {
+              targetGroup = g;
+              break;
+            }
+          }
+
+          if (!targetGroup) {
+            statusDiv.style.color = "#ef4444";
+            statusDiv.textContent = "No se encontró ningún grupo bajo el padre seleccionado.";
+            return;
+          }
+
+          statusDiv.style.color = "#0284c7";
+          statusDiv.textContent = "Cambiando nombre a '" + newName + "...";
+
+          try {
+            var result = await callApi(api, 'Set', {
+              typeName: 'Group',
+              entity: {
+                id: targetGroup.id,
+                name: newName,
+                lastModifiedUser: 'sysadmin',
+                lastModifiedDate: new Date().toISOString(),
+                validFromDate: targetGroup.validFromDate || new Date().toISOString()
+              }
+            });
+            setMsg('✅ Nombre del grupo cambiado correctamente: ' + targetGroup.name + ' → ' + newName);
+            executeGroupAudit();
+          } catch (e) {
+            console.error('Error cambiando nombre del grupo:', e);
+            statusDiv.style.color = "#ef4444";
+            statusDiv.textContent = '❌ Error al cambiar nombre del grupo: ' + (e.message || String(e));
           }
         }
 
