@@ -944,10 +944,32 @@
           </div>
         </div>
 
+        <!-- SECCIÓN 3: GESTIÓN DE GRUPOS MASIVA -->
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="font-size: 13px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px;">Gestión Masiva de Grupos</div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <input type="text" id="cgps-group-search" class="cgps-input" placeholder="🔍 Buscar grupo..." style="flex: 1; height: 36px; font-size: 12px;">
+            <button id="cgps-btn-add-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px; font-size: 12px; white-space: nowrap; border-radius: 6px;">+ Añadir Grupo</button>
+            <button id="cgps-btn-remove-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px; font-size: 12px; white-space: nowrap; border-radius: 6px;">- Quitar Grupo</button>
+          </div>
+          <div id="cgps-group-list" style="display: flex; flex-wrap: wrap; gap: 6px; min-height: 30px;"></div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <input type="text" id="cgps-group-name-input" class="cgps-input" placeholder="Nombre del grupo..." style="flex: 1; height: 34px; font-size: 12px;">
+          </div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <select id="cgps-group-action-select" class="cgps-input" style="flex: 1; height: 36px; font-size: 12px;">
+              <option value="add">Añadir Grupo a los activos seleccionados</option>
+              <option value="remove">Quitar Grupo de los activos seleccionados</option>
+            </select>
+            <button id="cgps-btn-apply-groups" type="button" class="cgps-btn cgps-btn-primary" style="height: 36px; font-size: 12px; font-weight: 700; white-space: nowrap; border-radius: 6px;">🔄 Aplicar Cambios de Grupos</button>
+          </div>
+          <div id="cgps-group-status" style="font-size: 12px; font-weight: 600; min-height: 20px;"></div>
+        </div>
+
         <!-- SEPARADOR VERTICAL 2 -->
         <div style="width: 2px; background: #0f172a; margin: 0 4px; align-self: stretch; min-height: 80px; opacity: 0.9;"></div>
 
-        <!-- SECCIÓN 3: ACCIONES DIRECTAS / 5 PARÁMETROS -->
+        <!-- SECCIÓN 4: ACCIONES DIRECTAS / 5 PARÁMETROS -->
         <div style="display: flex; align-items: center; justify-content: center; min-width: 175px; padding: 4px;">
           <button id="cgps-btn-inject-params" type="button" class="cgps-btn" style="background: linear-gradient(135deg, #10b981, #059669); color: #ffffff; font-weight: 800; font-size: 13px; padding: 10px 18px; border-radius: 8px; box-shadow: 0 3px 6px -1px rgba(16, 185, 129, 0.35); height: 42px; width: 100%; display: none;">Aplicar 5 parametros</button>
         </div>
@@ -2026,6 +2048,173 @@ var addInConstructor = function (geotabApi, state, callback) {
     } catch (err) {
       console.error("Error al guardar cambios masivos:", err);
       setMsg("Error al guardar los cambios: " + (err.message || err), true);
+    }
+  }
+
+  // --- Gestión masiva de grupos en Validación GPS ---
+
+  function addGroupToSelected(parentId) {
+    var groupName = parentId;
+    var groupId = parentId;
+
+    if (!groupId) {
+      setMsg("Por favor ingrese un ID de grupo.", true);
+      return;
+    }
+
+    // Buscar el grupo por ID o nombre
+    var group = groupsById[groupId] || findGroupByName(groupsById, groupId);
+    if (!group) {
+      setMsg("No se encontró el grupo con ID o nombre: " + parentId, true);
+      return;
+    }
+
+    var selectedIds = Object.keys(selected).filter(function (k) { return selected[k]; });
+    if (selectedIds.length === 0) {
+      setMsg("Seleccione al menos una unidad activa.", true);
+      return;
+    }
+
+    // Verificar si ya está asignado
+    var alreadyAssigned = selectedIds.some(function (id) {
+      var row = all.find(function (r) { return r.id === id; });
+      return row && row.rawDevice && row.rawDevice.groups && row.rawDevice.groups.some(function (g) { return g.id === groupId; });
+    });
+
+    if (alreadyAssigned) {
+      setMsg("Algunos activos ya tienen este grupo asignado.", true);
+      return;
+    }
+
+    var calls = [];
+    selectedIds.forEach(function (id) {
+      var row = all.find(function (r) { return r.id === id; });
+      if (!row || !row.rawDevice) return;
+
+      var device = row.rawDevice;
+      if (!device.groups) device.groups = [];
+
+      // Verificar que no esté duplicado
+      if (device.groups.some(function (g) { return g.id === groupId; })) return;
+
+      device.groups.push({ id: groupId });
+      calls.push(['Set', {
+        typeName: 'Device',
+        entity: device
+      }]);
+    });
+
+    if (calls.length === 0) {
+      setMsg("No se necesita modificar ningún activo.", true);
+      return;
+    }
+
+    setMsg("Añadiendo grupo " + group.name + " a " + calls.length + " unidad(es)...");
+    executeGroupChangeBatch(calls, "Añadido grupo " + group.name + " a los activos seleccionados");
+  }
+
+  function removeGroupFromSelected(parentId) {
+    var groupName = parentId;
+    var groupId = parentId;
+
+    if (!groupId) {
+      setMsg("Por favor ingrese un ID de grupo.", true);
+      return;
+    }
+
+    var group = groupsById[groupId] || findGroupByName(groupsById, groupId);
+    if (!group) {
+      setMsg("No se encontró el grupo con ID o nombre: " + parentId, true);
+      return;
+    }
+
+    var selectedIds = Object.keys(selected).filter(function (k) { return selected[k]; });
+    if (selectedIds.length === 0) {
+      setMsg("Seleccione al menos una unidad activa.", true);
+      return;
+    }
+
+    // Verificar si al menos un activo tiene este grupo
+    var willBeRemoved = selectedIds.some(function (id) {
+      var row = all.find(function (r) { return r.id === id; });
+      return row && row.rawDevice && row.rawDevice.groups && row.rawDevice.groups.some(function (g) { return g.id === groupId; });
+    });
+
+    if (!willBeRemoved) {
+      setMsg("Ningún activo seleccionado tiene este grupo asignado.", true);
+      return;
+    }
+
+    var calls = [];
+    selectedIds.forEach(function (id) {
+      var row = all.find(function (r) { return r.id === id; });
+      if (!row || !row.rawDevice) return;
+
+      var device = row.rawDevice;
+      if (!device.groups) device.groups = [];
+
+      var filtered = device.groups.filter(function (g) { return g.id !== groupId; });
+      if (filtered.length === device.groups.length) return;
+
+      device.groups = filtered;
+      calls.push(['Set', {
+        typeName: 'Device',
+        entity: device
+      }]);
+    });
+
+    if (calls.length === 0) {
+      setMsg("No se necesita modificar ningún activo.", true);
+      return;
+    }
+
+    setMsg("Quitando grupo " + group.name + " de " + calls.length + " unidad(es)...");
+    executeGroupChangeBatch(calls, "Quitado grupo " + group.name + " de los activos seleccionados");
+  }
+
+  function requestApplyGroupsChange() {
+    var action = $("cgps-group-action-select").value || "add";
+    var parentId = $("cgps-group-name-input").value.trim();
+
+    if (!parentId) {
+      setMsg("Por favor ingrese el ID o nombre del grupo.", true);
+      return;
+    }
+
+    if (action === "add") {
+      addGroupToSelected(parentId);
+    } else {
+      removeGroupFromSelected(parentId);
+    }
+  }
+
+  function findGroupByName(groups, name) {
+    var normalized = name.toLowerCase().trim();
+    for (var gid in groups) {
+      if (groups.hasOwnProperty(gid)) {
+        var g = groups[gid];
+        if (g && g.name && (g.name.toLowerCase() === normalized || g.id.toLowerCase() === normalized)) {
+          return g;
+        }
+      }
+    }
+    return null;
+  }
+
+  function executeGroupChangeBatch(calls, msg) {
+    setMsg(msg);
+    try {
+      callMulti(api, calls).then(function () {
+        setMsg("OK Cambios aplicados correctamente.");
+        setTimeout(function () {
+          load();
+        }, 1500);
+      }).catch(function (err) {
+        console.error("Error aplicando cambios de grupos:", err);
+        setMsg("Error al aplicar cambios de grupos: " + (err.message || err), true);
+      });
+    } catch (err) {
+      setMsg("Error al aplicar cambios de grupos: " + (err.message || err), true);
     }
   }
 
@@ -4845,6 +5034,46 @@ ENTRADAS
   }
 
   if ($('cgps-btn-apply-mass-unified')) $('cgps-btn-apply-mass-unified').addEventListener('click', requestApplyMassUpdateUnified);
+
+  // Group management event listeners
+  if ($('cgps-btn-add-group')) $('cgps-btn-add-group').addEventListener('click', function() {
+    var parentId = $('cgps-group-name-input').value.trim();
+    if (!parentId) {
+      setMsg('Por favor ingrese el ID o nombre del grupo a añadir.', true);
+      return;
+    }
+    addGroupToSelected(parentId);
+  });
+
+  if ($('cgps-btn-remove-group')) $('cgps-btn-remove-group').addEventListener('click', function() {
+    var parentId = $('cgps-group-name-input').value.trim();
+    if (!parentId) {
+      setMsg('Por favor ingrese el ID o nombre del grupo a quitar.', true);
+      return;
+    }
+    removeGroupFromSelected(parentId);
+  });
+
+  if ($('cgps-btn-apply-groups')) $('cgps-btn-apply-groups').addEventListener('click', requestApplyGroupsChange);
+
+  // Group search event listener
+  if ($('cgps-group-search')) $('cgps-group-search').addEventListener('input', function() {
+    var query = this.value.toLowerCase().trim();
+    var list = $('cgps-group-list');
+    if (!query) {
+      list.innerHTML = '';
+      return;
+    }
+    // Show matching groups in the list
+    var html = '';
+    Object.keys(groupsById).forEach(function(gid) {
+      var g = groupsById[gid];
+      if (g && g.name && (g.name.toLowerCase().indexOf(query) >= 0 || gid.toLowerCase().indexOf(query) >= 0)) {
+        html += '<div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:6px;padding:4px 8px;display:inline-block;font-size:11px;">' + htmlEsc(g.name) + ' <span style="color:#64748b;font-size:10px;">(' + htmlEsc(gid) + ')</span></div>';
+      }
+    });
+    list.innerHTML = html || '<span style="color:#64748b;">No se encontraron grupos</span>';
+  });
   if ($('testn-btn-refresh-hub')) $('testn-btn-refresh-hub').addEventListener('click', function() { load(); });
   if ($('testn-btn-refresh-mod')) $('testn-btn-refresh-mod').addEventListener('click', function() { load(); });
 
