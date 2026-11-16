@@ -952,18 +952,20 @@
             <button id="cgps-btn-add-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px; font-size: 12px; white-space: nowrap; border-radius: 6px;">+ Añadir Grupo</button>
             <button id="cgps-btn-remove-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px; font-size: 12px; white-space: nowrap; border-radius: 6px;">- Quitar Grupo</button>
           </div>
-          <div id="cgps-group-list" style="display: flex; flex-wrap: wrap; gap: 6px; max-height: 150px; overflow-y: auto; min-height: 30px; padding: 6px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;"></div>
-          <div style="display: flex; gap: 8px; align-items: center;">
-            <input type="text" id="cgps-group-name-input" class="cgps-input" placeholder="Nombre del grupo..." style="flex: 1; height: 34px; font-size: 12px;">
+          <div id="cgps-group-list" style="display: flex; flex-wrap: wrap; gap: 6px; max-height: 120px; overflow-y: auto; min-height: 24px; padding: 4px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;"></div>
+          <div style="display: flex; gap: 6px; align-items: center;">
+            <button id="cgps-btn-add-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 32px; font-size: 11px; padding: 0 10px; border-radius: 6px;">+ Añadir Grupo</button>
+            <button id="cgps-btn-remove-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 32px; font-size: 11px; padding: 0 10px; border-radius: 6px;">- Quitar Grupo</button>
           </div>
-          <div style="display: flex; gap: 8px; align-items: center;">
-            <select id="cgps-group-action-select" class="cgps-input" style="flex: 1; height: 36px; font-size: 12px;">
-              <option value="add">Añadir Grupo a los activos seleccionados</option>
-              <option value="remove">Quitar Grupo de los activos seleccionados</option>
+          <div style="display: flex; gap: 6px; align-items: center;">
+            <input type="text" id="cgps-group-name-input" class="cgps-input" placeholder="ID o nombre del grupo..." style="flex: 1; height: 30px; font-size: 11px;">
+            <select id="cgps-group-action-select" class="cgps-input" style="flex: 2; height: 30px; font-size: 11px;">
+              <option value="add">Añadir Grupo</option>
+              <option value="remove">Quitar Grupo</option>
             </select>
-            <button id="cgps-btn-apply-groups" type="button" class="cgps-btn cgps-btn-primary" style="height: 36px; font-size: 12px; font-weight: 700; white-space: nowrap; border-radius: 6px;">🔄 Aplicar Cambios de Grupos</button>
+            <button id="cgps-btn-apply-groups" type="button" class="cgps-btn cgps-btn-primary" style="height: 32px; font-size: 11px; font-weight: 700; padding: 0 12px; border-radius: 6px;">🔄 Aplicar cambios</button>
           </div>
-          <div id="cgps-group-status" style="font-size: 12px; font-weight: 600; min-height: 20px;"></div>
+          <div id="cgps-group-status" style="font-size: 11px; font-weight: 600; min-height: 16px;"></div>
         </div>
 
         <!-- SEPARADOR VERTICAL 2 -->
@@ -4284,7 +4286,6 @@ ENTRADAS
         '<th style="width: 72px;">Marca</th>' +
         '<th style="width: 85px;">Modelo</th>' +
         '<th style="width: 48px; text-align: center;">Año</th>' +
-        '<th style="width: 100px; text-align: center;">FECHA ACTIVACIÓN DEL SERVICIO</th>' +
         '</tr>';
     }
   }
