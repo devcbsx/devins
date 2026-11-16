@@ -1979,6 +1979,55 @@ var addInConstructor = function (geotabApi, state, callback) {
     );
   }
 
+  function requestApplyGroupsChange() {
+    var action = $('cgps-group-action-select').value || 'add';
+    var parentId = $('cgps-group-name-input').value.trim();
+    var statusDiv = $('cgps-group-status');
+
+    if (!parentId) {
+      setMsg("Por favor ingrese el ID o nombre del grupo.", true);
+      return;
+    }
+
+    if (action === 'add') {
+      // Verify the group exists
+      var group = groupsById[parentId] || findGroupByName(groupsById, parentId);
+      if (!group) {
+        setMsg("No se encontró el grupo con ID o nombre: " + parentId, true);
+        return;
+      }
+      showConfirmSaveModal(
+        "Confirmar Añadir Grupo",
+        "¿Desea añadir el grupo '" + group.name + "' a " + Object.keys(selected).filter(function (k) { return selected[k]; }).length + " unidad(es) seleccionadas?",
+        function() { addGroupToSelected(parentId); }
+      );
+    } else {
+      // Verify the group exists and is assigned to at least one selected asset
+      var group = groupsById[parentId] || findGroupByName(groupsById, parentId);
+      if (!group) {
+        setMsg("No se encontró el grupo con ID o nombre: " + parentId, true);
+        return;
+      }
+
+      var selectedIds = Object.keys(selected).filter(function (k) { return selected[k]; });
+      var willBeRemoved = selectedIds.some(function (id) {
+        var row = all.find(function (r) { return r.id === id; });
+        return row && row.rawDevice && row.rawDevice.groups && row.rawDevice.groups.some(function (g) { return g.id === groupId; });
+      });
+
+      if (!willBeRemoved) {
+        setMsg("Ningún activo seleccionado tiene este grupo asignado.", true);
+        return;
+      }
+
+      showConfirmSaveModal(
+        "Confirmar Quitar Grupo",
+        "¿Desea quitar el grupo '" + group.name + "' de " + selectedIds.length + " unidad(es) seleccionadas?",
+        function() { removeGroupFromSelected(parentId); }
+      );
+    }
+  }
+
   async function applyMassUpdateUnified() {
     var selectedIds = Object.keys(selected).filter(function (k) { return selected[k]; });
     var field = $('cgps-mass-field-select').value;
@@ -2216,6 +2265,19 @@ var addInConstructor = function (geotabApi, state, callback) {
     } catch (err) {
       setMsg("Error al aplicar cambios de grupos: " + (err.message || err), true);
     }
+  }
+
+  function findGroupByName(groups, name) {
+    var normalized = name.toLowerCase().trim();
+    for (var gid in groups) {
+      if (groups.hasOwnProperty(gid)) {
+        var g = groups[gid];
+        if (g && g.name && (g.name.toLowerCase() === normalized || g.id.toLowerCase() === normalized)) {
+          return g;
+        }
+      }
+    }
+    return null;
   }
 
   function requestInjectRequiredParameters() {
@@ -4202,7 +4264,7 @@ ENTRADAS
       tableContainer.classList.toggle('valid-mode', activeModule === 'valid');
     }
     if (activeModule === 'certi') {
-      head.innerHTML = '<tr><th style="width: 36px; text-align: center;"></th><th style="min-width: 120px;">Placa</th><th style="min-width: 160px;">VIN</th><th style="min-width: 110px;">Activo Desde</th><th style="min-width: 220px;">Razón Social</th><th style="min-width: 120px;">RUC</th><th style="min-width: 280px; max-width: 420px; width: 320px;">Grupos</th></tr>';
+      head.innerHTML = '<tr><th style="width: 36px; text-align: center;"></th><th style="min-width: 120px;">Placa</th><th style="min-width: 160px;">VIN</th><th style="min-width: 110px;">Activo Desde</th><th style="min-width: 220px;">Razón Social</th><th style="min-width: 120px;">RUC</th></tr>';
     } else if (activeModule === 'master') {
       head.innerHTML = '<tr><th style="width: 36px; text-align: center;"></th><th style="min-width: 160px;">PLACA</th><th style="min-width: 140px;">BASE DE DATOS</th><th style="min-width: 180px;">VIN</th><th style="min-width: 160px;"># SERIE</th><th style="min-width: 120px;">Instalación</th></tr>';
     } else {
@@ -4213,7 +4275,6 @@ ENTRADAS
         '<th style="width: 78px; text-align: center;">Activado Desde</th>' +
         '<th style="width: 125px;">VIN</th>' +
         '<th style="width: 72px; text-align: center;">Parámetros (5)</th>' +
-        '<th style="width: 220px;">Grupos</th>' +
         '<th style="width: 95px;">Estado/Prov.</th>' +
         '<th style="width: 72px;">RUC</th>' +
         '<th style="width: 160px;">Razón Social</th>' +
