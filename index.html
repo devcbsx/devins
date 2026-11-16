@@ -1589,6 +1589,18 @@ var addInConstructor = function (geotabApi, state, callback) {
 
     var isExcluded = isExcludedDevice(d);
 
+    // Propiedad personalizada: FECHA DE ACTIVACIÓN DEL SERVICIO
+    var fechaActivacionServicio = '';
+    var propId = null;
+    (d.customProperties || []).forEach(function(cp) {
+      if (cp && cp.property && cp.property.id) {
+        propId = cp.property.id;
+        if (cp.property.name && /FECHA\s*DE\s*ACTIVACI[A \u00d3]\s*DEL\s*SERVICIO/i.test(cp.property.name)) {
+          fechaActivacionServicio = cp.value || '';
+        }
+      }
+    });
+
     var row = {
       id: d.id,
       rawDevice: d,
@@ -1616,6 +1628,7 @@ var addInConstructor = function (geotabApi, state, callback) {
         return !!(grp && grp.name && normalizeStr(grp.name).indexOf('sin asignar') >= 0);
       })
     };
+    row.fechaActivacionServicio = fechaActivacionServicio;
     row._nom = name.toLowerCase(); row._p = row.placa.toLowerCase(); row._v = vin.toLowerCase(); row._s = serial.toLowerCase();
     row._pNorm = row._p.replace(/[-\s]/g, '');
     row._hay = [name, row.placa, vin, serial, row.grupos, razonSocial, rucVal, estadoProv, anualidadVal, tipoVehiculoVal, marcaVal, modeloVal, anioVal].join(' ').toLowerCase();
@@ -4020,6 +4033,7 @@ ENTRADAS
         '<th style="width: 72px;">Marca</th>' +
         '<th style="width: 85px;">Modelo</th>' +
         '<th style="width: 48px; text-align: center;">Año</th>' +
+        '<th style="width: 100px; text-align: center;">FECHA ACTIVACIÓN DEL SERVICIO</th>' +
         '</tr>';
     }
   }
@@ -4575,17 +4589,17 @@ ENTRADAS
       return;
     }
 
-    var headers = ["NOMBRE DEL ACTIVO", "PLACA", "ACTIVADO DESDE", "VIN", "PARÁMETROS (5)", "GRUPOS", "ESTADO/PROV.", "RUC", "RAZÓN SOCIAL", "ANUALIDAD", "TIPO VEHÍCULO", "MARCA", "MODELO", "AÑO"];
+    var headers = ["NOMBRE DEL ACTIVO", "PLACA", "ACTIVADO DESDE", "VIN", "PARÁMETROS (5)", "GRUPOS", "ESTADO/PROV.", "RUC", "RAZÓN SOCIAL", "ANUALIDAD", "TIPO VEHÍCULO", "MARCA", "MODELO", "AÑO", "FECHA ACTIVACIÓN DEL SERVICIO"];
     var data = rowsToExport.map(function(r) {
-      return [r.nombreActivo, r.placa, r.desde || '', r.vin, r.paramCount + '/5', r.grupos || '', r.estadoProvincia || '', r.ruc || '', r.razon || '', r.anualidad || '', r.tipoVehiculo || '', r.marca || '', r.modelo || '', r.anio || ''];
+      return [r.nombreActivo, r.placa, r.desde || '', r.vin, r.paramCount + '/5', r.grupos || '', r.estadoProvincia || '', r.ruc || '', r.razon || '', r.anualidad || '', r.tipoVehiculo || '', r.marca || '', r.modelo || '', r.anio || '', r.fechaActivacionServicio || ''];
     });
 
     var sheetData = [headers].concat(data);
     var wb = XLSX.utils.book_new();
     var ws = XLSX.utils.aoa_to_sheet(sheetData);
-    ws['!cols'] = [{ wch: 22 }, { wch: 12 }, { wch: 16 }, { wch: 22 }, { wch: 14 }, { wch: 30 }, { wch: 14 }, { wch: 14 }, { wch: 25 }, { wch: 18 }, { wch: 16 }, { wch: 14 }, { wch: 16 }, { wch: 8 }];
+    ws['!cols'] = [{ wch: 22 }, { wch: 12 }, { wch: 16 }, { wch: 22 }, { wch: 14 }, { wch: 30 }, { wch: 14 }, { wch: 14 }, { wch: 25 }, { wch: 18 }, { wch: 16 }, { wch: 14 }, { wch: 16 }, { wch: 8 }, { wch: 35 }];
 
-    var fileName = 'Validacion_GPS_' + fmtDate(new Date().toISOString()).replace(/\//g, '-') + '.xlsx';
+    var fileName = 'Validacion_GPS_' + fmtDate(new Date().toISOString()).replace(/\\//g, '-') + '.xlsx';
     XLSX.utils.book_append_sheet(wb, ws, "Validacion GPS");
     XLSX.writeFile(wb, fileName);
 
