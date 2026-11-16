@@ -952,7 +952,7 @@
             <button id="cgps-btn-add-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px; font-size: 12px; white-space: nowrap; border-radius: 6px;">+ Añadir Grupo</button>
             <button id="cgps-btn-remove-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px; font-size: 12px; white-space: nowrap; border-radius: 6px;">- Quitar Grupo</button>
           </div>
-          <div id="cgps-group-list" style="display: flex; flex-wrap: wrap; gap: 6px; min-height: 30px;"></div>
+          <div id="cgps-group-list" style="display: flex; flex-wrap: wrap; gap: 6px; max-height: 150px; overflow-y: auto; min-height: 30px; padding: 6px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;"></div>
           <div style="display: flex; gap: 8px; align-items: center;">
             <input type="text" id="cgps-group-name-input" class="cgps-input" placeholder="Nombre del grupo..." style="flex: 1; height: 34px; font-size: 12px;">
           </div>
@@ -4275,6 +4275,7 @@ ENTRADAS
         '<th style="width: 78px; text-align: center;">Activado Desde</th>' +
         '<th style="width: 125px;">VIN</th>' +
         '<th style="width: 72px; text-align: center;">Parámetros (5)</th>' +
+        '<th style="width: 220px;">Grupos</th>' +
         '<th style="width: 95px;">Estado/Prov.</th>' +
         '<th style="width: 72px;">RUC</th>' +
         '<th style="width: 160px;">Razón Social</th>' +
