@@ -1533,7 +1533,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     return isDeviceArchived(d) || isSinSeguimientoDevice(d);
   }
 
-  function getGroupsList(d) {
+  async function getGroupsList(d) {
     var gs = d.groups || [];
     var names = [];
     for (var i = 0; i < gs.length; i++) { 
@@ -1880,14 +1880,14 @@ var addInConstructor = function (geotabApi, state, callback) {
     if ($('reports-loading-progress')) $('reports-loading-progress').style.width = (progressPercent || 20) + '%';
   }
 
-  function hideLoading() {
+  async function hideLoading() {
     if ($('reports-loading-progress')) $('reports-loading-progress').style.width = '100%';
     setTimeout(function() {
       if ($('reports-loading-bar-box')) $('reports-loading-bar-box').style.display = 'none';
     }, 300);
   }
 
-  function updateMassSelectVisibility() {
+  async function updateMassSelectVisibility() {
     var validOpts = document.querySelectorAll('.opt-valid-only');
     var btnInject = $('cgps-btn-inject-params');
 
@@ -1907,13 +1907,13 @@ var addInConstructor = function (geotabApi, state, callback) {
     updateMassInputPlaceholder();
   }
 
-  function updateMassInputPlaceholder() {
+  async function updateMassInputPlaceholder() {
     var selectedOpt = $('cgps-mass-field-select').options[$('cgps-mass-field-select').selectedIndex];
     var labelText = selectedOpt ? selectedOpt.text : 'valor';
     $('cgps-mass-value-input').placeholder = labelText + '...';
   }
 
-  function requestTriggerVinDecodeProcess() {
+  async function requestTriggerVinDecodeProcess() {
     var selectedIds = Object.keys(selected).filter(function (k) { return selected[k]; });
     var targetRows = selectedIds.length > 0 
       ? all.filter(function(r){ return selectedIds.includes(r.id); })
@@ -1953,7 +1953,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     setMsg("✅ Se decodificaron y actualizaron Marca, Modelo y Año para " + vinsToDecode.length + " vehículos.");
   }
 
-  function requestApplyMassUpdateUnified() {
+  async function requestApplyMassUpdateUnified() {
     var selectedIds = Object.keys(selected).filter(function (k) { return selected[k]; });
     var field = $('cgps-mass-field-select').value;
     var val = ($('cgps-mass-value-input').value || '').trim();
@@ -1975,7 +1975,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     );
   }
 
-  // --- Gestión masiva de grupos en Validación GPS ---
+  async function requestApplyGroupChange() {
     var selectedIds = Object.keys(selected).filter(function (k) { return selected[k]; });
     var field = $('cgps-mass-field-select').value;
     var val = ($('cgps-mass-value-input').value || '').trim();
@@ -2046,6 +2046,8 @@ var addInConstructor = function (geotabApi, state, callback) {
       setMsg("Error al guardar los cambios: " + (err.message || err), true);
     }
   }
+
+  requestApplyGroupChange();
 
   // --- Gestión masiva de grupos en Validación GPS ---
 
@@ -2227,7 +2229,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     return null;
   }
 
-  function requestInjectRequiredParameters() {
+  async function requestInjectRequiredParameters() {
     var selectedIds = Object.keys(selected).filter(function (k) { return selected[k]; });
     
     if (selectedIds.length === 0) {
@@ -2540,7 +2542,7 @@ ENTRADAS
     });
   }
 
-  function requestCreateNewUserAutomated() {
+  async function requestCreateNewUserAutomated() {
     var email = ($('usr-input-email').value || '').trim();
     var selectedGroupIds = [];
     var groupList = $('usr-group-list');
@@ -2694,7 +2696,7 @@ ENTRADAS
     return Array.from(selectedCbs).map(function(cb) { return cb.value; });
   }
 
-  function getUnitsForSelectedReportGroups() {
+  async function getUnitsForSelectedReportGroups() {
     var gids = getSelectedSubGroupIds();
     if (gids.length === 0) return [];
 
@@ -2787,7 +2789,7 @@ ENTRADAS
       if (!o) return id;
       return o.name || ((o.firstName || '') + ' ' + (o.lastName || '')).trim() || id;
     }
-    function mk(id) { return ['Get', { typeName: typeName, search: { id: id }, propertySelector: { fields: fields, isIncluded: true } }]; }
+    async function mk(id) { return ['Get', { typeName: typeName, search: { id: id }, propertySelector: { fields: fields, isIncluded: true } }]; }
     for (var i = 0; i < pending.length; i += 50) {
       var part = pending.slice(i, i + 50);
       try {
@@ -2811,7 +2813,7 @@ ENTRADAS
     return (/geotab|copiloto/i.test(o) ? o : 'https://my.geotab.com') + '/' + (db || databaseName) + '/';
   }
 
-  function fillInlineList(container, list, emptyText) {
+  async function fillInlineList(container, list, emptyText) {
     container.innerHTML = '';
     if (!list || !list.length) {
       container.innerHTML = '<span style="color:#64748b; font-style: italic;">' + htmlEsc(emptyText) + '</span>';
@@ -3004,7 +3006,7 @@ ENTRADAS
     $('report-preview-modal').style.display = 'flex';
   }
 
-  function populateSourceGroupsDropdown() {
+  async function populateSourceGroupsDropdown() {
     var query = ($('create-rep-source-search').value || '').toLowerCase().trim();
     var sel = $('create-rep-source-group');
     if (!sel) return;
@@ -3124,7 +3126,7 @@ ENTRADAS
     $('create-report-modal').style.display = 'flex';
   }
 
-  function geotabAddinClonarReporte() {
+  async function geotabAddinClonarReporte() {
   let api;
 
   async function clonar() {
@@ -3193,7 +3195,7 @@ ENTRADAS
     );
   }
 
-  function openEditDiagnosticsModal() {
+  async function openEditDiagnosticsModal() {
     $('edit-diagnostics-modal').style.display = 'flex';
     $('edit-diag-status').style.color = "#0284c7";
 
@@ -3248,7 +3250,7 @@ ENTRADAS
     }
   }
 
-  function populateDiagnosticsReportDropdowns() {
+  async function populateDiagnosticsReportDropdowns() {
     var queryMod = ($('edit-diag-search-mod').value || '').toLowerCase().trim();
     var queryComp = ($('edit-diag-search-comp').value || '').toLowerCase().trim();
 
@@ -3285,7 +3287,7 @@ ENTRADAS
     if (currentValComp) selComp.value = currentValComp;
   }
 
-  function renderEditDiagGroupsList(assignedGroupIds) {
+  async function renderEditDiagGroupsList(assignedGroupIds) {
     var container = $('edit-diag-dest-groups-list');
     var query = ($('edit-diag-dest-search').value || '').toLowerCase().trim();
     if (!container) return;
@@ -3351,7 +3353,7 @@ ENTRADAS
     }
   }
 
-  function filterCatalogItems() {
+  async function filterCatalogItems() {
     var sel = $('diag-library-select');
     var query = ($('diag-library-search').value || '').toLowerCase().trim();
     if (!sel) return;
@@ -3496,7 +3498,7 @@ ENTRADAS
     setMsg("➕ Elemento '" + selectedVal + "' añadido al recuadro de texto.");
   }
 
-  function requestSaveDiagnosticsToReport() {
+  async function requestSaveDiagnosticsToReport() {
     var repId = $('edit-diag-select-report').value;
     var statusDiv = $('edit-diag-status');
 
@@ -3612,7 +3614,7 @@ ENTRADAS
       });
     }
 
-    function populateRenameParentGroupsDropdown() {
+    async function populateRenameParentGroupsDropdown() {
       var sel = $('audit-rename-parent-select');
       var query = ($('audit-rename-parent-search').value || '').toLowerCase().trim();
       if (!sel) return;
@@ -3635,7 +3637,7 @@ ENTRADAS
       });
     }
 
-    function requestCreateNewClientGroup() {
+    async function requestCreateNewClientGroup() {
     var clientName = $('audit-new-client-name').value.trim();
     var vehicleType = $('audit-new-client-vehicle-type').value.trim();
     var statusDiv = $('audit-create-status');
@@ -3694,7 +3696,7 @@ ENTRADAS
     }
   }
 
-  function requestCreateGeneralGroup() {
+  async function requestCreateGeneralGroup() {
       var parentId = $('audit-gen-parent-select').value;
       var name = $('audit-gen-group-name').value.trim();
       var statusDiv = $('audit-create-status');
@@ -3721,7 +3723,7 @@ ENTRADAS
       );
     }
 
-    function requestRenameGroup() {
+    async function requestRenameGroup() {
       var parentId = $('audit-rename-parent-select').value;
       var newName = $('audit-rename-group-name').value.trim();
       var statusDiv = $('audit-create-status');
@@ -3958,18 +3960,19 @@ ENTRADAS
     docContent += 'table { border-collapse: collapse; width: 100%; margin: 0 auto; }';
     docContent += 'th, td { border: 1px solid #000000; padding: 6px 8px; text-align: center; font-size: 10.5pt; }';
     docContent += 'th { font-weight: bold; background-color: #ffffff; }';
-    docContent += '
-    .cgps-btn { padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; white-space: nowrap; transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
-    .cgps-btn:disabled { opacity: 0.5; cursor: not-allowed !important; }
-    .cgps-btn-primary { background: linear-gradient(135deg, #0284c7, #0369a1) !important; color: #ffffff !important; box-shadow: 0 2px 4px rgba(2, 132, 199, 0.2); }
-    .cgps-btn-primary:hover { background: linear-gradient(135deg, #0369a1, #075985) !important; }
-    .cgps-btn-white { background-color: #ffffff !important; color: #0f172a !important; border: 1px solid #e2e8f0; }
-    .cgps-btn-white:hover { background-color: #f8fafc !important; border-color: #cbd5e1; }
-    .cgps-btn-secondary { background-color: #334155 !important; color: #ffffff !important; }
-    .cgps-btn-secondary:hover { background-color: #1e293b !important; }
-    .cgps-btn-outline { background-color: transparent; color: #475569; border: 1px solid #cbd5e1; }
-    .cgps-btn-outline:hover { background-color: #f1f5f9; color: #0f172a; }
-    </head><body>';
+    docContent += '<style>';
+    docContent += '.cgps-btn { padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; white-space: nowrap; transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }';
+    docContent += '.cgps-btn:disabled { opacity: 0.5; cursor: not-allowed !important; }';
+    docContent += '.cgps-btn-primary { background: linear-gradient(135deg, #0284c7, #0369a1) !important; color: #ffffff !important; box-shadow: 0 2px 4px rgba(2, 132, 199, 0.2); }';
+    docContent += '.cgps-btn-primary:hover { background: linear-gradient(135deg, #0369a1, #075985) !important; }';
+    docContent += '.cgps-btn-white { background-color: #ffffff !important; color: #0f172a !important; border: 1px solid #e2e8f0; }';
+    docContent += '.cgps-btn-white:hover { background-color: #f8fafc !important; border-color: #cbd5e1; }';
+    docContent += '.cgps-btn-secondary { background-color: #334155 !important; color: #ffffff !important; }';
+    docContent += '.cgps-btn-secondary:hover { background-color: #1e293b !important; }';
+    docContent += '.cgps-btn-outline { background-color: transparent; color: #475569; border: 1px solid #cbd5e1; }';
+    docContent += '.cgps-btn-outline:hover { background-color: #f1f5f9; color: #0f172a; }';
+    docContent += '</style>';
+    docContent += '</head><body>';
 
     docContent += '<div class="title">ANEXO N°01</div>';
 
@@ -4525,7 +4528,7 @@ ENTRADAS
     pendingGroupChangeTargetId = null;
   }
 
-  function requestApplyGroupChange() {
+  async function requestApplyGroupChange() {
     var row = getGroupEditRow();
     if (!row || !row.rawDevice) return;
 
@@ -4592,7 +4595,7 @@ ENTRADAS
     }
   }
 
-  function renderList() {
+  async function renderList() {
     var html = '';
 
     all.forEach(function (r) {
@@ -4652,7 +4655,7 @@ ENTRADAS
     highlightKpiCards();
   }
 
-  function cleanLegalName(str) {
+  async function cleanLegalName(str) {
     if (!str) return '';
     return str.toUpperCase()
       .replace(/^(\d+[\.\,-]|\s*)*OBSERVACIONES\s*:\s*/i, '')
@@ -4732,7 +4735,7 @@ ENTRADAS
       }
     }
 
-        function exportGroupsToExcel() {
+        async function exportGroupsToExcel() {
           try {
             var tbody = $('cgps-groups-listbody');
             var rows = tbody.querySelectorAll('tr');
@@ -4776,7 +4779,7 @@ ENTRADAS
     }
   }
 
-  function exportValidToExcel() {
+  async function exportValidToExcel() {
     try {
       var allActiveRows = getActiveRowsForModule().filter(function(r) { return isRowMatchingFilters(r); });
     var selectedIds = Object.keys(selected).filter(function (k) { return selected[k]; });
