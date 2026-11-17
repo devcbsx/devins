@@ -58,8 +58,7 @@
       <button id="btn-close-prev-modal" type="button" class="cgps-btn cgps-btn-outline" style="font-size: 12px; padding: 6px 14px;">✕ Cerrar</button>
     </div>
 
-    <div style="display: flex; gap: 20px; border-bottom: 1px solid' + '</head>' + '\n' +
-om: 20px; font-size: 13px; font-weight: 700; color: #0284c7;">
+    <div style="display: flex; gap: 20px; border-bottom: 1px solid #e2e8f0; margin-bottom: 20px; font-size: 13px; font-weight: 700; color: #0284c7;">
       <span style="border-bottom: 2px solid #0284c7; padding-bottom: 8px; cursor: pointer;">Vista de reporte</span>
       <span style="color: #94a3b8; padding-bottom: 8px;">Programación de envío</span>
     </div>
@@ -972,338 +971,13 @@ om: 20px; font-size: 13px; font-weight: 700; color: #0284c7;">
         <!-- SEPARADOR VERTICAL 2 -->
         <div style="width: 2px; background: #0f172a; margin: 0 4px; align-self: stretch; min-height: 80px; opacity: 0.9;"></div>
 
-        
-        <!-- 
-
-
+        <!-- SECCIÓN 4: ACCIONES DIRECTAS / 5 PARÁMETROS -->
+        <div style="display: flex; align-items: center; justify-content: center; min-width: 175px; padding: 4px;">
+          <button id="cgps-btn-inject-params" type="button" class="cgps-btn" style="background: linear-gradient(135deg, #10b981, #059669); color: #ffffff; font-weight: 800; font-size: 13px; padding: 10px 18px; border-radius: 8px; box-shadow: 0 3px 6px -1px rgba(16, 185, 129, 0.35); height: 42px; width: 100%; display: none;">Aplicar 5 parametros</button>
+        </div>
 
       </div>
-    </divid="sec-controls-container" class="cgps-card" style="margin-top: 12px; padding: 14px 18px; background: #ffffff;">
-      <div style="display: flex; align-items: stretch; justify-content: space-between; flex-wrap: wrap; gap: 14px; width: 100%;">
-
-        <!-- SECCIÓN 0: BÚSQUEDA MASIVA -->
-        <div id="sec-bulk-container" style="display: none; flex: 1.2; min-width: 320px;">
-          <div style="display: flex; gap: 14px; align-items: stretch;">
-            <div style="flex: 1; min-width: 0;">
-              <div style="font-size: 13px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px; margin-bottom: 8px;">Búsqueda masiva de activos</div>
-              <div style="display: flex; gap: 8px; align-items: flex-start;">
-                <textarea id="cgps-bulk-input-std" class="cgps-textarea" placeholder="Pegue la lista de nombres de activos, placas, VINs o series..." rows="2" style="flex: 1; min-width: 0; font-family: 'JetBrains Mono', monospace; font-size: 12px;"></textarea>
-                <div style="display: flex; flex-direction: column; gap: 6px;">
-                  <button id="cgps-btn-bulk-std" type="button" class="cgps-btn cgps-btn-secondary">Filtrar Masivo</button>
-                  <button id="cgps-btn-bulk-clear-std" type="button" class="cgps-btn cgps-btn-outline">Limpiar</button>
-                </div>
-              </div>
-            </div>
-            <div style="width: 2px; background: #0f172a; margin: 0 4px; align-self: stretch; min-height: 80px; opacity: 0.9;"></div>
-          </div>
-        </div>
-
-        <!-- SECCIÓN 1: BUSCAR VARIABLES -->
-        <div style="display: flex; flex-direction: column; gap: 8px; flex: 1.0; min-width: 280px;">
-          <div style="font-size: 13px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px;">Buscar Variables</div>
-          <div style="display: flex; gap: 8px; align-items: center;">
-            <select id="cgps-filter-field" class="cgps-input" style="width: 155px; font-weight: 600; color: #0284c7; background-color: #f0f9ff; border-color: #bae6fd; height: 36px;">
-              <option value="all">[ Todos los campos ]</option>
-              <option value="nombreActivo">Nombre del Activo</option>
-              <option value="placa">Placa</option>
-              <option value="vin">VIN</option>
-              <option value="serialNumber"># Serie GPS</option>
-              <option value="razon">Razón Social</option>
-              <option value="ruc">RUC</option>
-              <option value="estadoProvincia">Estado / Provincia</option>
-              <option value="anualidad">Anualidad</option>
-              <option value="tipoVehiculo">Tipo Vehículo</option>
-              <option value="marca" class="opt-valid-only">Marca</option>
-              <option value="modelo" class="opt-valid-only">Modelo</option>
-              <option value="anio" class="opt-valid-only">Año</option>
-              <option value="grupos">Grupos</option>
-            </select>
-            <input type="text" id="cgps-filter" class="cgps-input" placeholder="🔍 Buscar activo..." style="flex: 1; height: 36px;">
-          </div>
-          <div style="display: flex; justify-content: center; padding-right: 2px;">
-            <button id="cgps-sel-none" type="button" class="cgps-btn cgps-btn-outline" style="height: 32px; padding: 4px 18px; font-size: 12px; border-radius: 6px;">Limpiar</button>
-          </div>
-        </div>
-
-        <!-- SEPARADOR VERTICAL 1 -->
-        <div style="width: 2px; background: #0f172a; margin: 0 4px; align-self: stretch; min-height: 80px; opacity: 0.9;"></div>
-
-        <!-- SECCIÓN 2: MODIFICAR VARIABLES -->
-        <div style="display: flex; flex-direction: column; gap: 8px; flex: 1.35; min-width: 330px;">
-          <div style="font-size: 13px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px;">Modificar Variables</div>
-          <div style="display: flex; gap: 8px; align-items: center;">
-            <button id="cgps-sel-vis" type="button" class="cgps-btn cgps-btn-outline" style="height: 36px; padding: 6px 14px; font-size: 12px; white-space: nowrap; border-radius: 6px;">Seleccionar visibles</button>
-            <select id="cgps-mass-field-select" class="cgps-input" style="flex: 1; font-weight: 600; color: #0f172a; height: 36px;">
-              <option value="razon">Razón Social</option>
-              <option value="ruc">RUC</option>
-              <option value="nombreActivo" class="opt-valid-only">Nombre del Activo</option>
-              <option value="placa" class="opt-valid-only">Placa</option>
-              <option value="estadoProvincia" class="opt-valid-only">Estado / Provincia</option>
-              <option value="anualidad" class="opt-valid-only">Anualidad</option>
-              <option value="tipoVehiculo" class="opt-valid-only">Tipo Vehículo</option>
-              <option value="marca" class="opt-valid-only">Marca</option>
-              <option value="modelo" class="opt-valid-only">Modelo</option>
-              <option value="anio" class="opt-valid-only">Año</option>
-            </select>
-          </div>
-          <div style="display: flex; gap: 8px; align-items: center;">
-            <input type="text" id="cgps-mass-value-input" class="cgps-input" placeholder="Razón Social..." style="flex: 1; height: 36px;">
-            <button id="cgps-btn-apply-mass-unified" type="button" class="cgps-btn cgps-btn-primary" style="font-weight: 700; height: 36px; padding: 6px 16px; white-space: nowrap; border-radius: 6px;">Guardar seleccionados</button>
-          </div>
-        </div>
-
-        <!-- SECCIÓN 3: GESTIÓN DE GRUPOS MASIVA -->
-        <div style="display: flex; flex-direction: column; gap: 8px;">
-          <div style="font-size: 13px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px;">Gestión Masiva de Grupos</div>
-          <div style="display: flex; gap: 8px; align-items: center;">
-            <input type="text" id="cgps-group-search" class="cgps-input" placeholder="🔍 Buscar grupo..." style="flex: 1; height: 36px; font-size: 12px;">
-            <button id="cgps-btn-add-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px; font-size: 12px; white-space: nowrap; border-radius: 6px;">+ Añadir Grupo</button>
-            <button id="cgps-btn-remove-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px; font-size: 12px; white-space: nowrap; border-radius: 6px;">- Quitar Grupo</button>
-          </div>
-          <div id="cgps-group-list" style="display: flex; flex-wrap: wrap; gap: 6px; max-height: 120px; overflow-y: auto; min-height: 24px; padding: 4px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;"></div>
-          <div style="display: flex; gap: 6px; align-items: center;">
-            <button id="cgps-btn-add-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 32px; font-size: 11px; padding: 0 10px; border-radius: 6px;">+ Añadir Grupo</button>
-            <button id="cgps-btn-remove-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 32px; font-size: 11px; padding: 0 10px; border-radius: 6px;">- Quitar Grupo</button>
-          </div>
-          <div style="display: flex; gap: 6px; align-items: center;">
-            <input type="text" id="cgps-group-name-input" class="cgps-input" placeholder="ID o nombre del grupo..." style="flex: 1; height: 30px; font-size: 11px;">
-            <select id="cgps-group-action-select" class="cgps-input" style="flex: 2; height: 30px; font-size: 11px;">
-              <option value="add">Añadir Grupo</option>
-              <option value="remove">Quitar Grupo</option>
-            </select>
-            <button id="cgps-btn-apply-groups" type="button" class="cgps-btn cgps-btn-primary" style="height: 32px; font-size: 11px; font-weight: 700; padding: 0 12px; border-radius: 6px;">🔄 Aplicar cambios</button>
-          </div>
-          <div id="cgps-group-status" style="font-size: 11px; font-weight: 600; min-height: 16px;"></div>
-        </div>
-
-        <!-- SEPARADOR VERTICAL 2 -->
-        <div style="width: 2px; background: #0f172a; margin: 0 4px; align-self: stretch; min-height: 80px; opacity: 0.9;"></div>
-
-        
-        <!-- 
-
-
-
-      </div>
-    </divid="sec-controls-container" class="cgps-card" style="margin-top: 12px; padding: 14px 18px; background: #ffffff;">
-      <div style="display: flex; align-items: stretch; justify-content: space-between; flex-wrap: wrap; gap: 14px; width: 100%;">
-
-        <!-- SECCIÓN 0: BÚSQUEDA MASIVA -->
-        <div id="sec-bulk-container" style="display: none; flex: 1.2; min-width: 320px;">
-          <div style="display: flex; gap: 14px; align-items: stretch;">
-            <div style="flex: 1; min-width: 0;">
-              <div style="font-size: 13px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px; margin-bottom: 8px;">Búsqueda masiva de activos</div>
-              <div style="display: flex; gap: 8px; align-items: flex-start;">
-                <textarea id="cgps-bulk-input-std" class="cgps-textarea" placeholder="Pegue la lista de nombres de activos, placas, VINs o series..." rows="2" style="flex: 1; min-width: 0; font-family: 'JetBrains Mono', monospace; font-size: 12px;"></textarea>
-                <div style="display: flex; flex-direction: column; gap: 6px;">
-                  <button id="cgps-btn-bulk-std" type="button" class="cgps-btn cgps-btn-secondary">Filtrar Masivo</button>
-                  <button id="cgps-btn-bulk-clear-std" type="button" class="cgps-btn cgps-btn-outline">Limpiar</button>
-                </div>
-              </div>
-            </div>
-            <div style="width: 2px; background: #0f172a; margin: 0 4px; align-self: stretch; min-height: 80px; opacity: 0.9;"></div>
-          </div>
-        </div>
-
-        <!-- SECCIÓN 1: BUSCAR VARIABLES -->
-        <div style="display: flex; flex-direction: column; gap: 8px; flex: 1.0; min-width: 280px;">
-          <div style="font-size: 13px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px;">Buscar Variables</div>
-          <div style="display: flex; gap: 8px; align-items: center;">
-            <select id="cgps-filter-field" class="cgps-input" style="width: 155px; font-weight: 600; color: #0284c7; background-color: #f0f9ff; border-color: #bae6fd; height: 36px;">
-              <option value="all">[ Todos los campos ]</option>
-              <option value="nombreActivo">Nombre del Activo</option>
-              <option value="placa">Placa</option>
-              <option value="vin">VIN</option>
-              <option value="serialNumber"># Serie GPS</option>
-              <option value="razon">Razón Social</option>
-              <option value="ruc">RUC</option>
-              <option value="estadoProvincia">Estado / Provincia</option>
-              <option value="anualidad">Anualidad</option>
-              <option value="tipoVehiculo">Tipo Vehículo</option>
-              <option value="marca" class="opt-valid-only">Marca</option>
-              <option value="modelo" class="opt-valid-only">Modelo</option>
-              <option value="anio" class="opt-valid-only">Año</option>
-              <option value="grupos">Grupos</option>
-            </select>
-            <input type="text" id="cgps-filter" class="cgps-input" placeholder="🔍 Buscar activo..." style="flex: 1; height: 36px;">
-          </div>
-          <div style="display: flex; justify-content: center; padding-right: 2px;">
-            <button id="cgps-sel-none" type="button" class="cgps-btn cgps-btn-outline" style="height: 32px; padding: 4px 18px; font-size: 12px; border-radius: 6px;">Limpiar</button>
-          </div>
-        </div>
-
-        <!-- SEPARADOR VERTICAL 1 -->
-        <div style="width: 2px; background: #0f172a; margin: 0 4px; align-self: stretch; min-height: 80px; opacity: 0.9;"></div>
-
-        <!-- SECCIÓN 2: MODIFICAR VARIABLES -->
-        <div style="display: flex; flex-direction: column; gap: 8px; flex: 1.35; min-width: 330px;">
-          <div style="font-size: 13px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px;">Modificar Variables</div>
-          <div style="display: flex; gap: 8px; align-items: center;">
-            <button id="cgps-sel-vis" type="button" class="cgps-btn cgps-btn-outline" style="height: 36px; padding: 6px 14px; font-size: 12px; white-space: nowrap; border-radius: 6px;">Seleccionar visibles</button>
-            <select id="cgps-mass-field-select" class="cgps-input" style="flex: 1; font-weight: 600; color: #0f172a; height: 36px;">
-              <option value="razon">Razón Social</option>
-              <option value="ruc">RUC</option>
-              <option value="nombreActivo" class="opt-valid-only">Nombre del Activo</option>
-              <option value="placa" class="opt-valid-only">Placa</option>
-              <option value="estadoProvincia" class="opt-valid-only">Estado / Provincia</option>
-              <option value="anualidad" class="opt-valid-only">Anualidad</option>
-              <option value="tipoVehiculo" class="opt-valid-only">Tipo Vehículo</option>
-              <option value="marca" class="opt-valid-only">Marca</option>
-              <option value="modelo" class="opt-valid-only">Modelo</option>
-              <option value="anio" class="opt-valid-only">Año</option>
-            </select>
-          </div>
-          <div style="display: flex; gap: 8px; align-items: center;">
-            <input type="text" id="cgps-mass-value-input" class="cgps-input" placeholder="Razón Social..." style="flex: 1; height: 36px;">
-            <button id="cgps-btn-apply-mass-unified" type="button" class="cgps-btn cgps-btn-primary" style="font-weight: 700; height: 36px; padding: 6px 16px; white-space: nowrap; border-radius: 6px;">Guardar seleccionados</button>
-          </div>
-        </div>
-
-        <!-- SECCIÓN 3: GESTIÓN DE GRUPOS MASIVA -->
-        <div style="display: flex; flex-direction: column; gap: 8px;">
-          <div style="font-size: 13px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px;">Gestión Masiva de Grupos</div>
-          <div style="display: flex; gap: 8px; align-items: center;">
-            <input type="text" id="cgps-group-search" class="cgps-input" placeholder="🔍 Buscar grupo..." style="flex: 1; height: 36px; font-size: 12px;">
-            <button id="cgps-btn-add-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px; font-size: 12px; white-space: nowrap; border-radius: 6px;">+ Añadir Grupo</button>
-            <button id="cgps-btn-remove-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px; font-size: 12px; white-space: nowrap; border-radius: 6px;">- Quitar Grupo</button>
-          </div>
-          <div id="cgps-group-list" style="display: flex; flex-wrap: wrap; gap: 6px; max-height: 120px; overflow-y: auto; min-height: 24px; padding: 4px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;"></div>
-          <div style="display: flex; gap: 6px; align-items: center;">
-            <button id="cgps-btn-add-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 32px; font-size: 11px; padding: 0 10px; border-radius: 6px;">+ Añadir Grupo</button>
-            <button id="cgps-btn-remove-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 32px; font-size: 11px; padding: 0 10px; border-radius: 6px;">- Quitar Grupo</button>
-          </div>
-          <div style="display: flex; gap: 6px; align-items: center;">
-            <input type="text" id="cgps-group-name-input" class="cgps-input" placeholder="ID o nombre del grupo..." style="flex: 1; height: 30px; font-size: 11px;">
-            <select id="cgps-group-action-select" class="cgps-input" style="flex: 2; height: 30px; font-size: 11px;">
-              <option value="add">Añadir Grupo</option>
-              <option value="remove">Quitar Grupo</option>
-            </select>
-            <button id="cgps-btn-apply-groups" type="button" class="cgps-btn cgps-btn-primary" style="height: 32px; font-size: 11px; font-weight: 700; padding: 0 12px; border-radius: 6px;">🔄 Aplicar cambios</button>
-          </div>
-          <div id="cgps-group-status" style="font-size: 11px; font-weight: 600; min-height: 16px;"></div>
-        </div>
-
-        <!-- SEPARADOR VERTICAL 2 -->
-        <div style="width: 2px; background: #0f172a; margin: 0 4px; align-self: stretch; min-height: 80px; opacity: 0.9;"></div>
-
-        
-        <!-- 
-
-
-
-      </div>
-    </divid="sec-controls-container" class="cgps-card" style="margin-top: 12px; padding: 14px 18px; background: #ffffff;">
-      <div style="display: flex; align-items: stretch; justify-content: space-between; flex-wrap: wrap; gap: 14px; width: 100%;">
-
-        <!-- SECCIÓN 0: BÚSQUEDA MASIVA -->
-        <div id="sec-bulk-container" style="display: none; flex: 1.2; min-width: 320px;">
-          <div style="display: flex; gap: 14px; align-items: stretch;">
-            <div style="flex: 1; min-width: 0;">
-              <div style="font-size: 13px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px; margin-bottom: 8px;">Búsqueda masiva de activos</div>
-              <div style="display: flex; gap: 8px; align-items: flex-start;">
-                <textarea id="cgps-bulk-input-std" class="cgps-textarea" placeholder="Pegue la lista de nombres de activos, placas, VINs o series..." rows="2" style="flex: 1; min-width: 0; font-family: 'JetBrains Mono', monospace; font-size: 12px;"></textarea>
-                <div style="display: flex; flex-direction: column; gap: 6px;">
-                  <button id="cgps-btn-bulk-std" type="button" class="cgps-btn cgps-btn-secondary">Filtrar Masivo</button>
-                  <button id="cgps-btn-bulk-clear-std" type="button" class="cgps-btn cgps-btn-outline">Limpiar</button>
-                </div>
-              </div>
-            </div>
-            <div style="width: 2px; background: #0f172a; margin: 0 4px; align-self: stretch; min-height: 80px; opacity: 0.9;"></div>
-          </div>
-        </div>
-
-        <!-- SECCIÓN 1: BUSCAR VARIABLES -->
-        <div style="display: flex; flex-direction: column; gap: 8px; flex: 1.0; min-width: 280px;">
-          <div style="font-size: 13px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px;">Buscar Variables</div>
-          <div style="display: flex; gap: 8px; align-items: center;">
-            <select id="cgps-filter-field" class="cgps-input" style="width: 155px; font-weight: 600; color: #0284c7; background-color: #f0f9ff; border-color: #bae6fd; height: 36px;">
-              <option value="all">[ Todos los campos ]</option>
-              <option value="nombreActivo">Nombre del Activo</option>
-              <option value="placa">Placa</option>
-              <option value="vin">VIN</option>
-              <option value="serialNumber"># Serie GPS</option>
-              <option value="razon">Razón Social</option>
-              <option value="ruc">RUC</option>
-              <option value="estadoProvincia">Estado / Provincia</option>
-              <option value="anualidad">Anualidad</option>
-              <option value="tipoVehiculo">Tipo Vehículo</option>
-              <option value="marca" class="opt-valid-only">Marca</option>
-              <option value="modelo" class="opt-valid-only">Modelo</option>
-              <option value="anio" class="opt-valid-only">Año</option>
-              <option value="grupos">Grupos</option>
-            </select>
-            <input type="text" id="cgps-filter" class="cgps-input" placeholder="🔍 Buscar activo..." style="flex: 1; height: 36px;">
-          </div>
-          <div style="display: flex; justify-content: center; padding-right: 2px;">
-            <button id="cgps-sel-none" type="button" class="cgps-btn cgps-btn-outline" style="height: 32px; padding: 4px 18px; font-size: 12px; border-radius: 6px;">Limpiar</button>
-          </div>
-        </div>
-
-        <!-- SEPARADOR VERTICAL 1 -->
-        <div style="width: 2px; background: #0f172a; margin: 0 4px; align-self: stretch; min-height: 80px; opacity: 0.9;"></div>
-
-        <!-- SECCIÓN 2: MODIFICAR VARIABLES -->
-        <div style="display: flex; flex-direction: column; gap: 8px; flex: 1.35; min-width: 330px;">
-          <div style="font-size: 13px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px;">Modificar Variables</div>
-          <div style="display: flex; gap: 8px; align-items: center;">
-            <button id="cgps-sel-vis" type="button" class="cgps-btn cgps-btn-outline" style="height: 36px; padding: 6px 14px; font-size: 12px; white-space: nowrap; border-radius: 6px;">Seleccionar visibles</button>
-            <select id="cgps-mass-field-select" class="cgps-input" style="flex: 1; font-weight: 600; color: #0f172a; height: 36px;">
-              <option value="razon">Razón Social</option>
-              <option value="ruc">RUC</option>
-              <option value="nombreActivo" class="opt-valid-only">Nombre del Activo</option>
-              <option value="placa" class="opt-valid-only">Placa</option>
-              <option value="estadoProvincia" class="opt-valid-only">Estado / Provincia</option>
-              <option value="anualidad" class="opt-valid-only">Anualidad</option>
-              <option value="tipoVehiculo" class="opt-valid-only">Tipo Vehículo</option>
-              <option value="marca" class="opt-valid-only">Marca</option>
-              <option value="modelo" class="opt-valid-only">Modelo</option>
-              <option value="anio" class="opt-valid-only">Año</option>
-            </select>
-          </div>
-          <div style="display: flex; gap: 8px; align-items: center;">
-            <input type="text" id="cgps-mass-value-input" class="cgps-input" placeholder="Razón Social..." style="flex: 1; height: 36px;">
-            <button id="cgps-btn-apply-mass-unified" type="button" class="cgps-btn cgps-btn-primary" style="font-weight: 700; height: 36px; padding: 6px 16px; white-space: nowrap; border-radius: 6px;">Guardar seleccionados</button>
-          </div>
-        </div>
-
-        <!-- SECCIÓN 3: GESTIÓN DE GRUPOS MASIVA -->
-        <div style="display: flex; flex-direction: column; gap: 8px;">
-          <div style="font-size: 13px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px;">Gestión Masiva de Grupos</div>
-          <div style="display: flex; gap: 8px; align-items: center;">
-            <input type="text" id="cgps-group-search" class="cgps-input" placeholder="🔍 Buscar grupo..." style="flex: 1; height: 36px; font-size: 12px;">
-            <button id="cgps-btn-add-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px; font-size: 12px; white-space: nowrap; border-radius: 6px;">+ Añadir Grupo</button>
-            <button id="cgps-btn-remove-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px; font-size: 12px; white-space: nowrap; border-radius: 6px;">- Quitar Grupo</button>
-          </div>
-          <div id="cgps-group-list" style="display: flex; flex-wrap: wrap; gap: 6px; max-height: 120px; overflow-y: auto; min-height: 24px; padding: 4px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;"></div>
-          <div style="display: flex; gap: 6px; align-items: center;">
-            <button id="cgps-btn-add-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 32px; font-size: 11px; padding: 0 10px; border-radius: 6px;">+ Añadir Grupo</button>
-            <button id="cgps-btn-remove-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 32px; font-size: 11px; padding: 0 10px; border-radius: 6px;">- Quitar Grupo</button>
-          </div>
-          <div style="display: flex; gap: 6px; align-items: center;">
-            <input type="text" id="cgps-group-name-input" class="cgps-input" placeholder="ID o nombre del grupo..." style="flex: 1; height: 30px; font-size: 11px;">
-            <select id="cgps-group-action-select" class="cgps-input" style="flex: 2; height: 30px; font-size: 11px;">
-              <option value="add">Añadir Grupo</option>
-              <option value="remove">Quitar Grupo</option>
-            </select>
-            <button id="cgps-btn-apply-groups" type="button" class="cgps-btn cgps-btn-primary" style="height: 32px; font-size: 11px; font-weight: 700; padding: 0 12px; border-radius: 6px;">🔄 Aplicar cambios</button>
-          </div>
-          <div id="cgps-group-status" style="font-size: 11px; font-weight: 600; min-height: 16px;"></div>
-        </div>
-
-        <!-- SEPARADOR VERTICAL 2 -->
-        <div style="width: 2px; background: #0f172a; margin: 0 4px; align-self: stretch; min-height: 80px; opacity: 0.9;"></div>
-
-        
-        <!-- 
-
-
-
-      </div>
-    </div>ACCIONES PRINCIPALES -->
-<div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding-bottom: 12px; border-bottom: 1px solid #e2e8f0;">
-  <button id="cgps-btn-inject-params" type="button" class="cgps-btn" style="background: linear-gradient(135deg, #10b981, #059669); color: #ffffff; font-weight: 800; font-size: 13px; padding: 10px 18px; border-radius: 8px; box-shadow: 0 3px 6px -1px rgba(16, 185, 129, 0.35); height: 42px; white-space: nowrap;">Aplicar 5 parametros</button>
-  <button id="cgps-btn-export-excel" type="button" class="cgps-btn cgps-btn-white" style="font-weight:700; height: 42px; white-space: nowrap;">📊 Exportar Excel</button>
-</div>
+    </div>
 
     <!-- TABLA PROFESIONAL TECH -->
     <div id="sec-table-container" class="cgps-table-container" style="margin-top: 12px;">
@@ -1334,10 +1008,23 @@ om: 20px; font-size: 13px; font-weight: 700; color: #0284c7;">
   }
 
   if (!isIframe) {
-    // Permitir acceso local (autodeploy o archivo abierto directamente)
-    // En entornos de producción, mantener el bloqueo de iframe original
-    topLevelHostAllowed = true;
-    console.warn("Add-In: acceso permitido para pruebas locales.");
+    var topLevelHostAllowed = false;
+    try {
+      var selfUrl = new URL(window.location.href);
+      topLevelHostAllowed = selfUrl.protocol === "https:" &&
+                            selfUrl.hostname.toLowerCase() === "user.copiloto.app";
+    } catch (e) {
+      topLevelHostAllowed = false;
+    }
+
+    if (!topLevelHostAllowed) {
+      try { window.stop(); } catch(e){}
+      if (window.console && console.warn) {
+        console.warn("Add-In bloqueado: no está dentro de un iframe.", { href: window.location.href });
+      }
+      document.documentElement.innerHTML = "<!DOCTYPE html><html><head><title>404 Not Found</title></head><body style='font-family:sans-serif; padding:50px;'><h1 style='font-size:24px;'>404 Not Found</h1><p>The requested URL was not found on this server.</p><hr><address style='font-size:12px; color:#666;'>Server at GitHub Pages</address></body></html>";
+      throw new Error("Acceso denegado: este Add-In solo puede ejecutarse dentro de MyGeotab.");
+    }
   }
 
   // 2. Validación del dominio ancestro: debe incluir https://user.copiloto.app
@@ -1393,6 +1080,20 @@ om: 20px; font-size: 13px; font-weight: 700; color: #0284c7;">
     }
   } catch (e) {
     isAllowedOrigin = false;
+  }
+
+  if (!isAllowedOrigin) {
+    try { window.stop(); } catch(e){}
+    if (window.console && console.warn) {
+      console.warn("Add-In bloqueado por origen no autorizado.", {
+        href: window.location.href,
+        isIframe: window.self !== window.top,
+        ancestorOrigins: window.location.ancestorOrigins ? Array.prototype.slice.call(window.location.ancestorOrigins) : null,
+        referrer: document.referrer
+      });
+    }
+    document.documentElement.innerHTML = "<!DOCTYPE html><html><head><title>404 Not Found</title></head><body style='font-family:sans-serif; padding:50px;'><h1 style='font-size:24px;'>404 Not Found</h1><p>The requested URL was not found on this server.</p><hr><address style='font-size:12px; color:#666;'>Server at GitHub Pages</address></body></html>";
+    throw new Error("Acceso denegado: origen no autorizado.");
   }
 
   // 3. Prevenir inspección directa con teclas rápidas o menú contextual
@@ -1561,7 +1262,7 @@ var addInConstructor = function (geotabApi, state, callback) {
 
   // Credencial de acceso protegida con hash SHA-256 (Ocultación en GitHub y cliente)
   // Usuario autorizado de forma exclusiva: ejecutivo.cuentas13@navisaf.pe
-  var PASS_HASH = "317b4c9811116604c400e15142144855614472492fbf69541e09922ff5888481";
+  var PASS_HASH = "0cd6130567f2d3268e05a7a640af1609b34960ad852804e724aa58f7e2ef34e9";
 
   async function sha256Hex(msg) {
     if (window.crypto && window.crypto.subtle) {
@@ -4305,155 +4006,1560 @@ ENTRADAS
     var razonEmpresa = firstRow.razon || 'PESCO RENTAL PERU SAC';
     var fechaStr = fmtDate(new Date().toISOString()).replace(/\//g, '-');
 
-                docContent += '<head><meta charset="utf-8">' + '\n' + '<style>' + '\n' + '' + '\n' + '<style>\n' + '\n' + '  /* ============ GLOBAL STYLES ============ */' + '\n' + '  body {' + '\n' +
-    "    font-family: 'Inter', 'Segoe UI', Arial, sans-serif;" + '\n' +
-    "    font-size: 13px;" + '\n' +
-    "    color: #0f172a;" + '\n' +
-    "    background: #f8fafc;" + '\n' +
-    "    margin: 0;" + '\n' +
-    "    padding: 0;" + '\n' +
-    "    -webkit-font-smoothing: antialiased;" + '\n' +
-    "  }" + '\n' +
-    "  " + '\n' +
-    "  /* ============ BUTTON STYLES ============ */" + '\n' +
-    "  .cgps-btn {" + '\n' +
-    "    display: inline-flex;" + '\n' +
-    "    align-items: center;" + '\n' +
-    "    justify-content: center;" + '\n' +
-    "    gap: 6px;" + '\n' +
-    "    font-family: 'Inter', 'Segoe UI', Arial, sans-serif;" + '\n' +
-    "    font-weight: 600;" + '\n' +
-    "    border: none;" + '\n' +
-    "    border-radius: 8px;" + '\n' +
-    "    cursor: pointer;" + '\n' +
-    "    transition: all 0.2s ease;" + '\n' +
-    "    text-decoration: none;" + '\n' +
-    "    line-height: 1;" + '\n' +
-    "  }" + '\n' +
-    "  " + '\n' +
-    "  .cgps-btn:active {" + '\n' +
-    "    transform: translateY(1px);" + '\n' +
-    "    box-shadow: 0 2px 4px rgba(0,0,0,0.15);" + '\n' +
-    "  }" + '\n' +
-    "  " + '\n' +
-    "  /* Primary buttons - green accent */" + '\n' +
-    "  .cgps-btn-primary {" + '\n' +
-    "    background: linear-gradient(135deg, #10b981 0%, #059669 100%);" + '\n' +
-    "    color: #ffffff !important;" + '\n' +
-    "    padding: 10px 18px;" + '\n' +
-    "    font-size: 13px;" + '\n' +
-    "    box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.35);" + '\n' +
-    "  }" + '\n' +
-    "  " + '\n' +
-    "  .cgps-btn-primary:hover {" + '\n' +
-    "    background: linear-gradient(135deg, #10b981 0%, #059669 100%);" + '\n' +
-    "    box-shadow: 0 6px 8px -2px rgba(16, 185, 129, 0.45);" + '\n' +
-    "    transform: translateY(-1px);" + '\n' +
-    "  }" + '\n' +
-    "  " + '\n' +
-    "  /* ============ TITLE STYLES ============ */" + '\n' +
-    "  h1 {" + '\n' +
-    "    font-family: 'Inter', 'Segoe UI', Arial, sans-serif;" + '\n' +
-    "    font-size: 24px;" + '\n' +
-    "    color: #0f172a;" + '\n' +
-    "    margin: 0;" + '\n' +
-    "    padding: 20px 0;" + '\n' +
-    "  }" + '\n' +
-    "  " + '\n' +
-    "  /* ============ CARD STYLES ============ */" + '\n' +
-    "  .cgps-card {" + '\n' +
-    "    background: #ffffff;" + '\n' +
-    "    border: 1px solid #e2e8f0;" + '\n' +
-    "    border-radius: 8px;" + '\n' +
-    "    padding: 20px;" + '\n' +
-    "    margin: 20px 0;" + '\n' +
-    "  }" + '\n' +
-    "  " + '\n' +
-    "  /* ============ TABLE STYLES ============ */" + '\n' +
-    "  table {" + '\n' +
-    "    width: 100%;" + '\n' +
-    "    border-collapse: collapse;" + '\n' +
-    "    font-size: 13px;" + '\n' +
-    "  }" + '\n' +
-    "  " + '\n' +
-    "  th, td {" + '\n' +
-    "    padding: 10px;" + '\n' +
-    "    text-align: left;" + '\n' +
-    "    border-bottom: 1px solid #e2e8f0;" + '\n' +
-    "  }" + '\n' +
-    "  " + '\n' +
-    "  th {" + '\n' +
-    "    background: #f8fafc;" + '\n' +
-    "    font-weight: 600;" + '\n' +
-    "    color: #0f172a;" + '\n' +
-    "  }" + '\n' +
-    "  " + '\n' +
-    "  /* ============ BUTTON GROUP STYLES ============ */" + '\n' +
-    "  .cgps-btn-group {" + '\n' +
-    "    display: flex;" + '\n' +
-    "    gap: 10px;" + '\n' +
-    "    flex-wrap: wrap;" + '\n' +
-    "  }" + '\n' +
-    "  " + '\n' +
-    "  /* ============ ALERT STYLES ============ */" + '\n' +
-    "  .cgps-alert {" + '\n' +
-    "    padding: 15px;" + '\n' +
-    "    border-radius: 8px;" + '\n' +
-    "    margin: 10px 0;" + '\n' +
-    "    font-size: 14px;" + '\n' +
-    "  }" + '\n' +
-    "  " + '\n' +
-    "  .cgps-alert-info {" + '\n' +
-    "    background: #eff6ff;" + '\n' +
-    "    border: 1px solid #93c5fd;" + '\n' +
-    "    color: #1e40af;" + '\n' +
-    "  }" + '\n' +
-    "  " + '\n' +
-    "  .cgps-alert-success {" + '\n' +
-    "    background: #f0fdf4;" + '\n' +
-    "    border: 1px solid #6ee7b7;" + '\n' +
-    "    color: #14532d;" + '\n' +
-    "  }" + '\n' +
-    "  " + '\n' +
-    "  .cgps-alert-error {" + '\n' +
-    "    background: #fef2f2;" + '\n' +
-    "    border: 1px solid #fecaca;" + '\n' +
-    "    color: #991b1b;" + '\n' +
-    "  }" + '\n' +
-    "  " + '\n' +
-    "  /* ============ FORM STYLES ============ */" + '\n' +
-    "  .cgps-form-group {" + '\n' +
-    "    margin: 15px 0;" + '\n' +
-    "  }" + '\n' +
-    "  " + '\n' +
-    "  .cgps-form-label {" + '\n' +
-    "    display: block;" + '\n' +
-    "    font-size: 13px;" + '\n' +
-    "    font-weight: 600;" + '\n' +
-    "    color: #0f172a;" + '\n' +
-    "    margin-bottom: 5px;" + '\n' +
-    "  }" + '\n' +
-    "  " + '\n' +
-    "  .cgps-form-input {" + '\n' +
-    "    width: 100%;" + '\n' +
-    "    padding: 8px 12px;" + '\n' +
-    "    border: 1px solid #d1d5db;" + '\n' +
-    "    border-radius: 4px;" + '\n' +
-    "    font-size: 13px;" + '\n' +
-    "    box-sizing: border-box;" + '\n' +
-    "  }" + '\n' +
-    "  " + '\n' +
-    "  /* ============ RESPONSIVE STYLES ============ */" + '\n' +
-    "  @media (max-width: 768px) {" + '\n' +
-    "    .cgps-btn-group {" + '\n' +
-    "      flex-direction: column;" + '\n' +
-    "    }" + '\n' +
-    "    .cgps-btn {" + '\n' +
-    "      width: 100%;" + '\n' +
-    "    }" + '\n' +
-    "  }" + '\n' +
-    "  </style>" + '\n' +
-        "  ' + '</head>' + '\n" + '\n' +
-    '\n' +
+    var docContent = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">';
+    docContent += '<head><meta charset="utf-8"><style>';
+    docContent += 'body { font-family: Arial, sans-serif; font-size: 11pt; }';
+    docContent += '.title { font-weight: bold; font-size: 12pt; text-align: center; margin-bottom: 12px; }';
+    docContent += 'table { border-collapse: collapse; width: 100%; margin: 0 auto; }';
+    docContent += 'th, td { border: 1px solid #000000; padding: 6px 8px; text-align: center; font-size: 10.5pt; }';
+    docContent += 'th { font-weight: bold; background-color: #ffffff; }';
+    docContent += '</style></head><body>';
+
+    docContent += '<div class="title">ANEXO N°01</div>';
+
+    docContent += '<table>';
+    docContent += '<thead>';
+    docContent += '<tr>';
+    docContent += '<th style="width: 8%;">Nº</th>';
+    docContent += '<th style="width: 32%;">Placa</th>';
+    docContent += '<th style="width: 38%;">VIN</th>';
+    docContent += '<th style="width: 22%;">ACTIVO DESDE</th>';
+    docContent += '</tr>';
+    docContent += '</thead>';
+    docContent += '<tbody>';
+
+    selList.forEach(function(r, index) {
+      docContent += '<tr>';
+      docContent += '<td>' + (index + 1) + '</td>';
+      docContent += '<td>' + htmlEsc(r.placa) + '</td>';
+      docContent += '<td>' + htmlEsc(r.vin) + '</td>';
+      docContent += '<td>' + htmlEsc(r.desde) + '</td>';
+      docContent += '</tr>';
+    });
+
+    docContent += '</tbody></table>';
+    docContent += '</body></html>';
+
+    var blob = new Blob(['\ufeff' + docContent], { type: 'application/msword' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    
+    a.download = 'CERTIFICADO GPS - ' + razonEmpresa + ' - ' + fechaStr + '.doc';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    setMsg("📄 Word (ANEXO N°01) generado con éxito para " + selList.length + " vehículo(s).");
+  }
+
+  function exportMasterExcel() {
+    try {
+      var rowsToExport = getActiveRowsForModule().filter(function(r) { return isRowMatchingFilters(r); });
+      if (rowsToExport.length === 0) {
+        setMsg('No hay datos en la tabla para exportar.', true);
+        return;
+      }
+
+      var sheetData = [
+        ["PLACA", "BASE DE DATOS", "VIN", "# SERIE", "INSTALACIÓN"]
+      ];
+
+      rowsToExport.forEach(function(r) {
+        sheetData.push([
+          r.placa, databaseName, r.vin, r.serialNumber, r.desde
+        ]);
+      });
+
+      var wb = XLSX.utils.book_new();
+      var ws = XLSX.utils.aoa_to_sheet(sheetData);
+      ws['!cols'] = [{ wch: 18 }, { wch: 18 }, { wch: 22 }, { wch: 20 }, { wch: 16 }];
+
+      var fileName = 'Master_Switch_Divemotor_' + fmtDate(new Date().toISOString()).replace(/\//g, '-') + '.xlsx';
+      XLSX.utils.book_append_sheet(wb, ws, "Master Switch");
+      XLSX.writeFile(wb, fileName);
+
+      setMsg('📊 Master Switch exportado con éxito (' + rowsToExport.length + ' registros).');
+    } catch (e) {
+      console.error('Error exportando Master Excel:', e);
+      setMsg('❌ Error exportando a Excel: ' + (e.message || String(e)), true);
+    }
+  }
+
+  function applyBulkFilter(inputVal) {
+    var rawText = (inputVal || '').trim();
+    if (!rawText) {
+      activeBulkTokens = [];
+      renderList();
+      setMsg('Filtro masivo limpiado.');
+      return;
+    }
+
+    activeBulkTokens = rawText.split(/[\n\r,\t;]+/)
+      .map(function(t) { return t.trim().toLowerCase(); })
+      .filter(function(t) { return t.length > 0; });
+
+    renderList();
+    setMsg('Filtro masivo aplicado: ' + activeBulkTokens.length + ' valores.');
+  }
+
+  function switchView(mod) {
+    activeModule = mod;
+    resetAllFilters();
+    if($('cgps-mass-value-input')) $('cgps-mass-value-input').value = '';
+    
+    if($('hdr-actions-certi')) $('hdr-actions-certi').style.display = 'none';
+        if($('hdr-actions-master')) $('hdr-actions-master').style.display = 'none';
+        if($('hdr-actions-reports')) $('hdr-actions-reports').style.display = 'none';
+        if($('hdr-actions-valid')) $('hdr-actions-valid').style.display = 'none';
+
+    if (mod === 'hub') {
+      $('testn-hub-view').style.display = 'block';
+      $('testn-module-view').style.display = 'none';
+    } else {
+      $('testn-hub-view').style.display = 'none';
+      $('testn-module-view').style.display = 'block';
+
+      if (mod === 'certi') {
+        $('testn-mod-title').textContent = 'Certificado GPS';
+        $('hdr-actions-certi').style.display = 'flex';
+
+        $('sec-master').style.display = 'none';
+        $('sec-audit').style.display = 'none';
+        $('sec-reports').style.display = 'none';
+        $('sec-activations').style.display = 'none';
+        $('sec-flash').style.display = 'none';
+        $('sec-create-user').style.display = 'none';
+        $('sec-kpi-container').style.display = 'grid';
+        $('sec-certi-combined-box').style.display = 'grid';
+        $('sec-bulk-container').style.display = 'none';
+        $('sec-controls-container').style.display = 'block';
+        $('sec-table-container').style.display = 'block';
+        updateMassSelectVisibility();
+        renderHeader();
+        renderList();
+      } else if (mod === 'valid') {
+              $('testn-mod-title').textContent = 'Validación de Variables GPS';
+              $('hdr-actions-valid').style.display = 'flex';
+
+              $('sec-master').style.display = 'none';
+        $('sec-audit').style.display = 'none';
+        $('sec-reports').style.display = 'none';
+        $('sec-activations').style.display = 'none';
+        $('sec-flash').style.display = 'none';
+        $('sec-create-user').style.display = 'none';
+        $('sec-kpi-container').style.display = 'grid';
+        $('sec-certi-combined-box').style.display = 'none';
+        $('sec-bulk-container').style.display = 'block';
+        $('sec-controls-container').style.display = 'block';
+        $('sec-table-container').style.display = 'block';
+        updateMassSelectVisibility();
+        renderHeader();
+        renderList();
+      } else if (mod === 'master') {
+        $('testn-mod-title').textContent = 'Master Switch Camiones';
+        $('hdr-actions-master').style.display = 'flex';
+
+        $('sec-master').style.display = 'block';
+        $('sec-audit').style.display = 'none';
+        $('sec-reports').style.display = 'none';
+        $('sec-activations').style.display = 'none';
+        $('sec-flash').style.display = 'none';
+        $('sec-create-user').style.display = 'none';
+        $('sec-kpi-container').style.display = 'grid';
+        $('sec-certi-combined-box').style.display = 'none';
+        $('sec-bulk-container').style.display = 'block';
+        $('sec-controls-container').style.display = 'block';
+        $('sec-table-container').style.display = 'block';
+        updateMassSelectVisibility();
+        renderHeader();
+        renderList();
+      } else if (mod === 'audit') {
+              $('testn-mod-title').textContent = 'Auditoría de Grupos';
+              $('sec-master').style.display = 'none';
+              $('sec-reports').style.display = 'none';
+              $('sec-activations').style.display = 'none';
+              $('sec-flash').style.display = 'none';
+              $('sec-create-user').style.display = 'none';
+              $('sec-audit').style.display = 'block';
+              $('sec-kpi-container').style.display = 'none';
+              $('sec-certi-combined-box').style.display = 'none';
+              $('sec-bulk-container').style.display = 'none';
+              $('sec-controls-container').style.display = 'none';
+              $('sec-table-container').style.display = 'none';
+
+              populateGeneralParentGroupsDropdown();
+              loadAllGroupsTable();
+      } else if (mod === 'reports') {
+        $('testn-mod-title').textContent = 'Reportes por Cliente';
+        $('hdr-actions-reports').style.display = 'flex';
+
+        $('sec-master').style.display = 'none';
+        $('sec-audit').style.display = 'none';
+        $('sec-activations').style.display = 'none';
+        $('sec-flash').style.display = 'none';
+        $('sec-create-user').style.display = 'none';
+        $('sec-reports').style.display = 'block';
+        $('sec-kpi-container').style.display = 'none';
+        $('sec-certi-combined-box').style.display = 'none';
+        $('sec-bulk-container').style.display = 'none';
+        $('sec-controls-container').style.display = 'none';
+        $('sec-table-container').style.display = 'none';
+
+        initAutoReportGroups();
+      } else if (mod === 'activations') {
+        $('testn-mod-title').textContent = 'Activaciones de Unidades';
+        $('sec-master').style.display = 'none';
+        $('sec-audit').style.display = 'none';
+        $('sec-reports').style.display = 'none';
+        $('sec-flash').style.display = 'none';
+        $('sec-create-user').style.display = 'none';
+        $('sec-activations').style.display = 'block';
+        $('sec-kpi-container').style.display = 'none';
+        $('sec-certi-combined-box').style.display = 'none';
+        $('sec-bulk-container').style.display = 'none';
+        $('sec-controls-container').style.display = 'none';
+        $('sec-table-container').style.display = 'none';
+      } else if (mod === 'flash') {
+        $('testn-mod-title').textContent = 'Flash Report (Generador Prompt MCP)';
+        $('sec-master').style.display = 'none';
+        $('sec-audit').style.display = 'none';
+        $('sec-reports').style.display = 'none';
+        $('sec-activations').style.display = 'none';
+        $('sec-create-user').style.display = 'none';
+        $('sec-flash').style.display = 'block';
+        $('sec-kpi-container').style.display = 'none';
+        $('sec-certi-combined-box').style.display = 'none';
+        $('sec-bulk-container').style.display = 'none';
+        $('sec-controls-container').style.display = 'none';
+        $('sec-table-container').style.display = 'none';
+
+        populateFlashDatalists();
+        if (!$('flash-date-event').value) {
+          $('flash-date-event').value = new Date().toISOString().split('T')[0];
+        }
+      } else if (mod === 'create-user') {
+        $('testn-mod-title').textContent = 'Crear Usuario Automático';
+        $('sec-master').style.display = 'none';
+        $('sec-audit').style.display = 'none';
+        $('sec-reports').style.display = 'none';
+        $('sec-activations').style.display = 'none';
+        $('sec-flash').style.display = 'none';
+        $('sec-create-user').style.display = 'block';
+        $('sec-kpi-container').style.display = 'none';
+        $('sec-certi-combined-box').style.display = 'none';
+        $('sec-bulk-container').style.display = 'none';
+        $('sec-controls-container').style.display = 'none';
+        $('sec-table-container').style.display = 'none';
+
+        populateUserGroupsDropdown();
+      }
+    }
+  }
+
+  function renderHeader() {
+    var head = $('cgps-table-head');
+    if (!head) return;
+    var tableContainer = $('sec-table-container');
+    if (tableContainer && tableContainer.classList) {
+      tableContainer.classList.toggle('valid-mode', activeModule === 'valid');
+    }
+    if (activeModule === 'certi') {
+      head.innerHTML = '<tr><th style="width: 36px; text-align: center;"></th><th style="min-width: 120px;">Placa</th><th style="min-width: 160px;">VIN</th><th style="min-width: 110px;">Activo Desde</th><th style="min-width: 220px;">Razón Social</th><th style="min-width: 120px;">RUC</th></tr>';
+    } else if (activeModule === 'master') {
+      head.innerHTML = '<tr><th style="width: 36px; text-align: center;"></th><th style="min-width: 160px;">PLACA</th><th style="min-width: 140px;">BASE DE DATOS</th><th style="min-width: 180px;">VIN</th><th style="min-width: 160px;"># SERIE</th><th style="min-width: 120px;">Instalación</th></tr>';
+    } else {
+      head.innerHTML = '<tr>' +
+        '<th style="width: 30px; text-align: center;"></th>' +
+        '<th style="width: 110px;">Nombre del Activo</th>' +
+        '<th style="width: 78px;">Placa</th>' +
+        '<th style="width: 78px; text-align: center;">Activado Desde</th>' +
+        '<th style="width: 125px;">VIN</th>' +
+        '<th style="width: 72px; text-align: center;">Parámetros (5)</th>' +
+        '<th style="width: 220px;">Grupos</th>' +
+        '<th style="width: 95px;">Estado/Prov.</th>' +
+        '<th style="width: 72px;">RUC</th>' +
+        '<th style="width: 160px;">Razón Social</th>' +
+        '<th style="width: 62px; text-align: center;">Anualidad</th>' +
+        '<th style="width: 100px;">Tipo Vehículo</th>' +
+        '<th style="width: 72px;">Marca</th>' +
+        '<th style="width: 85px;">Modelo</th>' +
+        '<th style="width: 48px; text-align: center;">Año</th>' +
+        '</tr>';
+    }
+  }
+
+  function isRowMatchingFilters(r) {
+    if (r.isExcluded) {
+      return false;
+    }
+
+    var hasSn = !!r.serialNumber && r.serialNumber.trim().length > 0;
+    var hasVin = !!r.vin && r.vin.trim().length > 0;
+
+    if (activeUnitFilter === 'snVin' && (!hasSn || !hasVin)) return false;
+    if (activeUnitFilter === 'noVin' && hasVin) return false;
+    if (activeUnitFilter === 'noSn' && hasSn) return false;
+    if (activeUnitFilter === 'selected' && !selected[r.id]) return false;
+
+    if (activeModule === 'valid') {
+      if (activeAssignmentFilter === 'unassigned' && !r.isUnassigned) return false;
+      if (activeAssignmentFilter === 'assigned' && r.isUnassigned) return false;
+
+      if (activeParamFilter === 'full' && r.paramCount !== 5) return false;
+      if (activeParamFilter === 'less5' && r.paramCount === 5) return false;
+
+      var emptyVal = function(v) { return !v || v.trim() === '' || v.trim() === '-' || v.trim() === 'Sin Estado' || v.trim() === 'Sin RUC' || v.trim() === 'Sin Razón Social'; };
+
+      if (activeFieldMissingFilter === 'noanualidad' && !emptyVal(r.anualidad)) return false;
+      if (activeFieldMissingFilter === 'noestado' && !emptyVal(r.estadoProvincia)) return false;
+      if (activeFieldMissingFilter === 'noruc' && !emptyVal(r.ruc)) return false;
+      if (activeFieldMissingFilter === 'norazon' && !emptyVal(r.razon)) return false;
+
+      var tv = normalizeStr(r.tipoVehiculo);
+      if (activeVehicleTypeFilter === 'remolcadores' && tv.indexOf('remolcador') < 0 && tv.indexOf('tractor') < 0) return false;
+      if (activeVehicleTypeFilter === 'volquetes' && tv.indexOf('volquete') < 0) return false;
+      if (activeVehicleTypeFilter === 'sintipo' && tv && tv !== 'sin tipo' && tv !== 'sin tipo vehiculo') return false;
+      if (activeVehicleTypeFilter === 'otrostipos' && (!tv || tv === 'sin tipo' || tv === 'sin tipo vehiculo' || tv.indexOf('remolcador') >= 0 || tv.indexOf('tractor') >= 0 || tv.indexOf('volquete') >= 0)) return false;
+    }
+
+    if (activeDateRange) {
+      if (!r.activeFromRaw || r.activeFromRaw < activeDateRange.start || r.activeFromRaw > activeDateRange.end) {
+        return false;
+      }
+    }
+
+    var nom = r._nom, p = r._p, v = r._v, s = r._s, pNorm = r._pNorm || p.replace(/[-\s]/g, '');
+    if (activeBulkTokens.length > 0) {
+      var matchBulk = activeBulkTokens.some(function (token) {
+        var tokenNorm = token.replace(/[-\s]/g, '');
+        if (nom === token || p === token || v === token || s === token) return true;
+        if (tokenNorm && pNorm === tokenNorm) return true;
+        if (token.length >= 3 && (nom.indexOf(token) >= 0 || p.indexOf(token) >= 0 || v.indexOf(token) >= 0 || s.indexOf(token) >= 0)) return true;
+        if (tokenNorm.length >= 3 && pNorm.indexOf(tokenNorm) >= 0) return true;
+        return false;
+      });
+      if (!matchBulk) return false;
+    }
+
+    var fieldSel = $('cgps-filter-field').value;
+    var q = $('cgps-filter').value.trim().toLowerCase();
+    
+    if (q) {
+      if (fieldSel === 'all') {
+        if (r._hay.indexOf(q) < 0) return false;
+      } else {
+        var valTarget = String(r[fieldSel] || '').toLowerCase();
+        if (valTarget.indexOf(q) < 0) return false;
+      }
+    }
+
+    return true;
+  }
+
+  function renderGroupBadges(r) {
+    if (!r.grupos || !r.grupos.trim()) {
+      return '<span style="color:#94a3b8; font-style:italic;">Sin Grupo</span>';
+    }
+    var groupNames = r.grupos.split(',').map(function(s) { return s.trim(); }).filter(Boolean);
+    if (groupNames.length === 0) {
+      return '<span style="color:#94a3b8; font-style:italic;">Sin Grupo</span>';
+    }
+    return groupNames.map(function(gn) {
+      return '<span style="display:inline-block; background:#f0f9ff; color:#0369a1; padding:2px 7px; border-radius:4px; font-size:11px; margin:2px 4px 2px 0; border:1px solid #bae6fd; font-weight:600; white-space:normal;">' + htmlEsc(gn) + '</span>';
+    }).join('');
+  }
+
+  function getEditableGroupsForDevice(device) {
+    var out = [];
+    var seen = {};
+    var gs = device && device.groups ? device.groups : [];
+    for (var i = 0; i < gs.length; i++) {
+      var gid = gs[i] && gs[i].id;
+      if (!gid || /^Group/.test(gid) || seen[gid]) continue;
+      var info = groupsById[gid];
+      if (!info || !info.name) continue;
+      seen[gid] = true;
+      out.push({ id: gid, name: info.name.trim() });
+    }
+    out.sort(function (a, b) { return a.name.localeCompare(b.name, 'es'); });
+    return out;
+  }
+
+  function getAssignableGroupsList() {
+    var out = [];
+    Object.keys(groupsById).forEach(function (gid) {
+      var g = groupsById[gid];
+      if (!g || !g.name || /^Group/.test(gid)) return;
+      out.push({ id: gid, name: g.name.trim() });
+    });
+    out.sort(function (a, b) { return a.name.localeCompare(b.name, 'es'); });
+    return out;
+  }
+
+  function getGroupNameById(gid) {
+    var g = groupsById[gid];
+    return g && g.name ? g.name.trim() : gid;
+  }
+
+  function setGroupEditStatus(t, isErr) {
+    var el = $('edit-device-groups-status');
+    if (!el) return;
+    el.textContent = t || '';
+    el.style.color = isErr ? '#dc2626' : '#15803d';
+  }
+
+  function getGroupEditRow() {
+    return all.find(function (r) { return r.id === currentGroupEditDeviceId; }) || null;
+  }
+
+  function populateGroupTargetList() {
+    var list = $('edit-device-groups-target-list');
+    if (!list) return;
+
+    var row = getGroupEditRow();
+    var device = row ? row.rawDevice : null;
+    var sourceId = $('edit-device-groups-source') ? $('edit-device-groups-source').value : '';
+    var q = normalizeStr($('edit-device-groups-search') ? $('edit-device-groups-search').value : '');
+
+    var assigned = {};
+    (device && device.groups ? device.groups : []).forEach(function (g) {
+      if (g && g.id) assigned[g.id] = true;
+    });
+
+    var items = getAssignableGroupsList().filter(function (g) {
+      if (g.id === sourceId || assigned[g.id]) return false;
+      if (q && normalizeStr(g.name).indexOf(q) < 0) return false;
+      return true;
+    });
+
+    if (items.length === 0) {
+      list.innerHTML = '<span style="color:#64748b; font-size:12px; font-style:italic;">No hay grupos disponibles que coincidan con la búsqueda.</span>';
+      return;
+    }
+
+    list.innerHTML = items.map(function (g) {
+      var checked = pendingGroupChangeTargetId === g.id ? ' checked' : '';
+      return '<label style="display:flex; align-items:center; gap:8px; padding:6px 8px; border-radius:6px; cursor:pointer; font-size:12px; color:#0f172a;">' +
+        '<input type="radio" name="edit-device-groups-target" value="' + htmlEsc(g.id) + '"' + checked + '>' +
+        '<span style="word-break:break-word;">' + htmlEsc(g.name) + '</span>' +
+        '</label>';
+    }).join('');
+  }
+
+  function toggleGroupTargetBox() {
+    var action = $('edit-device-groups-action') ? $('edit-device-groups-action').value : 'replace';
+    var box = $('edit-device-groups-target-box');
+    if (box) box.style.display = action === 'replace' ? 'block' : 'none';
+    updateGroupChangePreview();
+  }
+
+  function getGroupChangeResultIds(device, sourceId, action, targetId) {
+    var result = [];
+    var gs = device && device.groups ? device.groups : [];
+    for (var i = 0; i < gs.length; i++) {
+      var gid = gs[i] && gs[i].id;
+      if (!gid || gid === sourceId) continue;
+      if (result.indexOf(gid) < 0) result.push(gid);
+    }
+    if (action === 'replace' && targetId && result.indexOf(targetId) < 0) result.push(targetId);
+    return result;
+  }
+
+  function updateGroupChangePreview() {
+    var preview = $('edit-device-groups-preview');
+    var btn = $('btn-apply-device-groups');
+    if (!preview) return;
+
+    var row = getGroupEditRow();
+    if (!row || !row.rawDevice) {
+      preview.textContent = 'No se encontró el activo seleccionado.';
+      if (btn) btn.disabled = true;
+      return;
+    }
+
+    var device = row.rawDevice;
+    var sourceId = $('edit-device-groups-source') ? $('edit-device-groups-source').value : '';
+    var action = $('edit-device-groups-action') ? $('edit-device-groups-action').value : 'replace';
+    var targetId = pendingGroupChangeTargetId;
+
+    var currentNames = (device.groups || [])
+      .filter(function (g) { return g && g.id && !/^Group/.test(g.id); })
+      .map(function (g) { return getGroupNameById(g.id); });
+
+    if (!sourceId) {
+      preview.innerHTML = '<div><b>Grupos actuales:</b> ' + htmlEsc(currentNames.join(', ') || 'Sin grupo') + '</div>' +
+        '<div style="color:#b45309; font-weight:700; margin-top:6px;">Seleccione el grupo que desea modificar.</div>';
+      if (btn) btn.disabled = true;
+      return;
+    }
+
+    var sourceName = getGroupNameById(sourceId);
+
+    if (action === 'replace' && !targetId) {
+      preview.innerHTML = '<div><b>Grupos actuales:</b> ' + htmlEsc(currentNames.join(', ') || 'Sin grupo') + '</div>' +
+        '<div style="color:#0369a1; font-weight:700; margin-top:6px;">Seleccione el grupo de reemplazo para continuar.</div>';
+      if (btn) btn.disabled = true;
+      return;
+    }
+
+    var resultIds = getGroupChangeResultIds(device, sourceId, action, targetId);
+    var resultNames = resultIds
+      .filter(function (id) { return !/^Group/.test(id); })
+      .map(function (id) { return getGroupNameById(id); });
+
+    var summary = action === 'replace'
+      ? 'Se reemplazará <b>' + htmlEsc(sourceName) + '</b> por <b>' + htmlEsc(getGroupNameById(targetId)) + '</b>.'
+      : 'Se eliminará el grupo <b>' + htmlEsc(sourceName) + '</b>.';
+
+    preview.innerHTML = '<div style="margin-bottom:6px; color:#0f172a;">' + summary + '</div>' +
+      '<div><b>Grupos actuales:</b> ' + htmlEsc(currentNames.join(', ') || 'Sin grupo') + '</div>' +
+      '<div style="color:#15803d; margin-top:4px;"><b>Grupos después del cambio:</b> ' + htmlEsc(resultNames.join(', ') || 'Sin grupo') + '</div>';
+
+    if (btn) btn.disabled = false;
+  }
+
+  function openDeviceGroupsModal(deviceId) {
+    var row = all.find(function (r) { return r.id === deviceId; });
+    if (!row || !row.rawDevice) return;
+
+    currentGroupEditDeviceId = deviceId;
+    pendingGroupChangeTargetId = null;
+
+    var subtitle = $('edit-device-groups-subtitle');
+    if (subtitle) {
+      subtitle.textContent = (row.placa || '-') + ' · ' + (row.nombreActivo || 'Sin nombre') + ' · VIN ' + (row.vin || '-');
+    }
+
+    var editable = getEditableGroupsForDevice(row.rawDevice);
+    var src = $('edit-device-groups-source');
+    if (src) {
+      src.innerHTML = '<option value="">-- Seleccione un grupo --</option>' + editable.map(function (g) {
+        return '<option value="' + htmlEsc(g.id) + '">' + htmlEsc(g.name) + '</option>';
+      }).join('');
+    }
+
+    var hint = $('edit-device-groups-source-hint');
+    if (hint) {
+      hint.textContent = editable.length
+        ? 'Solo se muestran los grupos editables asignados a la unidad.'
+        : 'Esta unidad no tiene grupos editables asignados.';
+      hint.style.color = editable.length ? '#94a3b8' : '#b45309';
+    }
+
+    var action = $('edit-device-groups-action');
+    if (action) action.value = 'replace';
+    var search = $('edit-device-groups-search');
+    if (search) search.value = '';
+
+    setGroupEditStatus('');
+    populateGroupTargetList();
+    toggleGroupTargetBox();
+
+    var btn = $('btn-apply-device-groups');
+    if (btn) btn.disabled = true;
+
+    $('edit-device-groups-modal').style.display = 'flex';
+  }
+
+  function closeDeviceGroupsModal() {
+    $('edit-device-groups-modal').style.display = 'none';
+    currentGroupEditDeviceId = null;
+    pendingGroupChangeTargetId = null;
+  }
+
+  function requestApplyGroupChange() {
+    var row = getGroupEditRow();
+    if (!row || !row.rawDevice) return;
+
+    var sourceId = $('edit-device-groups-source') ? $('edit-device-groups-source').value : '';
+    var action = $('edit-device-groups-action') ? $('edit-device-groups-action').value : 'replace';
+    var targetId = pendingGroupChangeTargetId;
+
+    if (!sourceId) {
+      setGroupEditStatus('Seleccione el grupo que desea modificar.', true);
+      return;
+    }
+    if (action === 'replace' && !targetId) {
+      setGroupEditStatus('Seleccione el grupo de reemplazo.', true);
+      return;
+    }
+
+    var sourceName = getGroupNameById(sourceId);
+    var plate = row.placa || row.id;
+    var msg = action === 'replace'
+      ? 'Se reemplazará el grupo "' + sourceName + '" por "' + getGroupNameById(targetId) + '" en la unidad ' + plate + '. ¿Desea aplicar el cambio?'
+      : 'Se eliminará el grupo "' + sourceName + '" de la unidad ' + plate + '. ¿Desea aplicar el cambio?';
+
+    showConfirmSaveModal('Confirmar cambio de grupos', msg, function () { applyGroupChange(); });
+  }
+
+  async function applyGroupChange() {
+    var row = getGroupEditRow();
+    if (!row || !row.rawDevice) {
+      setGroupEditStatus('No se encontró el activo seleccionado.', true);
+      return;
+    }
+
+    var device = row.rawDevice;
+    var sourceId = $('edit-device-groups-source') ? $('edit-device-groups-source').value : '';
+    var action = $('edit-device-groups-action') ? $('edit-device-groups-action').value : 'replace';
+    var targetId = pendingGroupChangeTargetId;
+
+    if (!sourceId || (action === 'replace' && !targetId)) {
+      setGroupEditStatus('Complete la selección antes de aplicar el cambio.', true);
+      return;
+    }
+
+    var resultIds = getGroupChangeResultIds(device, sourceId, action, targetId);
+    var entity = {};
+    Object.keys(device).forEach(function (k) { entity[k] = device[k]; });
+    entity.groups = resultIds.map(function (id) { return { id: id }; });
+
+    var btn = $('btn-apply-device-groups');
+    if (btn) btn.disabled = true;
+    setGroupEditStatus('Guardando cambios en Geotab...');
+
+    try {
+      await callApi(api, 'Set', { typeName: 'Device', entity: entity });
+      setGroupEditStatus('✅ Grupos actualizados correctamente.');
+      $('edit-device-groups-modal').style.display = 'none';
+      currentGroupEditDeviceId = null;
+      pendingGroupChangeTargetId = null;
+      setMsg('✅ Grupos actualizados en la unidad ' + (row.placa || row.id) + '. Recargando datos...');
+      setTimeout(function () { load(); }, 1200);
+    } catch (err) {
+      console.error('Error al actualizar los grupos del activo:', err);
+      setGroupEditStatus('Error al guardar: ' + (err && err.message ? err.message : err), true);
+      if (btn) btn.disabled = false;
+    }
+  }
+
+  function renderList() {
+    var html = '';
+
+    all.forEach(function (r) {
+      if (!isRowMatchingFilters(r)) return;
+
+      var isSel = !!selected[r.id];
+
+      if (activeModule === 'certi') {
+        html += '<tr>' +
+          '<td style="text-align:center;"><input type="checkbox" data-id="' + htmlEsc(r.id) + '"' + (isSel ? ' checked' : '') + '></td>' +
+          '<td><b style="color:#0f172a;">' + htmlEsc(r.placa) + '</b></td>' +
+          '<td style="font-family:monospace;">' + htmlEsc(r.vin) + '</td>' +
+          '<td>' + htmlEsc(r.desde) + '</td>' +
+          '<td>' + htmlEsc(r.razon || 'Sin Razón Social') + '</td>' +
+          '<td>' + htmlEsc(r.ruc || 'Sin RUC') + '</td>' +
+          '<td class="cgps-cell-groups" style="min-width: 240px; max-width: 360px; width: 280px; white-space: normal; line-height: 1.4; word-break: break-word;">' + renderGroupBadges(r) + '</td>' +
+          '</tr>';
+      } else if (activeModule === 'master') {
+        html += '<tr>' +
+          '<td style="text-align:center;"><input type="checkbox" data-id="' + htmlEsc(r.id) + '"' + (isSel ? ' checked' : '') + '></td>' +
+          '<td><b style="color:#0f172a;">' + htmlEsc(r.placa) + '</b></td>' +
+          '<td>' + htmlEsc(databaseName) + '</td>' +
+          '<td style="font-family:monospace;">' + htmlEsc(r.vin) + '</td>' +
+          '<td style="font-family:monospace;">' + htmlEsc(r.serialNumber) + '</td>' +
+          '<td>' + htmlEsc(r.desde) + '</td>' +
+          '</tr>';
+      } else {
+        var badgeClass = r.paramCount === 5 ? 'badge-full' : (r.paramCount === 0 ? 'badge-empty' : 'badge-partial');
+        var badgeLabel = r.paramCount + '/5 ' + (r.paramCount === 5 ? 'OK' : 'Incompleto');
+
+        html += '<tr>' +
+          '<td style="text-align:center;"><input type="checkbox" data-id="' + htmlEsc(r.id) + '"' + (isSel ? ' checked' : '') + '></td>' +
+          '<td><b style="color:#0f172a;">' + htmlEsc(r.nombreActivo) + '</b></td>' +
+          '<td>' + htmlEsc(r.placa) + '</td>' +
+          '<td style="text-align:center;">' + htmlEsc(r.desde) + '</td>' +
+          '<td style="font-family:monospace; font-size:11px;">' + htmlEsc(r.vin) + '</td>' +
+          '<td style="text-align:center;"><span class="badge-param ' + badgeClass + '" title="Posee ' + r.paramCount + ' de 5 parámetros">' + badgeLabel + '</span></td>' +
+          '<td class="cgps-cell-groups" style="min-width: 240px; max-width: 360px; width: 280px; white-space: normal; line-height: 1.4; word-break: break-word;">' + renderGroupBadges(r) +
+            (activeModule === 'valid' ? '<div><button type="button" class="cgps-btn cgps-btn-outline btn-edit-device-groups" data-id="' + htmlEsc(r.id) + '" style="margin-top: 6px; font-size: 10.5px; padding: 3px 8px; white-space: nowrap;">✏️ Editar grupos</button></div>' : '') +
+          '</td>' +
+          '<td>' + htmlEsc(r.estadoProvincia || 'Sin Estado') + '</td>' +
+          '<td>' + htmlEsc(r.ruc || 'Sin RUC') + '</td>' +
+          '<td>' + htmlEsc(r.razon || 'Sin Razón Social') + '</td>' +
+          '<td style="text-align:center;">' + htmlEsc(r.anualidad || '-') + '</td>' +
+          '<td>' + htmlEsc(r.tipoVehiculo || 'Sin Tipo') + '</td>' +
+          '<td>' + htmlEsc(r.marca || '-') + '</td>' +
+          '<td>' + htmlEsc(r.modelo || '-') + '</td>' +
+          '<td style="text-align:center;">' + htmlEsc(r.anio || '-') + '</td>' +
+          '</tr>';
+      }
+    });
+
+    if ($('cgps-listbody')) {
+      $('cgps-listbody').innerHTML = html || '<tr><td colspan="15" style="text-align:center; padding: 24px; color: #64748b;">Sin resultados coincidentes para la combinación de filtros aplicada</td></tr>';
+    }
+    updateKPIs();
+    highlightKpiCards();
+  }
+
+  function cleanLegalName(str) {
+    if (!str) return '';
+    return str.toUpperCase()
+      .replace(/^(\d+[\.\,-]|\s*)*OBSERVACIONES\s*:\s*/i, '')
+      .replace(/\b[A-Z0-9]{17}\b/gi, '') 
+      .replace(/\b(S\.?\s*A\.?\s*C\.?|S\.?\s*A\.?|E\.?\s*I\.?\s*R\.?\s*L\.?|S\.?\s*R\.?\s*L\.?|SOCIEDAD\s+ANONIMA\s+CERRADA|SOCIEDAD\s+ANONIMA|CERRADA)\b/g, '')
+      .replace(/_/g, ' ') 
+      .replace(/[^A-Z0-9\s]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  // Global variable para almacenar los grupos cargados
+  var allGroupsData = [];
+
+  async function loadAllGroupsTable() {
+    var tbody = $('cgps-groups-listbody');
+    $('cgps-groups-table-card').style.display = 'block';
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#64748b;">Cargando grupos desde Geotab...</td></tr>';
+
+    try {
+      var results = await callMulti(api, [
+          ["Get", { typeName: "Group", includeNestedEntities: true }],
+          ["Get", { typeName: "Device", propertySelector: { fields: ["id", "name", "groups", "activeFrom", "activeTo"] } }],
+          ["Get", { typeName: "Zone", propertySelector: { fields: ["id", "name", "groups"] } }],
+          ["Get", { typeName: "User", propertySelector: { fields: ["id", "name", "companyGroups"] } }]
+        ]);
+
+        var groups = results[0] || [];
+        var devices = results[1] || [];
+        var zones = results[2] || [];
+        var users = results[3] || [];
+
+        if (!groups || groups.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#94a3b8;">No se encontraron grupos.</td></tr>';
+          return;
+        }
+
+        // Build a map of group id -> group object
+        var groupsById = {};
+        groups.forEach(function(g) { groupsById[g.id] = g; });
+        allGroupsData = groups.map(function(g) { return g; });
+
+        // For each group, count related entities
+        var groupData = groups.map(function(g) {
+          var childCount = (g.children || []).length;
+          var deviceCount = devices.filter(function(d) { return (d.groups || []).some(function(gr) { return gr.id === g.id; }); }).length;
+          var zoneCount = zones.filter(function(z) { return (z.groups || []).some(function(gr) { return gr.id === g.id; }); }).length;
+          var userCount = users.filter(function(u) { return (u.companyGroups || []).some(function(gr) { return gr.id === g.id; }); }).length;
+
+          return {
+            group: g,
+            childCount: childCount,
+            deviceCount: deviceCount,
+            zoneCount: zoneCount,
+            userCount: userCount
+          };
+        });
+
+        // Populate right table (main table)
+        var rows = groupData.map(function(gd) {
+                var g = gd.group;
+                return '<tr>' +
+                  '<td><b>' + htmlEsc(g.name) + '</b><br><small style="color:#64748b;">ID: ' + htmlEsc(g.id) + '</small></td>' +
+                  '<td style="text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:11px;">' + gd.deviceCount + '</td>' +
+                  '<td style="text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:11px;">' + gd.zoneCount + '</td>' +
+                  '<td style="text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:11px;">' + gd.userCount + '</td>' +
+                  '</tr>';
+              }).join('');
+
+              tbody.innerHTML = rows || '<tr><td colspan="4" style="text-align:center; color:#94a3b8;">No hay grupos con datos.</td></tr>';
+
+        // Populate left search panel
+        // searchTbody and searchEmpty are no longer used in this function
+      } catch (e) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#ef4444;">Error: ' + htmlEsc(e.message) + '</td></tr>';
+        console.error('Error cargando grupos:', e);
+      }
+    }
+
+        function exportGroupsToExcel() {
+          try {
+            var tbody = $('cgps-groups-listbody');
+            var rows = tbody.querySelectorAll('tr');
+          if (rows.length === 0) {
+            setMsg('No hay datos en la tabla de grupos para exportar.', true);
+            return;
+          }
+
+          var headers = ["GRUPO", "Numero de activos", "Numero de Zonas", "Numero de usuarios"];
+
+    var data = [];
+    rows.forEach(function(row) {
+      var cells = row.querySelectorAll('td');
+      var rowData = [];
+      cells.forEach(function(cell) {
+        rowData.push(cell.textContent.trim());
+      });
+      if (rowData.length > 0) {
+        data.push(rowData);
+      }
+    });
+
+    if (data.length === 0) {
+      setMsg('No hay datos para exportar.', true);
+      return;
+    }
+
+    var sheetData = [headers].concat(data);
+    var wb = XLSX.utils.book_new();
+    var ws = XLSX.utils.aoa_to_sheet(sheetData);
+    ws['!cols'] = [{ wch: 35 }, { wch: 18 }, { wch: 18 }, { wch: 18 }];
+    XLSX.utils.book_append_sheet(wb, ws, "Grupos");
+
+    var fileName = 'Grupos_Datos_' + fmtDate(new Date().toISOString()).replace(/\//g, '-') + '.xlsx';
+    XLSX.writeFile(wb, fileName);
+
+    setMsg('📊 Tabla de grupos exportada a Excel: ' + fileName);
+    } catch (e) {
+      console.error('Error exportando Grupos Excel:', e);
+      setMsg('❌ Error exportando a Excel: ' + (e.message || String(e)), true);
+    }
+  }
+
+  function exportValidToExcel() {
+    try {
+      var allActiveRows = getActiveRowsForModule().filter(function(r) { return isRowMatchingFilters(r); });
+    var selectedIds = Object.keys(selected).filter(function (k) { return selected[k]; });
+
+    var rowsToExport;
+    if (selectedIds.length > 0) {
+      rowsToExport = allActiveRows.filter(function(r) { return selected[r.id]; });
+      if (rowsToExport.length === 0) {
+        setMsg('No hay filas seleccionadas para exportar.', true);
+        return;
+      }
+    } else {
+      rowsToExport = allActiveRows;
+    }
+
+    if (rowsToExport.length === 0) {
+      setMsg('No hay datos en la tabla de validación de GPS para exportar.', true);
+      return;
+    }
+
+    var headers = ["NOMBRE DEL ACTIVO", "PLACA", "ACTIVADO DESDE", "VIN", "PARÁMETROS (5)", "GRUPOS", "ESTADO/PROV.", "RUC", "RAZÓN SOCIAL", "ANUALIDAD", "TIPO VEHÍCULO", "MARCA", "MODELO", "AÑO", "FECHA ACTIVACIÓN DEL SERVICIO"];
+    var data = rowsToExport.map(function(r) {
+      return [r.nombreActivo, r.placa, r.desde || '', r.vin, r.paramCount + '/5', r.grupos || '', r.estadoProvincia || '', r.ruc || '', r.razon || '', r.anualidad || '', r.tipoVehiculo || '', r.marca || '', r.modelo || '', r.anio || '', r.fechaActivacionServicio || ''];
+    });
+
+    var sheetData = [headers].concat(data);
+    var wb = XLSX.utils.book_new();
+    var ws = XLSX.utils.aoa_to_sheet(sheetData);
+    ws['!cols'] = [{ wch: 22 }, { wch: 12 }, { wch: 16 }, { wch: 22 }, { wch: 14 }, { wch: 30 }, { wch: 14 }, { wch: 14 }, { wch: 25 }, { wch: 18 }, { wch: 16 }, { wch: 14 }, { wch: 16 }, { wch: 8 }, { wch: 35 }];
+
+    var fileName = 'Validacion_GPS_' + fmtDate(new Date().toISOString()).replace(/\\//g, '-') + '.xlsx';
+    XLSX.utils.book_append_sheet(wb, ws, "Validacion GPS");
+    XLSX.writeFile(wb, fileName);
+
+    setMsg('📊 Tabla de validación GPS exportada a Excel (' + data.length + ' filas). Seleccionadas: ' + (selectedIds.length > 0 ? selectedIds.length : 'todas'));
+    } catch (e) {
+      console.error('Error exportando Valid Excel:', e);
+      setMsg('❌ Error exportando a Excel: ' + (e.message || String(e)), true);
+    }
+  }
+
+  async function executeGroupAudit() {
+    var rawText = $('cgps-audit-input').value.trim();
+    var IGNORED_GENERIC_WORDS = [
+      'PERU', 'CORPORACION', 'LOGISTICA', 'TRANSPORTES', 'ASOCIADOS', 'SOCIEDAD',
+      'EMPRESA', 'SERVICIOS', 'GRUPO', 'RENTAL', 'IMPORTACIONES', 'INGENIEROS',
+      'COMERCIAL', 'INVERSIONES', 'GENERALES', 'INDUSTRIA', 'INDUSTRIAS', 'CONTRATISTAS'
+    ];
+
+    var groupList = [];
+    Object.keys(groupsById).forEach(function(gid) {
+      var g = groupsById[gid];
+      if (g && g.name && !/^Group/.test(g.id)) {
+        var cName = cleanLegalName(g.name);
+        if (cName.length >= 3) {
+          groupList.push({ id: g.id, name: g.name.trim(), cleanName: cName });
+        }
+      }
+    });
+
+    var clientCandidates = [];
+    var lines = rawText.split(/[\n\r]+/);
+    
+    lines.forEach(function(line) {
+      var lineClean = line.replace(/^(\d+[\.\,-]|\s*)*OBSERVACIONES\s*:\s*/i, '').trim();
+      if (!lineClean) return;
+
+      var subParts = lineClean.split(/\s*-\s*/);
+      for (var i = 0; i < subParts.length; i++) {
+        var part = subParts[i].trim();
+
+        part = part.replace(/^[A-Z0-9]{17}\s*/i, '').replace(/\s*[A-Z0-9]{17}$/i, '').trim();
+
+        if (/^(OBSERVACIONES|NO\s+INDICA|ACT\.\s*INMEDIATA|ACT\s+INMEDIATA|PENDIENTE)/i.test(part) || part.length < 3) {
+          continue;
+        }
+
+        if (!clientCandidates.includes(part)) {
+          clientCandidates.push(part);
+        }
+      }
+    });
+
+    var resultsHtml = '';
+    var uniqueClients = [];
+
+    clientCandidates.forEach(function(rawClient) {
+      var cleanClient = cleanLegalName(rawClient);
+      if (!cleanClient || cleanClient.length < 3 || uniqueClients.includes(cleanClient)) return;
+      uniqueClients.push(cleanClient);
+
+      var clientTokens = cleanClient.split(' ').filter(function(t) { 
+        return t.length >= 3 && !IGNORED_GENERIC_WORDS.includes(t);
+      });
+
+      if (clientTokens.length === 0) {
+        clientTokens = cleanClient.split(' ').filter(function(t) { return t.length >= 3; });
+      }
+
+      var matchedGroups = [];
+
+      for (var i = 0; i < groupList.length; i++) {
+        var g = groupList[i];
+        if (!g.cleanName || g.cleanName.length < 3) continue;
+
+        var isMatch = false;
+
+        for (var k = 0; k < clientTokens.length; k++) {
+          var token = clientTokens[k];
+          if (g.cleanName.indexOf(token) >= 0) {
+            isMatch = true;
+            break;
+          }
+        }
+
+        if (isMatch && !matchedGroups.includes(g.name)) {
+          matchedGroups.push(g.name);
+        }
+      }
+
+      var matchCount = matchedGroups.length;
+      var groupTextDisplay = matchCount > 0 ? matchedGroups.join(', ') : 'Sin Grupo Coincidente en el Árbol';
+      var statusBadge = matchCount > 0 
+        ? '<span class="badge-audit-ok">Grupo Existe</span>' 
+        : '<span class="badge-audit-warn">Grupo No Creado</span>';
+
+      resultsHtml += '<tr>' +
+        '<td><b>' + htmlEsc(rawClient) + '</b></td>' +
+        '<td style="white-space: normal; word-break: break-word;">' + htmlEsc(groupTextDisplay) + '</td>' +
+        '<td style="text-align: center; font-weight: 700;">' + matchCount + '</td>' +
+        '<td>' + statusBadge + '</td>' +
+        '</tr>';
+    });
+
+    // Actualizar tabla de grupos con las coincidencias resaltadas
+    await loadAllGroupsTable();
+    setMsg('Auditoría del árbol de grupos finalizada.');
+      }
+
+  async function renameGroup(groupId, newName) {
+      var apiRef = api;
+      if (!apiRef) {
+        setMsg('API de Geotab no disponible.', true);
+        return;
+      }
+
+      try {
+        var grupo = await callApi(apiRef, 'Get', { typeName: 'Group', search: { id: groupId } });
+        if (!grupo || grupo.length === 0) {
+          setMsg('No se encontró el grupo con ID: ' + groupId, true);
+          return;
+        }
+
+        var grupoData = grupo[0];
+        var originalName = grupoData.name || '';
+
+        if (newName.trim() === originalName) {
+          setMsg('El nombre es el mismo que el actual.', true);
+          return;
+        }
+
+        var updateData = {
+          name: newName.trim(),
+          lastModifiedUser: 'sysadmin',
+          lastModifiedDate: new Date().toISOString(),
+          validFromDate: grupoData.validFromDate || new Date().toISOString()
+        };
+
+        var result = await callApi(apiRef, 'Set', { typeName: 'Group', entity: updateData });
+        setMsg('✅ Nombre del grupo cambiado correctamente: ' + originalName + ' → ' + newName.trim());
+      } catch (e) {
+        console.error('Error cambiando nombre del grupo:', e);
+        setMsg('❌ Error al cambiar nombre del grupo: ' + (e.message || String(e)), true);
+      }
+    }
+
+  function load() {
+    setupLoginListeners();
+    setMsg('Sincronizando activos y DeviceStatusInfo de MyGeotab...');
+
+    var sessionP = new Promise(function (ok) {
+      try { 
+        if (api && typeof api.getSession === 'function') {
+          api.getSession(function (s) { ok(s); }); 
+        } else {
+          ok(null);
+        }
+      } catch (e) { 
+        ok(null); 
+      }
+    });
+
+    return sessionP.then(async function(session) {
+      var currentUser = session && (session.userName || session.user);
+      var cleanUser = String(currentUser || '').toLowerCase().trim();
+      var isAuthorized = cleanUser === "ejecutivo.cuentas13@navisaf.pe";
+
+      if (!currentUser || !isAuthorized) {
+        document.body.innerHTML = "<div style='display:flex; justify-content:center; align-items:center; height:100vh; background-color:#0f172a; font-family:sans-serif;'><div style='text-align:center; padding:40px; background:#1e293b; border-radius:16px; border:1px solid #334155; color:white;'><h3 style='color:#ef4444; margin:0 0 10px 0;'>Acceso Denegado</h3><p style='color:#94a3b8; font-size:14px; margin:0;'>Este módulo está restringido exclusivamente para la cuenta autorizada (" + htmlEsc(currentUser || "sesión no detectada") + ").</p></div></div>";
+        throw new Error("Usuario no autorizado para ejecutar esta extensión.");
+      }
+
+      if (session && session.database) {
+        databaseName = session.database;
+      }
+
+      var devSearch = {};
+
+      return callMulti(api, [
+        ['Get', { typeName: 'Device', search: devSearch, resultsLimit: 5000, propertySelector: { fields: DEVICE_FIELDS, isIncluded: true } }],
+        ['Get', { typeName: 'Group' }],
+        ['Get', { typeName: 'DeviceStatusInfo' }]
+      ]).catch(function () {
+        return Promise.all([
+          callApi(api, 'Get', { typeName: 'Device', search: devSearch, resultsLimit: 5000 }),
+          callApi(api, 'Get', { typeName: 'Group' }).catch(function () { return []; }),
+          callApi(api, 'Get', { typeName: 'DeviceStatusInfo' }).catch(function () { return []; })
+        ]);
+      }).then(function (res) {
+        var devices = (res && res[0]) || [];
+        var groups = (res && res[1]) || [];
+        var statuses = (res && res[2]) || [];
+
+        groupsById = {};
+        groups.forEach(function (g) { groupsById[g.id] = g; });
+
+        statusById = {};
+        statuses.forEach(function (s) {
+          if (s && s.device) {
+            statusById[s.device.id] = s;
+          }
+        });
+
+        rawDevices = devices.filter(function (d) {
+          if (d.deviceType === 'CustomDevice') return false;
+          if (isExcludedDevice(d)) return false;
+          return true;
+        });
+
+        rebuildRows();
+        renderList();
+        populateGeneralParentGroupsDropdown();
+        populateUserGroupsDropdown();
+        populateFlashDatalists();
+
+        setMsg(all.length + ' activos y ' + Object.keys(groupsById).length + ' grupos sincronizados correctamente.');
+
+        // Decodificación de VINs automática integrada en la sincronización
+        var vinsToAutoDecode = rawDevices
+          .map(function(d){ return (d.vehicleIdentificationNumber || '').trim().toUpperCase(); })
+          .filter(function(v){ return v.length >= 11; });
+
+        if (vinsToAutoDecode.length > 0) {
+          decodeVinsForDevices(vinsToAutoDecode).then(function() {
+            rebuildRows();
+            renderList();
+            setMsg('✅ ' + all.length + ' activos sincronizados y VINs decodificados correctamente.');
+          }).catch(function(e) {
+            console.warn('Decodificación parcial:', e);
+          });
+        }
+
+        callApi(api, 'Get', { typeName: 'ReportTemplate', includeNestedEntities: true })
+          .then(function(schedules) {
+            rawSchedules = schedules || [];
+          }).catch(function(err) {
+            console.warn("No se pudieron cargar CustomReportSchedule:", err);
+          });
+
+      });
+    }).catch(function (e) {
+      setMsg('Error al sincronizar con Geotab: ' + (e && e.message ? e.message : e), true);
+    });
+  }
+
+  if ($('cgps-btn-apply-mass-unified')) $('cgps-btn-apply-mass-unified').addEventListener('click', requestApplyMassUpdateUnified);
+
+  // Group management event listeners
+  if ($('cgps-btn-add-group')) $('cgps-btn-add-group').addEventListener('click', function() {
+    var parentId = $('cgps-group-name-input').value.trim();
+    if (!parentId) {
+      setMsg('Por favor ingrese el ID o nombre del grupo a añadir.', true);
+      return;
+    }
+    addGroupToSelected(parentId);
+  });
+
+  if ($('cgps-btn-remove-group')) $('cgps-btn-remove-group').addEventListener('click', function() {
+    var parentId = $('cgps-group-name-input').value.trim();
+    if (!parentId) {
+      setMsg('Por favor ingrese el ID o nombre del grupo a quitar.', true);
+      return;
+    }
+    removeGroupFromSelected(parentId);
+  });
+
+  if ($('cgps-btn-apply-groups')) $('cgps-btn-apply-groups').addEventListener('click', requestApplyGroupsChange);
+
+  // Group search event listener
+  if ($('cgps-group-search')) $('cgps-group-search').addEventListener('input', function() {
+    var query = this.value.toLowerCase().trim();
+    var list = $('cgps-group-list');
+    if (!query) {
+      list.innerHTML = '';
+      return;
+    }
+    // Show matching groups in the list
+    var html = '';
+    Object.keys(groupsById).forEach(function(gid) {
+      var g = groupsById[gid];
+      if (g && g.name && (g.name.toLowerCase().indexOf(query) >= 0 || gid.toLowerCase().indexOf(query) >= 0)) {
+        html += '<div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:6px;padding:4px 8px;display:inline-block;font-size:11px;">' + htmlEsc(g.name) + ' <span style="color:#64748b;font-size:10px;">(' + htmlEsc(gid) + ')</span></div>';
+      }
+    });
+    list.innerHTML = html || '<span style="color:#64748b;">No se encontraron grupos</span>';
+  });
+  if ($('testn-btn-refresh-hub')) $('testn-btn-refresh-hub').addEventListener('click', function() { load(); });
+  if ($('testn-btn-refresh-mod')) $('testn-btn-refresh-mod').addEventListener('click', function() { load(); });
+
+  if ($('audit-btn-create-client')) $('audit-btn-create-client').addEventListener('click', requestCreateNewClientGroup);
+    if ($('audit-btn-create-general')) $('audit-btn-create-general').addEventListener('click', requestCreateGeneralGroup);
+    if ($('audit-gen-parent-search')) $('audit-gen-parent-search').addEventListener('keyup', populateGeneralParentGroupsDropdown);
+    if ($('audit-rename-parent-search')) $('audit-rename-parent-search').addEventListener('keyup', populateRenameParentGroupsDropdown);
+    if ($('audit-btn-rename-group')) $('audit-btn-rename-group').addEventListener('click', requestRenameGroup);
+
+    if ($('usr-group-search')) $('usr-group-search').addEventListener('keyup', populateUserGroupsDropdown);
+  if ($('usr-btn-submit')) $('usr-btn-submit').addEventListener('click', requestCreateNewUserAutomated);
+
+  if ($('master-btn-excel')) $('master-btn-excel').addEventListener('click', exportMasterExcel);
+
+  if ($('master-btn-week')) {
+    $('master-btn-week').addEventListener('click', function() {
+      var now = new Date();
+      var dayOfWeek = now.getDay(); 
+      var distanceToMonday = (dayOfWeek + 6) % 7;
+      var startOfWeek = new Date(now);
+      startOfWeek.setDate(now.getDate() - distanceToMonday);
+      startOfWeek.setHours(0,0,0,0);
+
+      activeDateRange = { start: startOfWeek, end: new Date() };
+      renderList();
+      setMsg('Filtrado: Esta semana al corte.');
+    });
+  }
+
+  if ($('master-btn-custom-range')) {
+    $('master-btn-custom-range').addEventListener('click', function() {
+      var fromVal = $('master-date-from').value;
+      var toVal = $('master-date-to').value;
+
+      if (!fromVal || !toVal) {
+        setMsg('Seleccione ambas fechas para filtrar.', true);
+        return;
+      }
+
+      var start = new Date(fromVal + 'T00:00:00');
+      var end = new Date(toVal + 'T23:59:59');
+
+      activeDateRange = { start: start, end: end };
+      renderList();
+      setMsg('Rango personalizado aplicado.');
+    });
+  }
+
+  if ($('master-btn-reset-dates')) {
+    $('master-btn-reset-dates').addEventListener('click', function() {
+      $('master-date-from').value = '';
+      $('master-date-to').value = '';
+      activeDateRange = null;
+      renderList();
+      setMsg('Filtros de fecha restablecidos.');
+    });
+  }
+
+  if ($('cgps-btn-bulk')) $('cgps-btn-bulk').addEventListener('click', function() { applyBulkFilter($('cgps-bulk-input').value); });
+  if ($('cgps-btn-bulk-clear')) $('cgps-btn-bulk-clear').addEventListener('click', function() { $('cgps-bulk-input').value = ''; applyBulkFilter(''); });
+  
+  if ($('cgps-btn-bulk-std')) $('cgps-btn-bulk-std').addEventListener('click', function() { applyBulkFilter($('cgps-bulk-input-std').value); });
+  if ($('cgps-btn-bulk-clear-std')) $('cgps-btn-bulk-clear-std').addEventListener('click', function() { $('cgps-bulk-input-std').value = ''; applyBulkFilter(''); });
+
+  if ($('reports-search-input')) {
+    $('reports-search-input').addEventListener('keyup', function() {
+      renderSubGroupsChecklist();
+    });
+  }
+
+  if ($('reports-btn-select-all-subgroups')) {
+    $('reports-btn-select-all-subgroups').addEventListener('click', function() {
+      var cbs = document.querySelectorAll('.chk-report-subgroup');
+      cbs.forEach(function(cb) { cb.checked = true; });
+      window.updateReportSelectedSubgroupsCount();
+    });
+  }
+
+  if ($('reports-btn-deselect-all-subgroups')) {
+    $('reports-btn-deselect-all-subgroups').addEventListener('click', function() {
+      var cbs = document.querySelectorAll('.chk-report-subgroup');
+      cbs.forEach(function(cb) { cb.checked = false; });
+      window.updateReportSelectedSubgroupsCount();
+    });
+  }
+
+  if ($('reports-btn-search')) {
+    $('reports-btn-search').addEventListener('click', function() {
+      handleReportGroupChange();
+    });
+  }
+
+  if ($('reports-btn-open-create-modal')) $('reports-btn-open-create-modal').addEventListener('click', openCreateReportModal);
+  if ($('btn-close-create-modal')) {
+    $('btn-close-create-modal').addEventListener('click', function() {
+      $('create-report-modal').style.display = 'none';
+    });
+  }
+
+  if ($('create-rep-source-search')) {
+    $('create-rep-source-search').addEventListener('keyup', function() {
+      populateSourceGroupsDropdown();
+    });
+  }
+
+  if ($('create-rep-source-group')) $('create-rep-source-group').addEventListener('change', handleSourceGroupChange);
+  if ($('create-rep-source-schedule')) $('create-rep-source-schedule').addEventListener('change', handleSourceScheduleChange);
+  if ($('btn-apply-prefix-preset')) $('btn-apply-prefix-preset').addEventListener('click', applyNamePrefixPreset);
+  if ($('btn-submit-create-report')) $('btn-submit-create-report').addEventListener('click', function() {
+    var clonador = geotabAddinClonarReporte();
+    clonador.focus && clonador.focus();
+  });
+
+  if ($('reports-btn-open-edit-diags-modal')) $('reports-btn-open-edit-diags-modal').addEventListener('click', openEditDiagnosticsModal);
+  if ($('btn-close-edit-diags-modal')) {
+    $('btn-close-edit-diags-modal').addEventListener('click', function() {
+      $('edit-diagnostics-modal').style.display = 'none';
+    });
+  }
+  
+  if ($('btn-load-reports-list')) $('btn-load-reports-list').addEventListener('click', loadDiagnosticsReportsList);
+  if ($('edit-diag-search-mod')) $('edit-diag-search-mod').addEventListener('keyup', populateDiagnosticsReportDropdowns);
+  if ($('edit-diag-search-comp')) $('edit-diag-search-comp').addEventListener('keyup', populateDiagnosticsReportDropdowns);
+  if ($('edit-diag-dest-search')) {
+    $('edit-diag-dest-search').addEventListener('keyup', function() {
+      var currentRepId = $('edit-diag-select-report').value;
+      var currentSched = rawSchedules.find(function(s){ return s.id === currentRepId; });
+      var assignedGroupIds = currentSched ? (currentSched.groups || []).map(function(g){ return g.id; }) : [];
+      renderEditDiagGroupsList(assignedGroupIds);
+    });
+  }
+
+  if ($('btn-load-library-items')) $('btn-load-library-items').addEventListener('click', loadCatalogItemsOnDemand);
+  if ($('diag-library-search')) $('diag-library-search').addEventListener('keyup', filterCatalogItems);
+
+  if ($('edit-diag-select-report')) $('edit-diag-select-report').addEventListener('change', function() { handleEditDiagSelectReport('modificar'); });
+  if ($('edit-diag-select-compare')) $('edit-diag-select-compare').addEventListener('change', function() { handleEditDiagSelectReport('comparar'); });
+  if ($('btn-copy-compare-diags')) $('btn-copy-compare-diags').addEventListener('click', copyCompareDiagnosticsToInput);
+  if ($('btn-add-diag-from-library')) $('btn-add-diag-from-library').addEventListener('click', addSelectedDiagnosticFromLibrary);
+  if ($('btn-save-diagnostics')) $('btn-save-diagnostics').addEventListener('click', requestSaveDiagnosticsToReport);
+
+  if ($('cgps-listbody')) {
+    $('cgps-listbody').addEventListener('click', function (e) {
+      var b = e.target.closest ? e.target.closest('.btn-edit-device-groups') : null;
+      if (!b) return;
+      var devId = b.getAttribute('data-id');
+      if (devId) openDeviceGroupsModal(devId);
+    });
+  }
+
+  if ($('btn-close-device-groups-modal')) $('btn-close-device-groups-modal').addEventListener('click', closeDeviceGroupsModal);
+  if ($('btn-cancel-device-groups')) $('btn-cancel-device-groups').addEventListener('click', closeDeviceGroupsModal);
+  if ($('btn-apply-device-groups')) $('btn-apply-device-groups').addEventListener('click', requestApplyGroupChange);
+
+  if ($('edit-device-groups-source')) {
+    $('edit-device-groups-source').addEventListener('change', function () {
+      pendingGroupChangeTargetId = null;
+      populateGroupTargetList();
+      updateGroupChangePreview();
+    });
+  }
+
+  if ($('edit-device-groups-action')) {
+    $('edit-device-groups-action').addEventListener('change', toggleGroupTargetBox);
+  }
+
+  if ($('edit-device-groups-search')) {
+    $('edit-device-groups-search').addEventListener('input', populateGroupTargetList);
+  }
+
+  if ($('edit-device-groups-target-list')) {
+    $('edit-device-groups-target-list').addEventListener('change', function (e) {
+      var radio = e.target;
+      if (!radio || radio.name !== 'edit-device-groups-target') return;
+      pendingGroupChangeTargetId = radio.value;
+      updateGroupChangePreview();
+    });
+  }
+
+  if ($('btn-close-prev-modal')) {
+    $('btn-close-prev-modal').addEventListener('click', function() {
+      $('report-preview-modal').style.display = 'none';
+    });
+  }
+
+  if ($('btn-copy-rules')) {
+    $('btn-copy-rules').addEventListener('click', function() {
+      if (!currentSelectedReportObj || !currentSelectedReportObj._rules) return;
+      var txt = currentSelectedReportObj._rules.join(', ');
+      navigator.clipboard.writeText(txt).then(function() {
+        alert('📋 Normas copiadas al portapapeles');
+      });
+    });
+  }
+
+  if ($('btn-copy-diags')) {
+    $('btn-copy-diags').addEventListener('click', function() {
+      if (!currentSelectedReportObj || !currentSelectedReportObj._diags) return;
+      var txt = currentSelectedReportObj._diags.join(', ');
+      navigator.clipboard.writeText(txt).then(function() {
+        alert('📋 Diagnósticos copiados al portapapeles');
+      });
+    });
+  }
+
+  if ($('reports-listbody')) {
+    $('reports-listbody').addEventListener('click', function (e) {
+      var b = e.target.closest ? e.target.closest('.btn-view-report') : null;
+      if (!b) return;
+      var found = currentReportRows.find(function (x) { return x.id === b.getAttribute('data-id'); });
+      if (found) openReportPreviewModal(found);
+    });
+  }
+
+  if ($('rep-filter-from')) $('rep-filter-from').addEventListener('change', applyReportFilters);
+  if ($('rep-filter-to')) $('rep-filter-to').addEventListener('change', applyReportFilters);
+  if ($('rep-filter-user')) $('rep-filter-user').addEventListener('change', applyReportFilters);
+  if ($('rep-filter-keyword')) $('rep-filter-keyword').addEventListener('input', applyReportFilters);
+  
+  if ($('rep-filter-clear')) {
+    $('rep-filter-clear').addEventListener('click', function () {
+      $('rep-filter-from').value = ''; 
+      $('rep-filter-to').value = ''; 
+      $('rep-filter-user').value = '';
+      if ($('rep-filter-keyword')) $('rep-filter-keyword').value = '';
+      applyReportFilters();
+    });
+  }
+
+  if ($('cgps-btn-export-groups')) {
+    $('cgps-btn-export-groups').addEventListener('click', function() {
+      exportGroupsToExcel();
+    });
+  }
+
+  if ($('cgps-btn-refresh-groups')) {
+          $('cgps-btn-refresh-groups').addEventListener('click', function() {
+            loadAllGroupsTable();
+          });
+        }
+
+        if ($('cgps-groups-filter')) {
+                  $('cgps-groups-filter').addEventListener('input', function() {
+                    var filterText = this.value.toLowerCase().trim();
+                    var tbody = $('cgps-groups-listbody');
+                    if (!tbody) return;
+                    var rows = tbody.querySelectorAll('tr');
+                    rows.forEach(function(row) {
+                      var text = row.textContent.toLowerCase();
+                      row.style.display = text.indexOf(filterText) >= 0 ? '' : 'none';
+                    });
+                  });
+                }
+
+              if ($('cgps-btn-exec-audit')) $('cgps-btn-exec-audit').addEventListener('click', executeGroupAudit);
+  if ($('cgps-btn-clear-audit')) {
+      $('cgps-btn-clear-audit').addEventListener('click', function() {
+        $('cgps-audit-input').value = '';
+        setMsg('Auditoría de grupos limpiada.');
+      });
+    }
+
+  if ($('cgps-btn-view')) {
+    $('cgps-btn-view').addEventListener('click', function() {
+      switchView('certi');
+      $('sec-controls-container').scrollIntoView({ behavior: 'smooth' });
+      setMsg('Visualizando tabla de activos.');
+    });
+  }
+  if ($('cgps-btn-mail')) $('cgps-btn-mail').addEventListener('click', generateLegalText);
+  if ($('cgps-btn-doc')) $('cgps-btn-doc').addEventListener('click', downloadWordDoc);
+  if ($('cgps-btn-copy-legal')) {
+    $('cgps-btn-copy-legal').addEventListener('click', function() {
+      var txtElem = $('cgps-legal-text');
+      txtElem.select();
+      navigator.clipboard.writeText(txtElem.value).then(function() {
+        setMsg('📋 Texto legal copiado al portapapeles.');
+      });
+    });
+  }
+
+  if ($('valid-btn-excel')) {
+    $('valid-btn-excel').addEventListener('click', function() {
+      exportValidToExcel();
+    });
+  }
+
+  if ($('btn-mod-flash')) $('btn-mod-flash').addEventListener('click', function() { switchView('flash'); });
+  if ($('flash-btn-generate')) $('flash-btn-generate').addEventListener('click', generateFlashReportPrompt);
+  if ($('flash-btn-clear')) {
+    $('flash-btn-clear').addEventListener('click', function() {
+      $('flash-input-placa').value = '';
+      $('flash-input-vin').value = '';
+      $('flash-input-modelo').value = '';
+      $('flash-date-event').value = new Date().toISOString().split('T')[0];
+      $('flash-time-start').value = '14:00';
+      $('flash-time-end').value = '15:30';
+      $('flash-input-relato').value = '';
+      $('flash-input-fotos').value = '';
+      $('flash-output-prompt').value = '';
+      setMsg('Campos de Flash Report limpiados.');
+    });
+  }
+  if ($('flash-btn-copy')) {
+    $('flash-btn-copy').addEventListener('click', function() {
+      var outElem = $('flash-output-prompt');
+      if (!outElem.value) return;
+      outElem.select();
+      navigator.clipboard.writeText(outElem.value).then(function() {
+        setMsg('📋 Prompt MCP copiado al portapapeles.');
+      });
+    });
+  }
+
+  if ($('kpi-card-sn-vin')) $('kpi-card-sn-vin').addEventListener('click', function() { activeUnitFilter = (activeUnitFilter === 'snVin') ? 'all' : 'snVin'; renderList(); });
+  if ($('kpi-card-novin')) $('kpi-card-novin').addEventListener('click', function() { activeUnitFilter = (activeUnitFilter === 'noVin') ? 'all' : 'noVin'; renderList(); });
+  if ($('kpi-card-nosn')) $('kpi-card-nosn').addEventListener('click', function() { activeUnitFilter = (activeUnitFilter === 'noSn') ? 'all' : 'noSn'; renderList(); });
+  if ($('kpi-card-2')) $('kpi-card-2').addEventListener('click', function() { activeUnitFilter = (activeUnitFilter === 'selected') ? 'all' : 'selected'; renderList(); });
+
+  if ($('kpi-card-4')) $('kpi-card-4').addEventListener('click', function() { activeParamFilter = (activeParamFilter === 'full') ? 'all' : 'full'; renderList(); });
+  if ($('kpi-card-less5')) $('kpi-card-less5').addEventListener('click', function() { activeParamFilter = (activeParamFilter === 'less5') ? 'all' : 'less5'; renderList(); });
+
+  if ($('kpi-card-noanualidad')) $('kpi-card-noanualidad').addEventListener('click', function() { activeFieldMissingFilter = (activeFieldMissingFilter === 'noanualidad') ? 'all' : 'noanualidad'; renderList(); });
+  if ($('kpi-card-noestado')) $('kpi-card-noestado').addEventListener('click', function() { activeFieldMissingFilter = (activeFieldMissingFilter === 'noestado') ? 'all' : 'noestado'; renderList(); });
+  if ($('kpi-card-noruc')) $('kpi-card-noruc').addEventListener('click', function() { activeFieldMissingFilter = (activeFieldMissingFilter === 'noruc') ? 'all' : 'noruc'; renderList(); });
+  if ($('kpi-card-norazon')) $('kpi-card-norazon').addEventListener('click', function() { activeFieldMissingFilter = (activeFieldMissingFilter === 'norazon') ? 'all' : 'norazon'; renderList(); });
+
+  if ($('kpi-card-unassigned')) $('kpi-card-unassigned').addEventListener('click', function() { activeAssignmentFilter = (activeAssignmentFilter === 'unassigned') ? 'all' : 'unassigned'; renderList(); });
+  if ($('kpi-card-assigned')) $('kpi-card-assigned').addEventListener('click', function() { activeAssignmentFilter = (activeAssignmentFilter === 'assigned') ? 'all' : 'assigned'; renderList(); });
+
+  if ($('kpi-card-type-remolcadores')) $('kpi-card-type-remolcadores').addEventListener('click', function() { activeVehicleTypeFilter = (activeVehicleTypeFilter === 'remolcadores') ? 'all' : 'remolcadores'; renderList(); });
+  if ($('kpi-card-type-volquetes')) $('kpi-card-type-volquetes').addEventListener('click', function() { activeVehicleTypeFilter = (activeVehicleTypeFilter === 'volquetes') ? 'all' : 'volquetes'; renderList(); });
+  if ($('kpi-card-type-sintipo')) $('kpi-card-type-sintipo').addEventListener('click', function() { activeVehicleTypeFilter = (activeVehicleTypeFilter === 'sintipo') ? 'all' : 'sintipo'; renderList(); });
+  if ($('kpi-card-type-otrostipos')) $('kpi-card-type-otrostipos').addEventListener('click', function() { activeVehicleTypeFilter = (activeVehicleTypeFilter === 'otrostipos') ? 'all' : 'otrostipos'; renderList(); });
+
+  if ($('btn-mod-certi')) $('btn-mod-certi').addEventListener('click', function() { switchView('certi'); });
+  if ($('btn-mod-valid')) $('btn-mod-valid').addEventListener('click', function() { switchView('valid'); });
+  if ($('btn-mod-master')) $('btn-mod-master').addEventListener('click', function() { switchView('master'); });
+  if ($('btn-mod-audit')) $('btn-mod-audit').addEventListener('click', function() { switchView('audit'); });
+  if ($('btn-mod-reports')) $('btn-mod-reports').addEventListener('click', function() { switchView('reports'); });
+  if ($('btn-mod-activations')) $('btn-mod-activations').addEventListener('click', function() { switchView('activations'); });
+  if ($('btn-mod-create-user')) $('btn-mod-create-user').addEventListener('click', function() { switchView('create-user'); });
+  if ($('testn-btn-back')) $('testn-btn-back').addEventListener('click', function() { switchView('hub'); });
+
+  var filterTimer = null;
+  if ($('cgps-filter')) {
+    $('cgps-filter').addEventListener('input', function () { 
+      clearTimeout(filterTimer); 
+      filterTimer = setTimeout(renderList, 200); 
+    });
+  }
+  if ($('cgps-filter-field')) $('cgps-filter-field').addEventListener('change', renderList);
+  if ($('cgps-mass-field-select')) $('cgps-mass-field-select').addEventListener('change', updateMassInputPlaceholder);
+
+  if ($('cgps-listbody')) {
+    $('cgps-listbody').addEventListener('change', function (e) {
+      var id = e.target.getAttribute('data-id');
+      if (e.target.type === 'checkbox' && id) {
+        selected[id] = e.target.checked;
+        renderList();
+        updateKPIs();
+      }
+    });
+  }
+
+  if ($('cgps-sel-vis')) {
+    $('cgps-sel-vis').addEventListener('click', function () {
+      all.forEach(function (r) {
+        if (isRowMatchingFilters(r)) {
+          selected[r.id] = true;
+        }
+      });
+      renderList();
+    });
+  }
+
+  if ($('cgps-sel-none')) {
+    $('cgps-sel-none').addEventListener('click', function () { 
+      selected = {}; 
+      renderList(); 
+    });
+  }
+
+  var loadStarted = false;
+
+  return {
+    initialize: function (geotabApi, state, initializeCallback) {
+      if (geotabApi) api = geotabApi;
+      if (typeof initializeCallback === 'function') initializeCallback();
+      if (!loadStarted) {
+        loadStarted = true;
+        try { load(); } catch (e) { setMsg('Error al iniciar la sincronización: ' + (e && e.message ? e.message : e), true); }
+      }
+    },
+    focus: function (geotabApi, state) {
+      if (geotabApi) api = geotabApi;
+    },
+    blur: function (geotabApi, state) {}
+  };
+};
+
+window.geotab = window.geotab || {};
+window.geotab.addin = window.geotab.addin || {};
+
+(function registerAddIn() {
+  var reg = window.geotab.addin;
+  var seg = (location.pathname.split('/').pop() || '').replace(/\.html?$/i, '');
+  var keys = ["Control Hub Fleet Manager", "control_hub", "control_hub_fleet_manager", "Control Z", "control_z", "control_z-index", "ztest-index"];
+  if (seg) { keys.push(seg); if (location.search) keys.push(seg + location.search); }
+  keys.forEach(function (k) { reg[k] = addInConstructor; });
+
+  try {
+    window.geotab.addin = new Proxy(reg, {
+      has: function (t, p) { return (p in t) || (typeof p === 'string' && p.indexOf('ztest-index') === 0); },
+      get: function (t, p) {
+        if (p in t) return t[p];
+        if (typeof p === 'string' && p.indexOf('ztest-index') === 0) return addInConstructor;
+        return undefined;
+      }
+    });
+  } catch (e) {}
+})();
+setupLoginListeners();
+</script>
 </body>
 </html>
