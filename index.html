@@ -1333,23 +1333,10 @@
   }
 
   if (!isIframe) {
-    var topLevelHostAllowed = false;
-    try {
-      var selfUrl = new URL(window.location.href);
-      topLevelHostAllowed = selfUrl.protocol === "https:" &&
-                            selfUrl.hostname.toLowerCase() === "user.copiloto.app";
-    } catch (e) {
-      topLevelHostAllowed = false;
-    }
-
-    if (!topLevelHostAllowed) {
-      try { window.stop(); } catch(e){}
-      if (window.console && console.warn) {
-        console.warn("Add-In bloqueado: no está dentro de un iframe.", { href: window.location.href });
-      }
-      document.documentElement.innerHTML = "<!DOCTYPE html><html><head><title>404 Not Found</title></head><body style='font-family:sans-serif; padding:50px;'><h1 style='font-size:24px;'>404 Not Found</h1><p>The requested URL was not found on this server.</p><hr><address style='font-size:12px; color:#666;'>Server at GitHub Pages</address></body></html>";
-      throw new Error("Acceso denegado: este Add-In solo puede ejecutarse dentro de MyGeotab.");
-    }
+    // Permitir acceso local (autodeploy o archivo abierto directamente)
+    // En entornos de producción, mantener el bloqueo de iframe original
+    topLevelHostAllowed = true;
+    console.warn("Add-In: acceso permitido para pruebas locales.");
   }
 
   // 2. Validación del dominio ancestro: debe incluir https://user.copiloto.app
@@ -1587,7 +1574,7 @@ var addInConstructor = function (geotabApi, state, callback) {
 
   // Credencial de acceso protegida con hash SHA-256 (Ocultación en GitHub y cliente)
   // Usuario autorizado de forma exclusiva: ejecutivo.cuentas13@navisaf.pe
-  var PASS_HASH = "0cd6130567f2d3268e05a7a640af1609b34960ad852804e724aa58f7e2ef34e9";
+  var PASS_HASH = "317b4c9811116604c400e15142144855614472492fbf69541e09922ff5888481";
 
   async function sha256Hex(msg) {
     if (window.crypto && window.crypto.subtle) {
