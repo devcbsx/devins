@@ -1016,9 +1016,8 @@
       throw new Error("Acceso denegado: este Add-In solo puede ejecutarse dentro de MyGeotab.");
     }
   } else {
-    // Auto-grant access when iframe environment is correct
-    $('testn-login-overlay').style.display = 'none';
-    $('cgps-root').style.display = 'block';
+    // Environment validated - password will be checked by setupLoginListeners
+    // Do NOT auto-grant access here; wait for password verification
   }
 
   // 2. Validación del dominio ancestro: debe incluir https://user.copiloto.app
@@ -1321,7 +1320,7 @@ var addInConstructor = function (geotabApi, state, callback) {
             return;
           }
           var h = sha256Hex(val);
-          var PASS_HASH = "317b4c9811116604c400e15142144855614472492fbf69541e09922ff5888481";
+          var PASS_HASH = "0cd6130567f2d3268e05a7a640af1609b34960ad852804e724aa58f7e2ef34e9";
           if (h === PASS_HASH) {
             $('testn-login-overlay').style.display = 'none';
             $('cgps-root').style.display = 'block';
@@ -4966,7 +4965,7 @@ ENTRADAS
           return;
         }
         var h = sha256Hex(val);
-        var PASS_HASH = "317b4c9811116604c400e15142144855614472492fbf69541e09922ff5888481";
+        var PASS_HASH = "0cd6130567f2d3268e05a7a640af1609b34960ad852804e724aa58f7e2ef34e9";
         if (h === PASS_HASH) {
           $('testn-login-overlay').style.display = 'none';
           $('cgps-root').style.display = 'block';
