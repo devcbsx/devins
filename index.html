@@ -3420,7 +3420,180 @@ ENTRADAS
     var fechaStr = fmtDate(new Date().toISOString()).replace(/\//g, '-');
 
     var docContent = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">';
-    docContent += '<head><meta charset="utf-8"><style>';
+    docContent += '<head><meta charset="utf-8">
+<style>
+  /* ============ GLOBAL STYLES ============ */
+  body {
+    font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+    font-size: 13px;
+    color: #0f172a;
+    background: #f8fafc;
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+  }
+  
+  /* ============ BUTTON STYLES ============ */
+  .cgps-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    line-height: 1;
+  }
+  
+  .cgps-btn:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+  }
+  
+  /* Primary buttons - green accent */
+  .cgps-btn-primary {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff !important;
+    padding: 10px 18px;
+    font-size: 13px;
+    box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.35);
+  }
+  
+  .cgps-btn-primary:hover {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    box-shadow: 0 6px 8px -2px rgba(16, 185, 129, 0.45);
+    transform: translateY(-1px);
+  }
+  
+  .cgps-btn-primary:disabled {
+    background: #9ca3af !important;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+  
+  /* Secondary buttons - outline style */
+  .cgps-btn-secondary {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border: 1px solid #d1d5db !important;
+    padding: 8px 14px;
+    font-size: 12px;
+  }
+  
+  .cgps-btn-secondary:hover {
+    background: #f3f4f6 !important;
+    border-color: #9ca3af;
+  }
+  
+  /* White buttons */
+  .cgps-btn-white {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border: 1px solid #d1d5db !important;
+    padding: 10px 18px;
+    font-size: 13px;
+  }
+  
+  .cgps-btn-white:hover {
+    background: #f9fafb !important;
+    border-color: #9ca3af;
+  }
+  
+  /* Outline buttons */
+  .cgps-btn-outline {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border: 1px solid #d1d5db !important;
+    padding: 8px 14px;
+    font-size: 12px;
+  }
+  
+  .cgps-btn-outline:hover {
+    background: #f3f4f6 !important;
+  }
+  
+  /* ============ INPUT STYLES ============ */
+  .cgps-input {
+    width: 100%;
+    padding: 10px 14px;
+    font-size: 13px;
+    font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #0f172a;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  
+  .cgps-input:focus {
+    outline: none;
+    border-color: #0ea5e9;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+  }
+  
+  .cgps-textarea {
+    width: 100%;
+    padding: 10px 14px;
+    font-size: 13px;
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #0f172a;
+    min-height: 60px;
+    resize: vertical;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  
+  .cgps-textarea:focus {
+    outline: none;
+    border-color: #0ea5e9;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+  }
+  
+  /* ============ CARD STYLES ============ */
+  .cgps-card {
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  
+  /* ============ MESSAGE STYLES ============ */
+  .cgps-message {
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    display: none;
+  }
+  
+  .cgps-message-success {
+    background: #dcfce7;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+    display: block;
+  }
+  
+  .cgps-message-error {
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+    display: block;
+  }
+  
+  /* ============ RESPONSIVE ============ */
+  @media (max-width: 768px) {
+    .cgps-btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style><style>';
     docContent += 'body { font-family: Arial, sans-serif; font-size: 11pt; }';
     docContent += '.title { font-weight: bold; font-size: 12pt; text-align: center; margin-bottom: 12px; }';
     docContent += 'table { border-collapse: collapse; width: 100%; margin: 0 auto; }';
