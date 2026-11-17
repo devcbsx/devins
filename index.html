@@ -1649,6 +1649,12 @@ var addInConstructor = function (geotabApi, state, callback) {
     
     var cpMap = extractCustomPropertiesMap(d);
 
+    // Si licensePlate está vacío, buscar placa en custom property "PLACA"/"PATENTE"
+    if (!plate) {
+      var cpPlate = getCustomValue(cpMap, /^(PLACA|PATENTE|NUMERO\s*DE\s*PLACA)$/i);
+      if (cpPlate) plate = cpPlate.trim();
+    }
+
     var razonSocial = getCustomValue(cpMap, /RAZ[O\u00F3]N\s*SOCIAL/i) || getCustomValue(cpMap, /EMPRESA|CLIENTE/i);
     var rucVal = getCustomValue(cpMap, /^RUC$/i) || getCustomValue(cpMap, /TAXID/i);
     var anualidadVal = getCustomValue(cpMap, /ANUALIDAD/i);
@@ -4015,22 +4021,12 @@ ENTRADAS
 
     var docContent = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">';
     docContent += '<head><meta charset="utf-8">';
+    docContent += '<style>';
     docContent += 'body { font-family: Arial, sans-serif; font-size: 11pt; }';
     docContent += '.title { font-weight: bold; font-size: 12pt; text-align: center; margin-bottom: 12px; }';
     docContent += 'table { border-collapse: collapse; width: 100%; margin: 0 auto; }';
     docContent += 'th, td { border: 1px solid #000000; padding: 6px 8px; text-align: center; font-size: 10.5pt; }';
     docContent += 'th { font-weight: bold; background-color: #ffffff; }';
-    docContent += '<style>';
-    docContent += '.cgps-btn { padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; white-space: nowrap; transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }';
-    docContent += '.cgps-btn:disabled { opacity: 0.5; cursor: not-allowed !important; }';
-    docContent += '.cgps-btn-primary { background: linear-gradient(135deg, #0284c7, #0369a1) !important; color: #ffffff !important; box-shadow: 0 2px 4px rgba(2, 132, 199, 0.2); }';
-    docContent += '.cgps-btn-primary:hover { background: linear-gradient(135deg, #0369a1, #075985) !important; }';
-    docContent += '.cgps-btn-white { background-color: #ffffff !important; color: #0f172a !important; border: 1px solid #e2e8f0; }';
-    docContent += '.cgps-btn-white:hover { background-color: #f8fafc !important; border-color: #cbd5e1; }';
-    docContent += '.cgps-btn-secondary { background-color: #334155 !important; color: #ffffff !important; }';
-    docContent += '.cgps-btn-secondary:hover { background-color: #1e293b !important; }';
-    docContent += '.cgps-btn-outline { background-color: transparent; color: #475569; border: 1px solid #cbd5e1; }';
-    docContent += '.cgps-btn-outline:hover { background-color: #f1f5f9; color: #0f172a; }';
     docContent += '</style>';
     docContent += '</head><body>';
 
@@ -4050,7 +4046,8 @@ ENTRADAS
     selList.forEach(function(r, index) {
       docContent += '<tr>';
       docContent += '<td>' + (index + 1) + '</td>';
-      docContent += '<td>' + htmlEsc(r.placa) + '</td>';
+      var placaDoc = (r.placa && r.placa !== r.vin) ? r.placa : 'Sin placa';
+      docContent += '<td>' + htmlEsc(placaDoc) + '</td>';
       docContent += '<td>' + htmlEsc(r.vin) + '</td>';
       docContent += '<td>' + htmlEsc(r.fechaActivacionServicio || r.desde || '-') + '</td>';
       docContent += '</tr>';
@@ -4285,7 +4282,16 @@ ENTRADAS
       tableContainer.classList.toggle('valid-mode', activeModule === 'valid');
     }
     if (activeModule === 'certi') {
-      head.innerHTML = '<tr><th style="width: 36px; text-align: center;"></th><th style="min-width: 90px;">Placa</th><th style="min-width: 130px;">VIN</th><th style="min-width: 95px;">Instalado desde</th><th style="min-width: 150px;">Razón Social</th><th style="min-width: 95px;">RUC</th><th style="min-width: 180px;">Grupos</th><th style="min-width: 115px;">Fecha Activ. Servicio</th></tr>';
+      head.innerHTML = '<tr>' +
+        '<th style="width: 34px; text-align: center;"></th>' +
+        '<th style="width: 110px;">Placa</th>' +
+        '<th style="width: 155px;">VIN</th>' +
+        '<th style="width: 100px; text-align: center;">Instalado desde</th>' +
+        '<th style="width: 170px;">Razón Social</th>' +
+        '<th style="width: 110px;">RUC</th>' +
+        '<th style="width: 200px;">Grupos</th>' +
+        '<th style="width: 120px;">Fecha Activ. Servicio</th>' +
+        '</tr>';
     } else if (activeModule === 'master') {
       head.innerHTML = '<tr><th style="width: 36px; text-align: center;"></th><th style="min-width: 160px;">PLACA</th><th style="min-width: 140px;">BASE DE DATOS</th><th style="min-width: 180px;">VIN</th><th style="min-width: 160px;"># SERIE</th><th style="min-width: 120px;">Instalación</th></tr>';
     } else {
@@ -4667,12 +4673,12 @@ ENTRADAS
       if (activeModule === 'certi') {
         html += '<tr>' +
           '<td style="text-align:center;"><input type="checkbox" data-id="' + htmlEsc(r.id) + '"' + (isSel ? ' checked' : '') + '></td>' +
-          '<td><b style="color:#0f172a;">' + htmlEsc(r.placa) + '</b></td>' +
-          '<td style="font-family:monospace;">' + htmlEsc(r.vin) + '</td>' +
+          '<td><b style="color:#0f172a;">' + htmlEsc((r.placa && r.placa !== r.vin) ? r.placa : 'Sin placa') + '</b></td>' +
+          '<td style="font-family:monospace; font-size:11px;">' + htmlEsc(r.vin) + '</td>' +
           '<td>' + htmlEsc(r.desde) + '</td>' +
           '<td>' + htmlEsc(r.razon || 'Sin Razón Social') + '</td>' +
           '<td>' + htmlEsc(r.ruc || 'Sin RUC') + '</td>' +
-          '<td class="cgps-cell-groups" style="min-width: 180px; max-width: 280px; width: 200px; white-space: normal; line-height: 1.4; word-break: break-word;">' + renderGroupBadges(r) + '</td>' +
+          '<td class="cgps-cell-groups" style="white-space: normal; line-height: 1.4; word-break: break-word;">' + renderGroupBadges(r) + '</td>' +
           '<td style="white-space: nowrap; font-size: 11px;">' + htmlEsc(r.fechaActivacionServicio || '-') + '</td>' +
           '</tr>';
       } else if (activeModule === 'master') {
