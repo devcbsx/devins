@@ -494,6 +494,7 @@
                   <input type="text" id="cgps-groups-filter" class="cgps-input" placeholder="🔍 Filtrar tabla por nombre de grupo..." style="flex: 1; min-width: 250px; height: 36px; font-size: 12px;">
                   <button id="cgps-btn-refresh-groups" type="button" class="cgps-btn cgps-btn-primary" style="height: 36px; font-size: 12px;">🔄 Actualizar</button>
                   <button id="cgps-btn-export-groups" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px; font-size: 12px;">📊 Exportar Excel</button>
+                  <button id="cgps-btn-param-filter" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px; font-size: 11px; padding: 0 12px; border-radius: 8px;">🚫 Sin 5 Parámetros</button>
                 </div>
           
                 <div class="cgps-table-scroll" style="max-height: 500px;">
@@ -830,9 +831,9 @@
         <div class="cgps-kpi-value" id="kpi-val-assigned" style="color: #059669;">0</div>
       </div>
 
-      <div class="cgps-card kpi-btn-card" id="kpi-card-type-remolcadores" title="Filtrar remolcadores">
-        <div class="cgps-kpi-title">REMOLCADORES</div>
-        <div class="cgps-kpi-value" id="kpi-val-remolcadores" style="color: #0284c7;">0</div>
+      <div class="cgps-card kpi-btn-card" id="kpi-card-noparametros5" title="Filtrar sin los 5 parámetros">
+        <div class="cgps-kpi-title">SIN 5 PARÁMETROS</div>
+        <div class="cgps-kpi-value" id="kpi-val-noparametros5" style="color: #ef4444;">0</div>
       </div>
       <div class="cgps-card kpi-btn-card" id="kpi-card-type-volquetes" title="Filtrar volquetes">
         <div class="cgps-kpi-title">VOLQUETES</div>
@@ -873,20 +874,18 @@
     <div id="sec-controls-container" class="cgps-card" style="margin-top: 12px; padding: 14px 18px; background: #ffffff;">
       <div style="display: flex; align-items: stretch; justify-content: space-between; flex-wrap: wrap; gap: 14px; width: 100%;">
 
-        <!-- SECCIÓN 0: BÚSQUEDA MASIVA -->
-        <div id="sec-bulk-container" style="display: none; flex: 1.2; min-width: 320px;">
-          <div style="display: flex; gap: 14px; align-items: stretch;">
-            <div style="flex: 1; min-width: 0;">
-              <div style="font-size: 13px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px; margin-bottom: 8px;">Búsqueda masiva de activos</div>
-              <div style="display: flex; gap: 8px; align-items: flex-start;">
-                <textarea id="cgps-bulk-input-std" class="cgps-textarea" placeholder="Pegue la lista de nombres de activos, placas, VINs o series..." rows="2" style="flex: 1; min-width: 0; font-family: 'JetBrains Mono', monospace; font-size: 12px;"></textarea>
-                <div style="display: flex; flex-direction: column; gap: 6px;">
-                  <button id="cgps-btn-bulk-std" type="button" class="cgps-btn cgps-btn-secondary">Filtrar Masivo</button>
-                  <button id="cgps-btn-bulk-clear-std" type="button" class="cgps-btn cgps-btn-outline">Limpiar</button>
-                </div>
-              </div>
+        <!-- SECCIÓN 0: BÚSQUEDA MASIVA DE ACTIVOS -->
+        <div id="sec-bulk-container" style="display: flex; flex-direction: column; gap: 8px; flex: 1.2; min-width: 320px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="font-size: 13px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px;">Búsqueda masiva de activos</div>
+            <span style="font-size: 10px; color: #64748b; font-weight: 600;">Pendientes</span>
+          </div>
+          <div style="display: flex; gap: 8px; align-items: stretch;">
+            <textarea id="cgps-bulk-input-std" class="cgps-textarea" placeholder="Pendiente de activos, placas, VINs, series, RUC...&#10;Pegue la lista aquí (un elemento por línea)" rows="2" style="flex: 1; min-width: 0; font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 8px 10px;"></textarea>
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <button id="cgps-btn-bulk-std" type="button" class="cgps-btn cgps-btn-primary" style="height: 36px; padding: 0 16px; font-weight: 700; border-radius: 6px;">Filtrar Masivo</button>
+              <button id="cgps-btn-bulk-clear-std" type="button" class="cgps-btn cgps-btn-outline" style="height: 32px; padding: 0 12px; border-radius: 6px;">Limpiar</button>
             </div>
-            <div style="width: 2px; background: #0f172a; margin: 0 4px; align-self: stretch; min-height: 80px; opacity: 0.9;"></div>
           </div>
         </div>
 
@@ -4674,9 +4673,7 @@ ENTRADAS
           '<td style="text-align:center;">' + htmlEsc(r.desde) + '</td>' +
           '<td style="font-family:monospace; font-size:11px;">' + htmlEsc(r.vin) + '</td>' +
           '<td style="text-align:center;"><span class="badge-param ' + badgeClass + '" title="Posee ' + r.paramCount + ' de 5 parámetros">' + badgeLabel + '</span></td>' +
-          '<td class="cgps-cell-groups" style="min-width: 240px; max-width: 360px; width: 280px; white-space: normal; line-height: 1.4; word-break: break-word;">' + renderGroupBadges(r) +
-            (activeModule === 'valid' ? '<div><button type="button" class="cgps-btn cgps-btn-outline btn-edit-device-groups" data-id="' + htmlEsc(r.id) + '" style="margin-top: 6px; font-size: 10.5px; padding: 3px 8px; white-space: nowrap;">✏️ Editar grupos</button></div>' : '') +
-          '</td>' +
+          '<td class="cgps-cell-groups" style="min-width: 240px; max-width: 360px; width: 280px; white-space: normal; line-height: 1.4; word-break: break-word;">' + renderGroupBadges(r) + '</td>' +
           '<td>' + htmlEsc(r.estadoProvincia || 'Sin Estado') + '</td>' +
           '<td>' + htmlEsc(r.ruc || 'Sin RUC') + '</td>' +
           '<td>' + htmlEsc(r.razon || 'Sin Razón Social') + '</td>' +
@@ -5458,6 +5455,8 @@ ENTRADAS
 
   if ($('kpi-card-4')) $('kpi-card-4').addEventListener('click', function() { activeParamFilter = (activeParamFilter === 'full') ? 'all' : 'full'; renderList(); });
   if ($('kpi-card-less5')) $('kpi-card-less5').addEventListener('click', function() { activeParamFilter = (activeParamFilter === 'less5') ? 'all' : 'less5'; renderList(); });
+  if ($('kpi-card-noparametros5')) $('kpi-card-noparametros5').addEventListener('click', function() { activeParamFilter = (activeParamFilter === 'nopar') ? 'all' : 'nopar'; renderList(); });
+  if ($('cgps-btn-param-filter')) $('cgps-btn-param-filter').addEventListener('click', function() { activeParamFilter = (activeParamFilter === 'nopar') ? 'all' : 'nopar'; renderList(); });
 
   if ($('kpi-card-noanualidad')) $('kpi-card-noanualidad').addEventListener('click', function() { activeFieldMissingFilter = (activeFieldMissingFilter === 'noanualidad') ? 'all' : 'noanualidad'; renderList(); });
   if ($('kpi-card-noestado')) $('kpi-card-noestado').addEventListener('click', function() { activeFieldMissingFilter = (activeFieldMissingFilter === 'noestado') ? 'all' : 'noestado'; renderList(); });
