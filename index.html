@@ -946,24 +946,18 @@
         </div>
 
         <!-- SECCIÓN 3: GESTIÓN DE GRUPOS MASIVA -->
-        <div style="display: flex; flex-direction: column; gap: 8px;">
-          <div style="font-size: 13px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px;">Gestión Masiva de Grupos</div>
-          <div style="display: flex; gap: 8px; align-items: center;">
-            <input type="text" id="cgps-group-search" class="cgps-input" placeholder="🔍 Buscar grupo..." style="flex: 1; height: 36px; font-size: 12px;">
-            <button id="cgps-btn-add-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px; font-size: 12px; white-space: nowrap; border-radius: 6px;">+ Añadir Grupo</button>
-            <button id="cgps-btn-remove-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px; font-size: 12px; white-space: nowrap; border-radius: 6px;">- Quitar Grupo</button>
-          </div>
-          <div id="cgps-group-list" style="display: flex; flex-wrap: wrap; gap: 6px; max-height: 120px; overflow-y: auto; min-height: 24px; padding: 4px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;"></div>
-                    <div style="display: flex; gap: 6px; align-items: center;">
-                      <input type="text" id="cgps-group-name-input" class="cgps-input" placeholder="ID o nombre del grupo..." style="flex: 1; height: 30px; font-size: 11px;">
-                      <select id="cgps-group-action-select" class="cgps-input" style="flex: 2; height: 30px; font-size: 11px;">
-                        <option value="add">Añadir Grupo</option>
-                        <option value="remove">Quitar Grupo</option>
-                      </select>
-                      <button id="cgps-btn-apply-groups" type="button" class="cgps-btn cgps-btn-primary" style="height: 32px; font-size: 11px; font-weight: 700; padding: 0 12px; border-radius: 6px;">🔄 Aplicar cambios</button>
-                    </div>
-                    <div id="cgps-group-status" style="font-size: 11px; font-weight: 600; min-height: 16px;"></div>
-        </div>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                  <div style="font-size: 13px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px;">Gestión Masiva de Grupos</div>
+                  <div style="display: flex; gap: 8px; align-items: center;">
+                                      <input type="text" id="cgps-group-search" class="cgps-input" placeholder="🔍 Buscar grupo..." style="flex: 1; height: 36px; font-size: 12px;">
+                                      <select id="cgps-group-select" class="cgps-input" style="width: 240px; height: 36px; font-size: 12px;">
+                                        <option value="">-- Seleccionar grupo --</option>
+                                      </select>
+                                      <button id="cgps-btn-add-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px; font-size: 12px; white-space: nowrap; border-radius: 6px;">+ Añadir Grupo</button>
+                                      <button id="cgps-btn-remove-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px; font-size: 12px; white-space: nowrap; border-radius: 6px;">- Quitar Grupo</button>
+                                    </div>
+                  <div id="cgps-group-status" style="font-size: 11px; font-weight: 600; min-height: 16px;"></div>
+                </div>
 
         <!-- SEPARADOR VERTICAL 2 -->
                 <div style="width: 2px; background: #0f172a; margin: 0 4px; align-self: stretch; min-height: 80px; opacity: 0.9;"></div>
@@ -5092,45 +5086,41 @@ ENTRADAS
 
   // Group management event listeners
   if ($('cgps-btn-add-group')) $('cgps-btn-add-group').addEventListener('click', function() {
-    var parentId = $('cgps-group-name-input').value.trim();
-    if (!parentId) {
-      setMsg('Por favor ingrese el ID o nombre del grupo a añadir.', true);
+    var groupId = $('cgps-group-select').value.trim();
+    if (!groupId) {
+      setMsg('Por favor seleccione un grupo de la lista.', true);
       return;
     }
-    addGroupToSelected(parentId);
+    addGroupToSelected(groupId);
   });
 
   if ($('cgps-btn-remove-group')) $('cgps-btn-remove-group').addEventListener('click', function() {
-    var parentId = $('cgps-group-name-input').value.trim();
-    if (!parentId) {
-      setMsg('Por favor ingrese el ID o nombre del grupo a quitar.', true);
+    var groupId = $('cgps-group-select').value.trim();
+    if (!groupId) {
+      setMsg('Por favor seleccione un grupo de la lista.', true);
       return;
     }
-    removeGroupFromSelected(parentId);
+    removeGroupFromSelected(groupId);
   });
-
-  if ($('cgps-btn-apply-groups')) $('cgps-btn-apply-groups').addEventListener('click', requestApplyGroupsChange);
 
   // Group search event listener
-  if ($('cgps-group-search')) $('cgps-group-search').addEventListener('input', function() {
-    var query = this.value.toLowerCase().trim();
-    var list = $('cgps-group-list');
-    if (!query) {
-      list.innerHTML = '';
-      return;
-    }
-    // Show matching groups in the list
-    var html = '';
-    Object.keys(groupsById).forEach(function(gid) {
-      var g = groupsById[gid];
-      if (g && g.name && (g.name.toLowerCase().indexOf(query) >= 0 || gid.toLowerCase().indexOf(query) >= 0)) {
-        html += '<div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:6px;padding:4px 8px;display:inline-block;font-size:11px;">' + htmlEsc(g.name) + ' <span style="color:#64748b;font-size:10px;">(' + htmlEsc(gid) + ')</span></div>';
+    if ($('cgps-group-search')) $('cgps-group-search').addEventListener('input', function() {
+      var query = this.value.toLowerCase().trim();
+      var select = $('cgps-group-select');
+      if (!query) {
+        select.innerHTML = '<option value="">-- Seleccionar grupo --</option>';
+        return;
       }
+      // Populate select dropdown with matching groups
+      var html = '';
+      Object.keys(groupsById).forEach(function(gid) {
+        var g = groupsById[gid];
+        if (g && g.name && (g.name.toLowerCase().indexOf(query) >= 0 || gid.toLowerCase().indexOf(query) >= 0)) {
+          html += '<option value="' + htmlEsc(g.id) + '">' + htmlEsc(g.name) + ' (' + htmlEsc(gid) + ')</option>';
+        }
+      });
+      select.innerHTML = '<option value="">-- Seleccionar grupo --</option>' + html || '<option value="">-- Sin coincidencias --</option>';
     });
-    list.innerHTML = html || '<span style="color:#64748b;">No se encontraron grupos</span>';
-  });
-  if ($('testn-btn-refresh-hub')) $('testn-btn-refresh-hub').addEventListener('click', function() { load(); });
-  if ($('testn-btn-refresh-mod')) $('testn-btn-refresh-mod').addEventListener('click', function() { load(); });
 
   if ($('audit-btn-create-client')) $('audit-btn-create-client').addEventListener('click', requestCreateNewClientGroup);
     if ($('audit-btn-create-general')) $('audit-btn-create-general').addEventListener('click', requestCreateGeneralGroup);
