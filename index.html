@@ -3944,13 +3944,24 @@ ENTRADAS
     var fechaStr = fmtDate(new Date().toISOString()).replace(/\//g, '-');
 
     var docContent = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">';
-    docContent += '<head><meta charset="utf-8"><style>';
+    docContent += '<head><meta charset="utf-8">';
     docContent += 'body { font-family: Arial, sans-serif; font-size: 11pt; }';
     docContent += '.title { font-weight: bold; font-size: 12pt; text-align: center; margin-bottom: 12px; }';
     docContent += 'table { border-collapse: collapse; width: 100%; margin: 0 auto; }';
     docContent += 'th, td { border: 1px solid #000000; padding: 6px 8px; text-align: center; font-size: 10.5pt; }';
     docContent += 'th { font-weight: bold; background-color: #ffffff; }';
-    docContent += '</style></head><body>';
+    docContent += '
+    .cgps-btn { padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; white-space: nowrap; transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+    .cgps-btn:disabled { opacity: 0.5; cursor: not-allowed !important; }
+    .cgps-btn-primary { background: linear-gradient(135deg, #0284c7, #0369a1) !important; color: #ffffff !important; box-shadow: 0 2px 4px rgba(2, 132, 199, 0.2); }
+    .cgps-btn-primary:hover { background: linear-gradient(135deg, #0369a1, #075985) !important; }
+    .cgps-btn-white { background-color: #ffffff !important; color: #0f172a !important; border: 1px solid #e2e8f0; }
+    .cgps-btn-white:hover { background-color: #f8fafc !important; border-color: #cbd5e1; }
+    .cgps-btn-secondary { background-color: #334155 !important; color: #ffffff !important; }
+    .cgps-btn-secondary:hover { background-color: #1e293b !important; }
+    .cgps-btn-outline { background-color: transparent; color: #475569; border: 1px solid #cbd5e1; }
+    .cgps-btn-outline:hover { background-color: #f1f5f9; color: #0f172a; }
+    </head><body>';
 
     docContent += '<div class="title">ANEXO N°01</div>';
 
