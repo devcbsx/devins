@@ -956,12 +956,14 @@
             <div style="display: flex; flex-direction: column; gap: 8px; flex: 0.8; min-width: 240px;">
               <div style="font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 6px; letter-spacing: -0.2px;">Gestión Masiva de Grupos</div>
               <div style="display: flex; gap: 8px; align-items: center;">
-                <input type="text" id="cgps-group-search" class="cgps-input" placeholder="🔍 Buscar grupo..." style="flex: 1; height: 34px; font-size: 11px;">
-                <select id="cgps-group-select" class="cgps-input" style="width: 180px; height: 34px; font-size: 11px;">
+                <input type="text" id="cgps-group-search" class="cgps-input" placeholder="🔍 Buscar grupo..." style="flex: 1; min-width: 0; height: 34px; font-size: 11px;">
+                <select id="cgps-group-select" class="cgps-input" style="flex: 1; min-width: 0; height: 34px; font-size: 11px;">
                   <option value="">-- Seleccionar grupo --</option>
                 </select>
-                <button id="cgps-btn-add-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 34px; font-size: 11px; white-space: nowrap; border-radius: 6px;">+ Añadir</button>
-                <button id="cgps-btn-remove-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 34px; font-size: 11px; white-space: nowrap; border-radius: 6px;">- Quitar</button>
+              </div>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <button id="cgps-btn-add-group" type="button" class="cgps-btn cgps-btn-secondary" style="flex: 1; height: 34px; font-size: 11px; white-space: nowrap; border-radius: 6px;">+ Añadir</button>
+                <button id="cgps-btn-remove-group" type="button" class="cgps-btn cgps-btn-secondary" style="flex: 1; height: 34px; font-size: 11px; white-space: nowrap; border-radius: 6px;">- Quitar</button>
               </div>
               <div id="cgps-group-status" style="font-size: 11px; font-weight: 600; min-height: 16px;"></div>
             </div>
@@ -1584,7 +1586,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     return isDeviceArchived(d) || isSinSeguimientoDevice(d);
   }
 
-  async function getGroupsList(d) {
+  function getGroupsList(d) {
     var gs = d.groups || [];
     var names = [];
     for (var i = 0; i < gs.length; i++) { 
@@ -4706,7 +4708,7 @@ ENTRADAS
     highlightKpiCards();
   }
 
-  async function cleanLegalName(str) {
+  function cleanLegalName(str) {
     if (!str) return '';
     return str.toUpperCase()
       .replace(/^(\d+[\.\,-]|\s*)*OBSERVACIONES\s*:\s*/i, '')
