@@ -870,100 +870,100 @@
       </div>
     </div>
 
-    <!-- CONTROLES UNIFICADOS BARRA TECH (DISEÑO 4 SECCIONES) -->
-    <div id="sec-controls-container" class="cgps-card" style="margin-top: 12px; padding: 14px 18px; background: #ffffff;">
-      <div style="display: flex; align-items: stretch; justify-content: space-between; flex-wrap: wrap; gap: 14px; width: 100%;">
+    <!-- CONTROLES UNIFICADOS BARRA TECH (DISEÑO DE 4 SECCIONES EN FILA) -->
+        <div id="sec-controls-container" class="cgps-card" style="margin-top: 12px; padding: 12px 16px; background: #ffffff;">
+          <div style="display: flex; align-items: stretch; gap: 12px; width: 100%;">
 
-        <!-- SECCIÓN 0: BÚSQUEDA MASIVA -->
-        <div id="sec-bulk-container" style="display: none; flex: 1.2; min-width: 320px;">
-          <div style="display: flex; gap: 14px; align-items: stretch;">
-            <div style="flex: 1; min-width: 0;">
-              <div style="font-size: 13px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px; margin-bottom: 8px;">Búsqueda masiva de activos</div>
-              <div style="display: flex; gap: 8px; align-items: flex-start;">
-                <textarea id="cgps-bulk-input-std" class="cgps-textarea" placeholder="Pegue la lista de nombres de activos, placas, VINs o series..." rows="2" style="flex: 1; min-width: 0; font-family: 'JetBrains Mono', monospace; font-size: 12px;"></textarea>
-                <div style="display: flex; flex-direction: column; gap: 6px;">
-                  <button id="cgps-btn-bulk-std" type="button" class="cgps-btn cgps-btn-secondary">Filtrar Masivo</button>
-                  <button id="cgps-btn-bulk-clear-std" type="button" class="cgps-btn cgps-btn-outline">Limpiar</button>
+            <!-- SECCIÓN 0: BÚSQUEDA MASIVA -->
+            <div id="sec-bulk-container" style="display: flex; flex-direction: column; gap: 8px; flex: 1.2; min-width: 300px;">
+              <div style="display: flex; gap: 14px; align-items: stretch;">
+                <div style="flex: 1; min-width: 0;">
+                  <div style="font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 6px; letter-spacing: -0.2px;">Búsqueda masiva de activos</div>
+                  <div style="display: flex; gap: 8px; align-items: flex-start;">
+                    <textarea id="cgps-bulk-input-std" class="cgps-textarea" placeholder="Pegue la lista de nombres de activos, placas, VINs o series..." rows="2" style="flex: 1; min-width: 0; font-family: 'JetBrains Mono', monospace; font-size: 11px;"></textarea>
+                    <div style="display: flex; flex-direction: column; gap: 6px;">
+                      <button id="cgps-btn-bulk-std" type="button" class="cgps-btn cgps-btn-secondary" style="height: 34px;">Filtrar Masivo</button>
+                      <button id="cgps-btn-bulk-clear-std" type="button" class="cgps-btn cgps-btn-outline" style="height: 34px;">Limpiar</button>
+                    </div>
+                  </div>
                 </div>
+                <div style="width: 2px; background: #0f172a; margin: 0 4px; align-self: stretch; min-height: 60px; opacity: 0.9;"></div>
               </div>
             </div>
-            <div style="width: 2px; background: #0f172a; margin: 0 4px; align-self: stretch; min-height: 80px; opacity: 0.9;"></div>
+
+            <!-- SECCIÓN 1: BUSCAR VARIABLES -->
+            <div style="display: flex; flex-direction: column; gap: 8px; flex: 0.8; min-width: 260px;">
+              <div style="font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 6px; letter-spacing: -0.2px;">Buscar Variables</div>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <select id="cgps-filter-field" class="cgps-input" style="width: 140px; font-weight: 600; color: #0284c7; background-color: #f0f9ff; border-color: #bae6fd; height: 34px;">
+                  <option value="all">[ Todos los campos ]</option>
+                  <option value="nombreActivo">Nombre del Activo</option>
+                  <option value="placa">Placa</option>
+                  <option value="vin">VIN</option>
+                  <option value="serialNumber"># Serie GPS</option>
+                  <option value="razon">Razón Social</option>
+                  <option value="ruc">RUC</option>
+                  <option value="estadoProvincia">Estado / Provincia</option>
+                  <option value="anualidad">Anualidad</option>
+                  <option value="tipoVehiculo">Tipo Vehículo</option>
+                  <option value="marca" class="opt-valid-only">Marca</option>
+                  <option value="modelo" class="opt-valid-only">Modelo</option>
+                  <option value="anio" class="opt-valid-only">Año</option>
+                  <option value="grupos">Grupos</option>
+                </select>
+                <input type="text" id="cgps-filter" class="cgps-input" placeholder="🔍 Buscar activo..." style="flex: 1; height: 34px;">
+              </div>
+              <div style="display: flex; justify-content: center; padding-right: 2px;">
+                <button id="cgps-sel-none" type="button" class="cgps-btn cgps-btn-outline" style="height: 32px; padding: 4px 18px; font-size: 11px; border-radius: 6px;">Limpiar</button>
+              </div>
+            </div>
+
+            <!-- SEPARADOR VERTICAL 1 -->
+            <div style="width: 2px; background: #0f172a; margin: 0 6px; align-self: stretch; min-height: 60px; opacity: 0.9;"></div>
+
+            <!-- SECCIÓN 2: MODIFICAR VARIABLES -->
+            <div style="display: flex; flex-direction: column; gap: 8px; flex: 1.0; min-width: 280px;">
+              <div style="font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 6px; letter-spacing: -0.2px;">Modificar Variables</div>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <button id="cgps-sel-vis" type="button" class="cgps-btn cgps-btn-outline" style="height: 34px; padding: 6px 14px; font-size: 11px; white-space: nowrap; border-radius: 6px;">Seleccionar visibles</button>
+                <select id="cgps-mass-field-select" class="cgps-input" style="flex: 1; font-weight: 600; color: #0f172a; height: 34px;">
+                  <option value="razon">Razón Social</option>
+                  <option value="ruc">RUC</option>
+                  <option value="nombreActivo" class="opt-valid-only">Nombre del Activo</option>
+                  <option value="placa" class="opt-valid-only">Placa</option>
+                  <option value="estadoProvincia" class="opt-valid-only">Estado / Provincia</option>
+                  <option value="anualidad" class="opt-valid-only">Anualidad</option>
+                  <option value="tipoVehiculo" class="opt-valid-only">Tipo Vehículo</option>
+                  <option value="marca" class="opt-valid-only">Marca</option>
+                  <option value="modelo" class="opt-valid-only">Modelo</option>
+                  <option value="anio" class="opt-valid-only">Año</option>
+                </select>
+              </div>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <input type="text" id="cgps-mass-value-input" class="cgps-input" placeholder="Razón Social..." style="flex: 1; height: 34px;">
+                <button id="cgps-btn-apply-mass-unified" type="button" class="cgps-btn cgps-btn-primary" style="font-weight: 700; height: 34px; padding: 6px 16px; white-space: nowrap; border-radius: 6px;">Guardar</button>
+              </div>
+            </div>
+
+            <!-- SEPARADOR VERTICAL 2 -->
+            <div style="width: 2px; background: #0f172a; margin: 0 6px; align-self: stretch; min-height: 60px; opacity: 0.9;"></div>
+
+            <!-- SECCIÓN 3: GESTIÓN MASIVA DE GRUPOS -->
+            <div style="display: flex; flex-direction: column; gap: 8px; flex: 0.8; min-width: 240px;">
+              <div style="font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 6px; letter-spacing: -0.2px;">Gestión Masiva de Grupos</div>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <input type="text" id="cgps-group-search" class="cgps-input" placeholder="🔍 Buscar grupo..." style="flex: 1; height: 34px; font-size: 11px;">
+                <select id="cgps-group-select" class="cgps-input" style="width: 180px; height: 34px; font-size: 11px;">
+                  <option value="">-- Seleccionar grupo --</option>
+                </select>
+                <button id="cgps-btn-add-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 34px; font-size: 11px; white-space: nowrap; border-radius: 6px;">+ Añadir</button>
+                <button id="cgps-btn-remove-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 34px; font-size: 11px; white-space: nowrap; border-radius: 6px;">- Quitar</button>
+              </div>
+              <div id="cgps-group-status" style="font-size: 11px; font-weight: 600; min-height: 16px;"></div>
+            </div>
+
           </div>
         </div>
-
-        <!-- SECCIÓN 1: BUSCAR VARIABLES -->
-        <div style="display: flex; flex-direction: column; gap: 8px; flex: 1.0; min-width: 280px;">
-          <div style="font-size: 13px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px;">Buscar Variables</div>
-          <div style="display: flex; gap: 8px; align-items: center;">
-            <select id="cgps-filter-field" class="cgps-input" style="width: 155px; font-weight: 600; color: #0284c7; background-color: #f0f9ff; border-color: #bae6fd; height: 36px;">
-              <option value="all">[ Todos los campos ]</option>
-              <option value="nombreActivo">Nombre del Activo</option>
-              <option value="placa">Placa</option>
-              <option value="vin">VIN</option>
-              <option value="serialNumber"># Serie GPS</option>
-              <option value="razon">Razón Social</option>
-              <option value="ruc">RUC</option>
-              <option value="estadoProvincia">Estado / Provincia</option>
-              <option value="anualidad">Anualidad</option>
-              <option value="tipoVehiculo">Tipo Vehículo</option>
-              <option value="marca" class="opt-valid-only">Marca</option>
-              <option value="modelo" class="opt-valid-only">Modelo</option>
-              <option value="anio" class="opt-valid-only">Año</option>
-              <option value="grupos">Grupos</option>
-            </select>
-            <input type="text" id="cgps-filter" class="cgps-input" placeholder="🔍 Buscar activo..." style="flex: 1; height: 36px;">
-          </div>
-          <div style="display: flex; justify-content: center; padding-right: 2px;">
-            <button id="cgps-sel-none" type="button" class="cgps-btn cgps-btn-outline" style="height: 32px; padding: 4px 18px; font-size: 12px; border-radius: 6px;">Limpiar</button>
-          </div>
-        </div>
-
-        <!-- SEPARADOR VERTICAL 1 -->
-        <div style="width: 2px; background: #0f172a; margin: 0 4px; align-self: stretch; min-height: 80px; opacity: 0.9;"></div>
-
-        <!-- SECCIÓN 2: MODIFICAR VARIABLES -->
-        <div style="display: flex; flex-direction: column; gap: 8px; flex: 1.35; min-width: 330px;">
-          <div style="font-size: 13px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px;">Modificar Variables</div>
-          <div style="display: flex; gap: 8px; align-items: center;">
-            <button id="cgps-sel-vis" type="button" class="cgps-btn cgps-btn-outline" style="height: 36px; padding: 6px 14px; font-size: 12px; white-space: nowrap; border-radius: 6px;">Seleccionar visibles</button>
-            <select id="cgps-mass-field-select" class="cgps-input" style="flex: 1; font-weight: 600; color: #0f172a; height: 36px;">
-              <option value="razon">Razón Social</option>
-              <option value="ruc">RUC</option>
-              <option value="nombreActivo" class="opt-valid-only">Nombre del Activo</option>
-              <option value="placa" class="opt-valid-only">Placa</option>
-              <option value="estadoProvincia" class="opt-valid-only">Estado / Provincia</option>
-              <option value="anualidad" class="opt-valid-only">Anualidad</option>
-              <option value="tipoVehiculo" class="opt-valid-only">Tipo Vehículo</option>
-              <option value="marca" class="opt-valid-only">Marca</option>
-              <option value="modelo" class="opt-valid-only">Modelo</option>
-              <option value="anio" class="opt-valid-only">Año</option>
-            </select>
-          </div>
-          <div style="display: flex; gap: 8px; align-items: center;">
-            <input type="text" id="cgps-mass-value-input" class="cgps-input" placeholder="Razón Social..." style="flex: 1; height: 36px;">
-            <button id="cgps-btn-apply-mass-unified" type="button" class="cgps-btn cgps-btn-primary" style="font-weight: 700; height: 36px; padding: 6px 16px; white-space: nowrap; border-radius: 6px;">Guardar seleccionados</button>
-          </div>
-        </div>
-
-        <!-- SECCIÓN 3: GESTIÓN DE GRUPOS MASIVA -->
-                <div style="display: flex; flex-direction: column; gap: 8px;">
-                  <div style="font-size: 13px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px;">Gestión Masiva de Grupos</div>
-                  <div style="display: flex; gap: 8px; align-items: center;">
-                                      <input type="text" id="cgps-group-search" class="cgps-input" placeholder="🔍 Buscar grupo..." style="flex: 1; height: 36px; font-size: 12px;">
-                                      <select id="cgps-group-select" class="cgps-input" style="width: 240px; height: 36px; font-size: 12px;">
-                                        <option value="">-- Seleccionar grupo --</option>
-                                      </select>
-                                      <button id="cgps-btn-add-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px; font-size: 12px; white-space: nowrap; border-radius: 6px;">+ Añadir Grupo</button>
-                                      <button id="cgps-btn-remove-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px; font-size: 12px; white-space: nowrap; border-radius: 6px;">- Quitar Grupo</button>
-                                    </div>
-                  <div id="cgps-group-status" style="font-size: 11px; font-weight: 600; min-height: 16px;"></div>
-                </div>
-
-        <!-- SEPARADOR VERTICAL 2 -->
-                <div style="width: 2px; background: #0f172a; margin: 0 4px; align-self: stretch; min-height: 80px; opacity: 0.9;"></div>
-
-      </div>
-    </div>
 
     <!-- TABLA PROFESIONAL TECH -->
     <div id="sec-table-container" class="cgps-table-container" style="margin-top: 12px;">
@@ -1967,56 +1967,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     );
   }
 
-  function requestApplyGroupsChange() {
-    var action = $('cgps-group-action-select').value || 'add';
-    var parentId = $('cgps-group-name-input').value.trim();
-    var statusDiv = $('cgps-group-status');
-
-    if (!parentId) {
-      setMsg("Por favor ingrese el ID o nombre del grupo.", true);
-      return;
-    }
-
-    if (action === 'add') {
-      // Verify the group exists
-      var group = groupsById[parentId] || findGroupByName(groupsById, parentId);
-      if (!group) {
-        setMsg("No se encontró el grupo con ID o nombre: " + parentId, true);
-        return;
-      }
-      showConfirmSaveModal(
-        "Confirmar Añadir Grupo",
-        "¿Desea añadir el grupo '" + group.name + "' a " + Object.keys(selected).filter(function (k) { return selected[k]; }).length + " unidad(es) seleccionadas?",
-        function() { addGroupToSelected(parentId); }
-      );
-    } else {
-      // Verify the group exists and is assigned to at least one selected asset
-      var group = groupsById[parentId] || findGroupByName(groupsById, parentId);
-      if (!group) {
-        setMsg("No se encontró el grupo con ID o nombre: " + parentId, true);
-        return;
-      }
-
-      var selectedIds = Object.keys(selected).filter(function (k) { return selected[k]; });
-      var willBeRemoved = selectedIds.some(function (id) {
-        var row = all.find(function (r) { return r.id === id; });
-        return row && row.rawDevice && row.rawDevice.groups && row.rawDevice.groups.some(function (g) { return g.id === groupId; });
-      });
-
-      if (!willBeRemoved) {
-        setMsg("Ningún activo seleccionado tiene este grupo asignado.", true);
-        return;
-      }
-
-      showConfirmSaveModal(
-        "Confirmar Quitar Grupo",
-        "¿Desea quitar el grupo '" + group.name + "' de " + selectedIds.length + " unidad(es) seleccionadas?",
-        function() { removeGroupFromSelected(parentId); }
-      );
-    }
-  }
-
-  async function applyMassUpdateUnified() {
+  // --- Gestión masiva de grupos en Validación GPS ---
     var selectedIds = Object.keys(selected).filter(function (k) { return selected[k]; });
     var field = $('cgps-mass-field-select').value;
     var val = ($('cgps-mass-value-input').value || '').trim();
@@ -5091,7 +5042,34 @@ ENTRADAS
       setMsg('Por favor seleccione un grupo de la lista.', true);
       return;
     }
-    addGroupToSelected(groupId);
+
+    var group = groupsById[groupId] || findGroupByName(groupsById, groupId);
+    if (!group) {
+      setMsg('No se encontró el grupo con ID o nombre: ' + groupId, true);
+      return;
+    }
+
+    var selectedIds = Object.keys(selected).filter(function (k) { return selected[k]; });
+    if (selectedIds.length === 0) {
+      setMsg('Seleccione al menos una unidad activa.', true);
+      return;
+    }
+
+    var alreadyAssigned = selectedIds.some(function (id) {
+      var row = all.find(function (r) { return r.id === id; });
+      return row && row.rawDevice && row.rawDevice.groups && row.rawDevice.groups.some(function (g) { return g.id === groupId; });
+    });
+
+    if (alreadyAssigned) {
+      setMsg('Algunos activos ya tienen este grupo asignado.', true);
+      return;
+    }
+
+    showConfirmSaveModal(
+      'Confirmar Añadir Grupo',
+      '¿Desea añadir el grupo "' + group.name + '" a ' + selectedIds.length + ' unidad(es) seleccionada(s)?',
+      function() { addGroupToSelected(groupId); }
+    );
   });
 
   if ($('cgps-btn-remove-group')) $('cgps-btn-remove-group').addEventListener('click', function() {
@@ -5100,7 +5078,34 @@ ENTRADAS
       setMsg('Por favor seleccione un grupo de la lista.', true);
       return;
     }
-    removeGroupFromSelected(groupId);
+
+    var group = groupsById[groupId] || findGroupByName(groupsById, groupId);
+    if (!group) {
+      setMsg('No se encontró el grupo con ID o nombre: ' + groupId, true);
+      return;
+    }
+
+    var selectedIds = Object.keys(selected).filter(function (k) { return selected[k]; });
+    if (selectedIds.length === 0) {
+      setMsg('Seleccione al menos una unidad activa.', true);
+      return;
+    }
+
+    var willBeRemoved = selectedIds.some(function (id) {
+      var row = all.find(function (r) { return r.id === id; });
+      return row && row.rawDevice && row.rawDevice.groups && row.rawDevice.groups.some(function (g) { return g.id === groupId; });
+    });
+
+    if (!willBeRemoved) {
+      setMsg('Ningún activo seleccionado tiene este grupo asignado.', true);
+      return;
+    }
+
+    showConfirmSaveModal(
+      'Confirmar Quitar Grupo',
+      '¿Desea quitar el grupo "' + group.name + '" de ' + selectedIds.length + ' unidad(es) seleccionada(s)?',
+      function() { removeGroupFromSelected(groupId); }
+    );
   });
 
   // Group search event listener
