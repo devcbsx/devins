@@ -4115,150 +4115,150 @@ ENTRADAS
         if($('hdr-actions-valid')) $('hdr-actions-valid').style.display = 'none';
 
     if (mod === 'hub') {
-      $('testn-hub-view').style.display = 'block';
-      $('testn-module-view').style.display = 'none';
-    } else {
-      $('testn-hub-view').style.display = 'none';
-      $('testn-module-view').style.display = 'block';
+          $('testn-hub-view').style.display = 'block';
+          $('testn-module-view').style.display = 'none';
+        } else {
+          $('testn-hub-view').style.display = 'none';
+          $('testn-module-view').style.display = 'block';
 
-      if (mod === 'certi') {
-        $('testn-mod-title').textContent = 'Certificado GPS';
-        $('hdr-actions-certi').style.display = 'flex';
+          if (mod === 'certi') {
+                  $('testn-mod-title').textContent = 'Certificado GPS';
+                  $('hdr-actions-certi').style.display = 'flex';
 
-        $('sec-master').style.display = 'none';
-        $('sec-audit').style.display = 'none';
-        $('sec-reports').style.display = 'none';
-        $('sec-activations').style.display = 'none';
-        $('sec-flash').style.display = 'none';
-        $('sec-create-user').style.display = 'none';
-        $('sec-kpi-container').style.display = 'grid';
-        $('sec-certi-combined-box').style.display = 'grid';
-        $('sec-bulk-container').style.display = 'none';
-        $('sec-controls-container').style.display = 'block';
-        $('sec-table-container').style.display = 'block';
-        updateMassSelectVisibility();
-        renderHeader();
-        renderList();
-      } else if (mod === 'valid') {
-              $('testn-mod-title').textContent = 'Validación de Variables GPS';
-              $('hdr-actions-valid').style.display = 'flex';
+                  $('sec-master').style.display = 'none';
+                  $('sec-audit').style.display = 'none';
+                  $('sec-reports').style.display = 'none';
+                  $('sec-activations').style.display = 'none';
+                  $('sec-flash').style.display = 'none';
+                  $('sec-create-user').style.display = 'none';
+                  $('sec-kpi-container').style.display = 'grid';
+                  $('sec-certi-combined-box').style.display = 'grid';
+                  $('sec-bulk-container').style.display = 'none';
+                  $('sec-controls-container').style.display = 'none';
+                  $('sec-table-container').style.display = 'block';
+                  updateMassSelectVisibility();
+                  renderHeader();
+                  renderList();
+                } else if (mod === 'valid') {
+                  $('testn-mod-title').textContent = 'Validación de Variables GPS';
+                  $('hdr-actions-valid').style.display = 'flex';
 
-              $('sec-master').style.display = 'none';
-        $('sec-audit').style.display = 'none';
-        $('sec-reports').style.display = 'none';
-        $('sec-activations').style.display = 'none';
-        $('sec-flash').style.display = 'none';
-        $('sec-create-user').style.display = 'none';
-        $('sec-kpi-container').style.display = 'grid';
-        $('sec-certi-combined-box').style.display = 'none';
-        $('sec-bulk-container').style.display = 'block';
-        $('sec-controls-container').style.display = 'block';
-        $('sec-table-container').style.display = 'block';
-        updateMassSelectVisibility();
-        renderHeader();
-        renderList();
-      } else if (mod === 'master') {
-        $('testn-mod-title').textContent = 'Master Switch Camiones';
-        $('hdr-actions-master').style.display = 'flex';
+                  $('sec-master').style.display = 'none';
+                  $('sec-audit').style.display = 'none';
+                  $('sec-reports').style.display = 'none';
+                  $('sec-activations').style.display = 'none';
+                  $('sec-flash').style.display = 'none';
+                  $('sec-create-user').style.display = 'none';
+                  $('sec-kpi-container').style.display = 'grid';
+                  $('sec-certi-combined-box').style.display = 'none';
+                  $('sec-bulk-container').style.display = 'block';
+                  $('sec-controls-container').style.display = 'block';
+                  $('sec-table-container').style.display = 'block';
+                  updateMassSelectVisibility();
+                  renderHeader();
+                  renderList();
+                } else if (mod === 'master') {
+                  $('testn-mod-title').textContent = 'Master Switch Camiones';
+                  $('hdr-actions-master').style.display = 'flex';
 
-        $('sec-master').style.display = 'block';
-        $('sec-audit').style.display = 'none';
-        $('sec-reports').style.display = 'none';
-        $('sec-activations').style.display = 'none';
-        $('sec-flash').style.display = 'none';
-        $('sec-create-user').style.display = 'none';
-        $('sec-kpi-container').style.display = 'grid';
-        $('sec-certi-combined-box').style.display = 'none';
-        $('sec-bulk-container').style.display = 'block';
-        $('sec-controls-container').style.display = 'block';
-        $('sec-table-container').style.display = 'block';
-        updateMassSelectVisibility();
-        renderHeader();
-        renderList();
-      } else if (mod === 'audit') {
-              $('testn-mod-title').textContent = 'Auditoría de Grupos';
-              $('sec-master').style.display = 'none';
-              $('sec-reports').style.display = 'none';
-              $('sec-activations').style.display = 'none';
-              $('sec-flash').style.display = 'none';
-              $('sec-create-user').style.display = 'none';
-              $('sec-audit').style.display = 'block';
-              $('sec-kpi-container').style.display = 'none';
-              $('sec-certi-combined-box').style.display = 'none';
-              $('sec-bulk-container').style.display = 'none';
-              $('sec-controls-container').style.display = 'none';
-              $('sec-table-container').style.display = 'none';
+                  $('sec-master').style.display = 'block';
+                  $('sec-audit').style.display = 'none';
+                  $('sec-reports').style.display = 'none';
+                  $('sec-activations').style.display = 'none';
+                  $('sec-flash').style.display = 'none';
+                  $('sec-create-user').style.display = 'none';
+                  $('sec-kpi-container').style.display = 'grid';
+                  $('sec-certi-combined-box').style.display = 'none';
+                  $('sec-bulk-container').style.display = 'block';
+                  $('sec-controls-container').style.display = 'none';
+                  $('sec-table-container').style.display = 'block';
+                  updateMassSelectVisibility();
+                  renderHeader();
+                  renderList();
+                } else if (mod === 'audit') {
+                  $('testn-mod-title').textContent = 'Auditoría de Grupos';
+                  $('sec-master').style.display = 'none';
+                  $('sec-reports').style.display = 'none';
+                  $('sec-activations').style.display = 'none';
+                  $('sec-flash').style.display = 'none';
+                  $('sec-create-user').style.display = 'none';
+                  $('sec-audit').style.display = 'block';
+                  $('sec-kpi-container').style.display = 'none';
+                  $('sec-certi-combined-box').style.display = 'none';
+                  $('sec-bulk-container').style.display = 'none';
+                  $('sec-controls-container').style.display = 'none';
+                  $('sec-table-container').style.display = 'none';
 
-              populateGeneralParentGroupsDropdown();
-              loadAllGroupsTable();
-      } else if (mod === 'reports') {
-        $('testn-mod-title').textContent = 'Reportes por Cliente';
-        $('hdr-actions-reports').style.display = 'flex';
+                  populateGeneralParentGroupsDropdown();
+                  loadAllGroupsTable();
+                } else if (mod === 'reports') {
+                  $('testn-mod-title').textContent = 'Reportes por Cliente';
+                  $('hdr-actions-reports').style.display = 'flex';
 
-        $('sec-master').style.display = 'none';
-        $('sec-audit').style.display = 'none';
-        $('sec-activations').style.display = 'none';
-        $('sec-flash').style.display = 'none';
-        $('sec-create-user').style.display = 'none';
-        $('sec-reports').style.display = 'block';
-        $('sec-kpi-container').style.display = 'none';
-        $('sec-certi-combined-box').style.display = 'none';
-        $('sec-bulk-container').style.display = 'none';
-        $('sec-controls-container').style.display = 'none';
-        $('sec-table-container').style.display = 'none';
+                  $('sec-master').style.display = 'none';
+                  $('sec-audit').style.display = 'none';
+                  $('sec-activations').style.display = 'none';
+                  $('sec-flash').style.display = 'none';
+                  $('sec-create-user').style.display = 'none';
+                  $('sec-reports').style.display = 'block';
+                  $('sec-kpi-container').style.display = 'none';
+                  $('sec-certi-combined-box').style.display = 'none';
+                  $('sec-bulk-container').style.display = 'none';
+                  $('sec-controls-container').style.display = 'none';
+                  $('sec-table-container').style.display = 'none';
 
-        initAutoReportGroups();
-      } else if (mod === 'activations') {
-        $('testn-mod-title').textContent = 'Activaciones de Unidades';
-        $('sec-master').style.display = 'none';
-        $('sec-audit').style.display = 'none';
-        $('sec-reports').style.display = 'none';
-        $('sec-flash').style.display = 'none';
-        $('sec-create-user').style.display = 'none';
-        $('sec-activations').style.display = 'block';
-        $('sec-kpi-container').style.display = 'none';
-        $('sec-certi-combined-box').style.display = 'none';
-        $('sec-bulk-container').style.display = 'none';
-        $('sec-controls-container').style.display = 'none';
-        $('sec-table-container').style.display = 'none';
-      } else if (mod === 'flash') {
-        $('testn-mod-title').textContent = 'Flash Report (Generador Prompt MCP)';
-        $('sec-master').style.display = 'none';
-        $('sec-audit').style.display = 'none';
-        $('sec-reports').style.display = 'none';
-        $('sec-activations').style.display = 'none';
-        $('sec-create-user').style.display = 'none';
-        $('sec-flash').style.display = 'block';
-        $('sec-kpi-container').style.display = 'none';
-        $('sec-certi-combined-box').style.display = 'none';
-        $('sec-bulk-container').style.display = 'none';
-        $('sec-controls-container').style.display = 'none';
-        $('sec-table-container').style.display = 'none';
+                  initAutoReportGroups();
+                } else if (mod === 'activations') {
+                  $('testn-mod-title').textContent = 'Activaciones de Unidades';
+                  $('sec-master').style.display = 'none';
+                  $('sec-audit').style.display = 'none';
+                  $('sec-reports').style.display = 'none';
+                  $('sec-flash').style.display = 'none';
+                  $('sec-create-user').style.display = 'none';
+                  $('sec-activations').style.display = 'block';
+                  $('sec-kpi-container').style.display = 'none';
+                  $('sec-certi-combined-box').style.display = 'none';
+                  $('sec-bulk-container').style.display = 'none';
+                  $('sec-controls-container').style.display = 'none';
+                  $('sec-table-container').style.display = 'none';
+                } else if (mod === 'flash') {
+                  $('testn-mod-title').textContent = 'Flash Report (Generador Prompt MCP)';
+                  $('sec-master').style.display = 'none';
+                  $('sec-audit').style.display = 'none';
+                  $('sec-reports').style.display = 'none';
+                  $('sec-activations').style.display = 'none';
+                  $('sec-create-user').style.display = 'none';
+                  $('sec-flash').style.display = 'block';
+                  $('sec-kpi-container').style.display = 'none';
+                  $('sec-certi-combined-box').style.display = 'none';
+                  $('sec-bulk-container').style.display = 'none';
+                  $('sec-controls-container').style.display = 'none';
+                  $('sec-table-container').style.display = 'none';
 
-        populateFlashDatalists();
-        if (!$('flash-date-event').value) {
-          $('flash-date-event').value = new Date().toISOString().split('T')[0];
-        }
-      } else if (mod === 'create-user') {
-        $('testn-mod-title').textContent = 'Crear Usuario Automático';
-        $('sec-master').style.display = 'none';
-        $('sec-audit').style.display = 'none';
-        $('sec-reports').style.display = 'none';
-        $('sec-activations').style.display = 'none';
-        $('sec-flash').style.display = 'none';
-        $('sec-create-user').style.display = 'block';
-        $('sec-kpi-container').style.display = 'none';
-        $('sec-certi-combined-box').style.display = 'none';
-        $('sec-bulk-container').style.display = 'none';
-        $('sec-controls-container').style.display = 'none';
-        $('sec-table-container').style.display = 'none';
+                  populateFlashDatalists();
+                  if (!$('flash-date-event').value) {
+                    $('flash-date-event').value = new Date().toISOString().split('T')[0];
+                  }
+                } else if (mod === 'create-user') {
+                  $('testn-mod-title').textContent = 'Crear Usuario Automático';
+                  $('sec-master').style.display = 'none';
+                  $('sec-audit').style.display = 'none';
+                  $('sec-reports').style.display = 'none';
+                  $('sec-activations').style.display = 'none';
+                  $('sec-flash').style.display = 'none';
+                  $('sec-create-user').style.display = 'block';
+                  $('sec-kpi-container').style.display = 'none';
+                  $('sec-certi-combined-box').style.display = 'none';
+                  $('sec-bulk-container').style.display = 'none';
+                  $('sec-controls-container').style.display = 'none';
+                  $('sec-table-container').style.display = 'none';
 
-        populateUserGroupsDropdown();
-      }
-    }
-  }
+                  populateUserGroupsDropdown();
+                                    }
+                                }
+                            }
 
-  function renderHeader() {
+                    function renderHeader() {
     var head = $('cgps-table-head');
     if (!head) return;
     var tableContainer = $('sec-table-container');
