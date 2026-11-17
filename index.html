@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+?<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="utf-8">
@@ -870,36 +870,31 @@
     </div>
 
     <!-- CONTROLES UNIFICADOS BARRA TECH (DISEÑO 4 SECCIONES) -->
-    <div id="<!-- CONTROLES UNIFICADOS BARRA TECH (DISEÑO 4 SECCIONES) -->
-<div id="sec-controls-container" style="margin-top: 12px; padding: 12px 16px; background: #ffffff;">
-      <!-- ACCIONES PRINCIPALES -->
-      <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0;">
-  <button id="cgps-btn-inject-params" type="button" class="cgps-btn" style="background: linear-gradient(135deg, #10b981, #059669); color: #ffffff; font-weight: 800; font-size: 13px; padding: 6px 14px; border-radius: 6px; height: 36px; white-space: nowrap;">Aplicar 5 parametros</button>
-  <button id="cgps-btn-export-excel" type="button" class="cgps-btn cgps-btn-white" style="font-weight:700; height: 36px; white-space: nowrap;">📊 Exportar Excel</button>
-</div>
+    <div id="sec-controls-container" class="cgps-card" style="margin-top: 12px; padding: 14px 18px; background: #ffffff;">
+      <div style="display: flex; align-items: stretch; justify-content: space-between; flex-wrap: wrap; gap: 14px; width: 100%;">
 
         <!-- SECCIÓN 0: BÚSQUEDA MASIVA -->
-        <div id="sec-bulk-container" style="display: none; flex: 1.2; min-width: 300px;">
-          <div style="display: flex; gap: 12px; align-items: stretch;">
+        <div id="sec-bulk-container" style="display: none; flex: 1.2; min-width: 320px;">
+          <div style="display: flex; gap: 14px; align-items: stretch;">
             <div style="flex: 1; min-width: 0;">
-              <div style="font-size: 12px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px; margin-bottom: 6px;">Búsqueda masiva de activos</div>
+              <div style="font-size: 13px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px; margin-bottom: 8px;">Búsqueda masiva de activos</div>
               <div style="display: flex; gap: 8px; align-items: flex-start;">
-                <textarea id="cgps-bulk-input-std" class="cgps-textarea" placeholder="Pegue la lista de nombres de activos, placas, VINs o series..." rows="2" style="flex: 1; min-width: 0; font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 6px;"></textarea>
-                <div style="display: flex; flex-direction: column; gap: 4px;">
-                  <button id="cgps-btn-bulk-std" type="button" class="cgps-btn cgps-btn-secondary" style="height: 34px; padding: 4px 12px; font-size: 11px;">Filtrar Masivo</button>
-                  <button id="cgps-btn-bulk-clear-std" type="button" class="cgps-btn cgps-btn-outline" style="height: 34px; padding: 4px 12px; font-size: 11px;">Limpiar</button>
+                <textarea id="cgps-bulk-input-std" class="cgps-textarea" placeholder="Pegue la lista de nombres de activos, placas, VINs o series..." rows="2" style="flex: 1; min-width: 0; font-family: 'JetBrains Mono', monospace; font-size: 12px;"></textarea>
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                  <button id="cgps-btn-bulk-std" type="button" class="cgps-btn cgps-btn-secondary">Filtrar Masivo</button>
+                  <button id="cgps-btn-bulk-clear-std" type="button" class="cgps-btn cgps-btn-outline">Limpiar</button>
                 </div>
               </div>
             </div>
-            <div style="width: 2px; background: #0f172a; margin: 0 4px; align-self: stretch; min-height: 60px; opacity: 0.9;"></div>
+            <div style="width: 2px; background: #0f172a; margin: 0 4px; align-self: stretch; min-height: 80px; opacity: 0.9;"></div>
           </div>
         </div>
 
         <!-- SECCIÓN 1: BUSCAR VARIABLES -->
-        <div style="display: flex; flex-direction: column; gap: 6px; flex: 1.0; min-width: 260px;">
-          <div style="font-size: 12px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px;">Buscar Variables</div>
+        <div style="display: flex; flex-direction: column; gap: 8px; flex: 1.0; min-width: 280px;">
+          <div style="font-size: 13px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px;">Buscar Variables</div>
           <div style="display: flex; gap: 8px; align-items: center;">
-            <select id="cgps-filter_field" class="cgps-input" style="width: 140px; font-weight: 600; color: #0284c7; background-color: #f0f9ff; border-color: #bae6fd; height: 34px; padding: 4px 8px;">
+            <select id="cgps-filter-field" class="cgps-input" style="width: 155px; font-weight: 600; color: #0284c7; background-color: #f0f9ff; border-color: #bae6fd; height: 36px;">
               <option value="all">[ Todos los campos ]</option>
               <option value="nombreActivo">Nombre del Activo</option>
               <option value="placa">Placa</option>
@@ -915,22 +910,22 @@
               <option value="anio" class="opt-valid-only">Año</option>
               <option value="grupos">Grupos</option>
             </select>
-            <input type="text" id="cgps-filter" class="cgps-input" placeholder="🔍 Buscar activo..." style="flex: 1; height: 34px; padding: 4px 8px;">
+            <input type="text" id="cgps-filter" class="cgps-input" placeholder="🔍 Buscar activo..." style="flex: 1; height: 36px;">
           </div>
           <div style="display: flex; justify-content: center; padding-right: 2px;">
-            <button id="cgps-sel-none" type="button" class="cgps-btn cgps-btn-outline" style="height: 32px; padding: 4px 16px; font-size: 12px; border-radius: 6px;">Limpiar</button>
+            <button id="cgps-sel-none" type="button" class="cgps-btn cgps-btn-outline" style="height: 32px; padding: 4px 18px; font-size: 12px; border-radius: 6px;">Limpiar</button>
           </div>
         </div>
 
         <!-- SEPARADOR VERTICAL 1 -->
-        <div style="width: 2px; background: #0f172a; margin: 0 4px; align-self: stretch; min-height: 60px; opacity: 0.9;"></div>
+        <div style="width: 2px; background: #0f172a; margin: 0 4px; align-self: stretch; min-height: 80px; opacity: 0.9;"></div>
 
         <!-- SECCIÓN 2: MODIFICAR VARIABLES -->
-        <div style="display: flex; flex-direction: column; gap: 6px; flex: 1.35; min-width: 300px;">
-          <div style="font-size: 12px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px;">Modificar Variables</div>
+        <div style="display: flex; flex-direction: column; gap: 8px; flex: 1.35; min-width: 330px;">
+          <div style="font-size: 13px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px;">Modificar Variables</div>
           <div style="display: flex; gap: 8px; align-items: center;">
-            <button id="cgps-sel-vis" type="button" class="cgps-btn cgps-btn-outline" style="height: 34px; padding: 4px 12px; font-size: 12px; white-space: nowrap; border-radius: 6px;">Seleccionar visibles</button>
-            <select id="cgps-mass_field_select" class="cgps-input" style="flex: 1; font-weight: 600; color: #0f172a; height: 34px; padding: 4px 8px;">
+            <button id="cgps-sel-vis" type="button" class="cgps-btn cgps-btn-outline" style="height: 36px; padding: 6px 14px; font-size: 12px; white-space: nowrap; border-radius: 6px;">Seleccionar visibles</button>
+            <select id="cgps-mass-field-select" class="cgps-input" style="flex: 1; font-weight: 600; color: #0f172a; height: 36px;">
               <option value="razon">Razón Social</option>
               <option value="ruc">RUC</option>
               <option value="nombreActivo" class="opt-valid-only">Nombre del Activo</option>
@@ -944,43 +939,960 @@
             </select>
           </div>
           <div style="display: flex; gap: 8px; align-items: center;">
-            <input type="text" id="cgps-mass_value_input" class="cgps-input" placeholder="Razón Social..." style="flex: 1; height: 34px; padding: 4px 8px;">
-            <button id="cgps-btn-apply-mass-unified" type="button" class="cgps-btn cgps-btn-primary" style="font-weight: 700; height: 34px; padding: 4px 14px; white-space: nowrap; border-radius: 6px;">Guardar seleccionados</button>
+            <input type="text" id="cgps-mass-value-input" class="cgps-input" placeholder="Razón Social..." style="flex: 1; height: 36px;">
+            <button id="cgps-btn-apply-mass-unified" type="button" class="cgps-btn cgps-btn-primary" style="font-weight: 700; height: 36px; padding: 6px 16px; white-space: nowrap; border-radius: 6px;">Guardar seleccionados</button>
           </div>
         </div>
 
-        <!-- SEPARADOR VERTICAL 2 -->
-        <div style="width: 2px; background: #0f172a; margin: 0 4px; align-self: stretch; min-height: 60px; opacity: 0.9;"></div>
-
-        <!-- SECCIÓN 3: GESTIÓN MASIVA DE GRUPOS -->
-        <div style="display: flex; flex-direction: column; gap: 6px;">
-          <div style="font-size: 12px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px;">Gestión Masiva de Grupos</div>
+        <!-- SECCIÓN 3: GESTIÓN DE GRUPOS MASIVA -->
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="font-size: 13px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px;">Gestión Masiva de Grupos</div>
           <div style="display: flex; gap: 8px; align-items: center;">
-            <input type="text" id="cgps-group_search" class="cgps-input" placeholder="🔍 Buscar grupo..." style="flex: 1; height: 34px; font-size: 12px; padding: 4px 8px;">
-            <button id="cgps-btn-add-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 34px; font-size: 12px; white-space: nowrap; border-radius: 6px; padding: 4px 10px;">+ Añadir Grupo</button>
-            <button id="cgps-btn-remove-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 34px; font-size: 12px; white-space: nowrap; border-radius: 6px; padding: 4px 10px;">- Quitar Grupo</button>
+            <input type="text" id="cgps-group-search" class="cgps-input" placeholder="🔍 Buscar grupo..." style="flex: 1; height: 36px; font-size: 12px;">
+            <button id="cgps-btn-add-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px; font-size: 12px; white-space: nowrap; border-radius: 6px;">+ Añadir Grupo</button>
+            <button id="cgps-btn-remove-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px; font-size: 12px; white-space: nowrap; border-radius: 6px;">- Quitar Grupo</button>
           </div>
-          <div id="cgps-group_list" style="display: flex; flex-wrap: wrap; gap: 6px; max-height: 100px; overflow-y: auto; min-height: 20px; padding: 4px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;"></div>
+          <div id="cgps-group-list" style="display: flex; flex-wrap: wrap; gap: 6px; max-height: 120px; overflow-y: auto; min-height: 24px; padding: 4px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;"></div>
           <div style="display: flex; gap: 6px; align-items: center;">
-            <input type="text" id="cgps-group_name_input" class="cgps-input" placeholder="ID o nombre del grupo..." style="flex: 1; height: 28px; font-size: 11px; padding: 4px 8px;">
-            <select id="cgps-group_action_select" class="cgps-input" style="flex: 2; height: 28px; font-size: 11px; padding: 4px 8px;">
+            <button id="cgps-btn-add-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 32px; font-size: 11px; padding: 0 10px; border-radius: 6px;">+ Añadir Grupo</button>
+            <button id="cgps-btn-remove-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 32px; font-size: 11px; padding: 0 10px; border-radius: 6px;">- Quitar Grupo</button>
+          </div>
+          <div style="display: flex; gap: 6px; align-items: center;">
+            <input type="text" id="cgps-group-name-input" class="cgps-input" placeholder="ID o nombre del grupo..." style="flex: 1; height: 30px; font-size: 11px;">
+            <select id="cgps-group-action-select" class="cgps-input" style="flex: 2; height: 30px; font-size: 11px;">
               <option value="add">Añadir Grupo</option>
               <option value="remove">Quitar Grupo</option>
             </select>
-            <button id="cgps-btn-apply-groups" type="button" class="cgps-btn cgps-btn-primary" style="height: 30px; font-size: 11px; font-weight: 700; padding: 0 10px; border-radius: 6px;">🔄 Aplicar cambios</button>
+            <button id="cgps-btn-apply-groups" type="button" class="cgps-btn cgps-btn-primary" style="height: 32px; font-size: 11px; font-weight: 700; padding: 0 12px; border-radius: 6px;">🔄 Aplicar cambios</button>
           </div>
-          <div id="cgps-group_status" style="font-size: 11px; font-weight: 600; min-height: 14px;"></div>
+          <div id="cgps-group-status" style="font-size: 11px; font-weight: 600; min-height: 16px;"></div>
         </div>
 
-        <!-- TEXTO SOLICITUD ÁREA LEGAL (tarjeta) -->
-        <div style="margin-top: 12px; padding: 10px 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;">
-          <div style="font-size: 12px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px; margin-bottom: 6px;">TEXTO SOLICITUD ÁREA LEGAL</div>
-          <div style="display: flex; gap: 8px; align-items: center;">
-            <textarea id="cgps-legal_text" class="cgps-textarea" rows="3" style="flex: 1; font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 4px; resize: vertical;"></textarea>
-            <button id="cgps-btn-copy-legal" type="button" class="cgps-btn cgps-btn-secondary" style="padding: 6px 12px; font-size: 12px;">Copiar Texto</button>
+        <!-- SEPARADOR VERTICAL 2 -->
+        <div style="width: 2px; background: #0f172a; margin: 0 4px; align-self: stretch; min-height: 80px; opacity: 0.9;"></div>
+
+        
+        <!-- 
+
+
+
+      </div>
+    </divid="sec-controls-container" class="cgps-card" style="margin-top: 12px; padding: 14px 18px; background: #ffffff;">
+      <div style="display: flex; align-items: stretch; justify-content: space-between; flex-wrap: wrap; gap: 14px; width: 100%;">
+
+        <!-- SECCIÓN 0: BÚSQUEDA MASIVA -->
+        <div id="sec-bulk-container" style="display: none; flex: 1.2; min-width: 320px;">
+          <div style="display: flex; gap: 14px; align-items: stretch;">
+            <div style="flex: 1; min-width: 0;">
+              <div style="font-size: 13px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px; margin-bottom: 8px;">Búsqueda masiva de activos</div>
+              <div style="display: flex; gap: 8px; align-items: flex-start;">
+                <textarea id="cgps-bulk-input-std" class="cgps-textarea" placeholder="Pegue la lista de nombres de activos, placas, VINs o series..." rows="2" style="flex: 1; min-width: 0; font-family: 'JetBrains Mono', monospace; font-size: 12px;"></textarea>
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                  <button id="cgps-btn-bulk-std" type="button" class="cgps-btn cgps-btn-secondary">Filtrar Masivo</button>
+                  <button id="cgps-btn-bulk-clear-std" type="button" class="cgps-btn cgps-btn-outline">Limpiar</button>
+                </div>
+              </div>
+            </div>
+            <div style="width: 2px; background: #0f172a; margin: 0 4px; align-self: stretch; min-height: 80px; opacity: 0.9;"></div>
           </div>
         </div>
-</div> = await callApi(api, 'DecodeVins', { vins: chunk });
+
+        <!-- SECCIÓN 1: BUSCAR VARIABLES -->
+        <div style="display: flex; flex-direction: column; gap: 8px; flex: 1.0; min-width: 280px;">
+          <div style="font-size: 13px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px;">Buscar Variables</div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <select id="cgps-filter-field" class="cgps-input" style="width: 155px; font-weight: 600; color: #0284c7; background-color: #f0f9ff; border-color: #bae6fd; height: 36px;">
+              <option value="all">[ Todos los campos ]</option>
+              <option value="nombreActivo">Nombre del Activo</option>
+              <option value="placa">Placa</option>
+              <option value="vin">VIN</option>
+              <option value="serialNumber"># Serie GPS</option>
+              <option value="razon">Razón Social</option>
+              <option value="ruc">RUC</option>
+              <option value="estadoProvincia">Estado / Provincia</option>
+              <option value="anualidad">Anualidad</option>
+              <option value="tipoVehiculo">Tipo Vehículo</option>
+              <option value="marca" class="opt-valid-only">Marca</option>
+              <option value="modelo" class="opt-valid-only">Modelo</option>
+              <option value="anio" class="opt-valid-only">Año</option>
+              <option value="grupos">Grupos</option>
+            </select>
+            <input type="text" id="cgps-filter" class="cgps-input" placeholder="🔍 Buscar activo..." style="flex: 1; height: 36px;">
+          </div>
+          <div style="display: flex; justify-content: center; padding-right: 2px;">
+            <button id="cgps-sel-none" type="button" class="cgps-btn cgps-btn-outline" style="height: 32px; padding: 4px 18px; font-size: 12px; border-radius: 6px;">Limpiar</button>
+          </div>
+        </div>
+
+        <!-- SEPARADOR VERTICAL 1 -->
+        <div style="width: 2px; background: #0f172a; margin: 0 4px; align-self: stretch; min-height: 80px; opacity: 0.9;"></div>
+
+        <!-- SECCIÓN 2: MODIFICAR VARIABLES -->
+        <div style="display: flex; flex-direction: column; gap: 8px; flex: 1.35; min-width: 330px;">
+          <div style="font-size: 13px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px;">Modificar Variables</div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <button id="cgps-sel-vis" type="button" class="cgps-btn cgps-btn-outline" style="height: 36px; padding: 6px 14px; font-size: 12px; white-space: nowrap; border-radius: 6px;">Seleccionar visibles</button>
+            <select id="cgps-mass-field-select" class="cgps-input" style="flex: 1; font-weight: 600; color: #0f172a; height: 36px;">
+              <option value="razon">Razón Social</option>
+              <option value="ruc">RUC</option>
+              <option value="nombreActivo" class="opt-valid-only">Nombre del Activo</option>
+              <option value="placa" class="opt-valid-only">Placa</option>
+              <option value="estadoProvincia" class="opt-valid-only">Estado / Provincia</option>
+              <option value="anualidad" class="opt-valid-only">Anualidad</option>
+              <option value="tipoVehiculo" class="opt-valid-only">Tipo Vehículo</option>
+              <option value="marca" class="opt-valid-only">Marca</option>
+              <option value="modelo" class="opt-valid-only">Modelo</option>
+              <option value="anio" class="opt-valid-only">Año</option>
+            </select>
+          </div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <input type="text" id="cgps-mass-value-input" class="cgps-input" placeholder="Razón Social..." style="flex: 1; height: 36px;">
+            <button id="cgps-btn-apply-mass-unified" type="button" class="cgps-btn cgps-btn-primary" style="font-weight: 700; height: 36px; padding: 6px 16px; white-space: nowrap; border-radius: 6px;">Guardar seleccionados</button>
+          </div>
+        </div>
+
+        <!-- SECCIÓN 3: GESTIÓN DE GRUPOS MASIVA -->
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="font-size: 13px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px;">Gestión Masiva de Grupos</div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <input type="text" id="cgps-group-search" class="cgps-input" placeholder="🔍 Buscar grupo..." style="flex: 1; height: 36px; font-size: 12px;">
+            <button id="cgps-btn-add-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px; font-size: 12px; white-space: nowrap; border-radius: 6px;">+ Añadir Grupo</button>
+            <button id="cgps-btn-remove-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px; font-size: 12px; white-space: nowrap; border-radius: 6px;">- Quitar Grupo</button>
+          </div>
+          <div id="cgps-group-list" style="display: flex; flex-wrap: wrap; gap: 6px; max-height: 120px; overflow-y: auto; min-height: 24px; padding: 4px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;"></div>
+          <div style="display: flex; gap: 6px; align-items: center;">
+            <button id="cgps-btn-add-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 32px; font-size: 11px; padding: 0 10px; border-radius: 6px;">+ Añadir Grupo</button>
+            <button id="cgps-btn-remove-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 32px; font-size: 11px; padding: 0 10px; border-radius: 6px;">- Quitar Grupo</button>
+          </div>
+          <div style="display: flex; gap: 6px; align-items: center;">
+            <input type="text" id="cgps-group-name-input" class="cgps-input" placeholder="ID o nombre del grupo..." style="flex: 1; height: 30px; font-size: 11px;">
+            <select id="cgps-group-action-select" class="cgps-input" style="flex: 2; height: 30px; font-size: 11px;">
+              <option value="add">Añadir Grupo</option>
+              <option value="remove">Quitar Grupo</option>
+            </select>
+            <button id="cgps-btn-apply-groups" type="button" class="cgps-btn cgps-btn-primary" style="height: 32px; font-size: 11px; font-weight: 700; padding: 0 12px; border-radius: 6px;">🔄 Aplicar cambios</button>
+          </div>
+          <div id="cgps-group-status" style="font-size: 11px; font-weight: 600; min-height: 16px;"></div>
+        </div>
+
+        <!-- SEPARADOR VERTICAL 2 -->
+        <div style="width: 2px; background: #0f172a; margin: 0 4px; align-self: stretch; min-height: 80px; opacity: 0.9;"></div>
+
+        
+        <!-- 
+
+
+
+      </div>
+    </divid="sec-controls-container" class="cgps-card" style="margin-top: 12px; padding: 14px 18px; background: #ffffff;">
+      <div style="display: flex; align-items: stretch; justify-content: space-between; flex-wrap: wrap; gap: 14px; width: 100%;">
+
+        <!-- SECCIÓN 0: BÚSQUEDA MASIVA -->
+        <div id="sec-bulk-container" style="display: none; flex: 1.2; min-width: 320px;">
+          <div style="display: flex; gap: 14px; align-items: stretch;">
+            <div style="flex: 1; min-width: 0;">
+              <div style="font-size: 13px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px; margin-bottom: 8px;">Búsqueda masiva de activos</div>
+              <div style="display: flex; gap: 8px; align-items: flex-start;">
+                <textarea id="cgps-bulk-input-std" class="cgps-textarea" placeholder="Pegue la lista de nombres de activos, placas, VINs o series..." rows="2" style="flex: 1; min-width: 0; font-family: 'JetBrains Mono', monospace; font-size: 12px;"></textarea>
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                  <button id="cgps-btn-bulk-std" type="button" class="cgps-btn cgps-btn-secondary">Filtrar Masivo</button>
+                  <button id="cgps-btn-bulk-clear-std" type="button" class="cgps-btn cgps-btn-outline">Limpiar</button>
+                </div>
+              </div>
+            </div>
+            <div style="width: 2px; background: #0f172a; margin: 0 4px; align-self: stretch; min-height: 80px; opacity: 0.9;"></div>
+          </div>
+        </div>
+
+        <!-- SECCIÓN 1: BUSCAR VARIABLES -->
+        <div style="display: flex; flex-direction: column; gap: 8px; flex: 1.0; min-width: 280px;">
+          <div style="font-size: 13px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px;">Buscar Variables</div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <select id="cgps-filter-field" class="cgps-input" style="width: 155px; font-weight: 600; color: #0284c7; background-color: #f0f9ff; border-color: #bae6fd; height: 36px;">
+              <option value="all">[ Todos los campos ]</option>
+              <option value="nombreActivo">Nombre del Activo</option>
+              <option value="placa">Placa</option>
+              <option value="vin">VIN</option>
+              <option value="serialNumber"># Serie GPS</option>
+              <option value="razon">Razón Social</option>
+              <option value="ruc">RUC</option>
+              <option value="estadoProvincia">Estado / Provincia</option>
+              <option value="anualidad">Anualidad</option>
+              <option value="tipoVehiculo">Tipo Vehículo</option>
+              <option value="marca" class="opt-valid-only">Marca</option>
+              <option value="modelo" class="opt-valid-only">Modelo</option>
+              <option value="anio" class="opt-valid-only">Año</option>
+              <option value="grupos">Grupos</option>
+            </select>
+            <input type="text" id="cgps-filter" class="cgps-input" placeholder="🔍 Buscar activo..." style="flex: 1; height: 36px;">
+          </div>
+          <div style="display: flex; justify-content: center; padding-right: 2px;">
+            <button id="cgps-sel-none" type="button" class="cgps-btn cgps-btn-outline" style="height: 32px; padding: 4px 18px; font-size: 12px; border-radius: 6px;">Limpiar</button>
+          </div>
+        </div>
+
+        <!-- SEPARADOR VERTICAL 1 -->
+        <div style="width: 2px; background: #0f172a; margin: 0 4px; align-self: stretch; min-height: 80px; opacity: 0.9;"></div>
+
+        <!-- SECCIÓN 2: MODIFICAR VARIABLES -->
+        <div style="display: flex; flex-direction: column; gap: 8px; flex: 1.35; min-width: 330px;">
+          <div style="font-size: 13px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px;">Modificar Variables</div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <button id="cgps-sel-vis" type="button" class="cgps-btn cgps-btn-outline" style="height: 36px; padding: 6px 14px; font-size: 12px; white-space: nowrap; border-radius: 6px;">Seleccionar visibles</button>
+            <select id="cgps-mass-field-select" class="cgps-input" style="flex: 1; font-weight: 600; color: #0f172a; height: 36px;">
+              <option value="razon">Razón Social</option>
+              <option value="ruc">RUC</option>
+              <option value="nombreActivo" class="opt-valid-only">Nombre del Activo</option>
+              <option value="placa" class="opt-valid-only">Placa</option>
+              <option value="estadoProvincia" class="opt-valid-only">Estado / Provincia</option>
+              <option value="anualidad" class="opt-valid-only">Anualidad</option>
+              <option value="tipoVehiculo" class="opt-valid-only">Tipo Vehículo</option>
+              <option value="marca" class="opt-valid-only">Marca</option>
+              <option value="modelo" class="opt-valid-only">Modelo</option>
+              <option value="anio" class="opt-valid-only">Año</option>
+            </select>
+          </div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <input type="text" id="cgps-mass-value-input" class="cgps-input" placeholder="Razón Social..." style="flex: 1; height: 36px;">
+            <button id="cgps-btn-apply-mass-unified" type="button" class="cgps-btn cgps-btn-primary" style="font-weight: 700; height: 36px; padding: 6px 16px; white-space: nowrap; border-radius: 6px;">Guardar seleccionados</button>
+          </div>
+        </div>
+
+        <!-- SECCIÓN 3: GESTIÓN DE GRUPOS MASIVA -->
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="font-size: 13px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px;">Gestión Masiva de Grupos</div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <input type="text" id="cgps-group-search" class="cgps-input" placeholder="🔍 Buscar grupo..." style="flex: 1; height: 36px; font-size: 12px;">
+            <button id="cgps-btn-add-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px; font-size: 12px; white-space: nowrap; border-radius: 6px;">+ Añadir Grupo</button>
+            <button id="cgps-btn-remove-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px; font-size: 12px; white-space: nowrap; border-radius: 6px;">- Quitar Grupo</button>
+          </div>
+          <div id="cgps-group-list" style="display: flex; flex-wrap: wrap; gap: 6px; max-height: 120px; overflow-y: auto; min-height: 24px; padding: 4px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;"></div>
+          <div style="display: flex; gap: 6px; align-items: center;">
+            <button id="cgps-btn-add-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 32px; font-size: 11px; padding: 0 10px; border-radius: 6px;">+ Añadir Grupo</button>
+            <button id="cgps-btn-remove-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 32px; font-size: 11px; padding: 0 10px; border-radius: 6px;">- Quitar Grupo</button>
+          </div>
+          <div style="display: flex; gap: 6px; align-items: center;">
+            <input type="text" id="cgps-group-name-input" class="cgps-input" placeholder="ID o nombre del grupo..." style="flex: 1; height: 30px; font-size: 11px;">
+            <select id="cgps-group-action-select" class="cgps-input" style="flex: 2; height: 30px; font-size: 11px;">
+              <option value="add">Añadir Grupo</option>
+              <option value="remove">Quitar Grupo</option>
+            </select>
+            <button id="cgps-btn-apply-groups" type="button" class="cgps-btn cgps-btn-primary" style="height: 32px; font-size: 11px; font-weight: 700; padding: 0 12px; border-radius: 6px;">🔄 Aplicar cambios</button>
+          </div>
+          <div id="cgps-group-status" style="font-size: 11px; font-weight: 600; min-height: 16px;"></div>
+        </div>
+
+        <!-- SEPARADOR VERTICAL 2 -->
+        <div style="width: 2px; background: #0f172a; margin: 0 4px; align-self: stretch; min-height: 80px; opacity: 0.9;"></div>
+
+        
+        <!-- 
+
+
+
+      </div>
+    </divid="sec-controls-container" class="cgps-card" style="margin-top: 12px; padding: 14px 18px; background: #ffffff;">
+      <div style="display: flex; align-items: stretch; justify-content: space-between; flex-wrap: wrap; gap: 14px; width: 100%;">
+
+        <!-- SECCIÓN 0: BÚSQUEDA MASIVA -->
+        <div id="sec-bulk-container" style="display: none; flex: 1.2; min-width: 320px;">
+          <div style="display: flex; gap: 14px; align-items: stretch;">
+            <div style="flex: 1; min-width: 0;">
+              <div style="font-size: 13px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px; margin-bottom: 8px;">Búsqueda masiva de activos</div>
+              <div style="display: flex; gap: 8px; align-items: flex-start;">
+                <textarea id="cgps-bulk-input-std" class="cgps-textarea" placeholder="Pegue la lista de nombres de activos, placas, VINs o series..." rows="2" style="flex: 1; min-width: 0; font-family: 'JetBrains Mono', monospace; font-size: 12px;"></textarea>
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                  <button id="cgps-btn-bulk-std" type="button" class="cgps-btn cgps-btn-secondary">Filtrar Masivo</button>
+                  <button id="cgps-btn-bulk-clear-std" type="button" class="cgps-btn cgps-btn-outline">Limpiar</button>
+                </div>
+              </div>
+            </div>
+            <div style="width: 2px; background: #0f172a; margin: 0 4px; align-self: stretch; min-height: 80px; opacity: 0.9;"></div>
+          </div>
+        </div>
+
+        <!-- SECCIÓN 1: BUSCAR VARIABLES -->
+        <div style="display: flex; flex-direction: column; gap: 8px; flex: 1.0; min-width: 280px;">
+          <div style="font-size: 13px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px;">Buscar Variables</div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <select id="cgps-filter-field" class="cgps-input" style="width: 155px; font-weight: 600; color: #0284c7; background-color: #f0f9ff; border-color: #bae6fd; height: 36px;">
+              <option value="all">[ Todos los campos ]</option>
+              <option value="nombreActivo">Nombre del Activo</option>
+              <option value="placa">Placa</option>
+              <option value="vin">VIN</option>
+              <option value="serialNumber"># Serie GPS</option>
+              <option value="razon">Razón Social</option>
+              <option value="ruc">RUC</option>
+              <option value="estadoProvincia">Estado / Provincia</option>
+              <option value="anualidad">Anualidad</option>
+              <option value="tipoVehiculo">Tipo Vehículo</option>
+              <option value="marca" class="opt-valid-only">Marca</option>
+              <option value="modelo" class="opt-valid-only">Modelo</option>
+              <option value="anio" class="opt-valid-only">Año</option>
+              <option value="grupos">Grupos</option>
+            </select>
+            <input type="text" id="cgps-filter" class="cgps-input" placeholder="🔍 Buscar activo..." style="flex: 1; height: 36px;">
+          </div>
+          <div style="display: flex; justify-content: center; padding-right: 2px;">
+            <button id="cgps-sel-none" type="button" class="cgps-btn cgps-btn-outline" style="height: 32px; padding: 4px 18px; font-size: 12px; border-radius: 6px;">Limpiar</button>
+          </div>
+        </div>
+
+        <!-- SEPARADOR VERTICAL 1 -->
+        <div style="width: 2px; background: #0f172a; margin: 0 4px; align-self: stretch; min-height: 80px; opacity: 0.9;"></div>
+
+        <!-- SECCIÓN 2: MODIFICAR VARIABLES -->
+        <div style="display: flex; flex-direction: column; gap: 8px; flex: 1.35; min-width: 330px;">
+          <div style="font-size: 13px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px;">Modificar Variables</div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <button id="cgps-sel-vis" type="button" class="cgps-btn cgps-btn-outline" style="height: 36px; padding: 6px 14px; font-size: 12px; white-space: nowrap; border-radius: 6px;">Seleccionar visibles</button>
+            <select id="cgps-mass-field-select" class="cgps-input" style="flex: 1; font-weight: 600; color: #0f172a; height: 36px;">
+              <option value="razon">Razón Social</option>
+              <option value="ruc">RUC</option>
+              <option value="nombreActivo" class="opt-valid-only">Nombre del Activo</option>
+              <option value="placa" class="opt-valid-only">Placa</option>
+              <option value="estadoProvincia" class="opt-valid-only">Estado / Provincia</option>
+              <option value="anualidad" class="opt-valid-only">Anualidad</option>
+              <option value="tipoVehiculo" class="opt-valid-only">Tipo Vehículo</option>
+              <option value="marca" class="opt-valid-only">Marca</option>
+              <option value="modelo" class="opt-valid-only">Modelo</option>
+              <option value="anio" class="opt-valid-only">Año</option>
+            </select>
+          </div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <input type="text" id="cgps-mass-value-input" class="cgps-input" placeholder="Razón Social..." style="flex: 1; height: 36px;">
+            <button id="cgps-btn-apply-mass-unified" type="button" class="cgps-btn cgps-btn-primary" style="font-weight: 700; height: 36px; padding: 6px 16px; white-space: nowrap; border-radius: 6px;">Guardar seleccionados</button>
+          </div>
+        </div>
+
+        <!-- SECCIÓN 3: GESTIÓN DE GRUPOS MASIVA -->
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="font-size: 13px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px;">Gestión Masiva de Grupos</div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <input type="text" id="cgps-group-search" class="cgps-input" placeholder="🔍 Buscar grupo..." style="flex: 1; height: 36px; font-size: 12px;">
+            <button id="cgps-btn-add-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px; font-size: 12px; white-space: nowrap; border-radius: 6px;">+ Añadir Grupo</button>
+            <button id="cgps-btn-remove-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px; font-size: 12px; white-space: nowrap; border-radius: 6px;">- Quitar Grupo</button>
+          </div>
+          <div id="cgps-group-list" style="display: flex; flex-wrap: wrap; gap: 6px; max-height: 120px; overflow-y: auto; min-height: 24px; padding: 4px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;"></div>
+          <div style="display: flex; gap: 6px; align-items: center;">
+            <button id="cgps-btn-add-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 32px; font-size: 11px; padding: 0 10px; border-radius: 6px;">+ Añadir Grupo</button>
+            <button id="cgps-btn-remove-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 32px; font-size: 11px; padding: 0 10px; border-radius: 6px;">- Quitar Grupo</button>
+          </div>
+          <div style="display: flex; gap: 6px; align-items: center;">
+            <input type="text" id="cgps-group-name-input" class="cgps-input" placeholder="ID o nombre del grupo..." style="flex: 1; height: 30px; font-size: 11px;">
+            <select id="cgps-group-action-select" class="cgps-input" style="flex: 2; height: 30px; font-size: 11px;">
+              <option value="add">Añadir Grupo</option>
+              <option value="remove">Quitar Grupo</option>
+            </select>
+            <button id="cgps-btn-apply-groups" type="button" class="cgps-btn cgps-btn-primary" style="height: 32px; font-size: 11px; font-weight: 700; padding: 0 12px; border-radius: 6px;">🔄 Aplicar cambios</button>
+          </div>
+          <div id="cgps-group-status" style="font-size: 11px; font-weight: 600; min-height: 16px;"></div>
+        </div>
+
+        <!-- SEPARADOR VERTICAL 2 -->
+        <div style="width: 2px; background: #0f172a; margin: 0 4px; align-self: stretch; min-height: 80px; opacity: 0.9;"></div>
+
+        
+        <!-- 
+
+
+
+      </div>
+    </div>ACCIONES PRINCIPALES -->
+<div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding-bottom: 12px; border-bottom: 1px solid #e2e8f0;">
+  <button id="cgps-btn-inject-params" type="button" class="cgps-btn" style="background: linear-gradient(135deg, #10b981, #059669); color: #ffffff; font-weight: 800; font-size: 13px; padding: 10px 18px; border-radius: 8px; box-shadow: 0 3px 6px -1px rgba(16, 185, 129, 0.35); height: 42px; white-space: nowrap;">Aplicar 5 parametros</button>
+  <button id="cgps-btn-export-excel" type="button" class="cgps-btn cgps-btn-white" style="font-weight:700; height: 42px; white-space: nowrap;">📊 Exportar Excel</button>
+</div>
+
+    <!-- TABLA PROFESIONAL TECH -->
+    <div id="sec-table-container" class="cgps-table-container" style="margin-top: 12px;">
+      <div class="cgps-table-scroll">
+        <table class="cgps-table">
+          <thead id="cgps-table-head"></thead>
+          <tbody id="cgps-listbody">
+            <tr><td colspan="15" style="text-align:center; padding: 24px; color: #64748b;">Cargando activos…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="cgps-msg" class="cgps-msg" style="margin-top: 12px;"></div>
+    <div id="cgps-preview" class="cgps-card" style="display: none; margin-top: 12px;"></div>
+  </div>
+
+</div>
+
+<script>
+(function checkAllowedEnvironment() {
+  // 1. Bloqueo de acceso directo fuera de un iframe (si abren la URL de GitHub Pages directamente)
+  var isIframe = false;
+  try {
+    isIframe = (window.self !== window.top);
+  } catch (e) {
+    isIframe = true;
+  }
+
+  if (!isIframe) {
+    var topLevelHostAllowed = false;
+    try {
+      var selfUrl = new URL(window.location.href);
+      topLevelHostAllowed = selfUrl.protocol === "https:" &&
+                            selfUrl.hostname.toLowerCase() === "user.copiloto.app";
+    } catch (e) {
+      topLevelHostAllowed = false;
+    }
+
+    if (!topLevelHostAllowed) {
+      try { window.stop(); } catch(e){}
+      if (window.console && console.warn) {
+        console.warn("Add-In bloqueado: no está dentro de un iframe.", { href: window.location.href });
+      }
+      document.documentElement.innerHTML = "<!DOCTYPE html><html><head><title>404 Not Found</title></head><body style='font-family:sans-serif; padding:50px;'><h1 style='font-size:24px;'>404 Not Found</h1><p>The requested URL was not found on this server.</p><hr><address style='font-size:12px; color:#666;'>Server at GitHub Pages</address></body></html>";
+      throw new Error("Acceso denegado: este Add-In solo puede ejecutarse dentro de MyGeotab.");
+    }
+  }
+
+  // 2. Validación del dominio ancestro: debe incluir https://user.copiloto.app
+  //    Se revisan TODOS los ancestros (no solo el primero), porque MyGeotab puede
+  //    cargar el Add-In dentro de una cadena de iframes.
+  var isAllowedOrigin = false;
+  try {
+    var origins = window.location.ancestorOrigins || [];
+    var candidateOrigins = [];
+
+    for (var i = 0; i < origins.length; i++) {
+      candidateOrigins.push(String(origins[i] || ""));
+    }
+    if (document.referrer) {
+      candidateOrigins.push(String(document.referrer));
+    }
+
+    for (var j = 0; j < candidateOrigins.length; j++) {
+      try {
+        var parsedOrigin = new URL(candidateOrigins[j]);
+        if (parsedOrigin.protocol === "https:" &&
+            parsedOrigin.hostname.toLowerCase() === "user.copiloto.app") {
+          isAllowedOrigin = true;
+          break;
+        }
+      } catch (parseErr) {}
+    }
+
+    // Si el iframe es same-origin, ancestorOrigins puede venir vacío.
+    // En ese caso se valida directamente el host del padre.
+    if (!isAllowedOrigin) {
+      try {
+        if (window.parent && window.parent !== window && window.parent.location) {
+          var parentUrl = new URL(window.parent.location.href);
+          if (parentUrl.protocol === "https:" &&
+              parentUrl.hostname.toLowerCase() === "user.copiloto.app") {
+            isAllowedOrigin = true;
+          }
+        }
+      } catch (parentErr) {}
+    }
+
+    // Si el Add-In se sirve directamente desde el dominio permitido (sin iframe),
+    // también se acepta.
+    if (!isAllowedOrigin) {
+      try {
+        var ownUrl = new URL(window.location.href);
+        if (ownUrl.protocol === "https:" &&
+            ownUrl.hostname.toLowerCase() === "user.copiloto.app") {
+          isAllowedOrigin = true;
+        }
+      } catch (ownErr) {}
+    }
+  } catch (e) {
+    isAllowedOrigin = false;
+  }
+
+  if (!isAllowedOrigin) {
+    try { window.stop(); } catch(e){}
+    if (window.console && console.warn) {
+      console.warn("Add-In bloqueado por origen no autorizado.", {
+        href: window.location.href,
+        isIframe: window.self !== window.top,
+        ancestorOrigins: window.location.ancestorOrigins ? Array.prototype.slice.call(window.location.ancestorOrigins) : null,
+        referrer: document.referrer
+      });
+    }
+    document.documentElement.innerHTML = "<!DOCTYPE html><html><head><title>404 Not Found</title></head><body style='font-family:sans-serif; padding:50px;'><h1 style='font-size:24px;'>404 Not Found</h1><p>The requested URL was not found on this server.</p><hr><address style='font-size:12px; color:#666;'>Server at GitHub Pages</address></body></html>";
+    throw new Error("Acceso denegado: origen no autorizado.");
+  }
+
+  // 3. Prevenir inspección directa con teclas rápidas o menú contextual
+  document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+  document.addEventListener('keydown', function(e) {
+    if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) || (e.ctrlKey && e.keyCode === 85)) {
+      e.preventDefault();
+      return false;
+    }
+  });
+})();
+
+(function injectStyles() {
+  var css = `
+    * { box-sizing: border-box !important; }
+    html, body {
+      margin: 0 !important;
+      padding: 16px !important;
+      width: 100% !important;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+      background-color: #f8fafc !important;
+      color: #0f172a !important;
+      -webkit-font-smoothing: antialiased;
+    }
+    .cgps-wrapper { width: 100% !important; max-width: 100% !important; margin: 0 auto; }
+    
+    .cgps-hero { 
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important; 
+      color: #ffffff !important; 
+      padding: 16px 24px; 
+      border-radius: 12px; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.1), 0 4px 6px -4px rgba(15, 23, 42, 0.1); 
+      width: 100%; 
+      flex-wrap: wrap; 
+      gap: 12px; 
+      border: 1px solid #334155;
+    }
+    
+    .testn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; width: 100%; margin-top: 12px; }
+    @media (max-width: 900px) { .testn-grid { grid-template-columns: repeat(2, 1fr); } }
+    
+    .testn-card {
+      background: #ffffff !important;
+      border: 1px solid #e2e8f0 !important;
+      border-radius: 12px !important;
+      padding: 24px 20px !important;
+      text-align: left !important;
+      cursor: pointer !important;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: space-between !important;
+      min-height: 140px !important;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
+      position: relative;
+      overflow: hidden;
+    }
+    .testn-card:hover { 
+      border-color: #0284c7 !important; 
+      transform: translateY(-4px) !important; 
+      box-shadow: 0 12px 20px -5px rgba(2, 132, 199, 0.15) !important; 
+    }
+    .testn-card-icon { font-size: 24px; margin-bottom: 12px; }
+    .testn-card h2 { font-size: 15px !important; color: #0f172a !important; font-weight: 700 !important; margin: 0 0 6px 0 !important; text-transform: uppercase !important; letter-spacing: 0.5px; }
+    .testn-card p { font-size: 12px !important; color: #64748b !important; margin: 0 !important; line-height: 1.4 !important; }
+
+    .cgps-btn { padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; white-space: nowrap; transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+    .cgps-btn:disabled { opacity: 0.5; cursor: not-allowed !important; }
+    .cgps-btn-primary { background: linear-gradient(135deg, #0284c7, #0369a1) !important; color: #ffffff !important; box-shadow: 0 2px 4px rgba(2, 132, 199, 0.2); }
+    .cgps-btn-primary:hover { background: linear-gradient(135deg, #0369a1, #075985) !important; }
+    .cgps-btn-white { background-color: #ffffff !important; color: #0f172a !important; border: 1px solid #e2e8f0; }
+    .cgps-btn-white:hover { background-color: #f8fafc !important; border-color: #cbd5e1; }
+    .cgps-btn-secondary { background-color: #334155 !important; color: #ffffff !important; }
+    .cgps-btn-secondary:hover { background-color: #1e293b !important; }
+    .cgps-btn-outline { background-color: transparent; color: #475569; border: 1px solid #cbd5e1; }
+    .cgps-btn-outline:hover { background-color: #f1f5f9; color: #0f172a; }
+    
+    .cgps-kpi-grid { 
+      display: grid; 
+      grid-template-columns: repeat(10, 1fr); 
+      gap: 10px; 
+      width: 100%; 
+    }
+    @media (max-width: 1400px) {
+      .cgps-kpi-grid { grid-template-columns: repeat(5, 1fr); }
+    }
+    @media (max-width: 768px) {
+      .cgps-kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .cgps-card { background: #ffffff !important; border-radius: 12px; padding: 12px 14px; border: 1px solid #e2e8f0; width: 100%; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
+    .kpi-btn-card { cursor: pointer !important; transition: all 0.2s !important; user-select: none; text-align: left; }
+    .kpi-btn-card:hover { border-color: #38bdf8 !important; background-color: #f0f9ff !important; }
+    .kpi-btn-card.kpi-active { border: 2px solid #0284c7 !important; background-color: #f0f9ff !important; box-shadow: 0 4px 6px -1px rgba(2, 132, 199, 0.1) !important; }
+    
+    .cgps-kpi-title { font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cgps-kpi-value { font-size: 20px; font-weight: 800; color: #0f172a; line-height: 1; letter-spacing: -0.5px; }
+    
+    .certi-two-cols-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; }
+
+    .cgps-controls-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; width: 100%; }
+    .cgps-input, .cgps-textarea { padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12px; outline: none; background-color: #ffffff; transition: border 0.2s, box-shadow 0.2s; font-family: inherit; }
+    .cgps-input:focus, .cgps-textarea:focus { border-color: #0284c7 !important; box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15) !important; }
+    .cgps-input:disabled { background-color: #f1f5f9 !important; cursor: not-allowed !important; color: #94a3b8 !important; }
+    
+    .cgps-table-container { background-color: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; width: 100%; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+    .cgps-table-scroll { max-height: 480px; overflow-x: auto !important; overflow-y: auto !important; width: 100%; -webkit-overflow-scrolling: touch; }
+    .cgps-table-scroll::-webkit-scrollbar { height: 8px; width: 8px; }
+    .cgps-table-scroll::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+    .cgps-table-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .cgps-table-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    
+    .cgps-table { width: 100%; border-collapse: collapse; font-size: 12px; table-layout: auto; }
+    .cgps-table th { background-color: #f8fafc; color: #475569; font-weight: 700; text-align: left; padding: 10px 14px; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 2; white-space: nowrap; text-transform: uppercase; font-size: 10px; letter-spacing: 0.5px; }
+    .cgps-table td { padding: 10px 14px; border-bottom: 1px solid #f1f5f9; color: #1e293b; white-space: nowrap; }
+    .cgps-table tbody tr:hover { background-color: #f8fafc; }
+
+    #sec-table-container .cgps-table { width: max-content; min-width: 100%; }
+    #sec-table-container .cgps-table th,
+    #sec-table-container .cgps-table td { overflow: visible; text-overflow: clip; white-space: nowrap; }
+    #sec-table-container .cgps-table td.cgps-cell-groups { white-space: normal !important; }
+
+    /* Modo compacto para Validación de Variables: columnas más angostas y texto ajustado */
+    #sec-table-container.valid-mode .cgps-table { width: 100% !important; min-width: 100% !important; table-layout: auto !important; }
+    #sec-table-container.valid-mode .cgps-table th,
+    #sec-table-container.valid-mode .cgps-table td { overflow: visible; text-overflow: clip; white-space: normal !important; padding: 7px 8px; font-size: 11px; line-height: 1.35; word-break: break-word; }
+    #sec-table-container.valid-mode .cgps-table th { font-size: 9.5px; }
+    #sec-table-container.valid-mode .cgps-table td.cgps-cell-groups { min-width: 200px !important; max-width: 260px !important; width: 220px !important; }
+    #sec-table-container.valid-mode .cgps-table .btn-edit-device-groups { margin-top: 4px; }
+    .cgps-msg { min-height: 20px; font-size: 12px; font-weight: 600; color: #10b981; }
+    .cgps-msg.cgps-err { color: #ef4444; }
+
+    .badge-param { padding: 4px 8px; border-radius: 6px; font-weight: 700; font-size: 10px; display: inline-block; letter-spacing: 0.3px; }
+    .badge-full { background-color: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+    .badge-partial { background-color: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+    .badge-empty { background-color: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+
+    .badge-audit-ok { background-color: #dcfce7; color: #15803d; padding: 4px 8px; border-radius: 6px; font-weight: 700; border: 1px solid #86efac; display: inline-block; }
+    .badge-audit-warn { background-color: #fee2e2; color: #b91c1c; padding: 4px 8px; border-radius: 6px; font-weight: 700; border: 1px solid #fca5a5; display: inline-block; }
+
+    .cgps-spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid #cbd5e1;
+      border-top-color: #0284c7;
+      border-radius: 50%;
+      animation: cgps-spin 0.8s linear infinite;
+    }
+    @keyframes cgps-spin {
+      to { transform: rotate(360deg); }
+    }
+  `;
+  var styleElem = document.createElement('style');
+  styleElem.type = 'text/css';
+  styleElem.appendChild(document.createTextNode(css));
+  document.head.appendChild(styleElem);
+})();
+
+var addInConstructor = function (geotabApi, state, callback) {
+  'use strict';
+  var api = geotabApi;
+
+  // Credencial de acceso protegida con hash SHA-256 (Ocultación en GitHub y cliente)
+  // Usuario autorizado de forma exclusiva: ejecutivo.cuentas13@navisaf.pe
+  var PASS_HASH = "0cd6130567f2d3268e05a7a640af1609b34960ad852804e724aa58f7e2ef34e9";
+
+  async function sha256Hex(msg) {
+    if (window.crypto && window.crypto.subtle) {
+      var buf = new TextEncoder().encode(msg);
+      var hash = await crypto.subtle.digest('SHA-256', buf);
+      return Array.from(new Uint8Array(hash)).map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
+    }
+    return msg;
+  }
+
+  var REQUIRED_PARAMS = [
+    { description: "Enable Gps Altitude Logging", offset: 181, bytes: "CA==" },
+    { description: "Disable Accelerometer Record Limit", offset: 65, bytes: "Ag==" },
+    { description: "High Res RPM allowed Error = 2 rpm", offset: 168, bytes: "Ag==" },
+    { description: "Enable Engine Load", offset: 165, bytes: "BA==" },
+    { description: "Enable Engine Retarder Selection And Accel Pedal", offset: 166, bytes: "CQ==" }
+  ];
+
+  var DEVICE_FIELDS = ['id', 'name', 'licensePlate', 'licenseState', 'vehicleIdentificationNumber', 'serialNumber', 'activeFrom', 'activeTo', 'deviceType', 'groups', 'customProperties', 'customParameters', 'comment', 'make', 'model', 'year'];
+
+  var all = [], groupsById = {}, statusById = {}, selected = {}, rawDevices = [];
+  var decodedVinCache = {}; 
+  var filteredAllowedGroupsList = []; 
+  var rawSchedules = [], templateNamesById = {};
+  var usersById = {}, rulesById = {}, diagById = {}, currentReportRows = [];
+  var loadedCatalogItems = []; 
+  var sourceGroupSchedules = [];
+  var REPORT_LINK_HASH = '#customReportSchedule,id:';
+  var activeBulkTokens = [];
+  var activeModule = 'hub';
+  
+  var activeUnitFilter = 'all'; 
+  var activeParamFilter = 'all';
+  var activeFieldMissingFilter = 'all'; 
+  var activeVehicleTypeFilter = 'all'; 
+  var activeAssignmentFilter = 'all';
+
+  var activeDateRange = null;
+  var databaseName = "divemotor";
+
+  var currentSelectedReportObj = null;
+  var fetchedSubGroups = [];
+  var pendingSaveAction = null;
+  var currentGroupEditDeviceId = null;
+  var pendingGroupChangeTargetId = null;
+
+  var $ = function (id) { return document.getElementById(id); };
+
+  // INICIALIZACIÓN DE EVENTOS DEL LOGIN
+  function setupLoginListeners() {
+    var btnLogin = $('testn-btn-login');
+    var inputPass = $('testn-pass-input');
+
+    if (btnLogin) {
+      btnLogin.onclick = async function() {
+        var val = (inputPass ? inputPass.value : '').trim();
+        if (!val) {
+          $('testn-login-err').textContent = "Ingrese su credencial de seguridad";
+          return;
+        }
+        var h = await sha256Hex(val);
+        if (h === PASS_HASH) {
+          $('testn-login-overlay').style.display = 'none';
+          $('cgps-root').style.display = 'block';
+          $('testn-login-err').textContent = "";
+        } else {
+          $('testn-login-err').textContent = "Contraseña incorrecta";
+        }
+      };
+    }
+
+    if (inputPass) {
+      inputPass.onkeypress = function(e) {
+        if (e.key === 'Enter') {
+          if (btnLogin) btnLogin.click();
+        }
+      };
+    }
+  }
+
+  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+  function fmtDate(iso) {
+    if (!iso) return '';
+    var d = new Date(iso);
+    if (isNaN(d.getTime()) || d.getFullYear() > 2040) return '';
+    return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + pad(d.getFullYear());
+  }
+
+  function fmtDateTime(iso) {
+      if (!iso) return 'No registrada';
+      var d = new Date(iso);
+      if (isNaN(d.getTime())) return 'No registrada';
+      return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear() + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+    }
+
+    // --- Base de datos: IDs de grupos configurables ---
+    function getGroupIds() {
+      var db = databaseName || 'divemotor';
+      var ids = {
+        CLIENTES: 'b278A',
+        'TIPO DE MOTOR': 'b27A8'
+      };
+      if (db === 'divemotor_buses') {
+        ids.CLIENTES = 'b2795';
+        ids['TIPO DE MOTOR'] = 'b2796';
+      }
+      return ids;
+    }
+
+  function htmlEsc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }).replace(/'/g, '&#39;'); }
+
+  function normalizeStr(str) {
+    if (!str) return '';
+    return String(str)
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function getGroupsUnderParent(parentId) {
+    if (!parentId) return [];
+
+    var rootGroup = groupsById[parentId];
+    var rootIds = new Set();
+
+    if (rootGroup) {
+      rootIds.add(rootGroup.id);
+    }
+
+    Object.keys(groupsById).forEach(function(gid) {
+      var g = groupsById[gid];
+      if (!g || !g.name) return;
+      var nameUpper = g.name.toUpperCase().trim();
+      if ((parentId === 'b278A' && nameUpper === 'CLIENTES') || 
+          (parentId === 'b27A7' && nameUpper === 'TIPO DE MOTOR')) {
+        rootIds.add(g.id);
+      }
+    });
+
+    var subGroupsMap = {};
+
+    function collectChildren(group) {
+      if (!group) return;
+      if (group.children && Array.isArray(group.children)) {
+        group.children.forEach(function(child) {
+          var fullChild = groupsById[child.id] || child;
+          if (fullChild && fullChild.id && !rootIds.has(fullChild.id) && !/^Group/.test(fullChild.id)) {
+            subGroupsMap[fullChild.id] = fullChild;
+          }
+          collectChildren(fullChild);
+        });
+      }
+    }
+
+    rootIds.forEach(function(rId) {
+      if (groupsById[rId]) {
+        collectChildren(groupsById[rId]);
+      }
+    });
+
+    Object.keys(groupsById).forEach(function(gid) {
+      var g = groupsById[gid];
+      if (!g || !g.name || /^Group/.test(g.id) || rootIds.has(g.id)) return;
+
+      var current = g;
+      var visited = new Set();
+      var isChildOfRoot = false;
+
+      while (current && current.id && !visited.has(current.id)) {
+        visited.add(current.id);
+        var pId = current.parent ? (typeof current.parent === 'string' ? current.parent : current.parent.id) : null;
+        
+        if (pId && rootIds.has(pId)) {
+          isChildOfRoot = true;
+          break;
+        }
+        current = pId ? groupsById[pId] : null;
+      }
+
+      if (isChildOfRoot) {
+        subGroupsMap[g.id] = g;
+      }
+    });
+
+    var result = Object.keys(subGroupsMap).map(function(id) {
+      return subGroupsMap[id];
+    });
+
+    result.sort(function(a, b) { 
+      return (a.name || '').localeCompare(b.name || '', 'es'); 
+    });
+
+    return result;
+  }
+
+  function cacheAllowedGroups() {
+    filteredAllowedGroupsList = getGroupsUnderParent('b278A').concat(getGroupsUnderParent('b27A7'));
+  }
+
+  function extractCustomPropertiesMap(d) {
+    var map = {};
+    var customList = d.customProperties || [];
+    for (var i = 0; i < customList.length; i++) {
+      var item = customList[i];
+      if (item && item.property && item.property.name) {
+        var pName = String(item.property.name).trim();
+        var val = item.value != null ? String(item.value).trim() : '';
+        map[pName] = val;
+      }
+    }
+    return map;
+  }
+
+  function getCustomValue(map, regex) {
+    var keys = Object.keys(map);
+    for (var i = 0; i < keys.length; i++) {
+      if (regex.test(keys[i])) {
+        return map[keys[i]];
+      }
+    }
+    return '';
+  }
+
+  function evalDeviceParameters(d) {
+    var customList = Array.isArray(d.customParameters) ? d.customParameters : [];
+    var byOffset = {};
+    customList.forEach(function (cp) {
+      if (cp && cp.isEnabled !== false) byOffset[Number(cp.offset)] = String(cp.bytes || cp.bytesBase64 || cp.value || '');
+    });
+    var count = 0, missing = [];
+    REQUIRED_PARAMS.forEach(function (p) {
+      if (byOffset[p.offset] === p.bytes) count++; else missing.push(p);
+    });
+    return { count: count, missing: missing, total: REQUIRED_PARAMS.length };
+  }
+
+  function isDeviceArchived(d) {
+    if (!d.activeTo) return false;
+    var activeToDate = new Date(d.activeTo);
+    if (isNaN(activeToDate.getTime())) return false;
+    return activeToDate.getFullYear() < 2050 && activeToDate.getTime() < Date.now();
+  }
+
+  function isSinSeguimientoDevice(d) {
+    if (!d.serialNumber || !d.serialNumber.trim()) return true;
+    if (!statusById[d.id]) return true;
+
+    var name = normalizeStr(d.name);
+    var comment = normalizeStr(d.comment);
+    var groupsStr = normalizeStr(getGroupsList(d));
+
+    if (name.indexOf('sin seguimiento') >= 0 || 
+        comment.indexOf('sin seguimiento') >= 0 || 
+        groupsStr.indexOf('sin seguimiento') >= 0) {
+      return true;
+    }
+
+    var cpMap = extractCustomPropertiesMap(d);
+    var keys = Object.keys(cpMap);
+    for (var i = 0; i < keys.length; i++) {
+      var val = normalizeStr(cpMap[keys[i]]);
+      var propKey = normalizeStr(keys[i]);
+      if (val.indexOf('sin seguimiento') >= 0 || propKey.indexOf('sin seguimiento') >= 0) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  function isExcludedDevice(d) {
+    return isDeviceArchived(d) || isSinSeguimientoDevice(d);
+  }
+
+  function getGroupsList(d) {
+    var gs = d.groups || [];
+    var names = [];
+    for (var i = 0; i < gs.length; i++) { 
+      var g = groupsById[gs[i].id]; 
+      if (g && g.name && !/^Group/.test(g.id)) names.push(g.name.trim()); 
+    }
+    return names.join(', ');
+  }
+
+  /**
+   * Decodifica VINs usando el endpoint oficial DecodeVins de Geotab API
+   */
+  async function decodeVinsForDevices(vinList) {
+    if (!vinList || vinList.length === 0) return {};
+
+    var cleanVins = vinList.map(function(v) { return (v || '').trim().toUpperCase(); }).filter(function(v) { return v.length >= 11; });
+
+    var uniqueVins = Array.from(new Set(cleanVins)).filter(function(v) { return !decodedVinCache[v]; });
+
+    if (uniqueVins.length === 0) return decodedVinCache;
+
+    setMsg("Decodificando " + uniqueVins.length + " VINs mediante la API DecodeVins...");
+
+    for (var i = 0; i < uniqueVins.length; i += 50) {
+      var chunk = uniqueVins.slice(i, i + 50);
+
+      try {
+        var res = await callApi(api, 'DecodeVins', { vins: chunk });
         
         if (Array.isArray(res)) {
           res.forEach(function(item) {
@@ -3420,181 +4332,166 @@ ENTRADAS
     var fechaStr = fmtDate(new Date().toISOString()).replace(/\//g, '-');
 
     var docContent = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">';
-    docContent += '<head><meta charset="utf-8">
-<style>
-  /* ============ GLOBAL STYLES ============ */
-  body {
-    font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
-    font-size: 13px;
-    color: #0f172a;
-    background: #f8fafc;
-    margin: 0;
-    padding: 0;
-    -webkit-font-smoothing: antialiased;
-  }
-  
-  /* ============ BUTTON STYLES ============ */
-  .cgps-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
-    font-weight: 600;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    text-decoration: none;
-    line-height: 1;
-  }
-  
-  .cgps-btn:active {
-    transform: translateY(1px);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
-  }
-  
-  /* Primary buttons - green accent */
-  .cgps-btn-primary {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    color: #ffffff !important;
-    padding: 10px 18px;
-    font-size: 13px;
-    box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.35);
-  }
-  
-  .cgps-btn-primary:hover {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    box-shadow: 0 6px 8px -2px rgba(16, 185, 129, 0.45);
-    transform: translateY(-1px);
-  }
-  
-  .cgps-btn-primary:disabled {
-    background: #9ca3af !important;
-    cursor: not-allowed;
-    box-shadow: none;
-  }
-  
-  /* Secondary buttons - outline style */
-  .cgps-btn-secondary {
-    background: #ffffff !important;
-    color: #0f172a !important;
-    border: 1px solid #d1d5db !important;
-    padding: 8px 14px;
-    font-size: 12px;
-  }
-  
-  .cgps-btn-secondary:hover {
-    background: #f3f4f6 !important;
-    border-color: #9ca3af;
-  }
-  
-  /* White buttons */
-  .cgps-btn-white {
-    background: #ffffff !important;
-    color: #0f172a !important;
-    border: 1px solid #d1d5db !important;
-    padding: 10px 18px;
-    font-size: 13px;
-  }
-  
-  .cgps-btn-white:hover {
-    background: #f9fafb !important;
-    border-color: #9ca3af;
-  }
-  
-  /* Outline buttons */
-  .cgps-btn-outline {
-    background: #ffffff !important;
-    color: #0f172a !important;
-    border: 1px solid #d1d5db !important;
-    padding: 8px 14px;
-    font-size: 12px;
-  }
-  
-  .cgps-btn-outline:hover {
-    background: #f3f4f6 !important;
-  }
-  
-  /* ============ INPUT STYLES ============ */
-  .cgps-input {
-    width: 100%;
-    padding: 10px 14px;
-    font-size: 13px;
-    font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
-    border: 1.5px solid #e2e8f0;
-    border-radius: 8px;
-    background: #ffffff;
-    color: #0f172a;
-    transition: border-color 0.2s, box-shadow 0.2s;
-  }
-  
-  .cgps-input:focus {
-    outline: none;
-    border-color: #0ea5e9;
-    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
-  }
-  
-  .cgps-textarea {
-    width: 100%;
-    padding: 10px 14px;
-    font-size: 13px;
-    font-family: 'JetBrains Mono', 'Courier New', monospace;
-    border: 1.5px solid #e2e8f0;
-    border-radius: 8px;
-    background: #ffffff;
-    color: #0f172a;
-    min-height: 60px;
-    resize: vertical;
-    transition: border-color 0.2s, box-shadow 0.2s;
-  }
-  
-  .cgps-textarea:focus {
-    outline: none;
-    border-color: #0ea5e9;
-    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
-  }
-  
-  /* ============ CARD STYLES ============ */
-  .cgps-card {
-    background: #ffffff;
-    border-radius: 12px;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-  }
-  
-  /* ============ MESSAGE STYLES ============ */
-  .cgps-message {
-    padding: 10px 14px;
-    border-radius: 8px;
-    font-size: 12px;
-    font-weight: 500;
-    display: none;
-  }
-  
-  .cgps-message-success {
-    background: #dcfce7;
-    color: #166534;
-    border: 1px solid #bbf7d0;
-    display: block;
-  }
-  
-  .cgps-message-error {
-    background: #fef2f2;
-    color: #991b1b;
-    border: 1px solid #fecaca;
-    display: block;
-  }
-  
-  /* ============ RESPONSIVE ============ */
-  @media (max-width: 768px) {
-    .cgps-btn {
-      width: 100%;
-      justify-content: center;
-    }
-  }
-</style><style>';
-    docContent += 'body { font-family: Arial, sans-serif; font-size: 11pt; }';
+    docContent += '<head><meta charset="utf-8">' + '\n' + '<style>' + '\n' + '' + '\n' + '<style>\n' + '\n' + '  /* ============ GLOBAL STYLES ============ */' + '\n' + '  body {' + '\n' +
+    "    font-family: 'Inter', 'Segoe UI', Arial, sans-serif;" + '\n' +
+    "    font-size: 13px;" + '\n' +
+    "    color: #0f172a;" + '\n' +
+    "    background: #f8fafc;" + '\n' +
+    "    margin: 0;" + '\n' +
+    "    padding: 0;" + '\n' +
+    "    -webkit-font-smoothing: antialiased;" + '\n' +
+    "  }" + '\n' +
+    "  " + '\n' +
+    "  /* ============ BUTTON STYLES ============ */" + '\n' +
+    "  .cgps-btn {" + '\n' +
+    "    display: inline-flex;" + '\n' +
+    "    align-items: center;" + '\n' +
+    "    justify-content: center;" + '\n' +
+    "    gap: 6px;" + '\n' +
+    "    font-family: 'Inter', 'Segoe UI', Arial, sans-serif;" + '\n' +
+    "  /* ============ BUTTON STYLES ============ */" + '\n' +
+    "  .cgps-btn:active {" + '\n' +
+    "    transform: translateY(1px);" + '\n' +
+    "    box-shadow: 0 2px 4px rgba(0,0,0,0.15);" + '\n' +
+    "  }" + '\n' +
+    "  " + '\n' +
+    "  /* Primary buttons - green accent */" + '\n' +
+    "  .cgps-btn-primary {" + '\n' +
+    "    background: linear-gradient(135deg, #10b981 0%, #059669 100%);" + '\n' +
+    "    color: #ffffff !important;" + '\n' +
+    "    padding: 10px 18px;" + '\n' +
+    "    font-size: 13px;" + '\n' +
+    "    box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.35);" + '\n' +
+    "  }" + '\n' +
+    "  " + '\n' +
+    "  .cgps-btn-primary:hover {" + '\n' +
+    "    background: linear-gradient(135deg, #10b981 0%, #059669 100%);" + '\n' +
+    "    box-shadow: 0 6px 8px -2px rgba(16, 185, 129, 0.45);" + '\n' +
+    "    transform: translateY(-1px);" + '\n' +
+    "  }" + '\n' +
+    "  " + '\n' +
+    "  .cgps-btn-primary:disabled {" + '\n' +
+    "    background: #9ca3af !important;" + '\n' +
+    "    cursor: not-allowed;" + '\n' +
+    "    box-shadow: none;" + '\n' +
+    "  }" + '\n' +
+    "  " + '\n' +
+    "  /* Secondary buttons - outline style */" + '\n' +
+    "  .cgps-btn-secondary {" + '\n' +
+    "    background: #ffffff !important;" + '\n' +
+    "    color: #0f172a !important;" + '\n' +
+    "    border: 1px solid #d1d5db !important;" + '\n' +
+    "    padding: 8px 14px;" + '\n' +
+    "    font-size: 12px;" + '\n' +
+    "  }" + '\n' +
+    "  " + '\n' +
+    "  .cgps-btn-secondary:hover {" + '\n' +
+    "    background: #f3f4f6 !important;" + '\n' +
+    "    border-color: #9ca3af;" + '\n' +
+    "  }" + '\n' +
+    "  " + '\n' +
+    "  /* White buttons */" + '\n' +
+    "  .cgps-btn-white {" + '\n' +
+    "    background: #ffffff !important;" + '\n' +
+    "    color: #0f172a !important;" + '\n' +
+    "    border: 1px solid #d1d5db !important;" + '\n' +
+    "    padding: 10px 18px;" + '\n' +
+    "    font-size: 13px;" + '\n' +
+    "  }" + '\n' +
+    "  " + '\n' +
+    "  .cgps-btn-white:hover {" + '\n' +
+    "    background: #f9fafb !important;" + '\n' +
+    "    border-color: #9ca3af;" + '\n' +
+    "  }" + '\n' +
+    "  }" + '\n' +
+    "  " + '\n' +
+    "  /* Outline buttons */" + '\n' +
+    "  .cgps-btn-outline {" + '\n' +
+    "    background: #ffffff !important;" + '\n' +
+    "    color: #0f172a !important;" + '\n' +
+    "    border: 1px solid #d1d5db !important;" + '\n' +
+    "    padding: 8px 14px;" + '\n' +
+    "    font-size: 12px;" + '\n' +
+    "  }" + '\n' +
+    "  " + '\n' +
+    "  .cgps-btn-outline:hover {" + '\n' +
+    "    background: #f3f4f6 !important;" + '\n' +
+    "  }" + '\n' +
+    "  " + '\n' +
+    "  /* ============ INPUT STYLES ============ */" + '\n' +
+    "  .cgps-input {" + '\n' +
+    "    width: 100%;" + '\n' +
+    "    padding: 10px 14px;" + '\n' +
+    "    border-color: #0ea5e9;" + '\n' +
+    "    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);" + '\n' +
+    "  }" + '\n' +
+    "  " + '\n' +
+    "  .cgps-textarea {" + '\n' +
+    "    width: 100%;" + '\n' +
+    "    padding: 10px 14px;" + '\n' +
+    "    font-size: 13px;" + '\n' +
+    "    font-family: 'JetBrains Mono', 'Courier New', monospace;" + '\n' +
+    "    border: 1.5px solid #e2e8f0;" + '\n' +
+    "    border-radius: 8px;" + '\n' +
+    "    background: #ffffff;" + '\n' +
+    "    color: #0f172a;" + '\n' +
+    "    min-height: 60px;" + '\n' +
+    "    resize: vertical;" + '\n' +
+    "    transition: border-color 0.2s, box-shadow 0.2s;" + '\n' +
+    "  }" + '\n' +
+    "  " + '\n' +
+    "  .cgps-textarea:focus {" + '\n' +
+    "    outline: none;" + '\n' +
+    "    border-color: #0ea5e9;" + '\n' +
+    "    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);" + '\n' +
+    "  }" + '\n' +
+    "  " + '\n' +
+    "  /* ============ CARD STYLES ============ */" + '\n' +
+    "  .cgps-card {" + '\n' +
+    "    background: #ffffff;" + '\n' +
+    "    border-radius: 12px;" + '\n' +
+    "    border: 1px solid #e2e8f0;" + '\n' +
+    "    box-shadow: 0 1px 3px rgba(0,0,0,0.05);" + '\n' +
+    "  }" + '\n' +
+    "  " + '\n' +
+    "  /* ============ MESSAGE STYLES ============ */" + '\n' +
+    "  .cgps-message {" + '\n' +
+    "    padding: 10px 14px;" + '\n' +
+    "    border-radius: 8px;" + '\n' +
+    "    font-size: 12px;" + '\n' +
+    "    font-weight: 500;" + '\n' +
+    "    display: none;" + '\n' +
+    "  }" + '\n' +
+    "  " + '\n' +
+    "  .cgps-message-success {" + '\n' +
+    "    background: #dcfce7;" + '\n' +
+    "    color: #166534;" + '\n' +
+    "    border: 1px solid #bbf7d0;" + '\n' +
+    "    display: block;" + '\n' +
+    "  }" + '\n' +
+    "  " + '\n' +
+    "  .cgps-message-error {" + '\n' +
+    "    background: #fef2f2;" + '\n' +
+    "    color: #991b1b;" + '\n' +
+    "    border: 1px solid #fecaca;" + '\n' +
+    "    display: block;" + '\n' +
+    "    background: #fef2f2;" + '\n' +
+    "    color: #991b1b;" + '\n' +
+    "    border: 1px solid #fecaca;" + '\n' +
+    "    display: block;" + '\n' +
+    "    display: block;" + '\n' +
+    "  }" + '\n' +
+    "  " + '\n' +
+    "  /* ============ RESPONSIVE ============ */" + '\n' +
+    "  @media (max-width: 768px) {" + '\n' +
+    "    .cgps-btn {" + '\n' +
+    "      width: 100%;" + '\n' +
+    "      justify-content: center;" + '\n' +
+    "    }" + '\n' +
+    "  }" + '\n' +
+    "  }" + '\n' +
+    "  " + '\n' +
+    "</style><style>';" + '\n' +
     docContent += '.title { font-weight: bold; font-size: 12pt; text-align: center; margin-bottom: 12px; }';
     docContent += 'table { border-collapse: collapse; width: 100%; margin: 0 auto; }';
     docContent += 'th, td { border: 1px solid #000000; padding: 6px 8px; text-align: center; font-size: 10.5pt; }';
@@ -5122,104 +6019,8 @@ ENTRADAS
     },
     blur: function (geotabApi, state) {}
   };
-
-  /**
-   * Configura los escuchadores de eventos para el login
-   * Este método debe existir siempre que el login esté habilitado
-   */
-  function setupLoginListeners() {
-    var loginBtn = document.getElementById('testn-btn-login');
-    var passInput = document.getElementById('testn-pass-input');
-    var loginErr = document.getElementById('testn-login-err');
-    
-    if (!loginBtn) return;
-    
-    loginBtn.addEventListener('click', function() {
-      var password = passInput.value;
-      
-      if (!password) {
-        if (loginErr) loginErr.textContent = 'Por favor ingrese su contraseña.';
-        return;
-      }
-      
-      // Validar contra PASS_HASH (hash SHA-256 de la contraseña)
-      // NOTE: PASAR_HASH se define en la configuración del archivo
-      // Si no está definido, el login se habilita sin validación (modo desarrollo)
-      if (typeof PASS_HASH !== 'undefined' && PASS_HASH !== null && PASS_HASH !== '') {
-        // Calcular SHA-256 de la contraseña ingresada
-        // (En un entorno real se usaría crypto.subtle, aquí simplificamos)
-        var isCorrect = validatePasswordHash(password, PASS_HASH);
-        if (!isCorrect) {
-          if (loginErr) loginErr.textContent = 'Contraseña incorrecta. Intente nuevamente.';
-          return;
-        }
-      }
-      
-      // Login correcto - habilitar la aplicación
-      var loginOverlay = document.getElementById('testn-login-overlay');
-      if (loginOverlay) {
-        loginOverlay.style.display = 'none';
-      }
-      
-      // Llamar a la función de carga original
-      if (typeof load === 'function') {
-        load();
-      } else {
-        setMsg('Login exitoso. Inicializando módulo...');
-      }
-    });
-    
-    if (passInput) {
-      passInput.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') {
-          loginBtn.click();
-        }
-      });
-    }
-  }
-  
-  /**
-   * Valida el hash de la contraseña
-   * @param {string} password - Contraseña en texto plano
-   * @param {string} expectedHash - Hash SHA-256 esperado
-   * @returns {boolean} - true si coincide
-   */
-  function validatePasswordHash(password, expectedHash) {
-    if (typeof crypto !== 'undefined' && crypto.subtle && password) {
-      var encoder = new TextEncoder();
-      var data = encoder.encode(password);
-      return crypto.subtle.digest('SHA-256', data).then(function(hashBuffer) {
-        var hashArray = Array.from(new Uint8Array(hashBuffer));
-        var hashHex = hashArray.map(function(b) {
-          return b.toString(16).padStart(2, '0');
-        }).join('');
-        return hashHex === expectedHash;
-      }).catch(function() {
-        // Fallback: comparación simple si no hay crypto
-        return HashSHA256(password) === expectedHash;
-      });
-    }
-    // Fallback sin crypto
-    return HashSHA256(password) === expectedHash;
-  }
-  
-  /**
-   * SHA-256 simplificado (solo para entornos sin crypto.subtle)
-   * NOTA: En un entorno real, se debería usar la librería crypto adecuada
-   */
-  function HashSHA256(str) {
-    if (typeof sha256 === 'function') {
-      return sha256(str);
-    }
-    // Fallback: retornar el hash esperado (modo desarrollo)
-    return '';
-  }
-
-
 };
 
-<script>
-<script>
 window.geotab = window.geotab || {};
 window.geotab.addin = window.geotab.addin || {};
 
@@ -5242,8 +6043,6 @@ window.geotab.addin = window.geotab.addin || {};
   } catch (e) {}
 })();
 setupLoginListeners();
-
-</script>
 </script>
 </body>
 </html>
