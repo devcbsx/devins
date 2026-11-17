@@ -914,6 +914,7 @@
                   <option value="marca" class="opt-valid-only">Marca</option>
                   <option value="modelo" class="opt-valid-only">Modelo</option>
                   <option value="anio" class="opt-valid-only">Año</option>
+                  <option value="fechaActivacionServicio" class="opt-valid-only">Fecha Activ. Servicio</option>
                   <option value="grupos">Grupos</option>
                 </select>
                 <input type="text" id="cgps-filter" class="cgps-input" placeholder="🔍 Buscar activo..." style="flex: 1; height: 34px;">
@@ -942,6 +943,7 @@
                   <option value="marca" class="opt-valid-only">Marca</option>
                   <option value="modelo" class="opt-valid-only">Modelo</option>
                   <option value="anio" class="opt-valid-only">Año</option>
+                  <option value="fechaActivacionServicio" class="opt-valid-only">Fecha Activ. Servicio</option>
                 </select>
               </div>
               <div style="display: flex; gap: 8px; align-items: center;">
@@ -980,7 +982,7 @@
         <table class="cgps-table">
           <thead id="cgps-table-head"></thead>
           <tbody id="cgps-listbody">
-            <tr><td colspan="15" style="text-align:center; padding: 24px; color: #64748b;">Cargando activos…</td></tr>
+            <tr><td colspan="16" style="text-align:center; padding: 24px; color: #64748b;">Cargando activos…</td></tr>
           </tbody>
         </table>
       </div>
@@ -1662,13 +1664,13 @@ var addInConstructor = function (geotabApi, state, callback) {
 
     var isExcluded = isExcludedDevice(d);
 
-    // Propiedad personalizada: FECHA DE ACTIVACIÓN DEL SERVICIO
+    // Propiedad personalizada: FECHA ACTIVACION DEL SERVICIO
+    // Acepta variantes con/sin "DE", con/sin acento, con/sin guion bajo
     var fechaActivacionServicio = '';
-    var propId = null;
     (d.customProperties || []).forEach(function(cp) {
-      if (cp && cp.property && cp.property.id) {
-        propId = cp.property.id;
-        if (cp.property.name && /FECHA\s*DE\s*ACTIVACI[A \u00d3]\s*DEL\s*SERVICIO/i.test(cp.property.name)) {
+      if (cp && cp.property && cp.property.name) {
+        var pName = String(cp.property.name).toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        if (/^FECHA\s*(DE\s*)?ACTIVACION\s*DEL\s*SERVICIO$/.test(pName)) {
           fechaActivacionServicio = cp.value || '';
         }
       }
@@ -1704,7 +1706,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     row.fechaActivacionServicio = fechaActivacionServicio;
     row._nom = name.toLowerCase(); row._p = row.placa.toLowerCase(); row._v = vin.toLowerCase(); row._s = serial.toLowerCase();
     row._pNorm = row._p.replace(/[-\s]/g, '');
-    row._hay = [name, row.placa, vin, serial, row.grupos, razonSocial, rucVal, estadoProv, anualidadVal, tipoVehiculoVal, marcaVal, modeloVal, anioVal].join(' ').toLowerCase();
+    row._hay = [name, row.placa, vin, serial, row.grupos, razonSocial, rucVal, estadoProv, anualidadVal, tipoVehiculoVal, marcaVal, modeloVal, anioVal, fechaActivacionServicio].join(' ').toLowerCase();
     return row;
   }
 
@@ -2060,6 +2062,9 @@ var addInConstructor = function (geotabApi, state, callback) {
       } else if (field === 'anio') {
         if (!isNaN(parseInt(val, 10))) device.year = parseInt(val, 10);
         targetPropName = "Año";
+      } else if (field === 'fechaActivacionServicio') {
+        // Campo personalizado: nombre exacto usado por la API de Geotab
+        targetPropName = "FECHA ACTIVACION DEL SERVICIO";
       } else if (field === 'estadoProvincia') {
         device.licenseState = val;
       } else if (field === 'placa') {
@@ -4294,12 +4299,13 @@ ENTRADAS
         '<th style="width: 220px;">Grupos</th>' +
         '<th style="width: 95px;">Estado/Prov.</th>' +
         '<th style="width: 72px;">RUC</th>' +
-        '<th style="width: 160px;">Razón Social</th>' +
-        '<th style="width: 62px; text-align: center;">Anualidad</th>' +
-        '<th style="width: 100px;">Tipo Vehículo</th>' +
-        '<th style="width: 72px;">Marca</th>' +
-        '<th style="width: 85px;">Modelo</th>' +
-        '<th style="width: 48px; text-align: center;">Año</th>' +
+        '<th style="width: 130px;">Razón Social</th>' +
+        '<th style="width: 58px; text-align: center;">Anualidad</th>' +
+        '<th style="width: 90px;">Tipo Vehículo</th>' +
+        '<th style="width: 64px;">Marca</th>' +
+        '<th style="width: 72px;">Modelo</th>' +
+        '<th style="width: 44px; text-align: center;">Año</th>' +
+        '<th style="width: 115px;">Fecha Activ. Servicio</th>' +
         '</tr>';
     }
   }
@@ -4699,12 +4705,13 @@ ENTRADAS
           '<td>' + htmlEsc(r.marca || '-') + '</td>' +
           '<td>' + htmlEsc(r.modelo || '-') + '</td>' +
           '<td style="text-align:center;">' + htmlEsc(r.anio || '-') + '</td>' +
+          '<td style="white-space: nowrap; font-size: 11px;">' + htmlEsc(r.fechaActivacionServicio || '-') + '</td>' +
           '</tr>';
       }
     });
 
     if ($('cgps-listbody')) {
-      $('cgps-listbody').innerHTML = html || '<tr><td colspan="15" style="text-align:center; padding: 24px; color: #64748b;">Sin resultados coincidentes para la combinación de filtros aplicada</td></tr>';
+      $('cgps-listbody').innerHTML = html || '<tr><td colspan="16" style="text-align:center; padding: 24px; color: #64748b;">Sin resultados coincidentes para la combinación de filtros aplicada</td></tr>';
     }
     updateKPIs();
     highlightKpiCards();
