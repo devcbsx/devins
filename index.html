@@ -873,31 +873,28 @@
     <div id="sec-controls-container" class="cgps-card" style="margin-top: 12px; padding: 14px 18px; background: #ffffff;">
       <div style="display: flex; align-items: stretch; justify-content: space-between; flex-wrap: wrap; gap: 14px; width: 100%;">
 
-        <!-- SECCIÓN 0: BÚSQUEDA MASIVA DE ACTIVOS -->
-        <div id="sec-bulk-container" style="display: flex; flex-direction: column; gap: 8px; flex: 1.2; min-width: 320px;">
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <div style="font-size: 13px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px;">Búsqueda masiva de activos</div>
-            <span style="font-size: 10px; color: #64748b; font-weight: 600;">Pendientes</span>
-          </div>
-          <div style="display: flex; gap: 8px; align-items: stretch;">
-            <textarea id="cgps-bulk-input-std" class="cgps-textarea" placeholder="Pendiente de activos, placas, VINs, series, RUC...&#10;Pegue la lista aquí (un elemento por línea)" rows="2" style="flex: 1; min-width: 0; font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 8px 10px;"></textarea>
-            <div style="display: flex; flex-direction: column; gap: 6px;">
-              <button id="cgps-btn-bulk-std" type="button" class="cgps-btn cgps-btn-primary" style="height: 36px; padding: 0 16px; font-weight: 700; border-radius: 6px;">Filtrar Masivo</button>
-              <button id="cgps-btn-bulk-clear-std" type="button" class="cgps-btn cgps-btn-outline" style="height: 32px; padding: 0 12px; border-radius: 6px;">Limpiar</button>
+        <!-- SECCIÓN 0: BÚSQUEDA MASIVA -->
+        <div id="sec-bulk-container" style="display: none; flex: 1.2; min-width: 320px;">
+          <div style="display: flex; gap: 14px; align-items: stretch;">
+            <div style="flex: 1; min-width: 0;">
+              <div style="font-size: 13px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px; margin-bottom: 8px;">Búsqueda masiva de activos</div>
+              <div style="display: flex; gap: 8px; align-items: flex-start;">
+                <textarea id="cgps-bulk-input-std" class="cgps-textarea" placeholder="Pegue la lista de nombres de activos, placas, VINs o series..." rows="2" style="flex: 1; min-width: 0; font-family: 'JetBrains Mono', monospace; font-size: 12px;"></textarea>
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                  <button id="cgps-btn-bulk-std" type="button" class="cgps-btn cgps-btn-secondary">Filtrar Masivo</button>
+                  <button id="cgps-btn-bulk-clear-std" type="button" class="cgps-btn cgps-btn-outline">Limpiar</button>
+                </div>
+              </div>
             </div>
+            <div style="width: 2px; background: #0f172a; margin: 0 4px; align-self: stretch; min-height: 80px; opacity: 0.9;"></div>
           </div>
         </div>
 
-        <!-- SEPARADOR VERTICAL -->
-        <div style="width: 2px; background: #0f172a; margin: 0 4px; align-self: stretch; min-height: 100px; opacity: 0.9;"></div>
-
         <!-- SECCIÓN 1: BUSCAR VARIABLES -->
-        <div id="sec-search-variables" style="display: flex; flex-direction: column; gap: 8px; flex: 1.0; min-width: 280px;">
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <div style="font-size: 13px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px;">Buscar Variables</div>
-          </div>
+        <div style="display: flex; flex-direction: column; gap: 8px; flex: 1.0; min-width: 280px;">
+          <div style="font-size: 13px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px;">Buscar Variables</div>
           <div style="display: flex; gap: 8px; align-items: center;">
-            <select id="cgps-filter_field" class="cgps-input" style="width: 180px; font-weight: 600; color: #0284c7; background-color: #f0f9ff; border-color: #bae6fd; height: 36px;">
+            <select id="cgps-filter-field" class="cgps-input" style="width: 155px; font-weight: 600; color: #0284c7; background-color: #f0f9ff; border-color: #bae6fd; height: 36px;">
               <option value="all">[ Todos los campos ]</option>
               <option value="nombreActivo">Nombre del Activo</option>
               <option value="placa">Placa</option>
@@ -915,77 +912,10 @@
             </select>
             <input type="text" id="cgps-filter" class="cgps-input" placeholder="🔍 Buscar activo..." style="flex: 1; height: 36px;">
           </div>
-          <div style="display: flex; justify-content: flex-end;">
-            <button id="cgps-btn-filter-clear" type="button" class="cgps-btn cgps-btn-outline" style="height: 32px; padding: 0 16px; border-radius: 6px; font-size: 12px;">Limpiar filtros</button>
+          <div style="display: flex; justify-content: center; padding-right: 2px;">
+            <button id="cgps-sel-none" type="button" class="cgps-btn cgps-btn-outline" style="height: 32px; padding: 4px 18px; font-size: 12px; border-radius: 6px;">Limpiar</button>
           </div>
         </div>
-
-        <!-- SEPARADOR VERTICAL -->
-        <div style="width: 2px; background: #0f172a; margin: 0 4px; align-self: stretch; min-height: 100px; opacity: 0.9;"></div>
-
-        <!-- SECCIÓN 2: MODIFICAR VARIABLES -->
-        <div id="sec-modify-variables" style="display: flex; flex-direction: column; gap: 8px; flex: 1.35; min-width: 330px;">
-          <div style="display: flex; align-items: center; justify-content: space-between;">
-            <div style="font-size: 13px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px;">Modificar Variables</div>
-          </div>
-          <div style="display: flex; gap: 8px; align-items: center;">
-            <button id="cgps-sel-vis" type="button" class="cgps-btn cgps-btn-outline" style="height: 36px; padding: 6px 14px; font-size: 12px; white-space: nowrap; border-radius: 6px;">Seleccionar visibles</button>
-            <select id="cgps-mass_field_select" class="cgps-input" style="flex: 1; font-weight: 600; color: #0f172a; height: 36px;">
-              <option value="razon">Razón Social</option>
-              <option value="ruc">RUC</option>
-              <option value="nombreActivo" class="opt-valid-only">Nombre del Activo</option>
-              <option value="placa" class="opt-valid-only">Placa</option>
-              <option value="estadoProvincia" class="opt-valid-only">Estado / Provincia</option>
-              <option value="anualidad" class="opt-valid-only">Anualidad</option>
-              <option value="tipoVehiculo" class="opt-valid-only">Tipo Vehículo</option>
-              <option value="marca" class="opt-valid-only">Marca</option>
-              <option value="modelo" class="opt-valid-only">Modelo</option>
-              <option value="anio" class="opt-valid-only">Año</option>
-            </select>
-          </div>
-          <div style="display: flex; gap: 8px; align-items: center;">
-            <input type="text" id="cgps-mass_value_input" class="cgps-input" placeholder="Nuevo valor..." style="flex: 1; height: 36px;">
-            <button id="cgps-btn-apply-mass-unified" type="button" class="cgps-btn cgps-btn-primary" style="font-weight: 700; height: 36px; padding: 6px 16px; white-space: nowrap; border-radius: 6px;">Guardar seleccionados</button>
-          </div>
-        </div>
-
-        <!-- SEPARADOR VERTICAL -->
-        <div style="width: 2px; background: #0f172a; margin: 0 4px; align-self: stretch; min-height: 100px; opacity: 0.9;"></div>
-
-        <!-- SECCIÓN 3: GESTIÓN MASIVA DE GRUPOS -->
-        <div id="sec-group-management" style="display: flex; flex-direction: column; gap: 8px; flex: 1.3; min-width: 300px;">
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <div style="font-size: 13px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px;">Gestión Masiva de Grupos</div>
-          </div>
-          <div style="display: flex; gap: 8px; align-items: center;">
-            <input type="text" id="cgps-group_search" class="cgps-input" placeholder="🔍 Buscar grupo..." style="flex: 1; height: 36px; font-size: 12px;">
-            <button id="cgps-btn-add-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px; font-size: 12px; white-space: nowrap; border-radius: 6px;">+ Añadir Grupo</button>
-            <button id="cgps-btn-remove-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px; font-size: 12px; white-space: nowrap; border-radius: 6px;">- Quitar Grupo</button>
-          </div>
-          <div id="cgps-group_list" style="display: flex; flex-wrap: wrap; gap: 6px; max-height: 120px; overflow-y: auto; min-height: 24px; padding: 4px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;"></div>
-          <div style="display: flex; gap: 6px; align-items: center;">
-            <button id="cgps-btn-add-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 32px; font-size: 11px; padding: 0 10px; border-radius: 6px;">+ Añadir Grupo</button>
-            <button id="cgps-btn-remove-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 32px; font-size: 11px; padding: 0 10px; border-radius: 6px;">- Quitar Grupo</button>
-            <input type="text" id="cgps-group_name_input" class="cgps-input" placeholder="ID o nombre del grupo..." style="flex: 1; height: 30px; font-size: 11px;">
-            <select id="cgps-group_action_select" class="cgps-input" style="flex: 2; height: 30px; font-size: 11px;">
-              <option value="add">Añadir Grupo</option>
-              <option value="remove">Quitar Grupo</option>
-            </select>
-            <button id="cgps-btn-apply-groups" type="button" class="cgps-btn cgps-btn-primary" style="height: 32px; font-size: 11px; font-weight: 700; padding: 0 12px; border-radius: 6px;">🔄 Aplicar cambios</button>
-          </div>
-          <div id="cgps_group_status" style="font-size: 11px; font-weight: 600; min-height: 16px;"></div>
-        </div>
-
-        <!-- SEPARADOR VERTICAL -->
-        <div style="width: 2px; background: #0f172a; margin: 0 4px; align-self: stretch; min-height: 100px; opacity: 0.9;"></div>
-
-        <!-- SECCIÓN 4: ACCIONES DIRECTAS / 5 PARÁMETROS -->
-        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 175px; padding: 4px;">
-          <button id="cgps-btn-inject-params" type="button" class="cgps-btn" style="background: linear-gradient(135deg, #10b981, #059669); color: #ffffff; font-weight: 800; font-size: 13px; padding: 10px 18px; border-radius: 8px; box-shadow: 0 3px 6px -1px rgba(16, 185, 129, 0.35); height: 42px; width: 100%; display: none;">Aplicar 5 parámetros</button>
-        </div>
-
-      </div>
-    </div>
 
         <!-- SEPARADOR VERTICAL 1 -->
         <div style="width: 2px; background: #0f172a; margin: 0 4px; align-self: stretch; min-height: 80px; opacity: 0.9;"></div>
