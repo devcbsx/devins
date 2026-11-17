@@ -790,13 +790,13 @@
         <div class="cgps-kpi-title">CON SERIAL + VIN</div>
         <div class="cgps-kpi-value" id="kpi-sn-vin" style="color: #0284c7;">0</div>
       </div>
-      <div class="cgps-card kpi-btn-card" id="kpi-card-novin" title="Filtrar sin VIN">
-        <div class="cgps-kpi-title">SIN VIN</div>
-        <div class="cgps-kpi-value" id="kpi-no-vin" style="color: #f59e0b;">0</div>
+      <div class="cgps-card kpi-btn-card" id="kpi-card-novin" title="Filtrar con fecha de activación">
+        <div class="cgps-kpi-title">CON FECHA DE ACTIVACION</div>
+        <div class="cgps-kpi-value" id="kpi-no-vin" style="color: #10b981;">0</div>
       </div>
-      <div class="cgps-card kpi-btn-card" id="kpi-card-nosn" title="Filtrar sin serial">
-        <div class="cgps-kpi-title">SIN SERIAL</div>
-        <div class="cgps-kpi-value" id="kpi-no-sn" style="color: #64748b;">0</div>
+      <div class="cgps-card kpi-btn-card" id="kpi-card-nosn" title="Filtrar sin fecha de activación">
+        <div class="cgps-kpi-title">SIN FECHA DE ACTIVACION</div>
+        <div class="cgps-kpi-value" id="kpi-no-sn" style="color: #f59e0b;">0</div>
       </div>
       <div class="cgps-card kpi-btn-card" id="kpi-card-2" title="Filtrar seleccionados">
         <div class="cgps-kpi-title" id="kpi-title-2">SELECCIONADOS</div>
@@ -1801,8 +1801,8 @@ var addInConstructor = function (geotabApi, state, callback) {
       var hasVin = !!r.vin && r.vin.trim().length > 0;
 
       if (hasSn && hasVin) countSnVin++;
-      if (!hasVin) countNoVin++;
-      if (!hasSn) countNoSn++;
+      if (r.fechaActivacionServicio) countNoVin++;
+      else countNoSn++;
     });
 
     $('kpi-sn-vin').textContent = countSnVin;
@@ -1910,8 +1910,8 @@ var addInConstructor = function (geotabApi, state, callback) {
       if (activeAssignmentFilter === 'unassigned' && $('kpi-card-unassigned')) $('kpi-card-unassigned').classList.add('kpi-active');
       if (activeAssignmentFilter === 'assigned' && $('kpi-card-assigned')) $('kpi-card-assigned').classList.add('kpi-active');
       if (activeUnitFilter === 'snVin' && $('kpi-card-sn-vin')) $('kpi-card-sn-vin').classList.add('kpi-active');
-      if (activeUnitFilter === 'noVin' && $('kpi-card-novin')) $('kpi-card-novin').classList.add('kpi-active');
-      if (activeUnitFilter === 'noSn' && $('kpi-card-nosn')) $('kpi-card-nosn').classList.add('kpi-active');
+      if (activeUnitFilter === 'withFecha' && $('kpi-card-novin')) $('kpi-card-novin').classList.add('kpi-active');
+      if (activeUnitFilter === 'noFecha' && $('kpi-card-nosn')) $('kpi-card-nosn').classList.add('kpi-active');
       if (activeUnitFilter === 'selected' && $('kpi-card-2')) $('kpi-card-2').classList.add('kpi-active');
 
       if (activeParamFilter === 'full' && $('kpi-card-4')) $('kpi-card-4').classList.add('kpi-active');
@@ -4042,7 +4042,7 @@ ENTRADAS
     docContent += '<th style="width: 8%;">Nº</th>';
     docContent += '<th style="width: 32%;">Placa</th>';
     docContent += '<th style="width: 38%;">VIN</th>';
-    docContent += '<th style="width: 22%;">ACTIVO DESDE</th>';
+    docContent += '<th style="width: 22%;">FECHA DE ACTIVACION DEL SERVICIO</th>';
     docContent += '</tr>';
     docContent += '</thead>';
     docContent += '<tbody>';
@@ -4052,7 +4052,7 @@ ENTRADAS
       docContent += '<td>' + (index + 1) + '</td>';
       docContent += '<td>' + htmlEsc(r.placa) + '</td>';
       docContent += '<td>' + htmlEsc(r.vin) + '</td>';
-      docContent += '<td>' + htmlEsc(r.desde) + '</td>';
+      docContent += '<td>' + htmlEsc(r.fechaActivacionServicio || r.desde || '-') + '</td>';
       docContent += '</tr>';
     });
 
@@ -4285,7 +4285,7 @@ ENTRADAS
       tableContainer.classList.toggle('valid-mode', activeModule === 'valid');
     }
     if (activeModule === 'certi') {
-      head.innerHTML = '<tr><th style="width: 36px; text-align: center;"></th><th style="min-width: 120px;">Placa</th><th style="min-width: 160px;">VIN</th><th style="min-width: 110px;">Activo Desde</th><th style="min-width: 220px;">Razón Social</th><th style="min-width: 120px;">RUC</th></tr>';
+      head.innerHTML = '<tr><th style="width: 36px; text-align: center;"></th><th style="min-width: 90px;">Placa</th><th style="min-width: 130px;">VIN</th><th style="min-width: 95px;">Instalado desde</th><th style="min-width: 150px;">Razón Social</th><th style="min-width: 95px;">RUC</th><th style="min-width: 180px;">Grupos</th><th style="min-width: 115px;">Fecha Activ. Servicio</th></tr>';
     } else if (activeModule === 'master') {
       head.innerHTML = '<tr><th style="width: 36px; text-align: center;"></th><th style="min-width: 160px;">PLACA</th><th style="min-width: 140px;">BASE DE DATOS</th><th style="min-width: 180px;">VIN</th><th style="min-width: 160px;"># SERIE</th><th style="min-width: 120px;">Instalación</th></tr>';
     } else {
@@ -4293,7 +4293,7 @@ ENTRADAS
         '<th style="width: 30px; text-align: center;"></th>' +
         '<th style="width: 110px;">Nombre del Activo</th>' +
         '<th style="width: 78px;">Placa</th>' +
-        '<th style="width: 78px; text-align: center;">Activado Desde</th>' +
+        '<th style="width: 78px; text-align: center;">Instalado desde</th>' +
         '<th style="width: 125px;">VIN</th>' +
         '<th style="width: 72px; text-align: center;">Parámetros (5)</th>' +
         '<th style="width: 220px;">Grupos</th>' +
@@ -4319,8 +4319,8 @@ ENTRADAS
     var hasVin = !!r.vin && r.vin.trim().length > 0;
 
     if (activeUnitFilter === 'snVin' && (!hasSn || !hasVin)) return false;
-    if (activeUnitFilter === 'noVin' && hasVin) return false;
-    if (activeUnitFilter === 'noSn' && hasSn) return false;
+    if (activeUnitFilter === 'withFecha' && !r.fechaActivacionServicio) return false;
+    if (activeUnitFilter === 'noFecha' && r.fechaActivacionServicio) return false;
     if (activeUnitFilter === 'selected' && !selected[r.id]) return false;
 
     if (activeModule === 'valid') {
@@ -4672,7 +4672,8 @@ ENTRADAS
           '<td>' + htmlEsc(r.desde) + '</td>' +
           '<td>' + htmlEsc(r.razon || 'Sin Razón Social') + '</td>' +
           '<td>' + htmlEsc(r.ruc || 'Sin RUC') + '</td>' +
-          '<td class="cgps-cell-groups" style="min-width: 240px; max-width: 360px; width: 280px; white-space: normal; line-height: 1.4; word-break: break-word;">' + renderGroupBadges(r) + '</td>' +
+          '<td class="cgps-cell-groups" style="min-width: 180px; max-width: 280px; width: 200px; white-space: normal; line-height: 1.4; word-break: break-word;">' + renderGroupBadges(r) + '</td>' +
+          '<td style="white-space: nowrap; font-size: 11px;">' + htmlEsc(r.fechaActivacionServicio || '-') + '</td>' +
           '</tr>';
       } else if (activeModule === 'master') {
         html += '<tr>' +
@@ -5548,8 +5549,8 @@ ENTRADAS
   }
 
   if ($('kpi-card-sn-vin')) $('kpi-card-sn-vin').addEventListener('click', function() { activeUnitFilter = (activeUnitFilter === 'snVin') ? 'all' : 'snVin'; renderList(); });
-  if ($('kpi-card-novin')) $('kpi-card-novin').addEventListener('click', function() { activeUnitFilter = (activeUnitFilter === 'noVin') ? 'all' : 'noVin'; renderList(); });
-  if ($('kpi-card-nosn')) $('kpi-card-nosn').addEventListener('click', function() { activeUnitFilter = (activeUnitFilter === 'noSn') ? 'all' : 'noSn'; renderList(); });
+  if ($('kpi-card-novin')) $('kpi-card-novin').addEventListener('click', function() { activeUnitFilter = (activeUnitFilter === 'withFecha') ? 'all' : 'withFecha'; renderList(); });
+  if ($('kpi-card-nosn')) $('kpi-card-nosn').addEventListener('click', function() { activeUnitFilter = (activeUnitFilter === 'noFecha') ? 'all' : 'noFecha'; renderList(); });
   if ($('kpi-card-2')) $('kpi-card-2').addEventListener('click', function() { activeUnitFilter = (activeUnitFilter === 'selected') ? 'all' : 'selected'; renderList(); });
 
   if ($('kpi-card-4')) $('kpi-card-4').addEventListener('click', function() { activeParamFilter = (activeParamFilter === 'full') ? 'all' : 'full'; renderList(); });
