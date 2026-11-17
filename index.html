@@ -394,8 +394,9 @@
       </div>
 
       <div id="hdr-actions-valid" style="display: none; gap: 8px;">
-        <button id="valid-btn-excel" type="button" class="cgps-btn cgps-btn-white" style="font-weight:700;">📊 Exportar XLSX</button>
-      </div>
+              <button id="valid-btn-excel" type="button" class="cgps-btn cgps-btn-white" style="font-weight:700;">📊 Exportar XLSX</button>
+              <button id="cgps-btn-inject-params" type="button" class="cgps-btn" style="background: linear-gradient(135deg, #10b981, #059669); color: #ffffff; font-weight: 800; font-size: 13px; padding: 10px 18px; border-radius: 8px; box-shadow: 0 3px 6px -1px rgba(16, 185, 129, 0.35); height: 42px;">Aplicar 5 parametros</button>
+            </div>
 
       <div id="hdr-actions-reports" style="display: none; gap: 8px;">
         <button id="reports-btn-open-create-modal" type="button" class="cgps-btn cgps-btn-white" style="font-weight:700;">➕ Copiar Reporte de Cliente</button>
@@ -953,28 +954,19 @@
             <button id="cgps-btn-remove-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px; font-size: 12px; white-space: nowrap; border-radius: 6px;">- Quitar Grupo</button>
           </div>
           <div id="cgps-group-list" style="display: flex; flex-wrap: wrap; gap: 6px; max-height: 120px; overflow-y: auto; min-height: 24px; padding: 4px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;"></div>
-          <div style="display: flex; gap: 6px; align-items: center;">
-            <button id="cgps-btn-add-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 32px; font-size: 11px; padding: 0 10px; border-radius: 6px;">+ Añadir Grupo</button>
-            <button id="cgps-btn-remove-group" type="button" class="cgps-btn cgps-btn-secondary" style="height: 32px; font-size: 11px; padding: 0 10px; border-radius: 6px;">- Quitar Grupo</button>
-          </div>
-          <div style="display: flex; gap: 6px; align-items: center;">
-            <input type="text" id="cgps-group-name-input" class="cgps-input" placeholder="ID o nombre del grupo..." style="flex: 1; height: 30px; font-size: 11px;">
-            <select id="cgps-group-action-select" class="cgps-input" style="flex: 2; height: 30px; font-size: 11px;">
-              <option value="add">Añadir Grupo</option>
-              <option value="remove">Quitar Grupo</option>
-            </select>
-            <button id="cgps-btn-apply-groups" type="button" class="cgps-btn cgps-btn-primary" style="height: 32px; font-size: 11px; font-weight: 700; padding: 0 12px; border-radius: 6px;">🔄 Aplicar cambios</button>
-          </div>
-          <div id="cgps-group-status" style="font-size: 11px; font-weight: 600; min-height: 16px;"></div>
+                    <div style="display: flex; gap: 6px; align-items: center;">
+                      <input type="text" id="cgps-group-name-input" class="cgps-input" placeholder="ID o nombre del grupo..." style="flex: 1; height: 30px; font-size: 11px;">
+                      <select id="cgps-group-action-select" class="cgps-input" style="flex: 2; height: 30px; font-size: 11px;">
+                        <option value="add">Añadir Grupo</option>
+                        <option value="remove">Quitar Grupo</option>
+                      </select>
+                      <button id="cgps-btn-apply-groups" type="button" class="cgps-btn cgps-btn-primary" style="height: 32px; font-size: 11px; font-weight: 700; padding: 0 12px; border-radius: 6px;">🔄 Aplicar cambios</button>
+                    </div>
+                    <div id="cgps-group-status" style="font-size: 11px; font-weight: 600; min-height: 16px;"></div>
         </div>
 
         <!-- SEPARADOR VERTICAL 2 -->
-        <div style="width: 2px; background: #0f172a; margin: 0 4px; align-self: stretch; min-height: 80px; opacity: 0.9;"></div>
-
-        <!-- SECCIÓN 4: ACCIONES DIRECTAS / 5 PARÁMETROS -->
-        <div style="display: flex; align-items: center; justify-content: center; min-width: 175px; padding: 4px;">
-          <button id="cgps-btn-inject-params" type="button" class="cgps-btn" style="background: linear-gradient(135deg, #10b981, #059669); color: #ffffff; font-weight: 800; font-size: 13px; padding: 10px 18px; border-radius: 8px; box-shadow: 0 3px 6px -1px rgba(16, 185, 129, 0.35); height: 42px; width: 100%; display: none;">Aplicar 5 parametros</button>
-        </div>
+                <div style="width: 2px; background: #0f172a; margin: 0 4px; align-self: stretch; min-height: 80px; opacity: 0.9;"></div>
 
       </div>
     </div>
