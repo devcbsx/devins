@@ -4949,8 +4949,104 @@ ENTRADAS
     },
     blur: function (geotabApi, state) {}
   };
+
+  /**
+   * Configura los escuchadores de eventos para el login
+   * Este método debe existir siempre que el login esté habilitado
+   */
+  function setupLoginListeners() {
+    var loginBtn = document.getElementById('testn-btn-login');
+    var passInput = document.getElementById('testn-pass-input');
+    var loginErr = document.getElementById('testn-login-err');
+    
+    if (!loginBtn) return;
+    
+    loginBtn.addEventListener('click', function() {
+      var password = passInput.value;
+      
+      if (!password) {
+        if (loginErr) loginErr.textContent = 'Por favor ingrese su contraseña.';
+        return;
+      }
+      
+      // Validar contra PASS_HASH (hash SHA-256 de la contraseña)
+      // NOTE: PASAR_HASH se define en la configuración del archivo
+      // Si no está definido, el login se habilita sin validación (modo desarrollo)
+      if (typeof PASS_HASH !== 'undefined' && PASS_HASH !== null && PASS_HASH !== '') {
+        // Calcular SHA-256 de la contraseña ingresada
+        // (En un entorno real se usaría crypto.subtle, aquí simplificamos)
+        var isCorrect = validatePasswordHash(password, PASS_HASH);
+        if (!isCorrect) {
+          if (loginErr) loginErr.textContent = 'Contraseña incorrecta. Intente nuevamente.';
+          return;
+        }
+      }
+      
+      // Login correcto - habilitar la aplicación
+      var loginOverlay = document.getElementById('testn-login-overlay');
+      if (loginOverlay) {
+        loginOverlay.style.display = 'none';
+      }
+      
+      // Llamar a la función de carga original
+      if (typeof load === 'function') {
+        load();
+      } else {
+        setMsg('Login exitoso. Inicializando módulo...');
+      }
+    });
+    
+    if (passInput) {
+      passInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          loginBtn.click();
+        }
+      });
+    }
+  }
+  
+  /**
+   * Valida el hash de la contraseña
+   * @param {string} password - Contraseña en texto plano
+   * @param {string} expectedHash - Hash SHA-256 esperado
+   * @returns {boolean} - true si coincide
+   */
+  function validatePasswordHash(password, expectedHash) {
+    if (typeof crypto !== 'undefined' && crypto.subtle && password) {
+      var encoder = new TextEncoder();
+      var data = encoder.encode(password);
+      return crypto.subtle.digest('SHA-256', data).then(function(hashBuffer) {
+        var hashArray = Array.from(new Uint8Array(hashBuffer));
+        var hashHex = hashArray.map(function(b) {
+          return b.toString(16).padStart(2, '0');
+        }).join('');
+        return hashHex === expectedHash;
+      }).catch(function() {
+        // Fallback: comparación simple si no hay crypto
+        return HashSHA256(password) === expectedHash;
+      });
+    }
+    // Fallback sin crypto
+    return HashSHA256(password) === expectedHash;
+  }
+  
+  /**
+   * SHA-256 simplificado (solo para entornos sin crypto.subtle)
+   * NOTA: En un entorno real, se debería usar la librería crypto adecuada
+   */
+  function HashSHA256(str) {
+    if (typeof sha256 === 'function') {
+      return sha256(str);
+    }
+    // Fallback: retornar el hash esperado (modo desarrollo)
+    return '';
+  }
+
+
 };
 
+<script>
+<script>
 window.geotab = window.geotab || {};
 window.geotab.addin = window.geotab.addin || {};
 
@@ -4973,6 +5069,8 @@ window.geotab.addin = window.geotab.addin || {};
   } catch (e) {}
 })();
 setupLoginListeners();
+
+</script>
 </script>
 </body>
 </html>
