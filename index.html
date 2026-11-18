@@ -2780,8 +2780,9 @@ ENTRADAS
     var gids = getSelectedSubGroupIds();
     if (gids.length === 0) return [];
 
-    return getActiveRowsForModule().filter(function(r) {
-      return r.rawGroupIds && r.rawGroupIds.some(function(id) { return gids.includes(id); });
+    var rows = (typeof all !== 'undefined' && Array.isArray(all)) ? all : [];
+    return rows.filter(function(r) {
+      return r && r.rawGroupIds && r.rawGroupIds.some(function(id) { return gids.includes(id); });
     });
   }
 
@@ -2836,11 +2837,11 @@ ENTRADAS
     setMsg("Filtrando programaciones para los grupos marcados...");
 
     try {
-      if (!rawSchedules || rawSchedules.length === 0) {
-        showLoading("Sincronizando plantillas desde Geotab...", 60);
-        const scheds = await callApi(api, 'Get', { typeName: 'ReportTemplate' });
-        rawSchedules = scheds || [];
-      }
+      // Siempre traer programaciones frescas de Geotab (CustomReportSchedule),
+      // que es el tipo que usa renderClientSchedulesTable (arguments, template, lastUpdated)
+      showLoading("Sincronizando programaciones desde Geotab...", 60);
+      const scheds = await callApi(api, 'Get', { typeName: 'CustomReportSchedule' });
+      rawSchedules = scheds || [];
 
       showLoading("Procesando coincidencia de grupos...", 80);
       const soloGrupo = await contarReportesDeGrupos(selectedGids, false);
@@ -5041,7 +5042,7 @@ ENTRADAS
           });
         }
 
-        callApi(api, 'Get', { typeName: 'ReportTemplate', includeNestedEntities: true })
+        callApi(api, 'Get', { typeName: 'CustomReportSchedule' })
           .then(function(schedules) {
             rawSchedules = schedules || [];
           }).catch(function(err) {
