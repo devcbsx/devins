@@ -509,11 +509,9 @@
                   <table class="cgps-table">
                                       <thead>
                                                       <tr>
-                                                        <th style="width: 35%;">GRUPO</th>
-                                                        <th style="width: 17%; text-align: center;">ID</th>
-                                                        <th style="width: 24%; text-align: center;">Nº Activos</th>
-                                                        <th style="width: 24%; text-align: center;">Nº Zonas</th>
-                                                        <th style="width: 24%; text-align: center;">Nº Usuarios</th>
+                                                        <th style="width: 50%;">GRUPO</th>
+                                                        <th style="width: 25%; text-align: center;">Nº Activos</th>
+                                                        <th style="width: 25%; text-align: center;">Nº Zonas</th>
                                                       </tr>
                                                     </thead>
                                       <tbody id="cgps-groups-listbody"></tbody>
@@ -1940,9 +1938,9 @@ var addInConstructor = function (geotabApi, state, callback) {
 
   function setMsg(t, err) { 
     if (activeModule === 'audit') {
-      // En auditoría el mensaje va arriba de la tabla; ocultar el mensaje global de abajo
-      var m = $('cgps-msg');
-      if (m) { m.style.display = 'none'; }
+      // En auditoría el mensaje va SOLO arriba de la tabla; ocultar y limpiar el global de abajo
+      var g = $('cgps-msg');
+      if (g) { g.style.display = 'none'; g.textContent = ''; }
       var a = $('audit-table-status');
       if (a) { a.textContent = t || ''; a.className = 'cgps-msg' + (err ? ' cgps-err' : ''); }
       return;
@@ -4213,6 +4211,8 @@ ENTRADAS
                   $('sec-bulk-container').style.display = 'none';
                   $('sec-controls-container').style.display = 'none';
                   $('sec-table-container').style.display = 'none';
+                  // Ocultar mensaje global de abajo (puede quedar escrito desde load() asíncrono)
+                  if ($('cgps-msg')) $('cgps-msg').style.display = 'none';
 
                   populateGeneralParentGroupsDropdown();
                   loadAllGroupsTable();
@@ -4294,12 +4294,11 @@ ENTRADAS
       head.innerHTML = '<tr>' +
         '<th style="width: 34px; text-align: center;"></th>' +
         '<th style="width: 110px;">Placa</th>' +
-        '<th style="width: 155px;">VIN</th>' +
-        '<th style="width: 100px; text-align: center;">Instalado desde</th>' +
-        '<th style="width: 170px;">Razón Social</th>' +
-        '<th style="width: 110px;">RUC</th>' +
-        '<th style="width: 200px;">Grupos</th>' +
-        '<th style="width: 120px;">Fecha Activ. Servicio</th>' +
+        '<th style="width: 175px;">VIN</th>' +
+        '<th style="width: 200px;">Razón Social</th>' +
+        '<th style="width: 130px;">RUC</th>' +
+        '<th style="width: 230px;">Grupos</th>' +
+        '<th style="width: 140px;">Fecha Activ. Servicio</th>' +
         '</tr>';
     } else if (activeModule === 'master') {
       head.innerHTML = '<tr><th style="width: 36px; text-align: center;"></th><th style="min-width: 160px;">PLACA</th><th style="min-width: 140px;">BASE DE DATOS</th><th style="min-width: 180px;">VIN</th><th style="min-width: 160px;"># SERIE</th><th style="min-width: 120px;">Instalación</th></tr>';
@@ -4684,7 +4683,6 @@ ENTRADAS
           '<td style="text-align:center;"><input type="checkbox" data-id="' + htmlEsc(r.id) + '"' + (isSel ? ' checked' : '') + '></td>' +
           '<td><b style="color:#0f172a;">' + htmlEsc((r.placa && r.placa !== r.vin) ? r.placa : 'Sin placa') + '</b></td>' +
           '<td style="font-family:monospace; font-size:11px;">' + htmlEsc(r.vin) + '</td>' +
-          '<td>' + htmlEsc(r.desde) + '</td>' +
           '<td>' + htmlEsc(r.razon || 'Sin Razón Social') + '</td>' +
           '<td>' + htmlEsc(r.ruc || 'Sin RUC') + '</td>' +
           '<td class="cgps-cell-groups" style="white-space: normal; line-height: 1.4; word-break: break-word;">' + renderGroupBadges(r) + '</td>' +
@@ -4751,7 +4749,7 @@ ENTRADAS
   async function loadAllGroupsTable() {
     var tbody = $('cgps-groups-listbody');
     $('cgps-groups-table-card').style.display = 'block';
-    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#64748b;">Cargando grupos desde Geotab...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#64748b;">Cargando grupos desde Geotab...</td></tr>';
 
     try {
       // Llamadas independientes: si User/Zona fallan por permisos, igual mostramos grupos
@@ -4768,7 +4766,7 @@ ENTRADAS
         var users = results[3] || [];
 
         if (!groups || groups.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#94a3b8;">No se encontraron grupos.</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#94a3b8;">No se encontraron grupos.</td></tr>';
           return;
         }
 
@@ -4797,19 +4795,18 @@ ENTRADAS
         var rows = groupData.map(function(gd) {
                 var g = gd.group;
                 return '<tr>' +
-                  '<td><b>' + htmlEsc(g.name) + '</b><br><small style="color:#64748b;">ID: ' + htmlEsc(g.id) + '</small></td>' +
+                  '<td><b>' + htmlEsc(g.name) + '</b></td>' +
                   '<td style="text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:11px;">' + gd.deviceCount + '</td>' +
                   '<td style="text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:11px;">' + gd.zoneCount + '</td>' +
-                  '<td style="text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:11px;">' + gd.userCount + '</td>' +
                   '</tr>';
               }).join('');
 
-              tbody.innerHTML = rows || '<tr><td colspan="4" style="text-align:center; color:#94a3b8;">No hay grupos con datos.</td></tr>';
+              tbody.innerHTML = rows || '<tr><td colspan="3" style="text-align:center; color:#94a3b8;">No hay grupos con datos.</td></tr>';
 
         // Populate left search panel
         // searchTbody and searchEmpty are no longer used in this function
       } catch (e) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#ef4444;">Error: ' + htmlEsc(e.message) + '</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#ef4444;">Error: ' + htmlEsc(e.message) + '</td></tr>';
         console.error('Error cargando grupos:', e);
       }
     }
