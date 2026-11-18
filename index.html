@@ -387,6 +387,10 @@
         <button id="testn-btn-refresh-mod" type="button" class="cgps-btn cgps-btn-white" style="font-weight: 700; font-size: 12px;">🔄 Sincronizar</button>
       </div>
 
+      <div id="hdr-actions-audit" style="display: none; gap: 8px; margin-top: 8px;">
+        <button id="hdr-btn-export-groups" type="button" class="cgps-btn cgps-btn-white" style="font-weight: 700;">📊 Exportar Excel</button>
+      </div>
+
       <div id="hdr-actions-certi" style="display: none; gap: 8px;">
         <button id="cgps-btn-doc" type="button" class="cgps-btn cgps-btn-white">📄 Generar Word (ANEXO N°01)</button>
         <button id="cgps-btn-mail" type="button" class="cgps-btn cgps-btn-secondary">Generar Texto Legal</button>
@@ -494,12 +498,11 @@
               <!-- Panel derecho: Tabla completa de grupos con filtro -->
               <div id="cgps-groups-table-card" class="cgps-card" style="flex: 2; min-width: 500px; display: block;">
                 <div style="font-size: 13px; font-weight: 700; color: #0f172a; margin-bottom: 12px;">TABLA DE GRUPOS (DATOS COMPLETOS)</div>
+                <div id="audit-table-status" class="cgps-msg" style="margin-bottom: 8px;"></div>
           
                 <!-- Filtro arriba de la tabla -->
                 <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 12px; flex-wrap: wrap;">
                   <input type="text" id="cgps-groups-filter" class="cgps-input" placeholder="🔍 Filtrar tabla por nombre de grupo..." style="flex: 1; min-width: 250px; height: 36px; font-size: 12px;">
-                  <button id="cgps-btn-refresh-groups" type="button" class="cgps-btn cgps-btn-primary" style="height: 36px; font-size: 12px;">🔄 Actualizar</button>
-                  <button id="cgps-btn-export-groups" type="button" class="cgps-btn cgps-btn-secondary" style="height: 36px; font-size: 12px;">📊 Exportar Excel</button>
                 </div>
           
                 <div class="cgps-table-scroll" style="max-height: 500px;">
@@ -1935,7 +1938,14 @@ var addInConstructor = function (geotabApi, state, callback) {
     }
   }
 
-  function setMsg(t, err) { var m = $('cgps-msg'); if (m) { m.textContent = t || ''; m.className = 'cgps-msg' + (err ? ' cgps-err' : ''); } }
+  function setMsg(t, err) { 
+    var m = $('cgps-msg'); 
+    if (m) { m.textContent = t || ''; m.className = 'cgps-msg' + (err ? ' cgps-err' : ''); }
+    if (activeModule === 'audit') {
+      var a = $('audit-table-status');
+      if (a) { a.textContent = t || ''; a.className = 'cgps-msg' + (err ? ' cgps-err' : ''); }
+    }
+  }
 
   function showLoading(msg, progressPercent) {
     if ($('reports-loading-bar-box')) $('reports-loading-bar-box').style.display = 'block';
@@ -4129,6 +4139,7 @@ ENTRADAS
         if($('hdr-actions-master')) $('hdr-actions-master').style.display = 'none';
         if($('hdr-actions-reports')) $('hdr-actions-reports').style.display = 'none';
         if($('hdr-actions-valid')) $('hdr-actions-valid').style.display = 'none';
+        if($('hdr-actions-audit')) $('hdr-actions-audit').style.display = 'none';
 
     if (mod === 'hub') {
           $('testn-hub-view').style.display = 'block';
@@ -4193,6 +4204,7 @@ ENTRADAS
                   renderList();
                 } else if (mod === 'audit') {
                   $('testn-mod-title').textContent = 'Auditoría de Grupos';
+                  $('hdr-actions-audit').style.display = 'flex';
                   $('sec-master').style.display = 'none';
                   $('sec-reports').style.display = 'none';
                   $('sec-activations').style.display = 'none';
@@ -4745,12 +4757,13 @@ ENTRADAS
     tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#64748b;">Cargando grupos desde Geotab...</td></tr>';
 
     try {
-      var results = await callMulti(api, [
-          ["Get", { typeName: "Group", includeNestedEntities: true }],
-          ["Get", { typeName: "Device", propertySelector: { fields: ["id", "name", "groups", "activeFrom", "activeTo"] } }],
-          ["Get", { typeName: "Zone", propertySelector: { fields: ["id", "name", "groups"] } }],
-          ["Get", { typeName: "User", propertySelector: { fields: ["id", "name", "companyGroups"] } }]
-        ]);
+      // Llamadas independientes: si User/Zona fallan por permisos, igual mostramos grupos
+      var results = await Promise.all([
+        callApi(api, 'Get', { typeName: 'Group', includeNestedEntities: true }).catch(function(){ return []; }),
+        callApi(api, 'Get', { typeName: 'Device', propertySelector: { fields: ['id', 'name', 'groups', 'activeFrom', 'activeTo'] } }).catch(function(){ return []; }),
+        callApi(api, 'Get', { typeName: 'Zone', propertySelector: { fields: ['id', 'name', 'groups'] } }).catch(function(){ return []; }),
+        callApi(api, 'Get', { typeName: 'User', propertySelector: { fields: ['id', 'name', 'companyGroups'] } }).catch(function(){ return []; })
+      ]);
 
         var groups = results[0] || [];
         var devices = results[1] || [];
@@ -5444,17 +5457,11 @@ ENTRADAS
     });
   }
 
-  if ($('cgps-btn-export-groups')) {
-    $('cgps-btn-export-groups').addEventListener('click', function() {
+  if ($('hdr-btn-export-groups')) {
+    $('hdr-btn-export-groups').addEventListener('click', function() {
       exportGroupsToExcel();
     });
   }
-
-  if ($('cgps-btn-refresh-groups')) {
-          $('cgps-btn-refresh-groups').addEventListener('click', function() {
-            loadAllGroupsTable();
-          });
-        }
 
         if ($('cgps-groups-filter')) {
                   $('cgps-groups-filter').addEventListener('input', function() {
