@@ -3209,7 +3209,8 @@ ENTRADAS
 
   async function clonarReporteCreate() {
     // Clona una programación (CustomReportSchedule) del cliente origen.
-    // Basado en el script de referencia: Get por id -> copia -> limpiar campos de sistema -> Add.
+    // Geotab rechaza en 'Add' los campos de sistema y las referencias anidadas completas,
+    // por eso se construye un entity LIMPIO con solo campos editables y refs {id:...}.
     var statusDiv = $('create-rep-status');
     function st(msg, color) { if (statusDiv) { statusDiv.style.color = color || '#0284c7'; statusDiv.textContent = msg; } }
 
@@ -3232,26 +3233,66 @@ ENTRADAS
       }
       if (!original) { st('No se encontró la programación seleccionada.', '#ef4444'); return; }
 
-      // 2) Copia profunda y limpiar campos generados por el sistema
-      var copia = {};
-      Object.keys(original).forEach(function(k) { copia[k] = original[k]; });
-      ['id', 'version', 'lastRun', 'lastUpdated', 'lastModifiedUser', 'lastModifiedDate', 'isSystem'].forEach(function(c) { delete copia[c]; });
+      // 2) Helper: convertir cualquier referencia anidada a {id: ...}
+      function ref(x) {
+        if (!x) return null;
+        if (typeof x === 'string') return { id: x };
+        if (x.id) return { id: x.id };
+        return null;
+      }
+      function refs(arr) {
+        if (!Array.isArray(arr)) return [];
+        return arr.map(ref).filter(Boolean);
+      }
 
-      // 3) Nombre nuevo y grupo destino
-      copia.name = repName;
-      copia.scopeGroups = [{ id: destGroupId }];
-      delete copia.scopeGroupFilter;
-      copia.individualRecipients = [];
-      copia.includeAllChildrenGroups = [];
-      copia.includeDirectChildrenOnlyGroups = [];
+      // 3) Construir entity LIMPIO (solo campos editables)
+      var copy = { name: repName };
+
+      // Template como referencia
+      var tplRef = ref(original.template);
+      if (tplRef) copy.template = tplRef;
+
+      // Grupos: todos como referencias {id:...} y apuntan al grupo destino
+      copy.scopeGroups = [{ id: destGroupId }];
+      copy.groups = [{ id: destGroupId }];
+      copy.includeAllChildrenGroups = [{ id: destGroupId }];
+      copy.includeDirectChildrenOnlyGroups = [];
+
+      // Destinatarios limpios (no arrastrar los del cliente original)
+      copy.individualRecipients = [];
+      copy.groupRecipients = [];
+
+      // Campos simples editables
+      ['period', 'isActive', 'activeFrom', 'activeTo', 'showDimming', 'description'].forEach(function(k) {
+        if (original[k] !== undefined && original[k] !== null) copy[k] = original[k];
+      });
+
+      // Arguments: reconstruir con referencias limpias
+      if (original.arguments && typeof original.arguments === 'object') {
+        var args = {};
+        // copiar props escalares simples de arguments
+        Object.keys(original.arguments).forEach(function(k) {
+          var v = original.arguments[k];
+          if (v === null || typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean') {
+            args[k] = v;
+          }
+        });
+        // listas de entidades como refs
+        if (Array.isArray(original.arguments.diagnostics)) args.diagnostics = refs(original.arguments.diagnostics);
+        if (Array.isArray(original.arguments.rules)) args.rules = refs(original.arguments.rules);
+        if (Array.isArray(original.arguments.dimensions)) args.dimensions = refs(original.arguments.dimensions);
+        copy.arguments = args;
+      }
 
       // 4) Add de la nueva programación
-      var nuevoId = await callApi(api, 'Add', { typeName: 'CustomReportSchedule', entity: copia });
+      console.log('[CLON] Entity enviado a Add:', JSON.stringify(copy));
+      var nuevoId = await callApi(api, 'Add', { typeName: 'CustomReportSchedule', entity: copy });
       st('✅ Reporte creado con id: ' + (nuevoId && nuevoId.id ? nuevoId.id : nuevoId), '#10b981');
       setMsg('✅ Reporte clonado creado correctamente.');
     } catch (e) {
-      console.error('Error clonando reporte:', e);
-      st('❌ Error al clonar reporte: ' + (e && e.message ? e.message : e), '#ef4444');
+      console.error('[CLON] Error clonando reporte:', e, e && e.stack ? e.stack : '');
+      var errMsg = (e && (e.message || e.name)) ? (e.message || e.name) : String(e);
+      st('❌ Error al clonar reporte: ' + errMsg, '#ef4444');
     }
   }
 
