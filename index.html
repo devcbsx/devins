@@ -3920,9 +3920,13 @@ ENTRADAS
             // 3) Set con la entidad completa
             await callApi(api, 'Set', { typeName: 'Group', entity: entity });
 
-            statusDiv.style.color = "#10b981";
-            statusDiv.textContent = "✅ Nombre del grupo cambiado correctamente: " + oldName + " → " + newName;
-            setMsg('✅ Nombre del grupo cambiado: ' + oldName + ' → ' + newName);
+            // Mensaje ÚNICO, arriba de la tabla
+            var tableStatus = $('audit-table-status');
+            if (tableStatus) {
+              tableStatus.style.color = "#10b981";
+              tableStatus.textContent = "✅ Nombre del grupo cambiado correctamente: " + oldName + " → " + newName;
+            }
+            if (statusDiv) { statusDiv.textContent = ''; }
 
             // Recargar grupos para reflejar el cambio
             setTimeout(function() { loadAllGroupsTable(); }, 800);
@@ -4949,42 +4953,7 @@ ENTRADAS
     setMsg('Auditoría del árbol de grupos finalizada.');
       }
 
-  async function renameGroup(groupId, newName) {
-      var apiRef = api;
-      if (!apiRef) {
-        setMsg('API de Geotab no disponible.', true);
-        return;
-      }
-
-      try {
-        var grupo = await callApi(apiRef, 'Get', { typeName: 'Group', search: { id: groupId } });
-        if (!grupo || grupo.length === 0) {
-          setMsg('No se encontró el grupo con ID: ' + groupId, true);
-          return;
-        }
-
-        var grupoData = grupo[0];
-        var originalName = grupoData.name || '';
-
-        if (newName.trim() === originalName) {
-          setMsg('El nombre es el mismo que el actual.', true);
-          return;
-        }
-
-        var updateData = {
-          name: newName.trim(),
-          lastModifiedUser: 'sysadmin',
-          lastModifiedDate: new Date().toISOString(),
-          validFromDate: grupoData.validFromDate || new Date().toISOString()
-        };
-
-        var result = await callApi(apiRef, 'Set', { typeName: 'Group', entity: updateData });
-        setMsg('✅ Nombre del grupo cambiado correctamente: ' + originalName + ' → ' + newName.trim());
-      } catch (e) {
-        console.error('Error cambiando nombre del grupo:', e);
-        setMsg('❌ Error al cambiar nombre del grupo: ' + (e.message || String(e)), true);
-      }
-    }
+  
 
   function load() {
     setupLoginListeners();
@@ -5538,6 +5507,35 @@ ENTRADAS
   if ($('btn-mod-activations')) $('btn-mod-activations').addEventListener('click', function() { switchView('activations'); });
   if ($('btn-mod-create-user')) $('btn-mod-create-user').addEventListener('click', function() { switchView('create-user'); });
   if ($('testn-btn-back')) $('testn-btn-back').addEventListener('click', function() { switchView('hub'); });
+
+  // Sincronizar: recarga datos de Geotab y refresca la vista activa
+  if ($('testn-btn-refresh-mod')) {
+    $('testn-btn-refresh-mod').addEventListener('click', function() {
+      var btn = this;
+      var originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = '⏳ Sincronizando...';
+      // load() ya llama a renderList() y actualiza groupsById con datos frescos del API
+      Promise.resolve(load()).then(function() {
+        // Refrescar vistas según el módulo activo
+        if (activeModule === 'reports') {
+          if (typeof initAutoReportGroups === 'function') initAutoReportGroups();
+          if (typeof populateSourceGroupsDropdown === 'function') populateSourceGroupsDropdown();
+        } else if (activeModule === 'audit') {
+          if (typeof loadAllGroupsTable === 'function') loadAllGroupsTable();
+          if (typeof populateGeneralParentGroupsDropdown === 'function') populateGeneralParentGroupsDropdown();
+          if (typeof populateRenameParentGroupsDropdown === 'function') populateRenameParentGroupsDropdown();
+        }
+        btn.disabled = false;
+        btn.textContent = originalText;
+        setMsg('✅ Sincronización completada con datos frescos de Geotab.');
+      }).catch(function(err) {
+        btn.disabled = false;
+        btn.textContent = originalText;
+        setMsg('❌ Error al sincronizar: ' + (err && err.message ? err.message : err), true);
+      });
+    });
+  }
 
   var filterTimer = null;
   if ($('cgps-filter')) {
