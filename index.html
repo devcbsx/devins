@@ -3207,50 +3207,53 @@ ENTRADAS
     $('create-report-modal').style.display = 'flex';
   }
 
-  async function geotabAddinClonarReporte() {
-  let api;
+  async function clonarReporteCreate() {
+    // Clona una programación (CustomReportSchedule) del cliente origen.
+    // Basado en el script de referencia: Get por id -> copia -> limpiar campos de sistema -> Add.
+    var statusDiv = $('create-rep-status');
+    function st(msg, color) { if (statusDiv) { statusDiv.style.color = color || '#0284c7'; statusDiv.textContent = msg; } }
 
-  async function clonar() {
-    // 1. Leer la plantilla origen seleccionada del cliente
-    var schedId = $('create-rep-source-schedule').value;
-    if (!schedId) {
-      alert('Por favor, seleccione un reporte base a clonar.');
-      return null;
+    var schedId = ($('create-rep-source-schedule') || {}).value;
+    var repName = (($('create-rep-name') || {}).value || '').trim();
+    var destGroupId = ($('create-rep-source-group') || {}).value || '';
+
+    if (!destGroupId) { st('Seleccione el cliente origen (grupo destino).', '#ef4444'); return; }
+    if (!schedId) { st('Seleccione un reporte base a clonar.', '#ef4444'); return; }
+    if (!repName) { st('Ingrese un nombre para el reporte.', '#ef4444'); return; }
+
+    st('Clonando reporte desde Geotab...');
+    try {
+      // 1) Get de la programación original por ID
+      var res = await callApi(api, 'Get', { typeName: 'CustomReportSchedule', search: { id: schedId }, resultsLimit: 1 });
+      var original = (res && res[0]) || null;
+      if (!original) {
+        var lista = (typeof sourceGroupSchedules !== 'undefined' && sourceGroupSchedules) ? sourceGroupSchedules : [];
+        original = lista.find(function(s){ return s.id === schedId; }) || null;
+      }
+      if (!original) { st('No se encontró la programación seleccionada.', '#ef4444'); return; }
+
+      // 2) Copia profunda y limpiar campos generados por el sistema
+      var copia = {};
+      Object.keys(original).forEach(function(k) { copia[k] = original[k]; });
+      ['id', 'version', 'lastRun', 'lastUpdated', 'lastModifiedUser', 'lastModifiedDate', 'isSystem'].forEach(function(c) { delete copia[c]; });
+
+      // 3) Nombre nuevo y grupo destino
+      copia.name = repName;
+      copia.scopeGroups = [{ id: destGroupId }];
+      delete copia.scopeGroupFilter;
+      copia.individualRecipients = [];
+      copia.includeAllChildrenGroups = [];
+      copia.includeDirectChildrenOnlyGroups = [];
+
+      // 4) Add de la nueva programación
+      var nuevoId = await callApi(api, 'Add', { typeName: 'CustomReportSchedule', entity: copia });
+      st('✅ Reporte creado con id: ' + (nuevoId && nuevoId.id ? nuevoId.id : nuevoId), '#10b981');
+      setMsg('✅ Reporte clonado creado correctamente.');
+    } catch (e) {
+      console.error('Error clonando reporte:', e);
+      st('❌ Error al clonar reporte: ' + (e && e.message ? e.message : e), '#ef4444');
     }
-
-    // Usar las plantillas que se cargaron en el dropdown del cliente origen
-    var origen = sourceGroupSchedules.find(function(s){ return s.id === schedId; });
-
-    if (!origen) {
-      alert('No se encontró la plantilla seleccionada.');
-      return null;
-    }
-
-    // 2. Preparar la copia
-    const copia = { ...origen };
-    delete copia.id;
-    delete copia.lastModifiedDate;
-    delete copia.isSystem;
-    copia.name = copia.name.replace(/WARAYANA/i, "Test x1");
-    if (copia.name === origen.name) copia.name += " - Test x1";
-
-    // 3. Guardar (sin grupos ni vehículos)
-    return api.call("Add", { typeName: "ReportTemplate", entity: copia });
   }
-
-  return {
-    initialize(_api, state, cb) { api = _api; cb(); },
-    focus() {
-      document.getElementById("btn-submit-create-report").onclick = async () => {
-        try {
-          const id = await clonar();
-          alert("Reporte creado con id " + id);
-        } catch (e) { alert("Error: " + (e.message || e)); }
-      };
-    },
-    blur() {}
-  };
-}
 
   function requestCreateAndSubmitReport() {
     var sourceSchedId = $('create-rep-source-schedule').value;
@@ -5254,10 +5257,7 @@ ENTRADAS
   if ($('create-rep-source-group')) $('create-rep-source-group').addEventListener('change', handleSourceGroupChange);
   if ($('create-rep-source-schedule')) $('create-rep-source-schedule').addEventListener('change', handleSourceScheduleChange);
   if ($('btn-apply-prefix-preset')) $('btn-apply-prefix-preset').addEventListener('click', applyNamePrefixPreset);
-  if ($('btn-submit-create-report')) $('btn-submit-create-report').addEventListener('click', function() {
-    var clonador = geotabAddinClonarReporte();
-    clonador.focus && clonador.focus();
-  });
+  if ($('btn-submit-create-report')) $('btn-submit-create-report').addEventListener('click', clonarReporteCreate);
 
   if ($('reports-btn-open-edit-diags-modal')) $('reports-btn-open-edit-diags-modal').addEventListener('click', openEditDiagnosticsModal);
   if ($('btn-close-edit-diags-modal')) {
