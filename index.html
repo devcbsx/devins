@@ -502,18 +502,16 @@
           
                 <!-- Filtro arriba de la tabla -->
                 <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 12px; flex-wrap: wrap;">
-                  <input type="text" id="cgps-groups-filter" class="cgps-input" placeholder="🔍 Filtrar por nombre o ID (puede pegar varios separados por coma o salto de línea)..." style="flex: 1; min-width: 250px; height: 36px; font-size: 12px;">
+                  <input type="text" id="cgps-groups-filter" class="cgps-input" placeholder="🔍 Pegue IDs (uno por línea) o nombres — ej: b299D, b32CD ..." style="flex: 1; min-width: 250px; height: 36px; font-size: 12px;">
                 </div>
           
                 <div class="cgps-table-scroll" style="max-height: 500px;">
                   <table class="cgps-table">
                                       <thead>
                                                       <tr>
-                                                        <th style="width: 28%;">GRUPO</th>
-                                                        <th style="width: 26%;">Grupos Superiores (padres)</th>
-                                                        <th style="width: 26%;">Grupos Inferiores (hijos/descendientes)</th>
-                                                        <th style="width: 10%; text-align: center;">Nº Activos</th>
-                                                        <th style="width: 10%; text-align: center;">Nº Zonas</th>
+                                                        <th style="width: 30%;">GRUPO</th>
+                                                        <th style="width: 35%;">Grupos Superiores (padres)</th>
+                                                        <th style="width: 35%;">Grupos Inferiores (hijos/descendientes)</th>
                                                       </tr>
                                                     </thead>
                                       <tbody id="cgps-groups-listbody"></tbody>
@@ -4767,24 +4765,15 @@ ENTRADAS
   async function loadAllGroupsTable() {
     var tbody = $('cgps-groups-listbody');
     $('cgps-groups-table-card').style.display = 'block';
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#64748b;">Cargando grupos desde Geotab...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#64748b;">Cargando grupos desde Geotab...</td></tr>';
 
     try {
-      // Llamadas independientes: si User/Zona fallan por permisos, igual mostramos grupos
-      var results = await Promise.all([
-        callApi(api, 'Get', { typeName: 'Group', includeNestedEntities: true }).catch(function(){ return []; }),
-        callApi(api, 'Get', { typeName: 'Device', propertySelector: { fields: ['id', 'name', 'groups', 'activeFrom', 'activeTo'] } }).catch(function(){ return []; }),
-        callApi(api, 'Get', { typeName: 'Zone', propertySelector: { fields: ['id', 'name', 'groups'] } }).catch(function(){ return []; }),
-        callApi(api, 'Get', { typeName: 'User', propertySelector: { fields: ['id', 'name', 'companyGroups'] } }).catch(function(){ return []; })
-      ]);
+      // Solo necesitamos los grupos (con jerarquía anidada)
+      var groups = await callApi(api, 'Get', { typeName: 'Group', includeNestedEntities: true });
+      groups = groups || [];
 
-      var groups = results[0] || [];
-      var devices = results[1] || [];
-      var zones = results[2] || [];
-      var users = results[3] || [];
-
-      if (!groups || groups.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#94a3b8;">No se encontraron grupos.</td></tr>';
+      if (groups.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#94a3b8;">No se encontraron grupos.</td></tr>';
         return;
       }
 
@@ -4793,19 +4782,9 @@ ENTRADAS
       groups.forEach(function(g) { if (g && g.id) gById[g.id] = g; });
       allGroupsData = groups.slice();
 
-      // Helper: nombre de un grupo por su referencia
-      function gname(ref) {
-        if (!ref) return '';
-        var id = (typeof ref === 'string') ? ref : ref.id;
-        var g = gById[id];
-        if (g && g.name) return g.name;
-        if (ref.name) return ref.name;
-        return id || '';
-      }
-
-      // Helper:grupos SUPERIORES (ancestros) - seguir parent hacia arriba
-      function getParentNames(g) {
-        var names = [];
+      // SUPERIORES (ancestros): subir por parent.id hasta la raíz
+      function getParentInfo(g) {
+        var items = [];
         var seen = {};
         var cur = g;
         var depth = 0;
@@ -4815,16 +4794,16 @@ ENTRADAS
           seen[pid] = true;
           var p = gById[pid];
           if (!p) break;
-          names.unshift(p.name || pid);   // el más alto primero
+          items.unshift({ id: p.id, name: p.name || pid });  // más alto primero
           cur = p;
           depth++;
         }
-        return names;
+        return items;
       }
 
-      // Helper: grupos INFERIORES (hijos directos + descendientes)
-      function getDescendantNames(g) {
-        var names = [];
+      // INFERIORES (hijos directos + descendientes recursivos)
+      function getDescendantInfo(g) {
+        var items = [];
         var seen = {};
         seen[g.id] = true;
         function walk(group, depth) {
@@ -4835,44 +4814,42 @@ ENTRADAS
             seen[cid] = true;
             var cg = gById[cid];
             if (!cg) return;
-            var prefix = depth > 0 ? '└ ' : '';
-            names.push(prefix + (cg.name || cid));
+            items.push({ id: cg.id, name: cg.name || cid, depth: depth });
             walk(cg, depth + 1);
           });
         }
         walk(g, 0);
-        return names;
+        return items;
       }
 
-      // Render de cada fila
-      var rows = groups.map(function(g) {
-        var deviceCount = devices.filter(function(d) { return (d.groups || []).some(function(gr) { return gr.id === g.id; }); }).length;
-        var zoneCount = zones.filter(function(z) { return (z.groups || []).some(function(gr) { return gr.id === g.id; }); }).length;
+      function chip(item, color, textColor, indent) {
+        var pad = indent ? ' style="margin-left:' + (indent * 10) + 'px;"' : '';
+        return '<span' + pad + ' title="ID: ' + htmlEsc(item.id) + '" style="display:inline-block;background:' + color + ';color:' + textColor + ';padding:2px 7px;border-radius:4px;font-size:11px;margin:2px 3px 2px 0;white-space:nowrap;">' + htmlEsc(item.name) + '</span>';
+      }
 
-        var parents = getParentNames(g);
-        var descendants = getDescendantNames(g);
+      var rows = groups.map(function(g) {
+        var parents = getParentInfo(g);
+        var descendants = getDescendantInfo(g);
 
         var parentHtml = parents.length
-          ? parents.map(function(n){ return '<span style="display:inline-block;background:#fef3c7;color:#92400e;padding:2px 6px;border-radius:4px;font-size:10.5px;margin:2px 3px 2px 0;">' + htmlEsc(n) + '</span>'; }).join('')
+          ? parents.map(function(p){ return chip(p, '#fef3c7', '#92400e', 0); }).join('')
           : '<span style="color:#94a3b8;font-style:italic;font-size:11px;">(grupo raíz)</span>';
 
         var descHtml = descendants.length
-          ? descendants.map(function(n){ return '<span style="display:inline-block;background:#e0f2fe;color:#0369a1;padding:2px 6px;border-radius:4px;font-size:10.5px;margin:2px 3px 2px 0;">' + htmlEsc(n) + '</span>'; }).join('')
+          ? descendants.map(function(d){ return chip(d, '#e0f2fe', '#0369a1', d.depth); }).join('')
           : '<span style="color:#94a3b8;font-style:italic;font-size:11px;">(sin inferiores)</span>';
 
-        return '<tr>' +
+        return '<tr data-gid="' + htmlEsc(g.id) + '">' +
           '<td><b>' + htmlEsc(g.name || '') + '</b><br><small style="color:#64748b;font-family:monospace;font-size:10px;">ID: ' + htmlEsc(g.id) + '</small></td>' +
-          '<td style="white-space:normal;line-height:1.4;">' + parentHtml + '</td>' +
-          '<td style="white-space:normal;line-height:1.4;">' + descHtml + '</td>' +
-          '<td style="text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:11px;">' + deviceCount + '</td>' +
-          '<td style="text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:11px;">' + zoneCount + '</td>' +
+          '<td style="white-space:normal;line-height:1.5;vertical-align:top;">' + parentHtml + '</td>' +
+          '<td style="white-space:normal;line-height:1.5;vertical-align:top;">' + descHtml + '</td>' +
           '</tr>';
       }).join('');
 
-      tbody.innerHTML = rows || '<tr><td colspan="5" style="text-align:center; color:#94a3b8;">No hay grupos con datos.</td></tr>';
+      tbody.innerHTML = rows || '<tr><td colspan="3" style="text-align:center; color:#94a3b8;">No hay grupos con datos.</td></tr>';
 
     } catch (e) {
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#ef4444;">Error: ' + htmlEsc(e.message) + '</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#ef4444;">Error: ' + htmlEsc(e.message) + '</td></tr>';
       console.error('Error cargando grupos:', e);
     }
   }
@@ -4892,7 +4869,7 @@ ENTRADAS
             if (headRow) {
               Array.from(headRow.querySelectorAll('th')).forEach(function(th){ headers.push(th.textContent.trim()); });
             }
-            if (headers.length === 0) headers = ['GRUPO', 'Grupos Superiores', 'Grupos Inferiores', 'Nº Activos', 'Nº Zonas'];
+            if (headers.length === 0) headers = ['GRUPO', 'Grupos Superiores (padres)', 'Grupos Inferiores (hijos/descendientes)'];
 
             var data = [];
             rows.forEach(function(row) {
@@ -4908,7 +4885,7 @@ ENTRADAS
             var sheetData = [headers].concat(data);
             var wb = XLSX.utils.book_new();
             var ws = XLSX.utils.aoa_to_sheet(sheetData);
-            ws['!cols'] = [{ wch: 32 }, { wch: 30 }, { wch: 34 }, { wch: 14 }, { wch: 14 }];
+            ws['!cols'] = [{ wch: 32 }, { wch: 40 }, { wch: 45 }];
             XLSX.utils.book_append_sheet(wb, ws, "Grupos");
 
             var fileName = 'Grupos_Datos_' + fmtDate(new Date().toISOString()).replace(/\//g, '-') + '.xlsx';
@@ -5494,17 +5471,45 @@ ENTRADAS
                   $('cgps-groups-filter').addEventListener('input', function() {
                     var tbody = $('cgps-groups-listbody');
                     if (!tbody) return;
-                    // Dividir en términos: comas, saltos de línea, punto y coma, tab
                     var raw = this.value || '';
-                    var terms = raw.split(/[,\n\r;\t]+/).map(function(t){ return t.toLowerCase().trim(); }).filter(Boolean);
-                    var rows = tbody.querySelectorAll('tr');
+                    // Separar por coma, salto de línea, punto y coma, tab, espacios múltiples
+                    var terms = raw.split(/[,\n\r;\t]+|\s{2,}/).map(function(t){ return t.trim(); }).filter(Boolean);
+                    var idTerms = terms.filter(function(t){ return /^b[0-9a-fA-F]{4,}$/.test(t); });
+                    var textTerms = terms.filter(function(t){ return !/^b[0-9a-fA-F]{4,}$/.test(t); }).map(function(t){ return t.toLowerCase(); });
+                    var rows = Array.from(tbody.querySelectorAll('tr'));
+                    var shown = 0;
+
                     rows.forEach(function(row) {
-                      if (terms.length === 0) { row.style.display = ''; return; }
+                      if (terms.length === 0) { row.style.display = ''; shown++; return; }
+                      var gid = (row.getAttribute('data-gid') || '').toLowerCase();
                       var text = row.textContent.toLowerCase();
-                      // Coincide si CUALQUIERA de los términos aparece (nombre, ID o jerarquía)
-                      var match = terms.some(function(t){ return text.indexOf(t) >= 0; });
+                      // IDs: coincidencia EXACTA. Texto: coincidencia parcial.
+                      var idMatch = idTerms.some(function(id){ return gid === id.toLowerCase(); });
+                      var textMatch = textTerms.some(function(t){ return text.indexOf(t) >= 0; });
+                      var match = idMatch || textMatch;
                       row.style.display = match ? '' : 'none';
+                      if (match) shown++;
                     });
+
+                    // Validación: avisar IDs no encontrados
+                    if (idTerms.length > 0) {
+                      var foundIds = {};
+                      rows.forEach(function(row){
+                        var gid = (row.getAttribute('data-gid') || '').toLowerCase();
+                        foundIds[gid] = true;
+                      });
+                      var missing = idTerms.filter(function(id){ return !foundIds[id.toLowerCase()]; });
+                      var status = $('audit-table-status');
+                      if (status) {
+                        if (missing.length > 0) {
+                          status.style.color = '#f59e0b';
+                          status.textContent = '⚠ ' + missing.length + ' ID(s) no encontrado(s): ' + missing.join(', ');
+                        } else {
+                          status.style.color = '#10b981';
+                          status.textContent = '✅ ' + shown + ' grupo(s) encontrado(s) para ' + idTerms.length + ' ID(s).';
+                        }
+                      }
+                    }
                   });
                 }
 
