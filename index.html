@@ -419,6 +419,8 @@
         <div style="font-size: 11px; font-weight: 800; color: #0284c7; margin-bottom: 10px; text-transform: uppercase; letter-spacing:1px;">FILTRAR POR FECHA DE INSTALACIÓN</div>
         <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
           <button id="master-btn-week" type="button" class="cgps-btn cgps-btn-secondary" style="height: 38px;">📅 Esta Semana al Corte</button>
+          <button id="master-btn-week-current" type="button" class="cgps-btn cgps-btn-secondary" style="height: 38px;">📆 Corte Semana Actual (Lun–Dom)</button>
+          <button id="master-btn-week-prev" type="button" class="cgps-btn cgps-btn-secondary" style="height: 38px;">📆 Corte Semana Pasada (Lun–Dom)</button>
           <div style="height: 24px; width: 1px; background-color: #e2e8f0;"></div>
           <div style="display: flex; align-items: center; gap: 8px;">
             <span style="font-size: 12px; font-weight: 600; color: #64748b;">Desde:</span>
@@ -4771,7 +4773,10 @@ ENTRADAS
       // Solo necesitamos los grupos (con jerarquía anidada)
       var groups = await callApi(api, 'Get', { typeName: 'Group', includeNestedEntities: true });
       groups = groups || [];
-
+      // Omitir el grupo raíz "Company Group" (GroupCompanyId) del resultado
+      groups = groups.filter(function(g) {
+        return !(g && (g.id === 'GroupCompanyId' || /^company group$/i.test((g.name || '').trim())));
+      });
       if (groups.length === 0) {
         tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#94a3b8;">No se encontraron grupos.</td></tr>';
         return;
@@ -5282,6 +5287,37 @@ ENTRADAS
     });
   }
 
+  // Helper: rango Lunes-Domingo de la semana actual / pasada
+  function getWeekRange(offsetWeeks) {
+    var now = new Date();
+    var dow = (now.getDay() + 6) % 7; // 0 = lunes
+    var monday = new Date(now);
+    monday.setDate(now.getDate() - dow + (offsetWeeks * 7));
+    monday.setHours(0, 0, 0, 0);
+    var sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    sunday.setHours(23, 59, 59, 999);
+    return { start: monday, end: sunday };
+  }
+
+  if ($('master-btn-week-current')) {
+    $('master-btn-week-current').addEventListener('click', function() {
+      var r = getWeekRange(0);
+      activeDateRange = r;
+      renderList();
+      setMsg('Filtrado: Semana actual (Lun ' + fmtDate(r.start.toISOString()) + ' – Dom ' + fmtDate(r.end.toISOString()) + ').');
+    });
+  }
+
+  if ($('master-btn-week-prev')) {
+    $('master-btn-week-prev').addEventListener('click', function() {
+      var r = getWeekRange(-1);
+      activeDateRange = r;
+      renderList();
+      setMsg('Filtrado: Semana pasada (Lun ' + fmtDate(r.start.toISOString()) + ' – Dom ' + fmtDate(r.end.toISOString()) + ').');
+    });
+  }
+
   if ($('master-btn-custom-range')) {
     $('master-btn-custom-range').addEventListener('click', function() {
       var fromVal = $('master-date-from').value;
@@ -5490,10 +5526,12 @@ ENTRADAS
                     var tbody = $('cgps-groups-listbody');
                     if (!tbody) return;
                     var raw = this.value || '';
-                    // Separar por coma, salto de línea, punto y coma, tab, espacios múltiples
-                    var terms = raw.split(/[,\n\r;\t]+|\s{2,}/).map(function(t){ return t.trim(); }).filter(Boolean);
-                    var idTerms = terms.filter(function(t){ return /^b[0-9a-fA-F]{4,}$/.test(t); });
-                    var textTerms = terms.filter(function(t){ return !/^b[0-9a-fA-F]{4,}$/.test(t); }).map(function(t){ return t.toLowerCase(); });
+                    // Extraer IDs (b + hexadecimal) con cualquier separador: espacio, coma, salto de línea, etc.
+                    var idTerms = raw.match(/\bb[0-9a-fA-F]{4,}\b/g) || [];
+                    // El resto (sin los IDs) son términos de texto: separar por coma/salto de línea
+                    var textPart = raw.replace(/\bb[0-9a-fA-F]{4,}\b/g, ' ');
+                    var textTerms = textPart.split(/[,\n\r;]+/).map(function(t){ return t.trim().toLowerCase(); }).filter(Boolean);
+                    var terms = idTerms.concat(textTerms);
                     var rows = Array.from(tbody.querySelectorAll('tr'));
                     var shown = 0;
 
