@@ -4782,20 +4782,38 @@ ENTRADAS
       groups.forEach(function(g) { if (g && g.id) gById[g.id] = g; });
       allGroupsData = groups.slice();
 
-      // SUPERIORES (ancestros): subir por parent.id hasta la raíz
+      // Mapa INVERSO childId -> parentId (Geotab no siempre devuelve 'parent' en cada grupo,
+      // pero los hijos están en 'children' del padre). Construir desde children.
+      var parentMap = {};
+      groups.forEach(function(g) {
+        if (!g || !g.id || !g.children) return;
+        g.children.forEach(function(c) {
+          var cid = (typeof c === 'string') ? c : (c && c.id);
+          if (cid && !parentMap[cid]) parentMap[cid] = g.id;
+        });
+      });
+      // También usar 'parent' directo si existe (refuerzo)
+      groups.forEach(function(g) {
+        if (g && g.id && g.parent) {
+          var pid = (typeof g.parent === 'string') ? g.parent : g.parent.id;
+          if (pid && !parentMap[g.id]) parentMap[g.id] = pid;
+        }
+      });
+
+      // SUPERIORES (ancestros): usar parentMap (inverso de children) + parent directo
       function getParentInfo(g) {
         var items = [];
         var seen = {};
-        var cur = g;
+        var curId = g.id;
         var depth = 0;
-        while (cur && cur.parent && depth < 20) {
-          var pid = typeof cur.parent === 'string' ? cur.parent : cur.parent.id;
+        while (curId && depth < 20) {
+          var pid = parentMap[curId];
           if (!pid || seen[pid]) break;
           seen[pid] = true;
           var p = gById[pid];
           if (!p) break;
           items.unshift({ id: p.id, name: p.name || pid });  // más alto primero
-          cur = p;
+          curId = p.id;
           depth++;
         }
         return items;
