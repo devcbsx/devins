@@ -983,6 +983,48 @@
           </div>
         </div>
 
+        <!-- SECCIÓN: EDICIÓN MASIVA POR LISTA 2 COLUMNAS -->
+        <div id="sec-pair-edit" class="cgps-card" style="margin-top: 12px; padding: 12px 16px; background: #f8fafc; border: 1px solid #bae6fd;">
+          <div style="font-size: 12px; font-weight: 700; color: #0369a1; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.3px;">
+            ✏️ Edición Masiva por Lista (2 columnas: buscar → reemplazar)
+          </div>
+          <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-start;">
+            <div style="flex: 2; min-width: 320px;">
+              <div style="font-size: 11px; color: #475569; margin-bottom: 4px;">Pegue la lista: columna 1 = valor a buscar, columna 2 = valor a reemplazar (separados por tab, coma o espacio)</div>
+              <textarea id="pair-edit-input" class="cgps-textarea" rows="5" placeholder="3AKJG3DV1TDWK2697	THA-924&#10;3AKJHPDV0VSWZ1271	CHK-718" style="width: 100%; font-family: 'JetBrains Mono', monospace; font-size: 11px;"></textarea>
+            </div>
+            <div style="flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 8px;">
+              <div>
+                <label style="font-size: 11px; font-weight: 700; color: #0f172a; display: block; margin-bottom: 3px;">Buscar por:</label>
+                <select id="pair-edit-search-field" class="cgps-input" style="width: 100%; height: 34px; font-size: 11px;">
+                  <option value="vin">VIN</option>
+                  <option value="placa">Placa</option>
+                  <option value="serialNumber"># Serie GPS</option>
+                  <option value="nombreActivo">Nombre del Activo</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size: 11px; font-weight: 700; color: #0f172a; display: block; margin-bottom: 3px;">Reemplazar en:</label>
+                <select id="pair-edit-target-field" class="cgps-input" style="width: 100%; height: 34px; font-size: 11px;">
+                  <option value="placa">Placa</option>
+                  <option value="razon">Razón Social</option>
+                  <option value="ruc">RUC</option>
+                  <option value="estadoProvincia">Estado / Provincia</option>
+                  <option value="anualidad">Anualidad</option>
+                  <option value="tipoVehiculo">Tipo Vehículo</option>
+                  <option value="fechaActivacionServicio">Fecha Activ. Servicio</option>
+                  <option value="nombreActivo">Nombre del Activo</option>
+                </select>
+              </div>
+              <div style="display: flex; gap: 6px;">
+                <button id="pair-edit-preview" type="button" class="cgps-btn cgps-btn-secondary" style="flex: 1; height: 34px; font-size: 11px;">👁 Vista previa</button>
+                <button id="pair-edit-apply" type="button" class="cgps-btn cgps-btn-primary" style="flex: 1; height: 34px; font-size: 11px;">💾 Aplicar</button>
+              </div>
+            </div>
+          </div>
+          <div id="pair-edit-status" style="font-size: 11px; font-weight: 600; min-height: 18px; margin-top: 8px;"></div>
+        </div>
+
     <div id="cgps-msg" class="cgps-msg" style="margin-bottom: 8px;"></div>
 
     <!-- TABLA PROFESIONAL TECH -->
@@ -4138,6 +4180,162 @@ ENTRADAS
     }
   }
 
+  // ===== EDICIÓN MASIVA POR LISTA 2 COLUMNAS =====
+  function parsePairList(raw) {
+    var lines = (raw || '').split(/\n|\r/);
+    var pairs = [];
+    lines.forEach(function(line) {
+      var t = line.trim();
+      if (!t) return;
+      // Separar por TAB, coma, o 2+ espacios (pero VIN/placa no tienen espacios internos)
+      var parts = t.split(/\t|,|\s{2,}/).map(function(x){ return x.trim(); }).filter(Boolean);
+      if (parts.length < 2) return;
+      pairs.push({ search: parts[0], replace: parts.slice(1).join(' ') });
+    });
+    return pairs;
+  }
+
+  function normKey(v) {
+    return String(v == null ? '' : v).toUpperCase().replace(/[-\s]/g, '').trim();
+  }
+
+  function getRowField(r, field) {
+    if (field === 'vin') return r.vin;
+    if (field === 'placa') return r.placa;
+    if (field === 'serialNumber') return r.serialNumber;
+    if (field === 'nombreActivo') return r.nombreActivo;
+    if (field === 'razon') return r.razon;
+    if (field === 'ruc') return r.ruc;
+    return '';
+  }
+
+  function setDeviceField(device, row, field, val) {
+    // Campos nativos de Geotab
+    if (field === 'placa') { device.licensePlate = val; return true; }
+    if (field === 'nombreActivo') { device.name = val; return true; }
+    if (field === 'estadoProvincia') { device.licenseState = val; return true; }
+    // Campos personalizados
+    var propNames = {
+      razon: 'Razón Social',
+      ruc: 'RUC',
+      anualidad: 'Anualidad',
+      tipoVehiculo: 'Tipo de Vehiculo',
+      fechaActivacionServicio: 'FECHA ACTIVACION DEL SERVICIO'
+    };
+    var pName = propNames[field];
+    if (!pName) return false;
+    if (!device.customProperties) device.customProperties = [];
+    var propItem = device.customProperties.find(function(cp) {
+      return cp && cp.property && new RegExp('^' + pName + '$', 'i').test(cp.property.name);
+    });
+    if (propItem) {
+      propItem.value = val;
+    } else {
+      // Reutilizar id real de property si existe en all
+      var realProp = null;
+      for (var k = 0; k < all.length && !realProp; k++) {
+        var cps = (all[k].rawDevice && all[k].rawDevice.customProperties) || [];
+        for (var j = 0; j < cps.length; j++) {
+          var cpj = cps[j];
+          if (cpj && cpj.property && cpj.property.id &&
+              new RegExp('^' + pName + '$', 'i').test(cpj.property.name)) {
+            realProp = cpj.property; break;
+          }
+        }
+      }
+      device.customProperties.push({
+        property: realProp ? { id: realProp.id, name: realProp.name } : { name: pName },
+        value: val
+      });
+    }
+    return true;
+  }
+
+  function computePairMatches() {
+    var pairs = parsePairList($('pair-edit-input') ? $('pair-edit-input').value : '');
+    var searchField = $('pair-edit-search-field') ? $('pair-edit-search-field').value : 'vin';
+    var targetField = $('pair-edit-target-field') ? $('pair-edit-target-field').value : 'placa';
+    var results = [];
+    pairs.forEach(function(p) {
+      var key = normKey(p.search);
+      var row = all.find(function(r) { return normKey(getRowField(r, searchField)) === key; });
+      results.push({
+        search: p.search,
+        replace: p.replace,
+        row: row || null,
+        oldValue: row ? getRowField(row, targetField) : null,
+        targetField: targetField
+      });
+    });
+    return results;
+  }
+
+  function pairEditPreview() {
+    var results = computePairMatches();
+    var statusDiv = $('pair-edit-status');
+    if (!statusDiv) return;
+    if (results.length === 0) {
+      statusDiv.style.color = '#ef4444';
+      statusDiv.textContent = 'No se detectaron pares válidos. Use: valor_a_buscar TAB valor_a_reemplazar (uno por línea).';
+      return;
+    }
+    var found = results.filter(function(r){ return !!r.row; }).length;
+    var missing = results.filter(function(r){ return !r.row; });
+    var html = '<div style="margin-top:8px;max-height:220px;overflow-y:auto;border:1px solid #e2e8f0;border-radius:6px;padding:6px;background:#fff;">';
+    html += '<div style="font-weight:700;color:#0284c7;margin-bottom:4px;">' + found + ' de ' + results.length + ' encontrados</div>';
+    results.forEach(function(r, i) {
+      var color = r.row ? '#059669' : '#ef4444';
+      var txt = r.row
+        ? (r.oldValue || '(vacío)') + ' → <b>' + htmlEsc(r.replace) + '</b>'
+        : 'NO ENCONTRADO';
+      html += '<div style="font-size:11px;padding:2px 0;color:' + color + ';">' + (i+1) + '. ' + htmlEsc(r.search) + ' :: ' + txt + '</div>';
+    });
+    html += '</div>';
+    statusDiv.style.color = found ? '#0284c7' : '#f59e0b';
+    statusDiv.innerHTML = html;
+  }
+
+  async function pairEditApply() {
+    var results = computePairMatches();
+    var statusDiv = $('pair-edit-status');
+    if (!statusDiv) return;
+    if (results.length === 0) {
+      statusDiv.style.color = '#ef4444';
+      statusDiv.textContent = 'No se detectaron pares válidos.';
+      return;
+    }
+    var found = results.filter(function(r){ return !!r.row; });
+    if (found.length === 0) {
+      statusDiv.style.color = '#ef4444';
+      statusDiv.textContent = 'Ningún valor de búsqueda coincidió con activos cargados.';
+      return;
+    }
+
+    statusDiv.style.color = '#0284c7';
+    statusDiv.textContent = 'Aplicando cambios en ' + found.length + ' unidad(es)...';
+
+    var calls = [];
+    found.forEach(function(r) {
+      var device = r.row.rawDevice;
+      if (!device) return;
+      if (setDeviceField(device, r.row, r.targetField, r.replace)) {
+        calls.push(['Set', { typeName: 'Device', entity: device }]);
+      }
+    });
+
+    try {
+      if (calls.length > 0) await callMulti(api, calls);
+      statusDiv.style.color = '#10b981';
+      statusDiv.textContent = '✅ Se actualizaron ' + calls.length + ' unidad(es). Recargando...';
+      setMsg('✅ Edición masiva por lista completada: ' + calls.length + ' unidad(es).');
+      setTimeout(function(){ load(); }, 1200);
+    } catch (e) {
+      console.error('[PAIR-EDIT] Error:', e, e && e.stack ? e.stack : '');
+      statusDiv.style.color = '#ef4444';
+      statusDiv.textContent = '❌ Error al aplicar: ' + (e && e.message ? e.message : e);
+    }
+  }
+
   function applyBulkFilter(inputVal) {
     var rawText = (inputVal || '').trim();
     if (!rawText) {
@@ -5364,6 +5562,8 @@ ENTRADAS
   
   if ($('cgps-btn-bulk-std')) $('cgps-btn-bulk-std').addEventListener('click', function() { applyBulkFilter($('cgps-bulk-input-std').value); });
   if ($('cgps-btn-bulk-clear-std')) $('cgps-btn-bulk-clear-std').addEventListener('click', function() { $('cgps-bulk-input-std').value = ''; applyBulkFilter(''); });
+  if ($('pair-edit-preview')) $('pair-edit-preview').addEventListener('click', pairEditPreview);
+  if ($('pair-edit-apply')) $('pair-edit-apply').addEventListener('click', pairEditApply);
 
   if ($('reports-search-input')) {
     $('reports-search-input').addEventListener('keyup', function() {
