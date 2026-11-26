@@ -2058,7 +2058,7 @@ var addInConstructor = function (geotabApi, state, callback) {
     );
   }
 
-  async function requestApplyGroupChange() {
+  async function applyMassUpdateUnified() {
     var selectedIds = Object.keys(selected).filter(function (k) { return selected[k]; });
     var field = $('cgps-mass-field-select').value;
     var val = ($('cgps-mass-value-input').value || '').trim();
@@ -2107,8 +2107,21 @@ var addInConstructor = function (geotabApi, state, callback) {
         if (propItem) {
           propItem.value = val;
         } else {
+          // Buscar el id real de la Property en devices ya cargados (Geotab lo requiere)
+          var realProp = null;
+          for (var k = 0; k < all.length && !realProp; k++) {
+            var cps = (all[k].rawDevice && all[k].rawDevice.customProperties) || [];
+            for (var j = 0; j < cps.length; j++) {
+              var cpj = cps[j];
+              if (cpj && cpj.property && cpj.property.id &&
+                  new RegExp('^' + targetPropName + '$', 'i').test(cpj.property.name)) {
+                realProp = cpj.property;
+                break;
+              }
+            }
+          }
           device.customProperties.push({
-            property: { name: targetPropName },
+            property: realProp ? { id: realProp.id, name: realProp.name } : { name: targetPropName },
             value: val
           });
         }
@@ -2128,12 +2141,11 @@ var addInConstructor = function (geotabApi, state, callback) {
         load();
       }, 1500);
     } catch (err) {
-      console.error("Error al guardar cambios masivos:", err);
-      setMsg("Error al guardar los cambios: " + (err.message || err), true);
+      console.error("[MASS-UPDATE] Error al guardar cambios masivos:", err, err && err.stack ? err.stack : '');
+      console.error("[MASS-UPDATE] Calls enviados:", JSON.stringify(calls));
+      setMsg("Error al guardar los cambios: " + (err.message || JSON.stringify(err)), true);
     }
   }
-
-  requestApplyGroupChange();
 
   // --- Gestión masiva de grupos en Validación GPS ---
 
